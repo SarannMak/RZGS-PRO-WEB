@@ -34,32 +34,51 @@ document.addEventListener('keydown', (event) => {
     menuToggle.focus();
   }
 });
-window.matchMedia('(min-width: 900px)').addEventListener('change', (event) => {
+window.matchMedia('(min-width: 1024px)').addEventListener('change', (event) => {
   if (event.matches) setMenu(false);
 });
 
 /* ==========================================================================
-   Active nav link while scrolling
+   Highlight the link for the section in view
+   (home page nav + the "On this page" list on legal pages)
    ========================================================================== */
-const navLinks = [...document.querySelectorAll('.nav-link')];
-// The hero is observed too, so scrolling back to the top clears the highlight
-const spiedSections = [document.getElementById('top'), ...navLinks.map((link) => document.querySelector(link.hash))];
+function highlightWhileScrolling(links, extraSections = []) {
+  if (!links.length) return;
+  const sections = [...extraSections, ...links.map((link) => document.querySelector(link.hash))].filter(Boolean);
 
-const spy = new IntersectionObserver(
-  (entries) => {
-    entries.forEach((entry) => {
-      if (!entry.isIntersecting) return;
-      navLinks.forEach((link) => {
-        const active = link.hash === `#${entry.target.id}`;
-        link.classList.toggle('is-active', active);
-        if (active) link.setAttribute('aria-current', 'location');
-        else link.removeAttribute('aria-current');
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        links.forEach((link) => {
+          const active = link.hash === `#${entry.target.id}`;
+          link.classList.toggle('is-active', active);
+          if (active) link.setAttribute('aria-current', 'location');
+          else link.removeAttribute('aria-current');
+        });
       });
-    });
-  },
-  { rootMargin: '-45% 0px -50% 0px' }
-);
-spiedSections.forEach((section) => section && spy.observe(section));
+    },
+    { rootMargin: '-45% 0px -50% 0px' }
+  );
+  sections.forEach((section) => observer.observe(section));
+}
+
+// The hero is observed too, so scrolling back to the top clears the highlight
+highlightWhileScrolling([...document.querySelectorAll('.nav-link[href^="#"]')], [document.getElementById('top')].filter(Boolean));
+highlightWhileScrolling([...document.querySelectorAll('.toc a[href^="#"]')]);
+
+// "On this page" is a collapsible box on phones and an always-open sidebar on desktop
+const tocBoxes = document.querySelectorAll('[data-toc]');
+if (tocBoxes.length) {
+  const desktop = window.matchMedia('(min-width: 1024px)');
+  const syncToc = () => tocBoxes.forEach((box) => { box.open = desktop.matches; });
+  syncToc();
+  desktop.addEventListener('change', syncToc);
+  // on phones, close the box after jumping to a section
+  tocBoxes.forEach((box) => box.addEventListener('click', (event) => {
+    if (!desktop.matches && event.target.closest('a')) box.open = false;
+  }));
+}
 
 /* ==========================================================================
    Scroll reveal

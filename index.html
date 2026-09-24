@@ -18,10 +18,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=3">
 
   <script>document.documentElement.classList.add('js');</script>
-  <script src="script.js" defer></script>
+  <script src="script.js?v=3" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -50,6 +50,19 @@
     <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></symbol>
     <symbol id="i-send" viewBox="0 0 24 24"><path d="M14.54 21.69a.5.5 0 0 0 .94-.03l6.5-19a.5.5 0 0 0-.64-.63l-19 6.5a.5.5 0 0 0-.02.93l7.93 3.18a2 2 0 0 1 1.11 1.11z"/><path d="m21.85 2.15-10.94 10.94"/></symbol>
     <symbol id="i-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4M12 17h.01"/></symbol>
+    <symbol id="i-timer" viewBox="0 0 24 24"><path d="M10 2h4M12 14l3-3"/><circle cx="12" cy="14" r="8"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65M22 12.65l-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M10.27 21a2 2 0 0 0 3.46 0"/><path d="M3.26 15.33A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.67C19.41 13.96 18 12.5 18 8A6 6 0 0 0 6 8c0 4.5-1.41 5.96-2.74 7.33"/></symbol>
+    <symbol id="i-server" viewBox="0 0 24 24"><rect width="20" height="8" x="2" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/><path d="M6 6h.01M6 18h.01"/></symbol>
+    <symbol id="i-monitor" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
+    <symbol id="i-message" viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></symbol>
+    <symbol id="i-key" viewBox="0 0 24 24"><path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4M21 2l-9.6 9.6"/><circle cx="7.5" cy="15.5" r="5.5"/></symbol>
+    <symbol id="i-file-text" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4M10 9H8M16 13H8M16 17H8"/></symbol>
+    <symbol id="i-circle-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-ban" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></symbol>
+    <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></symbol>
   </svg>
 
   <!-- Animated background -->
@@ -65,10 +78,11 @@
 
       <nav class="primary-nav" id="primary-nav" aria-label="Main">
         <ul class="nav-list">
-          <li><a class="nav-link" href="#features">Features</a></li>
-          <li><a class="nav-link" href="#how-it-works">How it works</a></li>
+          <li><a class="nav-link" href="bot.html">The Bot</a></li>
           <li><a class="nav-link" href="#pricing">Pricing</a></li>
-          <li><a class="nav-link" href="#faq">FAQ</a></li>
+          <li><a class="nav-link" href="how-to-buy.html">How to Buy</a></li>
+          <li><a class="nav-link" href="license.html">License</a></li>
+          <li><a class="nav-link" href="contact.html">Contact</a></li>
         </ul>
         <a class="btn btn-primary btn-block nav-menu-cta" href="#pricing">Start now for $0</a>
       </nav>
@@ -102,7 +116,7 @@
               Start now for $0
               <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg>
             </a>
-            <a class="btn btn-ghost btn-lg" href="#features">Learn more</a>
+            <a class="btn btn-ghost btn-lg" href="bot.html">Meet the bot</a>
           </div>
 
           <ul class="hero-points">
@@ -116,7 +130,7 @@
           <div class="hero-orbit" aria-hidden="true"></div>
           <picture>
             <source type="image/webp" srcset="assets/robot-560.webp 560w, assets/robot-880.webp 880w" sizes="(min-width: 960px) 460px, 320px">
-            <img class="hero-robot" src="robot.png" alt="The RZGS-PRO robot mascot checking a trade on its phone" width="1024" height="1536" fetchpriority="high">
+            <img class="hero-robot" src="assets/robot-560.webp" alt="The RZGS-PRO robot mascot checking a trade on its phone" width="1024" height="1536" fetchpriority="high">
           </picture>
 
           <div class="float-card float-signal" aria-hidden="true">
@@ -294,15 +308,15 @@
               <span class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-target"/></svg></span>
               <h3>Take profit</h3>
               <p>Close the basket on your holding, and get notified the moment a trade closes.</p>
-              <a class="text-link" href="#faq">Learn more <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+              <a class="text-link" href="bot.html">Learn more <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
             </div>
 
             <div class="mock mock-notify" aria-hidden="true">
               <div class="notif notif--main">
                 <span class="notif-app"><img src="assets/logo-192.webp" alt="" width="28" height="28" loading="lazy"></span>
                 <div class="notif-body">
-                  <div class="notif-head"><strong>RZGS-PRO</strong><span>Just now</span></div>
-                  <div class="notif-text">Buy Closed, Profit: <span class="pos">+$4.50</span></div>
+                  <div class="notif-head"><strong>BUY closed</strong><span>Just now</span></div>
+                  <div class="notif-text">Profit: <span class="pos">+$1.60</span></div>
                 </div>
                 <span class="notif-badge"><svg class="icon"><use href="#i-check"/></svg></span>
               </div>
@@ -345,14 +359,14 @@
                 <span class="step-icon"><svg class="icon" aria-hidden="true"><use href="#i-dollar"/></svg></span>
                 <span class="step-num" aria-hidden="true">02</span>
               </div>
-              <h3>Select any PLAN and click the button</h3>
+              <h3>Select a plan and tap its button</h3>
             </li>
             <li class="step">
               <div class="step-top">
                 <span class="step-icon"><svg class="icon" aria-hidden="true"><use href="#i-sparkles"/></svg></span>
                 <span class="step-num" aria-hidden="true">03</span>
               </div>
-              <h3>You will go to telegram dirrectly to and click to send me a message.</h3>
+              <h3>Telegram opens with your message ready. Tap Send and we'll reply</h3>
             </li>
           </ol>
         </div>
@@ -425,6 +439,8 @@
             </a>
           </article>
         </div>
+
+        <p class="pricing-note reveal">Prices in US dollars. By choosing a plan you agree to our <a href="license.html">License Rules</a> and <a href="terms.html">Terms &amp; Conditions</a>. <a href="how-to-buy.html">See how buying works</a>.</p>
       </div>
     </section>
 
@@ -442,6 +458,10 @@
             <div class="faq-answer"><p>A MetaTrader 5 (MT5) trading account. Every plan covers one MT5 account. Request your trial and we'll help you get set up on Telegram.</p></div>
           </details>
           <details class="faq-item" name="faq">
+            <summary>How do I buy a plan?<svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg></summary>
+            <div class="faq-answer"><p>Tap the button on the plan you want. Telegram opens with a message ready to send. Send it and we'll reply with payment details and setup help. See every step on our <a href="how-to-buy.html">How to Buy</a> page.</p></div>
+          </details>
+          <details class="faq-item" name="faq">
             <summary>How does the free trial work?<svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg></summary>
             <div class="faq-answer"><p>Once your request is approved you get a 5-day EA license for one MT5 account. It's a way to get familiar with the strategy before you choose a plan.</p></div>
           </details>
@@ -455,7 +475,7 @@
           </details>
           <details class="faq-item" name="faq">
             <summary>Is profit guaranteed?<svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg></summary>
-            <div class="faq-answer"><p>No. Trading gold involves real risk, and past results don't guarantee future returns. Only trade with money you can afford to lose.</p></div>
+            <div class="faq-answer"><p>No. Trading gold involves real risk, and past results don't guarantee future returns. Only trade with money you can afford to lose. Read our <a href="risk-disclosure.html">Risk Disclosure</a>.</p></div>
           </details>
         </div>
       </div>
@@ -483,27 +503,57 @@
 
   <footer class="site-footer">
     <div class="container">
-      <div class="footer-top">
-        <a class="brand" href="#top" aria-label="RZGS-PRO, back to top">
-          <img src="assets/logo-192.webp" alt="" width="36" height="36" loading="lazy">
-          <span class="brand-name">RZGS<span class="brand-accent">-PRO</span></span>
-        </a>
-        <nav aria-label="Footer">
-          <ul class="footer-nav">
-            <li><a href="#features">Features</a></li>
-            <li><a href="#how-it-works">How it works</a></li>
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="brand" href="#top" aria-label="RZGS-PRO home">
+            <img src="assets/logo-192.webp" alt="" width="36" height="36" loading="lazy">
+            <span class="brand-name">RZGS<span class="brand-accent">-PRO</span></span>
+          </a>
+          <p>AI gold trading bot for MetaTrader 5, with setup help and support on Telegram.</p>
+          <a class="btn btn-ghost btn-sm" href="https://t.me/m/kuh-_ELkNmQ1">
+            <svg class="icon" aria-hidden="true"><use href="#i-send"/></svg>
+            Free 5-day trial
+          </a>
+        </div>
+
+        <nav aria-labelledby="footer-product">
+          <h2 class="footer-title" id="footer-product">Product</h2>
+          <ul class="footer-links">
+            <li><a href="bot.html">The Bot</a></li>
             <li><a href="#pricing">Pricing</a></li>
+            <li><a href="how-to-buy.html">How to Buy</a></li>
             <li><a href="#faq">FAQ</a></li>
+          </ul>
+        </nav>
+
+        <nav aria-labelledby="footer-legal">
+          <h2 class="footer-title" id="footer-legal">Legal</h2>
+          <ul class="footer-links">
+            <li><a href="license.html">License Rules</a></li>
+            <li><a href="terms.html">Terms &amp; Conditions</a></li>
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="risk-disclosure.html">Risk Disclosure</a></li>
+          </ul>
+        </nav>
+
+        <nav aria-labelledby="footer-support">
+          <h2 class="footer-title" id="footer-support">Support</h2>
+          <ul class="footer-links">
+            <li><a href="contact.html">Contact us</a></li>
+            <li><a href="https://t.me/m/kuh-_ELkNmQ1">Free trial</a></li>
           </ul>
         </nav>
       </div>
 
       <p class="risk">
         <svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>
-        <span><strong>Risk warning:</strong> Trading gold (XAUUSD) and other leveraged products carries a high level of risk and may not be suitable for every investor. You could lose some or all of your capital. Past performance does not guarantee future results. RZGS-PRO is trading software and does not provide financial advice.</span>
+        <span><strong>Risk warning:</strong> Trading gold (XAUUSD) and other leveraged products carries a high level of risk and may not be suitable for every investor. You could lose some or all of your capital. Past performance does not guarantee future results. RZGS-PRO is trading software and does not provide financial advice. <a href="risk-disclosure.html">Read the full Risk Disclosure</a>.</span>
       </p>
 
-      <p class="copyright">© <span data-year>2026</span> RZGS-PRO. All rights reserved.</p>
+      <div class="footer-bottom">
+        <p>© <span data-year>2026</span> RZGS-PRO. All rights reserved.</p>
+        <p>Trading software, not financial advice.</p>
+      </div>
     </div>
   </footer>
 </body>
