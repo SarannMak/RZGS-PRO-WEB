@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0a0c1a">
 <meta name="robots" content="noindex">
+<script>
+/* never run over plain http: the login and the commands must travel encrypted */
+if (location.protocol === 'http:' && !/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) location.replace('https://' + location.host + location.pathname + location.search + location.hash);
+</script>
 <title>RZGS-PRO Control</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -490,6 +494,7 @@ nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;st
           <div class="line"><span class="cap">License</span><b class="good" id="acLic">4d 12h left</b></div>
           <div class="line"><span class="cap">Link</span><b id="acLink">-</b></div>
           <div class="line"><span class="cap">Last update</span><b id="acSeen">now</b></div>
+          <div class="line"><span class="cap">Devices logged in</span><b id="acDevices">-</b></div>
         </section>
         <section class="panel">
           <h2>Support</h2>
@@ -499,11 +504,12 @@ nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;st
         <form class="panel" id="pwForm" autocomplete="off" novalidate>
           <h2>Change app password</h2>
           <div class="set"><label for="pwOld">Current password</label><input id="pwOld" type="password" autocomplete="current-password" style="width:150px"></div>
-          <div class="set"><label for="pwNew">New password<small>4 or more characters</small></label><input id="pwNew" type="password" autocomplete="new-password" style="width:150px"></div>
+          <div class="set"><label for="pwNew">New password<small>8 or more characters</small></label><input id="pwNew" type="password" autocomplete="new-password" style="width:150px"></div>
           <p class="err" id="pwMsg" role="alert"></p>
           <div class="row"><button class="btn primary" type="submit">Change password</button></div>
-          <p class="hint">After you change it here, type the same new password in the bot inputs in MT5 (App Password).</p>
+          <p class="hint">After you change it here, type the same new password in the bot inputs in MT5 (App Password). All other devices are logged out.</p>
         </form>
+        <div class="row"><button class="btn" type="button" id="acLogoutOthers">Log out all other devices</button></div>
         <div class="row"><button class="btn danger" type="button" id="acLogout">Disconnect this phone</button></div>
       </div>
     </div>
@@ -597,7 +603,7 @@ const EMPTY = { status: 'WAITING FOR BOT', tone: 'off', paused: false, finish: f
   cfg: { tpPts: 0, gridPts: 0, pt: 0.001, basket: 0, cooldown: 0, maxLevels: 15, lots: [0.01], highStart: 0.01, highMult: 1.5,
          asym: true, reset: true, maxLots: 0, eqStop: 0, target: 0, pv: 100, tpMode: 'points' } };
 let token = store.get('rz_token'), account = store.get('rz_account') || '', symbol = '';
-let S = null, age = null, events = [], online = false, netErr = false;
+let S = null, age = null, events = [], online = false, netErr = false, devices = null;
 const eq = [], waiting = new Set();
 // An older bot does not send price bars. Then the app builds its own 15-second bars from the
 // live price while it is open, so the chart is never empty.
@@ -626,7 +632,7 @@ async function poll() {
     netErr = false;
     if (!r.ok) { polling = false; if (r.err === 'session') leave('Your login has expired. Log in again.'); return; }
     account = String(r.account); symbol = r.symbol || '';
-    age = r.age; events = r.events || [];
+    age = r.age; events = r.events || []; devices = r.sessions == null ? null : r.sessions;
     if (r.state) {
       S = Object.assign({}, EMPTY, r.state);
       S.cfg = Object.assign({}, EMPTY.cfg, r.state.cfg || {});
@@ -974,6 +980,7 @@ function render() {
       const al = $('acLic'); al.textContent = s.license; al.className = s.licTone === 'bad' ? 'bad' : s.licTone === 'warn' ? 'warn' : 'good';
       const lk = $('acLink'); lk.textContent = online ? 'Online' : 'Offline'; lk.className = online ? 'good' : 'bad';
       $('acSeen').textContent = ago(age);
+      $('acDevices').textContent = devices == null ? '-' : devices + (devices === 1 ? ' (this one)' : '');
     }
   }
   if (tab === 'log') {
@@ -1040,6 +1047,14 @@ async function logout() {
 }
 $('logout').addEventListener('click', askQuit);
 $('acLogout').addEventListener('click', askQuit);
+$('acLogoutOthers').addEventListener('click', async () => {
+  try {
+    const r = await rpc('app_logout_others', { p_token: token });
+    if (r.ok) { toast(r.removed ? r.removed + (r.removed === 1 ? ' other device' : ' other devices') + ' logged out.' : 'No other device was logged in.'); poll(); }
+    else if (r.err === 'session') leave('Your login has expired. Log in again.');
+    else toast('Could not log out the other devices.');
+  } catch (e) { toast('No connection to the server.'); }
+});
 $('quitNo').addEventListener('click', closeQuit);
 $('quitYes').addEventListener('click', logout);
 $('quit').addEventListener('click', e => { if (e.target === $('quit')) closeQuit(); });
@@ -1077,14 +1092,15 @@ $('pwForm').addEventListener('submit', async e => {
   e.preventDefault();
   const msg = $('pwMsg'), oldP = $('pwOld').value, newP = $('pwNew').value;
   msg.className = 'err';
-  if (newP.length < 4) { msg.textContent = 'The new password needs 4 or more characters.'; return; }
+  if (newP.length < 8) { msg.textContent = 'The new password needs 8 or more characters.'; return; }
   try {
     const r = await rpc('app_change_password', { p_token: token, p_old: oldP, p_new: newP });
     if (r.ok) {
       msg.className = 'hint'; msg.style.color = 'var(--good)';
       msg.textContent = 'Password changed. Now type the new password in the bot inputs in MT5 (App Password).';
       $('pwOld').value = ''; $('pwNew').value = '';
-    } else msg.textContent = r.err === 'password' ? 'The current password is wrong.' : r.err === 'session' ? 'Log in again.' : 'Could not change the password.';
+    } else msg.textContent = r.err === 'password' ? 'The current password is wrong.' : r.err === 'short' ? 'The new password needs 8 or more characters.'
+                           : r.err === 'session' ? 'Log in again.' : 'Could not change the password.';
   } catch (x) { msg.textContent = 'No connection to the server.'; }
 });
 document.addEventListener('visibilitychange', () => { if (!document.hidden) poll(); });
