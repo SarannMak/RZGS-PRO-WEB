@@ -188,6 +188,15 @@ nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;st
 .ld-line{position:absolute;left:0;right:0;border-top:1px solid var(--cyan)}
 .ld-line span{position:absolute;right:0;top:-9px;background:var(--panel);font:500 10.5px/1 var(--f-mono);padding:3px 0 3px 6px;color:var(--cyan)}
 .ld-line.next{border-top:1px dashed var(--muted)} .ld-line.next span{left:0;right:auto;padding:3px 6px 3px 0;color:var(--muted)}
+/* TP of a single trade / close price of a basket: dashed in the side colour, word at that side's edge */
+.ld-line.exit{border-top:1px dashed currentColor}
+.ld-line.exit.buy{color:var(--buy)} .ld-line.exit.sell{color:var(--sell)}
+.ld-line.exit span{color:inherit}
+.ld-line.exit.buy span{left:0;right:auto;padding:3px 6px 3px 0}
+.ld-line.exit.sell span{right:0;left:auto;padding:3px 0 3px 6px}
+/* basket: a soft band on the profit side of the line marks the close zone */
+.ld-line.exit.band::after{content:"";position:absolute;left:0;right:0;height:14px;background:currentColor;opacity:.13}
+.ld-line.exit.band.buy::after{bottom:0} .ld-line.exit.band.sell::after{top:0}
 .legend{display:flex;gap:16px;margin-top:10px;flex-wrap:wrap}
 .legend span{display:flex;align-items:center;gap:6px}
 .sw{width:9px;height:9px;border:1px solid}
@@ -737,6 +746,22 @@ function renderLadder(s, el) {
   if (s.bid) all.push(s.bid);
   if (s.nextUp) all.push(s.nextUp);
   if (s.nextDn) all.push(s.nextDn);
+  // exit levels: the TP of a side with one trade, and the price where a basket (2+ trades) reaches its close profit
+  const pv = (s.cfg && s.cfg.pv) || 100, exits = [];
+  if (s.bid) for (const side of ['buy', 'sell']) {
+    const ps = s.positions.filter(p => p.side === side), dir = side === 'buy' ? 1 : -1;
+    if (!ps.length) continue;
+    const lots = ps.reduce((a, p) => a + Number(p.lot), 0), profit = ps.reduce((a, p) => a + Number(p.profit), 0);
+    if (!(lots > 0)) continue;
+    if (ps.length === 1) {
+      let tp = ps[0].tp;                             // real TP on the order, or the money TP worked out from the profit
+      if (!tp && s.cfg && s.cfg.tpMode === 'money' && s.cfg.tpMoney > 0) tp = s.bid + dir * (s.cfg.tpMoney - profit) / (lots * pv);
+      if (tp) exits.push({ side, price: tp, text: 'TP', band: false });
+    } else {
+      exits.push({ side, price: s.bid + dir * (s.basketTarget - profit) / (lots * pv), text: 'BASKET', band: true });
+    }
+  }
+  for (const x of exits) all.push(x.price);
   for (const b of bars) all.push(b[1], b[2]);
   let lo = Math.min(...all), hi = Math.max(...all);
   const pad = Math.max((hi - lo) * .08, hi * 0.00012);
@@ -791,6 +816,13 @@ function renderLadder(s, el) {
     }
     g.globalAlpha = 1; g.lineWidth = 1;
   }
+  // exit levels: outlined price tag on the scale, in the colour of the side
+  for (const x of exits) {
+    const yy = Math.max(8, Math.min(H - 8, y(x.price))), c = col(x.side === 'buy' ? '--buy' : '--sell');
+    g.fillStyle = col('--panel'); g.fillRect(PW + 1, yy - 8, SW - 1, 16);
+    g.strokeStyle = c; g.strokeRect(PW + 1.5, yy - 7.5, SW - 2, 15);
+    g.fillStyle = c; g.fillText(px(x.price), PW + 6, yy + .5);
+  }
   // current price: tag on the scale, like MT5
   if (s.bid) {
     const yy = Math.max(8, Math.min(H - 8, y(s.bid)));
@@ -804,6 +836,7 @@ function renderLadder(s, el) {
   if (s.bid) h += '<div class="ld-line" style="top:' + yp(s.bid) + '"></div>';
   if (s.nextUp) h += '<div class="ld-line next" style="top:' + yp(s.nextUp) + '"><span>NEXT ' + px(s.nextUp) + '</span></div>';
   if (s.nextDn) h += '<div class="ld-line next" style="top:' + yp(s.nextDn) + '"><span>NEXT ' + px(s.nextDn) + '</span></div>';
+  for (const x of exits) h += '<div class="ld-line exit ' + x.side + (x.band ? ' band' : '') + '" style="top:' + yp(x.price) + '"><span>' + x.text + '</span></div>';
   for (const p of s.positions) {
     h += '<i class="ld-tick ' + p.side + '" style="top:' + yp(p.open) + '"></i>' +
          '<div class="ld-pos ' + p.side + '" style="top:' + yp(p.open) + '">' + E(p.tag) + ' ' + Number(p.lot).toFixed(2) + '</div>';
