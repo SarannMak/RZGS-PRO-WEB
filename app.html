@@ -78,6 +78,7 @@ button{cursor:pointer}
 .btn.on{background:var(--cyan);border-color:var(--cyan);color:var(--bg)}
 .btn.go.on{background:var(--good);border-color:var(--good);color:#04130c}
 .btn.hold.on{background:var(--sell);border-color:var(--sell);color:#1a0f00}
+.btn.danger.on{background:var(--bad);border-color:var(--bad);color:#2a0508}
 /* every press flashes, so a tap is always visible */
 .btn.flash{animation:flash .5s ease-out}
 @keyframes flash{from{background:var(--title);border-color:var(--title);color:var(--bg);box-shadow:0 0 18px var(--cyan)}}
@@ -163,8 +164,17 @@ nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;st
 .line b{font:600 14px var(--f-display);color:var(--title);text-align:right}
 
 /* ---------- trades ---------- */
-.ladder{position:relative;height:290px;overflow:hidden}
-.ladder.sm{height:200px}
+.ladder{position:relative;height:330px;overflow:hidden}
+.ladder canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.ladder .empty{padding-top:8px}
+.ld-plot{position:absolute;left:0;top:0;bottom:0;right:62px}
+.ld-tick{position:absolute;width:12px;height:2px;margin-top:-1px}
+.ld-tick.buy{right:50%;background:var(--buy)} .ld-tick.sell{left:50%;background:var(--sell)}
+.panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.panel-head h2{font:500 10px/1.2 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0}
+.mini-seg{display:flex;border:1px solid var(--line)}
+.mini-seg button{background:none;border:0;padding:0 12px;min-height:36px;font:500 10px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.mini-seg button[aria-pressed="true"]{background:var(--chip);color:var(--cyan)}
 .legend b{color:var(--title);font-size:13px;letter-spacing:0;margin-left:3px}
 /* Activate / Pause bar: its own row between the scrolling deck and the dock, so it never covers content */
 .actbar{padding-block:10px;border-top:1px solid var(--line);background:var(--bg)}
@@ -172,9 +182,9 @@ nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;st
 .quit-card{width:100%;max-width:340px;padding:26px 22px 20px;display:flex;flex-direction:column;gap:14px}
 .quit-card h3{font:700 19px var(--f-display);color:var(--title);margin:0;letter-spacing:.03em}
 .quit-card p{margin:0;font-size:13.5px;color:var(--muted)}
-.ld-axis{position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--line)}
+.ld-axis{position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--muted);opacity:.55}
 .ld-pos{position:absolute;transform:translateY(-50%);font:500 11px/1 var(--f-mono);padding:3px 6px;border:1px solid;background:var(--panel);white-space:nowrap}
-.ld-pos.buy{right:calc(50% + 8px);color:var(--buy)} .ld-pos.sell{left:calc(50% + 8px);color:var(--sell)}
+.ld-pos.buy{right:calc(50% + 16px);color:var(--buy)} .ld-pos.sell{left:calc(50% + 16px);color:var(--sell)}
 .ld-line{position:absolute;left:0;right:0;border-top:1px solid var(--cyan)}
 .ld-line span{position:absolute;right:0;top:-9px;background:var(--panel);font:500 10.5px/1 var(--f-mono);padding:3px 0 3px 6px;color:var(--cyan)}
 .ld-line.next{border-top:1px dashed var(--muted)} .ld-line.next span{left:0;right:auto;padding:3px 6px 3px 0;color:var(--muted)}
@@ -183,6 +193,8 @@ nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;st
 .sw{width:9px;height:9px;border:1px solid}
 .baskets{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .basket{display:flex;flex-direction:column;gap:6px;min-width:0}
+.bk-meta{display:flex;justify-content:space-between;gap:8px;white-space:nowrap;letter-spacing:.06em}
+.basket .bar{margin-top:auto}
 .basket .num{font-size:20px;font-weight:600}
 .bar{height:4px;background:var(--line)} .bar i{display:block;height:100%;background:var(--good);width:0;transition:width .4s}
 .pos{display:grid;grid-template-columns:auto 1fr auto;gap:2px 10px;align-items:center;padding-block:9px;border-top:1px solid var(--line)}
@@ -204,7 +216,7 @@ nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;st
 /* ---------- overlays ---------- */
 #toast{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);max-width:min(440px,calc(100% - 32px));
   background:var(--panel-2);border:1px solid var(--frame);color:var(--title);padding:10px 14px;font-size:13.5px;z-index:30;text-align:center}
-#sheet{position:fixed;inset:0;background:rgba(5,6,14,.78);display:flex;align-items:flex-end;justify-content:center;z-index:40;padding:16px;
+#sheet{position:fixed;inset:0;background:rgba(5,6,14,.78);display:flex;align-items:center;justify-content:center;z-index:40;padding:16px;
   padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
 .sheet-card{width:100%;max-width:448px;padding:24px 20px 20px;display:flex;flex-direction:column;gap:14px;border-color:#aa3241;box-shadow:0 0 0 2px rgba(170,50,65,.2)}
 .sheet-card h3{font:700 18px var(--f-display);color:var(--title);margin:0;letter-spacing:.04em}
@@ -212,7 +224,8 @@ nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;st
 
 @keyframes spin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.ring-dash,.eye .sweep,.btn.flash{animation:none}.ring-arc,.bar i{transition:none}}
-@media (max-width:360px){.core{flex-direction:column;align-items:flex-start}.stats .num{font-size:24px}}
+/* phones: the ring and its text stay side by side, just a little smaller */
+@media (max-width:400px){.core{padding:18px 14px;gap:14px}.ring{width:98px;height:98px}.stats .num{font-size:24px}}
 .set input:disabled{opacity:.75;-webkit-text-fill-color:var(--body)}
 .sw-in:disabled{opacity:.6;cursor:default}
 .set input[type=password]{flex:none;background:var(--bg);border:1px solid var(--line);padding:9px 8px;font:500 15px var(--f-mono);color:var(--title);border-radius:2px}
@@ -315,21 +328,26 @@ nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;st
     <!-- TRADES -->
     <div class="view" id="v-trades" hidden>
       <section class="panel">
-        <h2>Grid ladder</h2>
+        <div class="panel-head"><h2>Grid ladder</h2>
+          <div class="mini-seg" id="chartSeg">
+            <button type="button" data-chart="candle" aria-pressed="true">Candles</button>
+            <button type="button" data-chart="line" aria-pressed="false">Line</button>
+          </div>
+        </div>
         <div class="ladder" id="ladder"></div>
         <div class="legend cap">
           <span><i class="sw" style="color:var(--buy)"></i>Buy (left)</span>
           <span><i class="sw" style="color:var(--sell)"></i>Sell (right)</span>
-          <span>Label + lot</span>
+          <span id="ldTf">Label + lot</span>
         </div>
       </section>
       <section class="panel">
         <h2>Baskets</h2>
         <div class="baskets">
           <div class="basket"><span class="cap" style="color:var(--buy)">Buy side</span><span class="num" id="bkBuyPL">+0.00$</span>
-            <span class="cap" id="bkBuyInfo">0 trades | 0.00 lots</span><div class="bar"><i id="bkBuyBar"></i></div></div>
+            <span class="cap bk-meta" id="bkBuyInfo"><span>0 trades</span><span>0.00 lots</span></span><div class="bar"><i id="bkBuyBar"></i></div></div>
           <div class="basket"><span class="cap" style="color:var(--sell)">Sell side</span><span class="num" id="bkSellPL">+0.00$</span>
-            <span class="cap" id="bkSellInfo">0 trades | 0.00 lots</span><div class="bar"><i id="bkSellBar"></i></div></div>
+            <span class="cap bk-meta" id="bkSellInfo"><span>0 trades</span><span>0.00 lots</span></span><div class="bar"><i id="bkSellBar"></i></div></div>
         </div>
         <p class="hint">A side with 2 or more trades closes together when its total reaches +0.10$. The bar shows how close it is.</p>
       </section>
@@ -346,7 +364,7 @@ nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;st
         <div class="row">
           <button class="btn go" data-cmd="activate" data-state="activate">Activate</button>
           <button class="btn hold" data-cmd="pause" data-state="pause">Pause</button>
-          <button class="btn" data-cmd="finish" id="btnFinish">Finish</button>
+          <button class="btn danger" data-cmd="finish" id="btnFinish">Finish</button>
         </div>
         <p class="hint">Pause stops new trades; open baskets are still managed. Finish lets the running cycle end, then the bot stays idle.</p>
       </section>
@@ -565,12 +583,21 @@ const EMPTY = { status: 'WAITING FOR BOT', tone: 'off', paused: false, finish: f
   balance: 0, equity: 0, dayProfit: 0, floating: 0, drawdown: 0, trades: 0, cycles: 0, tpHits: 0, baskets: 0, maxDD: 0,
   buy: { count: 0, lots: 0, profit: 0 }, sell: { count: 0, lots: 0, profit: 0 }, mode: 'basic', cMode: 'basic', smart: false,
   sSteps: 0, sMax: 3, level: 0, maxLevels: 15, nextLot: 0.01, nextUp: 0, nextDn: 0, bid: 0, basketTarget: 0.10,
+  bars: [], barTf: 'M1',
   license: '-', licTone: 'good', positions: [], days: [0, 0, 0, 0, 0, 0, 0],
   cfg: { tpPts: 0, gridPts: 0, pt: 0.001, basket: 0, cooldown: 0, maxLevels: 15, lots: [0.01], highStart: 0.01, highMult: 1.5,
          asym: true, reset: true, maxLots: 0, eqStop: 0, target: 0, pv: 100, tpMode: 'points' } };
 let token = store.get('rz_token'), account = store.get('rz_account') || '', symbol = '';
 let S = null, age = null, events = [], online = false, netErr = false;
 const eq = [], waiting = new Set();
+// An older bot does not send price bars. Then the app builds its own 15-second bars from the
+// live price while it is open, so the chart is never empty.
+const ownBars = [];
+function addOwnBar(price) {
+  const slot = Math.floor(Date.now() / 15000), b = ownBars[ownBars.length - 1];
+  if (!b || b[4] !== slot) { ownBars.push([price, price, price, price, slot]); if (ownBars.length > 60) ownBars.shift(); }
+  else { b[1] = Math.max(b[1], price); b[2] = Math.min(b[2], price); b[3] = price; }
+}
 let timer = 0, tab = 'home', tool = 'settings', pending = null, toastT = 0, settingsFilled = false;
 const show = { tp: true, basket: true, cool: true, risk: true };      // log filter, kept on this phone
 try { Object.assign(show, JSON.parse(store.get('rz_show') || '{}')); } catch (e) {}
@@ -581,12 +608,14 @@ function lotAt(l) {
   if (s.mode === 'high') return Math.max(0.01, Math.round(c.highStart * Math.pow(c.highMult, l) * 100 + 1e-9) / 100);
   return c.lots[Math.min(l, c.lots.length - 1)] || 0.01;
 }
+let polling = false;
 async function poll() {
-  if (!token || document.hidden) return;
+  if (!token || document.hidden || polling) return;       // asked every second; never two requests at once
+  polling = true;
   try {
     const r = await rpc('app_state', { p_token: token });
     netErr = false;
-    if (!r.ok) { if (r.err === 'session') leave('Your login has expired. Log in again.'); return; }
+    if (!r.ok) { polling = false; if (r.err === 'session') leave('Your login has expired. Log in again.'); return; }
     account = String(r.account); symbol = r.symbol || '';
     age = r.age; events = r.events || [];
     if (r.state) {
@@ -595,13 +624,23 @@ async function poll() {
       if (S.dig != null) dig = S.dig;
     }
     online = !!r.state && age != null && age <= OFFLINE_AFTER;
-    if (online) { eq.push(S.equity); if (eq.length > 150) eq.shift(); }
+    if (online) { eq.push(S.equity); if (eq.length > 300) eq.shift(); }
+    // chart bars, best source first: 1. MT5 history sent by the bot  2. one-minute bars the server
+    // keeps from the bot's price (still there after a reload)  3. bars built in this app while it is open
+    if (S && !(r.state && r.state.bars && r.state.bars.length >= 2)) {
+      if (r.bars && r.bars.length >= 2) { S.bars = r.bars; S.barTf = 'M1'; }
+      else {
+        if (online && S.bid) addOwnBar(S.bid);
+        S.bars = ownBars; S.barTf = '15s live';
+      }
+    }
     for (const c of r.cmds || []) {
       if (!waiting.has(c.id)) continue;
       if (c.done) { waiting.delete(c.id); toast(c.result || 'Done.'); }
       else if (c.age > 20) { waiting.delete(c.id); toast('The bot did not answer. Is MT5 running?'); }
     }
   } catch (e) { netErr = true; }
+  polling = false;
   render();
 }
 async function send(cmd, arg) {
@@ -679,25 +718,105 @@ function renderSpark() {
        '<circle cx="' + lx + '" cy="' + ly + '" r="3.5" fill="var(--cyan)"/>';
   el.innerHTML = h;
 }
+let chartType = (typeof store !== 'undefined' && store.get('rz_chart')) || 'candle';
+// Price chart with the grid ladder on top. It cannot be moved or scrolled: it always shows the newest bars.
 function renderLadder(s, el) {
-  if (!s.positions.length) { el.innerHTML = '<p class="empty">No open trades. The ladder appears when a cycle starts.</p>'; return; }
-  const all = s.positions.map(p => p.open).concat([s.bid]);
+  const bars = (s.bars || []).slice(-45), n = bars.length;      // the newest 45 bars fit left of the middle line
+  const tf = document.getElementById('ldTf');
+  if (tf) tf.textContent = n >= 2 ? (s.barTf || 'M1') + ' chart' : 'Label + lot';
+  if (!s.positions.length && n < 2) { el.innerHTML = '<p class="empty">No open trades. The ladder appears when a cycle starts.</p>'; return; }
+  if (!el.querySelector('canvas')) el.innerHTML = '<canvas aria-hidden="true"></canvas><div class="ld-plot"></div>';
+  const cv = el.firstChild, plot = el.lastChild;
+  const W = el.clientWidth, H = el.clientHeight, SW = 62, PW = W - SW;        // SW = price scale on the right
+  if (W < 120) return;
+  const D = typeof dig === 'number' ? dig : 3;
+  const E = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  // price range: open trades, current price, next entries and the bars on screen
+  const all = s.positions.map(p => p.open);
+  if (s.bid) all.push(s.bid);
   if (s.nextUp) all.push(s.nextUp);
   if (s.nextDn) all.push(s.nextDn);
+  for (const b of bars) all.push(b[1], b[2]);
   let lo = Math.min(...all), hi = Math.max(...all);
-  const pad = Math.max((hi - lo) * .12, s.bid * 0.0003); lo -= pad; hi += pad;
-  const y = p => ((hi - p) / (hi - lo) * 100).toFixed(2) + '%';
+  const pad = Math.max((hi - lo) * .08, hi * 0.00012);
+  lo -= pad; hi += pad;
+  const y = p => (hi - p) / (hi - lo) * H;
+
+  // horizontal grid every 1.00 of price; it only gets wider when lines would be closer than 16 px
+  let unit = 1;
+  if (hi - lo < 2) { const raw = (hi - lo) / 5, p10 = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / p10; unit = (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * p10; }
+  let step = unit, k = 0;
+  while (step * H / (hi - lo) < 16) { k++; step = unit * [1, 2, 5][k % 3] * Math.pow(10, Math.floor(k / 3)); }
+  const sd = Math.min(D, step >= 1 ? 2 : D);
+
+  const dpr = window.devicePixelRatio || 1;
+  if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
+  const g = cv.getContext('2d'), cs = getComputedStyle(document.documentElement), col = v => cs.getPropertyValue(v).trim();
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.clearRect(0, 0, W, H);
+  g.font = '500 10px "IBM Plex Mono", Consolas, monospace';
+  g.textBaseline = 'middle'; g.textAlign = 'left'; g.lineWidth = 1;
+
+  // grid + price scale
+  g.strokeStyle = col('--line'); g.fillStyle = col('--muted'); g.setLineDash([2, 4]);
+  for (let v = Math.ceil(lo / step) * step; v <= hi; v += step) {
+    const yy = Math.round(y(v)) + .5;
+    g.beginPath(); g.moveTo(0, yy); g.lineTo(PW, yy); g.stroke();
+    if (yy > 8 && yy < H - 8) g.fillText(v.toFixed(sd), PW + 7, yy);
+  }
+  // the chart ends at the middle line: newest bar there, older bars to the left, right half stays free
+  const mid = PW / 2, bw = mid / Math.max(n, 24), bx = i => mid - (n - i - .5) * bw;
+  for (let i = n - 1; i >= 0; i -= 10) { const xx = Math.round(bx(i)) + .5; g.beginPath(); g.moveTo(xx, 0); g.lineTo(xx, H); g.stroke(); }
+  g.setLineDash([]);
+  g.beginPath(); g.moveTo(PW + .5, 0); g.lineTo(PW + .5, H); g.stroke();
+
+  // bars: [open, high, low, close], oldest first
+  if (n >= 2) {
+    if (chartType === 'line') {
+      g.strokeStyle = col('--body'); g.globalAlpha = .9; g.lineWidth = 1.5; g.lineJoin = 'round';
+      g.beginPath();
+      bars.forEach((b, i) => { if (i) g.lineTo(bx(i), y(b[3])); else g.moveTo(bx(i), y(b[3])); });
+      if (s.bid) g.lineTo(mid, y(s.bid));                       // join the line to the current price on the middle line
+      g.stroke();
+    } else {
+      const body = Math.max(1, Math.min(9, bw * .62)), up = col('--good'), dn = col('--bad');
+      g.globalAlpha = .82;
+      bars.forEach((b, i) => {
+        const xx = Math.round(bx(i)) + .5, yo = y(b[0]), yc = y(b[3]);
+        g.strokeStyle = g.fillStyle = b[3] >= b[0] ? up : dn;
+        g.beginPath(); g.moveTo(xx, y(b[1])); g.lineTo(xx, y(b[2])); g.stroke();
+        g.fillRect(xx - body / 2, Math.min(yo, yc), body, Math.max(1, Math.abs(yc - yo)));
+      });
+    }
+    g.globalAlpha = 1; g.lineWidth = 1;
+  }
+  // current price: tag on the scale, like MT5
+  if (s.bid) {
+    const yy = Math.max(8, Math.min(H - 8, y(s.bid)));
+    g.fillStyle = col('--cyan'); g.fillRect(PW + 1, yy - 8, SW - 1, 16);
+    g.fillStyle = col('--bg'); g.fillText(px(s.bid), PW + 6, yy + .5);
+  }
+
+  // ladder on top: middle line, a dash on it for every trade, the label beside it
+  const yp = p => (y(p) / H * 100).toFixed(2) + '%';
   let h = '<div class="ld-axis"></div>';
-  for (const p of s.positions) h += '<div class="ld-pos ' + p.side + '" style="top:' + y(p.open) + '">' + esc(p.tag) + ' ' + Number(p.lot).toFixed(2) + '</div>';
-  if (s.nextUp) h += '<div class="ld-line next" style="top:' + y(s.nextUp) + '"><span>NEXT ' + px(s.nextUp) + '</span></div>';
-  if (s.nextDn) h += '<div class="ld-line next" style="top:' + y(s.nextDn) + '"><span>NEXT ' + px(s.nextDn) + '</span></div>';
-  h += '<div class="ld-line" style="top:' + y(s.bid) + '"><span>' + px(s.bid) + '</span></div>';
-  el.innerHTML = h;
+  if (s.bid) h += '<div class="ld-line" style="top:' + yp(s.bid) + '"></div>';
+  if (s.nextUp) h += '<div class="ld-line next" style="top:' + yp(s.nextUp) + '"><span>NEXT ' + px(s.nextUp) + '</span></div>';
+  if (s.nextDn) h += '<div class="ld-line next" style="top:' + yp(s.nextDn) + '"><span>NEXT ' + px(s.nextDn) + '</span></div>';
+  for (const p of s.positions) {
+    h += '<i class="ld-tick ' + p.side + '" style="top:' + yp(p.open) + '"></i>' +
+         '<div class="ld-pos ' + p.side + '" style="top:' + yp(p.open) + '">' + E(p.tag) + ' ' + Number(p.lot).toFixed(2) + '</div>';
+  }
+  plot.innerHTML = h;
+}
+function syncChartSeg() {
+  document.querySelectorAll('#chartSeg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.chart === chartType));
 }
 const low = { buy: 0, sell: 0 };
 function basketBox(side, b, target, plEl, infoEl, barEl) {
   pnl(plEl, b.profit);
-  infoEl.textContent = b.count + (b.count === 1 ? ' trade' : ' trades') + ' | ' + Number(b.lots).toFixed(2) + ' lots';
+  infoEl.innerHTML = '<span>' + b.count + (b.count === 1 ? ' trade' : ' trades') + '</span><span>' + Number(b.lots).toFixed(2) + ' lots</span>';
   low[side] = b.count < 2 ? 0 : Math.min(low[side], b.profit);
   const span = target - low[side];
   barEl.style.width = (b.count < 2 || span <= 0 ? 0 : Math.max(0, Math.min(100, (b.profit - low[side]) / span * 100))) + '%';
@@ -846,7 +965,7 @@ function enter() {
   settingsFilled = false;
   setTab('home');
   clearInterval(timer);
-  timer = setInterval(poll, 2000);
+  timer = setInterval(poll, 1000);
   poll();
 }
 // the power button asks first: "Do you want to quit?"  No / Yes
@@ -855,7 +974,7 @@ function closeQuit() { $('quit').hidden = true; }
 function leave(message) {
   clearInterval(timer); closeSheet(); closeQuit();
   token = null; store.set('rz_token', null);
-  S = null; age = null; events = []; online = false; eq.length = 0; waiting.clear();
+  S = null; age = null; events = []; online = false; eq.length = 0; ownBars.length = 0; waiting.clear();
   for (const id of ['hdr', 'main', 'dock', 'actbar']) $(id).hidden = true;
   $('login').hidden = false;
   $('loginBtn').textContent = 'Connect to bot'; $('loginBtn').disabled = false;
@@ -909,6 +1028,11 @@ function onAction(e) {
 }
 $('main').addEventListener('click', onAction);
 $('actbar').addEventListener('click', onAction);
+$('chartSeg').addEventListener('click', e => {
+  const b = e.target.closest('button[data-chart]'); if (!b) return;
+  chartType = b.dataset.chart; store.set('rz_chart', chartType); syncChartSeg(); render();
+});
+syncChartSeg();
 $('shCancel').addEventListener('click', () => { closeSheet(); toast('Canceled.'); });
 $('shOk').addEventListener('click', () => { const c = pending && pending.cmd; closeSheet(); if (c) send(c); });
 $('t-settings').addEventListener('submit', e => e.preventDefault());
