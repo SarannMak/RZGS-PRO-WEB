@@ -44,7 +44,16 @@
   function friendlyError(error) {
     const code = (error && error.code) || '';
     const status = (error && error.status) || 0;
-    if (!navigator.onLine || (error && error.name === 'AuthRetryableFetchError')) {
+    const text = (error && error.message) || '';
+    if (!navigator.onLine) return "You're offline. Check your connection and try again.";
+    // supabase-js reports every server-side failure (HTTP 500 and up) as a "retryable fetch error".
+    // Only a missing status means the request never arrived.
+    if (status >= 500) {
+      return /sending .*mail/i.test(text)
+        ? "We couldn't send the email right now. Please try again in a few minutes, or contact us."
+        : 'Our server had a problem. Please try again in a few minutes.';
+    }
+    if (error && error.name === 'AuthRetryableFetchError') {
       return "Couldn't reach the server. Check your connection and try again.";
     }
     const known = {
