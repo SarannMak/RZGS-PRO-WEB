@@ -1,0 +1,558 @@
+/* ==========================================================================
+   Login, sign-up, password reset and account pages
+   Loaded after style.css and built on its design tokens (colors, fonts, radii).
+   ========================================================================== */
+.auth-section {
+  position: relative;
+  padding: clamp(24px, 5vw, 64px) 0 clamp(56px, 8vw, 96px);
+}
+
+/* the hidden attribute must win over the display values set below */
+.auth-msg[hidden],
+.auth-step[hidden],
+.field-error[hidden],
+.account-rows > div[hidden],
+[data-resend][hidden] {
+  display: none;
+}
+
+.auth-layout {
+  display: grid;
+  gap: 20px;
+  align-items: start;
+  max-width: 980px;
+  margin: 0 auto;
+}
+.auth-card {
+  padding: clamp(24px, 5vw, 44px);
+  border-radius: var(--radius-xl);
+}
+.auth-card--narrow {
+  width: min(100%, 480px);
+  margin: 0 auto;
+}
+.auth-title {
+  margin: 14px 0 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(28px, 4.5vw, 36px);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+.auth-lead {
+  margin: 12px 0 0;
+  color: var(--text-muted);
+}
+.auth-alt {
+  margin: 24px 0 0;
+  color: var(--text-muted);
+  font-size: 15px;
+  text-align: center;
+}
+.auth-alt a,
+.auth-link {
+  color: var(--lime);
+  font-weight: 600;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+.link-button {
+  min-height: 44px;
+  padding: 8px;
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+}
+.auth-resend {
+  margin-top: 12px;
+}
+
+/* ---------- messages (errors, notices) ---------- */
+.auth-msg {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 20px 0 0;
+  padding: 12px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.auth-msg .icon {
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  color: var(--text-muted);
+}
+.auth-msg[data-tone="error"] {
+  border-color: rgba(255, 95, 126, 0.45);
+  background: rgba(255, 95, 126, 0.08);
+}
+.auth-msg[data-tone="error"] .icon {
+  color: var(--down);
+}
+.auth-msg[data-tone="success"] {
+  border-color: rgba(0, 239, 167, 0.4);
+  background: rgba(0, 239, 167, 0.07);
+}
+.auth-msg[data-tone="success"] .icon {
+  color: var(--mint);
+}
+
+/* ---------- form fields ---------- */
+.field {
+  display: grid;
+  gap: 8px;
+  margin-top: 18px;
+}
+.field label {
+  font-weight: 500;
+  font-size: 14px;
+}
+.field .req {
+  color: var(--lime);
+}
+.field .opt {
+  color: var(--text-subtle);
+  font-weight: 400;
+}
+.field-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.field-row a {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+.input {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  background-color: rgba(0, 0, 0, 0.35);
+  color: var(--text);
+  font: 400 16px/1.4 var(--font-body);
+  transition: border-color var(--dur) var(--ease-out), box-shadow var(--dur) var(--ease-out);
+}
+.input::placeholder {
+  color: var(--text-subtle);
+}
+.input:hover {
+  border-color: rgba(255, 255, 255, 0.28);
+}
+.input:focus-visible {
+  outline: none;
+  border-color: var(--lime);
+  box-shadow: 0 0 0 3px rgba(130, 255, 0, 0.22);
+}
+.input[aria-invalid="true"] {
+  border-color: var(--down);
+}
+.input[aria-invalid="true"]:focus-visible {
+  box-shadow: 0 0 0 3px rgba(255, 95, 126, 0.25);
+}
+select.input {
+  padding-right: 44px;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a9a8b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 18px;
+}
+select.input option {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.input-wrap {
+  position: relative;
+}
+.input-wrap--action .input {
+  padding-right: 56px;
+}
+.input-wrap--prefix .input {
+  padding-left: 36px;
+}
+.input-prefix {
+  position: absolute;
+  top: 50%;
+  left: 16px;
+  translate: 0 -50%;
+  color: var(--text-subtle);
+  pointer-events: none;
+}
+.toggle-pw {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.toggle-pw:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+}
+.toggle-pw .icon-hide,
+.toggle-pw[aria-pressed="true"] .icon-show {
+  display: none;
+}
+.toggle-pw[aria-pressed="true"] .icon-hide {
+  display: block;
+}
+.hint {
+  margin: 0;
+  color: var(--text-subtle);
+  font-size: 13px;
+}
+.field-error {
+  margin: 0;
+  color: #ff8fa5;
+  font-size: 13px;
+}
+.check-field {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: 4px 12px;
+  align-items: start;
+  margin-top: 22px;
+}
+.check-field input {
+  width: 22px;
+  height: 22px;
+  margin: 1px 0 0;
+  accent-color: var(--lime);
+  cursor: pointer;
+}
+.check-field label {
+  color: var(--text-muted);
+  font-size: 14px;
+  cursor: pointer;
+}
+.check-field label a {
+  color: var(--lime);
+}
+.check-field .field-error {
+  grid-column: 2;
+}
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 28px;
+}
+.form-actions .btn {
+  flex: 1;
+}
+.form-actions .btn-back {
+  flex: 0 0 auto;
+}
+
+/* busy buttons */
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.btn.is-busy {
+  opacity: 1;
+  cursor: progress;
+}
+.btn.is-busy .icon {
+  display: none;
+}
+.btn.is-busy::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(5, 17, 6, 0.25);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* ---------- sign-up steps ---------- */
+.steps-bar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.steps-bar li {
+  display: grid;
+  gap: 8px;
+  color: var(--text-subtle);
+  font: 500 11px/1.3 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: color var(--dur) var(--ease-out);
+}
+.steps-bar li::before {
+  content: "";
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  transition: background-color var(--dur) var(--ease-out);
+}
+.steps-bar li.is-done::before,
+.steps-bar li.is-current::before {
+  background: var(--lime);
+}
+.steps-bar li.is-current {
+  color: var(--text);
+}
+.auth-step {
+  min-width: 0;
+  margin: 24px 0 0;
+  padding: 0;
+  border: 0;
+}
+.step-legend {
+  padding: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 20px;
+}
+.step-legend:focus-visible {
+  outline: none;
+}
+.step-count {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--lime);
+  font: 500 12px/1 var(--font-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* "check your email" state */
+.auth-done {
+  text-align: center;
+}
+.auth-done-icon {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 4px;
+  border: 1px solid rgba(130, 255, 0, 0.3);
+  border-radius: 50%;
+  background: rgba(130, 255, 0, 0.1);
+  color: var(--lime);
+}
+.auth-done-icon .icon {
+  width: 28px;
+  height: 28px;
+}
+.auth-done h2 {
+  margin: 16px 0 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(24px, 4vw, 30px);
+  letter-spacing: -0.02em;
+}
+.auth-done h2:focus-visible {
+  outline: none;
+}
+.auth-done p {
+  margin: 12px auto 0;
+  max-width: 36ch;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+.auth-done strong {
+  color: var(--text);
+}
+.auth-done .btn {
+  margin-top: 24px;
+}
+
+/* ---------- free trial banner ---------- */
+.trial-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border: 1px solid rgba(130, 255, 0, 0.3);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(120% 140% at 0% 0%, rgba(130, 255, 0, 0.14), transparent 60%),
+    rgba(130, 255, 0, 0.04);
+  color: var(--text);
+  text-decoration: none;
+}
+.trial-banner-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--grad);
+  color: var(--on-accent);
+}
+.trial-banner-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.trial-banner strong {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 1.25;
+}
+.trial-banner small {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+a.trial-banner {
+  margin-top: 28px;
+  transition: border-color var(--dur) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+}
+a.trial-banner:hover {
+  border-color: rgba(130, 255, 0, 0.6);
+}
+a.trial-banner:active {
+  transform: scale(0.99);
+}
+a.trial-banner > .icon {
+  margin-left: auto;
+  color: var(--lime);
+}
+.trial-panel {
+  order: -1;
+  display: grid;
+  gap: 20px;
+}
+.trial-panel .check-list {
+  display: none;
+  padding: 0 4px;
+}
+
+@media (min-width: 900px) {
+  .auth-layout--split {
+    grid-template-columns: minmax(0, 520px) minmax(0, 1fr);
+    gap: 32px;
+  }
+  .trial-panel {
+    position: sticky;
+    top: calc(var(--header-h) + 24px);
+    order: 0;
+    padding: 28px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    background: var(--surface);
+  }
+  .trial-panel .check-list {
+    display: grid;
+  }
+}
+
+/* ---------- account ---------- */
+.account-card {
+  width: min(100%, 600px);
+  margin: 0 auto;
+  padding: clamp(24px, 5vw, 44px);
+  border-radius: var(--radius-xl);
+}
+.account-card .trial-banner {
+  margin-top: 28px;
+}
+.account-head {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.avatar-lg {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 72px;
+  height: 72px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--grad);
+  color: var(--on-accent);
+  font: 700 28px/1 var(--font-display);
+  box-shadow: 0 0 0 4px rgba(130, 255, 0, 0.12);
+}
+.avatar-lg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.account-name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(22px, 3.4vw, 28px);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+}
+.account-sub {
+  margin: 6px 0 0;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+.account-rows {
+  margin: 24px 0 0;
+}
+.account-rows > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+  border-top: 1px solid var(--border);
+  font-size: 15px;
+}
+.account-rows dt {
+  color: var(--text-muted);
+}
+.account-rows dd {
+  margin: 0;
+  font-weight: 500;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.account-actions {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+.account-note {
+  margin: 16px 0 0;
+  color: var(--text-subtle);
+  font-size: 13px;
+}
+@media (min-width: 520px) {
+  .account-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* loading placeholders while the session is checked */
+.account-card[aria-busy="true"] .account-name,
+.account-card[aria-busy="true"] .account-sub,
+.account-card[aria-busy="true"] .account-rows dd {
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: transparent;
+  animation: blink 1.4s ease-in-out infinite;
+}
