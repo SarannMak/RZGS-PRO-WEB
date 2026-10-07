@@ -458,7 +458,9 @@
 
   /* ------------------------------------------------------------ dashboard page */
   const PLAN_NAMES = { trial: 'Free trial', elite: 'Elite', diamond: 'Diamond' };
+  const PLAN_DAYS = { trial: 7, elite: 30, diamond: 30 }; // length of one period, used to fill the ring
   const longDate = (value) => new Date(value).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+  const shortDateTime = (value) => new Date(value).toLocaleString(undefined, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
   // Small "Saved." / error line next to a form's own button.
   function formMessage(form, text, tone) {
@@ -470,45 +472,64 @@
     if (tone === 'success') line.hideTimer = setTimeout(() => { line.hidden = true; }, 4000);
   }
 
-  // The plan and its end date are set by the site owner in the web_users table.
-  // With no plan on file, the card keeps the "get started" content written in the page.
-  function renderPlan(card, profile) {
+  // A row of tabs showing one panel at a time. Arrow keys move between tabs, Home/End jump.
+  function setupTabs(tabs, onSelect) {
+    const select = (tab, moveFocus = false) => {
+      tabs.forEach((other) => {
+        const on = other === tab;
+        other.setAttribute('aria-selected', String(on));
+        other.tabIndex = on ? 0 : -1;
+        document.getElementById(other.getAttribute('aria-controls')).hidden = !on;
+      });
+      if (moveFocus) tab.focus();
+      if (onSelect) onSelect(tab);
+    };
+    tabs.forEach((tab, index) => {
+      tab.addEventListener('click', () => select(tab));
+      tab.addEventListener('keydown', (event) => {
+        const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[event.key];
+        let next = null;
+        if (step) next = tabs[(index + step + tabs.length) % tabs.length];
+        else if (event.key === 'Home') next = tabs[0];
+        else if (event.key === 'End') next = tabs[tabs.length - 1];
+        if (!next) return;
+        event.preventDefault();
+        select(next, true);
+      });
+    });
+    return select;
+  }
+
+  // The plan and its end date are typed by the site owner in the web_users table.
+  // This turns them into everything the dashboard shows about the plan.
+  function planState(profile) {
     const plan = PLAN_NAMES[profile.plan] ? profile.plan : null;
-    if (!plan) return;
-
+    if (!plan) {
+      return {
+        plan: null, name: 'Not started', status: 'No plan', tone: 'off', until: '-', big: '--', sub: 'NO PLAN', arc: 0,
+        note: 'Request your free 7-day Pro trial, or choose a plan. A plan you buy shows here once we activate it.',
+      };
+    }
     const ends = profile.plan_expires_at ? new Date(profile.plan_expires_at) : null;
-    const daysLeft = ends ? Math.ceil((ends - Date.now()) / 86400000) : null;
-    const status = $('[data-plan-status]', card);
-    const action = $('[data-plan-action]', card);
-    const secondary = $('[data-plan-secondary]', card);
-    let note = 'Your plan is active.';
+    const base = { plan, name: PLAN_NAMES[plan], until: ends ? longDate(ends) : 'No end date' };
+    if (!ends) return { ...base, status: 'Active', tone: 'good', big: 'ON', sub: 'ACTIVE', arc: 100, note: 'Your plan is active.' };
 
-    if (ends && daysLeft <= 0) {
-      status.textContent = 'Expired';
-      status.dataset.tone = 'bad';
-      note = `Ended on ${longDate(ends)}. Renew to keep the bot running.`;
-    } else if (ends && daysLeft <= 3) {
-      status.textContent = daysLeft === 1 ? 'Ends tomorrow' : `Ends in ${daysLeft} days`;
-      status.dataset.tone = 'warn';
-      note = `Valid until ${longDate(ends)}. Renew now to avoid a break.`;
-    } else {
-      status.textContent = 'Active';
-      status.dataset.tone = 'good';
-      if (ends) note = `Valid until ${longDate(ends)}.`;
+    const daysLeft = Math.ceil((ends - Date.now()) / 86400000);
+    const what = plan === 'trial' ? 'free trial' : 'plan';
+    const todo = plan === 'trial' ? 'Choose a plan' : 'Renew';
+    if (daysLeft <= 0) {
+      return { ...base, status: 'Expired', tone: 'bad', big: '0', sub: 'DAYS LEFT', arc: 0, note: `Your ${what} ended on ${longDate(ends)}. ${todo} to keep the bot running.` };
     }
-    status.hidden = false;
-    $('[data-plan-name]', card).textContent = PLAN_NAMES[plan];
-    $('[data-plan-note]', card).textContent = note;
-
-    if (plan === 'trial') {
-      action.textContent = 'Choose a plan';
-      action.href = 'index.html#pricing';
-      secondary.hidden = true;
-    } else {
-      action.textContent = 'Renew plan';
-      action.href = card.dataset[`link${plan.charAt(0).toUpperCase()}${plan.slice(1)}`] || 'index.html#pricing';
-      secondary.hidden = false;
-    }
+    const soon = daysLeft <= 3;
+    return {
+      ...base,
+      status: soon ? 'Ends soon' : 'Active',
+      tone: soon ? 'warn' : 'good',
+      big: String(daysLeft),
+      sub: daysLeft === 1 ? 'DAY LEFT' : 'DAYS LEFT',
+      arc: Math.max(4, Math.min(100, (daysLeft / PLAN_DAYS[plan]) * 100)),
+      note: soon ? `Your ${what} ends on ${longDate(ends)}. ${todo} now to avoid a break.` : `Your ${what} is valid until ${longDate(ends)}.`,
+    };
   }
 
   async function initDashboard() {
@@ -527,23 +548,123 @@
     try {
       const { data } = await db
         .from('web_users')
-        .select('full_name, username, email, country, phone, telegram_username, mt5_account, broker, plan, plan_expires_at')
+        .select('full_name, username, email, country, phone, telegram_username, mt5_account, broker, plan, plan_expires_at, created_at, email_confirmed_at, last_sign_in_at, accepted_terms_at')
         .eq('id', user.id)
         .maybeSingle();
       if (data) profile = data;
     } catch (e) { /* fall back to what the sign-up itself stored */ }
 
     const stored = (key) => profile[key] || (user.user_metadata || {})[key] || '';
+    const setAll = (selector, text) => $$(selector, root).forEach((el) => { el.textContent = text; });
 
+    /* ----- menu: one view at a time, remembered in the address (#plan, #tools ...) ----- */
+    const tabs = $$('.dash-dock [role="tab"]', root);
+    const tabFor = (name) => tabs.find((tab) => tab.dataset.tab === name);
+    let settled = false;
+    const selectTab = setupTabs(tabs, (tab) => {
+      if (!settled) return;
+      history.replaceState(null, '', `#${tab.dataset.tab}`);
+      window.scrollTo({ top: 0, behavior: 'instant' }); // every view starts at its top, like a new screen
+    });
+    selectTab(tabFor(location.hash.slice(1)) || tabs[0]);
+    settled = true;
+    // links inside the page, like "See plans", switch tab through the address
+    window.addEventListener('hashchange', () => {
+      const tab = tabFor(location.hash.slice(1));
+      if (tab && tab.getAttribute('aria-selected') !== 'true') selectTab(tab);
+    });
+    setupTabs($$('.dash-seg [role="tab"]', root))($('.dash-seg [role="tab"]', root));
+
+    /* ----- header + core ----- */
     function renderHeader() {
       const name = stored('full_name') || stored('username') || 'RZGS-PRO member';
       const email = profile.email || user.email || '';
       $('[data-dash-name]').textContent = name.trim().split(/\s+/)[0];
       $('[data-dash-avatar]').textContent = name.trim().charAt(0).toUpperCase() || 'R';
-      $('[data-dash-email]').textContent = email;
-      $('[data-dash-email-row]').textContent = email;
+      setAll('[data-dash-email]', email);
     }
 
+    function renderInfo() {
+      const joined = profile.created_at || user.created_at;
+      const confirmed = profile.email_confirmed_at || user.email_confirmed_at;
+      setAll('[data-info="joined"]', joined ? longDate(joined) : '-');
+      setAll('[data-info="email-status"]', confirmed ? 'Confirmed' : 'Not confirmed');
+      setAll('[data-info="mt5"]', stored('mt5_account') || 'Not set');
+      setAll('[data-info="broker"]', stored('broker') || 'Not set');
+    }
+
+    function renderPlan() {
+      const state = planState(profile);
+      setAll('[data-plan-name]', state.name);
+      setAll('[data-plan-status]', state.status);
+      setAll('[data-plan-until]', state.until);
+      setAll('[data-plan-note]', state.note);
+      $('[data-plan-pill]', root).dataset.tone = state.tone;
+
+      const ring = $('[data-ring]', root);
+      ring.dataset.tone = state.tone;
+      ring.setAttribute('aria-label', state.plan ? `${state.name}: ${state.big} ${state.sub.toLowerCase()}` : 'No plan yet');
+      $('[data-ring-arc]', ring).setAttribute('stroke-dasharray', `${state.arc} 100`);
+      $('[data-ring-big]', ring).textContent = state.big;
+      $('[data-ring-sub]', ring).textContent = state.sub;
+
+      // One solid button per screen: the control app while the plan is healthy, otherwise the plan step.
+      const action = $('[data-plan-action]', root);
+      const healthy = state.tone === 'good';
+      [[action, !healthy], [$('[data-open-app]', root), healthy]].forEach(([button, main]) => {
+        button.classList.toggle('btn-primary', main);
+        button.classList.toggle('btn-ghost', !main);
+      });
+      if (!state.plan) {
+        action.textContent = 'Request your free trial';
+        action.href = root.dataset.linkTrial;
+      } else if (state.plan === 'trial') {
+        action.textContent = 'Choose a plan';
+        action.href = '#plan';
+      } else {
+        action.textContent = 'Renew plan';
+        action.href = root.dataset[state.plan === 'elite' ? 'linkElite' : 'linkDiamond'];
+      }
+      // on the Plan view, the current plan's button is shown "on"
+      $$('[data-plan-link]', root).forEach((button) => {
+        const on = button.dataset.planLink === state.plan;
+        button.classList.toggle('is-on', on);
+        if (on) button.setAttribute('aria-current', 'true');
+        else button.removeAttribute('aria-current');
+      });
+    }
+
+    /* ----- log: real moments from this account, newest first ----- */
+    function renderLog() {
+      const state = planState(profile);
+      const events = [
+        [profile.created_at || user.created_at, 'account', 'Account created'],
+        [profile.accepted_terms_at, 'account', 'Terms and conditions accepted'],
+        [profile.email_confirmed_at || user.email_confirmed_at, 'account', 'Email address confirmed'],
+        [profile.last_sign_in_at || user.last_sign_in_at, 'security', 'Signed in'],
+        [state.plan && profile.plan_expires_at, 'plan', state.plan && `${state.name} plan ${new Date(profile.plan_expires_at) > new Date() ? 'ends' : 'ended'}`],
+      ].filter(([when]) => when).sort((a, b) => new Date(b[0]) - new Date(a[0]));
+
+      const list = $('[data-log]', root);
+      list.replaceChildren(...events.map(([when, kind, text]) => {
+        const row = document.createElement('div');
+        row.className = 'dash-ev';
+        const time = document.createElement('time');
+        time.dateTime = new Date(when).toISOString();
+        time.textContent = shortDateTime(when);
+        const label = document.createElement('p');
+        label.textContent = text;
+        const tag = document.createElement('span');
+        tag.className = 'k';
+        tag.dataset.kind = kind;
+        tag.textContent = kind;
+        row.append(time, label, tag);
+        return row;
+      }));
+      $('[data-log-empty]', root).hidden = events.length > 0;
+    }
+
+    /* ----- forms ----- */
     // Each form saves a few fields of the person's own profile, then says so next to its button.
     function wireSaveForm(form, readFields, successText) {
       wireValidation(form);
@@ -565,6 +686,7 @@
           if (data && data.user) user = data.user;
           Object.assign(profile, fields);
           renderHeader();
+          renderInfo();
         }
         formMessage(form, successText, 'success');
       });
@@ -590,7 +712,9 @@
     tradingForm.elements.broker.value = stored('broker');
 
     renderHeader();
-    renderPlan($('[data-plan-card]'), profile);
+    renderInfo();
+    renderPlan();
+    renderLog();
     root.setAttribute('aria-busy', 'false');
 
     wireSaveForm(profileForm, () => ({
@@ -608,11 +732,22 @@
 
     wireSaveForm(passwordForm, () => ({ password: passwordForm.elements.new_password.value }), 'Password updated.');
 
-    const signOut = $('[data-sign-out]');
-    signOut.addEventListener('click', async () => {
-      signOut.disabled = true;
+    /* ----- session ----- */
+    $$('[data-sign-out]').forEach((button) => button.addEventListener('click', async () => {
+      button.disabled = true;
       await db.auth.signOut();
       location.replace('login.html?signedout=1');
+    }));
+
+    const others = $('[data-sign-out-others]');
+    others.addEventListener('click', async () => {
+      setBusy(others, true);
+      const { error } = await db.auth.signOut({ scope: 'others' });
+      setBusy(others, false);
+      const line = $('[data-session-msg]');
+      line.textContent = error ? friendlyError(error) : 'Your other devices are signed out.';
+      line.dataset.tone = error ? 'error' : 'success';
+      line.hidden = false;
     });
 
     // signed out in another tab

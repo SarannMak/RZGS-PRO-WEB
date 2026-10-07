@@ -11,7 +11,6 @@
 .auth-msg[hidden],
 .auth-step[hidden],
 .field-error[hidden],
-.account-rows > div[hidden],
 [data-resend][hidden] {
   display: none;
 }
@@ -464,318 +463,623 @@ a.trial-banner > .icon {
   }
 }
 
-/* ---------- account ---------- */
-.account-card {
-  width: min(100%, 600px);
+/* ---------- dashboard: an app-style console (menu + one view at a time, like app.html) ---------- */
+.form-msg[hidden],
+.dash-view[hidden],
+.dash-tool[hidden],
+.dash-empty[hidden] {
+  display: none;
+}
+
+/* the dashboard is its own app screen: no marketing button, no site footer */
+body[data-auth-page="dashboard"] .header-cta,
+body[data-auth-page="dashboard"] .nav-menu-cta,
+body[data-auth-page="dashboard"] .site-footer {
+  display: none;
+}
+/* views differ in height: keep the scrollbar's space so the page doesn't jump sideways */
+html:has(body[data-auth-page="dashboard"]) {
+  scrollbar-gutter: stable;
+}
+/* room for the fixed menu at the bottom of the screen */
+body[data-auth-page="dashboard"] {
+  padding-bottom: calc(132px + env(safe-area-inset-bottom, 0px));
+}
+
+.dash-shell {
+  max-width: 980px;
   margin: 0 auto;
-  padding: clamp(24px, 5vw, 44px);
-  border-radius: var(--radius-xl);
 }
-.account-card .trial-banner {
-  margin-top: 28px;
+
+/* small capital label, like the app's .cap */
+.cap {
+  color: var(--text-subtle);
+  font: 500 10px/1.3 var(--font-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
-.account-head {
+
+/* ----- header strip ----- */
+.dash-head {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 14px;
+}
+.dash-head-text {
+  flex: 1;
+  min-width: 0;
 }
 .avatar-lg {
   display: grid;
   place-items: center;
   flex: none;
-  width: 72px;
-  height: 72px;
-  overflow: hidden;
-  border-radius: 50%;
-  background: var(--grad);
-  color: var(--on-accent);
-  font: 700 28px/1 var(--font-display);
-  box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.12);
-}
-.avatar-lg img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.account-name {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: clamp(22px, 3.4vw, 28px);
-  line-height: 1.15;
-  letter-spacing: 0.01em;
-  overflow-wrap: anywhere;
-}
-.account-sub {
-  margin: 6px 0 0;
-  color: var(--text-muted);
-  overflow-wrap: anywhere;
-}
-.account-rows {
-  margin: 24px 0 0;
-}
-.account-rows > div {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 14px 0;
-  border-top: 1px solid var(--border);
-  font-size: 15px;
-}
-.account-rows dt {
-  color: var(--text-muted);
-}
-.account-rows dd {
-  margin: 0;
-  font-weight: 500;
-  text-align: right;
-  overflow-wrap: anywhere;
-}
-.account-actions {
-  display: grid;
-  gap: 12px;
-  margin-top: 16px;
-}
-.account-note {
-  margin: 16px 0 0;
-  color: var(--text-subtle);
-  font-size: 13px;
-}
-@media (min-width: 520px) {
-  .account-actions {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-/* loading placeholders while the session is checked */
-.account-card[aria-busy="true"] .account-name,
-.account-card[aria-busy="true"] .account-sub,
-.account-card[aria-busy="true"] .account-rows dd {
+  width: 52px;
+  height: 52px;
+  border: 1px solid var(--frame);
   border-radius: 2px;
-  background: rgba(255, 255, 255, 0.08);
-  color: transparent;
-  animation: blink 1.4s ease-in-out infinite;
-}
-
-/* ---------- dashboard ---------- */
-.form-msg[hidden],
-.status-chip[hidden],
-[data-plan-secondary][hidden] {
-  display: none;
-}
-.dash-head,
-.dash-body {
-  max-width: 1040px;
-  margin: 0 auto;
-}
-.dash-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 18px;
-}
-.dash-head-text {
-  flex: 1 1 240px;
-  min-width: 0;
+  background: var(--chip);
+  color: var(--cyan);
+  font: 700 22px/1 var(--font-display);
 }
 .dash-title {
-  margin: 10px 0 0;
+  margin: 6px 0 0;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: clamp(26px, 4.4vw, 40px);
+  font-size: clamp(20px, 3.6vw, 28px);
   line-height: 1.1;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.02em;
   overflow-wrap: anywhere;
 }
 .dash-sub {
-  margin: 6px 0 0;
-  color: var(--text-muted);
+  margin: 4px 0 0;
+  color: var(--text-subtle);
+  font: 500 12px/1.4 var(--font-mono);
+  letter-spacing: 0.04em;
   overflow-wrap: anywhere;
 }
 
-.dash-cards {
+/* ----- layout: menu + deck of panels ----- */
+.dash-layout {
   display: grid;
   gap: 16px;
-  margin-top: 28px;
+  margin-top: 20px;
 }
-.dash-card {
+.dash-deck {
+  min-width: 0;
+}
+.dash-view,
+.dash-tool {
+  display: grid;
+  gap: 12px;
+}
+[data-dash][aria-busy="true"] .dash-deck {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* ----- menu: a bottom dock on phones, exactly like the app ----- */
+.dash-side {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column-reverse;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: var(--bg);
+}
+.dash-dock {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+.dash-dock button {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 24px;
-  border-radius: var(--radius-lg);
+  align-items: center;
+  gap: 4px;
+  min-height: 58px;
+  margin-top: -1px;
+  padding: 9px 0 10px;
+  border: 0;
+  border-top: 2px solid transparent;
+  background: none;
+  color: var(--text-subtle);
+  font: 500 10px/1 var(--font-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
 }
-.dash-card--plan {
-  border-color: rgba(34, 211, 238, 0.35);
-  background:
-    radial-gradient(120% 80% at 0% 0%, rgba(34, 211, 238, 0.12), transparent 60%),
-    var(--surface);
+.dash-dock button[aria-selected="true"] {
+  border-top-color: var(--cyan);
+  color: var(--cyan);
 }
-.dash-card-label {
-  margin: 10px 0 0;
-  color: var(--text-muted);
-  font: 500 12px/1.2 var(--font-mono);
-  letter-spacing: 0.1em;
+.dash-dock button:focus-visible {
+  outline-offset: -3px;
+}
+.dash-dock svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* action bar: its own row above the dock, so it never covers content */
+.dash-actbar {
+  padding: 10px var(--gutter);
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+
+@media (max-width: 1023.98px) {
+  /* a field reached with the keyboard must not end up under the fixed menu */
+  html:has(body[data-auth-page="dashboard"]) {
+    scroll-padding-bottom: calc(140px + env(safe-area-inset-bottom, 0px));
+  }
+}
+/* a phone held sideways: no room for a fixed menu, so it sits above the panels */
+@media (max-width: 1023.98px) and (max-height: 520px) {
+  body[data-auth-page="dashboard"] {
+    padding-bottom: 0;
+  }
+  .dash-side {
+    position: static;
+    flex-direction: column;
+    padding-bottom: 0;
+  }
+  .dash-dock {
+    border: 1px solid var(--border);
+  }
+  .dash-actbar {
+    padding-inline: 0;
+    border-top: 0;
+  }
+}
+
+/* wide screens: the same menu becomes a side column */
+@media (min-width: 1024px) {
+  body[data-auth-page="dashboard"] {
+    padding-bottom: 0;
+  }
+  .dash-layout {
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+  }
+  .dash-side {
+    position: sticky;
+    top: calc(var(--header-h) + 24px);
+    z-index: auto;
+    flex-direction: column;
+    gap: 12px;
+    padding-bottom: 0;
+    background: none;
+  }
+  .dash-dock {
+    grid-template-columns: 1fr;
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .dash-dock button {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 12px;
+    min-height: 50px;
+    margin-top: 0;
+    padding: 0 16px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+  }
+  .dash-dock button:hover {
+    background: var(--surface-2);
+    color: var(--text-muted);
+  }
+  .dash-dock button[aria-selected="true"] {
+    border-top-color: var(--border);
+    background: var(--chip);
+    color: var(--cyan);
+    box-shadow: inset 2px 0 0 var(--cyan);
+  }
+  .dash-dock button:first-child {
+    border-top: 0;
+  }
+  .dash-actbar {
+    padding: 0;
+    border: 0;
+    background: none;
+  }
+}
+
+/* ----- panels ----- */
+.dash-panel {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+.dash-panel > h2 {
+  margin: 0 0 12px;
+  color: var(--text-subtle);
+  font: 500 10px/1.2 var(--font-mono);
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
-.dash-card-value {
+.dash-hint {
+  margin: 10px 0 0;
+  color: var(--text-subtle);
+  font-size: 13px;
+}
+.dash-hint:first-of-type {
+  margin-top: 0;
+}
+.dash-row {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
   gap: 10px;
-  margin: 0;
+}
+.dash-row > .btn {
+  flex: 1 1 0;
+  min-width: 0;
+  padding-inline: 10px;
+}
+/* long labels: side by side when there is room, one under the other on a phone */
+.dash-row--wide > .btn {
+  flex: 1 1 220px;
+}
+.dash-row + .dash-hint,
+.dash-line + .dash-hint,
+.dash-hint + .dash-row,
+.dash-line + .dash-row,
+.dash-row + .form-msg {
+  margin-top: 12px;
+}
+/* "on" = this is the current state: solid fill, dark text (as in the app) */
+.btn.is-on {
+  border-color: var(--cyan);
+  background: var(--cyan);
+  color: var(--bg);
+}
+.btn-danger {
+  border-color: #aa3241;
+  background: #3a1422;
+  color: #ff8a8a;
+}
+.btn-danger:hover {
+  border-color: var(--bad);
+}
+/* a form's own button: the app's cyan-on-chip "primary" */
+.btn-chip {
+  border-color: var(--frame);
+  background: var(--chip);
+  color: var(--cyan);
+}
+.btn-chip:hover {
+  border-color: var(--cyan);
+}
+
+/* label + value pairs */
+.dash-kv {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.dash-kv b,
+.dash-line b {
+  color: var(--text);
+  font: 600 14px/1.3 var(--font-display);
+  letter-spacing: 0.02em;
+  overflow-wrap: anywhere;
+}
+.dash-grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 12px;
+}
+.dash-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-block: 9px;
+  border-top: 1px solid var(--border);
+}
+.dash-line:first-of-type {
+  padding-top: 0;
+  border-top: 0;
+}
+.dash-line:last-of-type {
+  padding-bottom: 0;
+}
+.dash-line b {
+  text-align: right;
+}
+/* rows that open another page */
+.dash-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 15px;
+  text-decoration: none;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.dash-link:first-of-type {
+  border-top: 0;
+}
+.dash-link .icon {
+  width: 16px;
+  height: 16px;
+  color: var(--text-subtle);
+  transition: transform var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.dash-link:hover,
+.dash-link:hover .icon {
+  color: var(--cyan);
+}
+.dash-link:hover .icon {
+  transform: translateX(2px);
+}
+
+/* ----- core: framed status panel with the ring ----- */
+.dash-core {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 22px 20px;
+  border: 1px solid var(--frame);
+  background: var(--surface);
+  box-shadow: 0 0 0 2px rgba(38, 150, 178, 0.16), 0 0 26px var(--glow);
+}
+.dash-core::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--bracket), var(--bracket)) top left / 13px 1px,
+    linear-gradient(var(--bracket), var(--bracket)) top left / 1px 13px,
+    linear-gradient(var(--bracket), var(--bracket)) top right / 13px 1px,
+    linear-gradient(var(--bracket), var(--bracket)) top right / 1px 13px,
+    linear-gradient(var(--bracket), var(--bracket)) bottom left / 13px 1px,
+    linear-gradient(var(--bracket), var(--bracket)) bottom left / 1px 13px,
+    linear-gradient(var(--bracket), var(--bracket)) bottom right / 13px 1px,
+    linear-gradient(var(--bracket), var(--bracket)) bottom right / 1px 13px;
+  background-repeat: no-repeat;
+}
+.dash-ring {
+  flex: none;
+  width: 118px;
+  height: 118px;
+}
+.dash-ring .ring-track {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 6;
+}
+.dash-ring .ring-arc {
+  fill: none;
+  stroke: var(--cyan);
+  stroke-width: 6;
+  transform: rotate(-90deg);
+  transform-origin: 60px 60px;
+  transition: stroke-dasharray 0.4s var(--ease-out), stroke 0.3s var(--ease-out);
+}
+.dash-ring .ring-dash {
+  fill: none;
+  stroke: var(--frame);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 6;
+  transform-origin: 60px 60px;
+  animation: spin 14s linear infinite;
+}
+.dash-ring[data-tone="warn"] .ring-arc {
+  stroke: var(--warn);
+}
+.dash-ring[data-tone="bad"] .ring-arc {
+  stroke: var(--bad);
+}
+.dash-ring[data-tone="off"] .ring-dash,
+.dash-ring[data-tone="bad"] .ring-dash {
+  stroke: var(--text-subtle);
+  animation-play-state: paused;
+}
+.dash-ring text {
+  fill: var(--text);
   font-family: var(--font-display);
+  text-anchor: middle;
+}
+.dash-ring .big {
+  font-size: 26px;
   font-weight: 700;
-  font-size: clamp(22px, 3vw, 28px);
-  line-height: 1.15;
-  letter-spacing: 0.01em;
 }
-.dash-card-note {
-  margin: 0;
-  color: var(--text-muted);
-  font-size: 14px;
+.dash-ring .sub {
+  fill: var(--text-subtle);
+  font: 500 7.5px var(--font-mono);
+  letter-spacing: 0.14em;
 }
-.dash-card-actions {
+.dash-core-info {
   display: flex;
-  flex-wrap: wrap;
+  flex: 1;
+  flex-direction: column;
   gap: 10px;
-  margin-top: auto;
-  padding-top: 12px;
+  min-width: 0;
 }
-.status-chip {
-  display: inline-flex;
+.dash-pill {
+  display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 10px;
-  border: 1px solid var(--border-strong);
-  border-radius: 2px;
-  color: var(--text-muted);
-  font: 600 11px/1 var(--font-mono);
+  gap: 8px;
+  color: var(--good);
+  font: 600 15px/1.2 var(--font-display);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
-.status-chip::before {
-  content: "";
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: currentColor;
+.dash-pill[data-tone="warn"] {
+  color: var(--warn);
 }
-.status-chip[data-tone="good"] {
-  border-color: rgba(34, 211, 238, 0.4);
-  background: rgba(34, 211, 238, 0.1);
-  color: var(--lime);
-}
-.status-chip[data-tone="warn"] {
-  border-color: rgba(255, 214, 0, 0.45);
-  background: rgba(255, 214, 0, 0.1);
-  color: var(--gold);
-}
-.status-chip[data-tone="bad"] {
-  border-color: rgba(255, 82, 82, 0.45);
-  background: rgba(255, 82, 82, 0.1);
+.dash-pill[data-tone="bad"] {
   color: #ff8a8a;
 }
+.dash-pill[data-tone="off"] {
+  color: var(--text-subtle);
+}
+.led {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 18%, transparent);
+}
+@media (max-width: 400px) {
+  .dash-core {
+    gap: 14px;
+    padding: 18px 14px;
+  }
+  .dash-ring {
+    width: 98px;
+    height: 98px;
+  }
+}
 
-.dash-panels,
-.dash-col {
+/* ----- tools: segmented switch, like the app's ----- */
+.dash-seg {
   display: grid;
-  gap: 16px;
-  align-items: start;
+  grid-template-columns: repeat(3, 1fr);
+  border: 1px solid var(--border);
+  background: var(--surface);
 }
-.dash-panels {
-  margin-top: 16px;
+.dash-seg button {
+  min-height: 44px;
+  padding: 11px 2px;
+  border: 0;
+  background: none;
+  color: var(--text-subtle);
+  font: 500 10px/1 var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  touch-action: manipulation;
 }
-.dash-panel {
-  padding: clamp(22px, 3vw, 32px);
-  border-radius: var(--radius-lg);
+.dash-seg button[aria-selected="true"] {
+  background: var(--chip);
+  color: var(--cyan);
+  box-shadow: inset 0 -2px 0 var(--cyan);
 }
-.dash-panel h2 {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 22px;
-  line-height: 1.2;
-  letter-spacing: 0.01em;
+.dash-seg button:focus-visible {
+  outline-offset: -3px;
 }
-.dash-panel-lead {
-  margin: 8px 0 0;
-  color: var(--text-muted);
-  font-size: 15px;
+
+/* ----- forms inside panels ----- */
+.dash-panel form .field {
+  margin-top: 14px;
 }
-.dash-panel .form-actions {
-  align-items: center;
-  flex-wrap: wrap;
-  margin-top: 22px;
-}
-.dash-panel .form-actions .btn {
-  flex: 0 0 auto;
+.dash-panel form > .field:first-child,
+.dash-panel form > .field-grid:first-child > .field:first-child {
+  margin-top: 0;
 }
 .field-grid {
   display: grid;
   gap: 0 16px;
 }
-.readonly-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  margin: 22px 0 0;
-  padding: 14px 0 0;
-  border-top: 1px solid var(--border);
-  font-size: 15px;
+@media (min-width: 560px) {
+  .field-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .dash-panel form > .field-grid:first-child > .field {
+    margin-top: 0;
+  }
 }
-.readonly-row dt {
-  color: var(--text-muted);
+.dash-hint + form {
+  margin-top: 14px;
 }
-.readonly-row dd {
-  margin: 0;
-  font-weight: 500;
-  text-align: right;
-  overflow-wrap: anywhere;
+.dash-panel .form-actions {
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+.dash-panel .form-actions .btn {
+  flex: 0 0 auto;
 }
 .form-msg {
   margin: 0;
   font-size: 14px;
 }
 .form-msg[data-tone="success"] {
-  color: var(--mint);
+  color: var(--good);
 }
 .form-msg[data-tone="error"] {
   color: #ff8a8a;
 }
 
-@media (min-width: 560px) {
-  .field-grid {
-    grid-template-columns: 1fr 1fr;
-  }
+/* ----- log ----- */
+/* what happened + its kind on the first line, the time under it */
+.dash-ev {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 3px 12px;
+  align-items: baseline;
+  padding-block: 10px;
+  border-top: 1px solid var(--border);
 }
-@media (min-width: 760px) {
-  .dash-cards {
-    grid-template-columns: 1.3fr 1fr 1fr;
-  }
+.dash-ev:first-child {
+  padding-top: 0;
+  border-top: 0;
 }
-@media (min-width: 960px) {
-  .dash-panels {
-    grid-template-columns: 1.15fr 1fr;
-  }
+.dash-ev:last-child {
+  padding-bottom: 0;
+}
+.dash-ev p {
+  grid-area: 1 / 1;
+  margin: 0;
+  color: var(--text);
+  font-size: 14px;
+}
+.dash-ev .k {
+  grid-area: 1 / 2;
+  color: var(--text-subtle);
+  font: 500 9.5px/1.2 var(--font-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.dash-ev time {
+  grid-area: 2 / 1 / auto / -1;
+  color: var(--text-subtle);
+  font: 400 11px/1.4 var(--font-mono);
+}
+.dash-ev .k[data-kind="plan"] {
+  color: var(--cyan);
+}
+.dash-ev .k[data-kind="account"] {
+  color: var(--good);
+}
+.dash-ev .k[data-kind="security"] {
+  color: var(--warn);
+}
+.dash-empty {
+  margin: 0;
+  color: var(--text-subtle);
+  font-size: 13px;
 }
 
-/* loading placeholders while the session is checked */
-[data-dash][aria-busy="true"] [data-dash-name],
-[data-dash][aria-busy="true"] .dash-sub,
-[data-dash][aria-busy="true"] [data-plan-name],
-[data-dash][aria-busy="true"] [data-dash-email-row] {
-  border-radius: 2px;
-  background: rgba(255, 255, 255, 0.08);
-  color: transparent;
-  animation: blink 1.4s ease-in-out infinite;
-}
-
-/* a signed-in client doesn't need the "Start for $0" button */
-body[data-auth-page="dashboard"] .header-cta,
-body[data-auth-page="dashboard"] .nav-menu-cta {
-  display: none;
+@media (prefers-reduced-motion: reduce) {
+  .dash-ring .ring-dash {
+    animation: none;
+  }
+  .dash-ring .ring-arc {
+    transition: none;
+  }
 }
 
 /* ==========================================================================
@@ -785,14 +1089,12 @@ body[data-auth-page="dashboard"] .nav-menu-cta {
    ========================================================================== */
 
 /* framed cards with corner brackets */
-.auth-card,
-.dash-card--plan {
+.auth-card {
   border-color: var(--frame);
   background: var(--surface);
   box-shadow: 0 0 0 2px rgba(38, 150, 178, 0.16), 0 0 26px var(--glow);
 }
-.auth-card::before,
-.dash-card--plan::before {
+.auth-card::before {
   content: "";
   position: absolute;
   inset: 8px;
@@ -857,8 +1159,7 @@ select.input option {
   border-color: #00aa69;
   background: #0a3828;
 }
-.auth-msg[data-tone="success"] .icon,
-.form-msg[data-tone="success"] {
+.auth-msg[data-tone="success"] .icon {
   color: var(--good);
 }
 
@@ -896,51 +1197,9 @@ a.trial-banner:hover {
   }
 }
 
-/* dashboard */
-.avatar-lg {
-  border: 1px solid var(--frame);
-  border-radius: 2px;
-  background: var(--chip);
-  color: var(--cyan);
-  box-shadow: none;
-}
-.status-chip[data-tone="good"] {
-  border-color: #00aa69;
-  background: #0a3828;
-  color: var(--good);
-}
-.status-chip[data-tone="warn"] {
-  border-color: #b98a00;
-  background: #3a2a06;
-  color: var(--warn);
-}
-.status-chip[data-tone="bad"] {
-  border-color: #aa3241;
-  background: #3a1422;
-  color: #ff8a8a;
-}
-.dash-panel h2 {
-  font-size: 20px;
-}
 
 /* the busy spinner sits on a cyan button */
 .btn.is-busy::before {
   border-color: rgba(10, 12, 26, 0.25);
   border-top-color: currentColor;
-}
-
-/* data rows on the dashboard: capital mono label, Oxanium value */
-.readonly-row dt,
-.account-rows dt {
-  color: var(--text-subtle);
-  font: 500 11px/1.5 var(--font-mono);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-.readonly-row dd,
-.account-rows dd {
-  color: var(--text);
-  font-family: var(--font-display);
-  font-weight: 600;
-  letter-spacing: 0.02em;
 }
