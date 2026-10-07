@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Reset your password — RZGS-PRO</title>
-  <meta name="description" content="Reset the password of your RZGS-PRO account.">
+  <title>Dashboard — RZGS-PRO</title>
+  <meta name="description" content="Your RZGS-PRO dashboard: plan, profile and account settings.">
   <meta name="robots" content="noindex">
   <meta name="theme-color" content="#0a0c1a">
   <meta name="color-scheme" content="dark">
 
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Reset your password — RZGS-PRO">
-  <meta property="og:description" content="Reset the password of your RZGS-PRO account.">
+  <meta property="og:title" content="Dashboard — RZGS-PRO">
+  <meta property="og:description" content="Your RZGS-PRO dashboard: plan, profile and account settings.">
 
   <link rel="icon" type="image/png" href="assets/logo-192.png">
   <link rel="apple-touch-icon" href="assets/logo-192.png">
@@ -27,7 +27,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
   <script src="auth.js?v=3" defer></script>
 </head>
-<body data-auth-page="reset">
+<body data-auth-page="dashboard">
   <a class="skip-link" href="#main">Skip to content</a>
 
   <!-- Icon sprite (Lucide-style, 24px grid, stroke icons) -->
@@ -87,7 +87,7 @@
           <li><a class="nav-link" href="how-to-buy.html">How to Buy</a></li>
           <li><a class="nav-link" href="license.html">License</a></li>
           <li><a class="nav-link" href="contact.html">Contact</a></li>
-          <li><a class="nav-link" href="login.html" aria-current="page">Log in</a></li>
+          <li><a class="nav-link" href="dashboard.html" aria-current="page">Dashboard</a></li>
         </ul>
         <a class="btn btn-primary btn-block nav-menu-cta" href="signup.html">Start now for $0</a>
       </nav>
@@ -105,70 +105,181 @@
   <main id="main">
     <!-- icons used only by the account pages -->
     <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-      <symbol id="i-gift" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/></symbol>
       <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.06 12.35a1 1 0 0 1 0-.7 10.75 10.75 0 0 1 19.88 0 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-19.88 0"/><circle cx="12" cy="12" r="3"/></symbol>
       <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M10.73 5.08a10.74 10.74 0 0 1 11.2 6.57 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-1.44 2.49M14.08 14.16a3 3 0 0 1-4.24-4.24"/><path d="M17.48 17.5a10.75 10.75 0 0 1-15.42-5.15 1 1 0 0 1 0-.7 10.75 10.75 0 0 1 4.45-5.14M2 2l20 20"/></symbol>
     </svg>
 
     <section class="auth-section" id="top" aria-labelledby="page-title">
-      <div class="container">
-        <div class="card auth-card auth-card--narrow">
-          <p class="kicker">Account help</p>
-          <h1 class="auth-title" id="page-title">Reset your password</h1>
+      <div class="container" data-dash aria-busy="true">
+        <header class="dash-head">
+          <span class="avatar-lg" data-dash-avatar aria-hidden="true"></span>
+          <div class="dash-head-text">
+            <p class="kicker">Dashboard</p>
+            <h1 class="dash-title" id="page-title">Welcome, <span data-dash-name>there</span></h1>
+            <p class="dash-sub" data-dash-email>loading</p>
+          </div>
+          <button class="btn btn-ghost btn-sm" type="button" data-sign-out>Sign out</button>
+        </header>
 
+        <div class="dash-body">
           <p class="auth-msg" data-auth-msg role="alert" hidden>
             <svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>
             <span data-auth-msg-text></span>
           </p>
-          <noscript><p class="auth-msg" data-tone="error">Please turn on JavaScript in your browser to reset your password.</p></noscript>
+          <noscript><p class="auth-msg" data-tone="error">Please turn on JavaScript in your browser to use your dashboard.</p></noscript>
 
-          <div data-reset-request>
-            <p class="auth-lead">Enter your account email and we'll send you a link to choose a new password.</p>
-            <form novalidate>
-            <div class="field">
-              <label for="reset-email">Email <span class="req" aria-hidden="true">*</span></label>
-              <input class="input" id="reset-email" name="email" type="email" autocomplete="email" required aria-describedby="reset-email-error" inputmode="email" autocapitalize="none" spellcheck="false">
-              <p class="field-error" id="reset-email-error" hidden></p>
-            </div>
-              <div class="form-actions">
-                <button class="btn btn-primary btn-lg" type="submit" data-submit>Send reset link</button>
+          <!-- overview -->
+          <div class="dash-cards">
+            <article class="card dash-card dash-card--plan" data-plan-card data-link-elite="https://t.me/m/GbS3QIWgYzY1" data-link-diamond="https://t.me/m/mXXD-IlgNThl">
+              <span class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-gem"/></svg></span>
+              <h2 class="dash-card-label">Your plan</h2>
+              <p class="dash-card-value"><span data-plan-name>Get started</span><span class="status-chip" data-plan-status hidden></span></p>
+              <p class="dash-card-note" data-plan-note>Request your free 7-day Pro trial, or choose a plan. A plan you buy shows here once we activate it.</p>
+              <div class="dash-card-actions">
+                <a class="btn btn-primary btn-sm" data-plan-action href="https://t.me/m/kuh-_ELkNmQ1">Request your free trial</a>
+                <a class="btn btn-ghost btn-sm" data-plan-secondary href="index.html#pricing">See plans</a>
               </div>
-            </form>
+            </article>
+
+            <article class="card dash-card">
+              <span class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-bot"/></svg></span>
+              <h2 class="dash-card-label">Control app</h2>
+              <p class="dash-card-note">Activate, pause and watch your bot. It has its own login: your MT5 account number and App Password.</p>
+              <div class="dash-card-actions">
+                <a class="btn btn-ghost btn-sm" href="app.html">Open control app</a>
+              </div>
+            </article>
+
+            <article class="card dash-card">
+              <span class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-send"/></svg></span>
+              <h2 class="dash-card-label">Need help?</h2>
+              <p class="dash-card-note">Setup help and support on Telegram.</p>
+              <div class="dash-card-actions">
+                <a class="btn btn-ghost btn-sm" href="https://t.me/sarannsadboi">Message us</a>
+              </div>
+            </article>
           </div>
 
-          <div data-reset-update hidden>
-            <p class="auth-lead">Choose a new password for your account.</p>
-            <form novalidate>
-            <div class="field">
-              <label for="reset-password">New password <span class="req" aria-hidden="true">*</span></label>
-              <div class="input-wrap input-wrap--action">
-                <input class="input" id="reset-password" name="new_password" type="password" autocomplete="new-password" required aria-describedby="reset-password-error reset-password-hint">
-                <button class="toggle-pw" type="button" data-toggle-password aria-controls="reset-password" aria-pressed="false" aria-label="Show password">
-                  <svg class="icon icon-show" aria-hidden="true"><use href="#i-eye"/></svg>
-                  <svg class="icon icon-hide" aria-hidden="true"><use href="#i-eye-off"/></svg>
-                </button>
+          <div class="dash-panels">
+            <!-- profile -->
+            <section class="card dash-panel" aria-labelledby="profile-title">
+              <h2 id="profile-title">Profile</h2>
+              <form data-profile-form novalidate>
+                <div class="field-grid">
+              <div class="field">
+                <label for="dash-name">Full name <span class="req" aria-hidden="true">*</span></label>
+                <input class="input" id="dash-name" name="full_name" type="text" autocomplete="name" required aria-describedby="dash-name-error">
+                <p class="field-error" id="dash-name-error" hidden></p>
               </div>
-              <p class="hint" id="reset-password-hint">At least 8 characters.</p>
-              <p class="field-error" id="reset-password-error" hidden></p>
-            </div>
-            <div class="field">
-              <label for="reset-confirm">Confirm new password <span class="req" aria-hidden="true">*</span></label>
-              <div class="input-wrap input-wrap--action">
-                <input class="input" id="reset-confirm" name="confirm_password" type="password" autocomplete="new-password" required aria-describedby="reset-confirm-error">
-                <button class="toggle-pw" type="button" data-toggle-password aria-controls="reset-confirm" aria-pressed="false" aria-label="Show password">
-                  <svg class="icon icon-show" aria-hidden="true"><use href="#i-eye"/></svg>
-                  <svg class="icon icon-hide" aria-hidden="true"><use href="#i-eye-off"/></svg>
-                </button>
+              <div class="field">
+                <label for="dash-username">Username <span class="req" aria-hidden="true">*</span></label>
+                <input class="input" id="dash-username" name="username" type="text" autocomplete="username" required aria-describedby="dash-username-error" autocapitalize="none" spellcheck="false">
+                <p class="field-error" id="dash-username-error" hidden></p>
               </div>
-              <p class="field-error" id="reset-confirm-error" hidden></p>
-            </div>
+                </div>
+              <div class="field">
+                <label for="dash-country">Country <span class="req" aria-hidden="true">*</span></label>
+                <select class="input" id="dash-country" name="country" autocomplete="country-name" required aria-describedby="dash-country-error">
+                  <option value="">Choose your country</option>
+                  <option>Cambodia</option>
+                  <option>Thailand</option>
+                  <option>Vietnam</option>
+                  <option>Indonesia</option>
+                  <option>Malaysia</option>
+                  <option>India</option>
+                  <option>Türkiye</option>
+                  <option>Brazil</option>
+                  <option>United Kingdom</option>
+                  <option>United States</option>
+                  <option>Other</option>
+                </select>
+                <p class="field-error" id="dash-country-error" hidden></p>
+              </div>
+                <div class="field-grid">
+              <div class="field">
+                <label for="dash-phone">Phone number <span class="opt">(optional)</span></label>
+                <input class="input" id="dash-phone" name="phone" type="tel" autocomplete="tel" aria-describedby="dash-phone-error" inputmode="tel">
+                <p class="field-error" id="dash-phone-error" hidden></p>
+              </div>
+              <div class="field">
+                <label for="dash-telegram">Telegram <span class="opt">(optional)</span></label>
+                <div class="input-wrap input-wrap--prefix">
+                  <span class="input-prefix" aria-hidden="true">@</span>
+                  <input class="input" id="dash-telegram" name="telegram_username" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="dash-telegram-error">
+                </div>
+                <p class="field-error" id="dash-telegram-error" hidden></p>
+              </div>
+                </div>
+                <dl class="readonly-row">
+                  <dt>Email</dt>
+                  <dd data-dash-email-row>loading</dd>
+                </dl>
+                <p class="hint">To change your email address, <a class="auth-link" href="contact.html">contact us</a>.</p>
               <div class="form-actions">
-                <button class="btn btn-primary btn-lg" type="submit" data-submit>Save new password</button>
+                <button class="btn btn-primary" type="submit" data-submit>Save changes</button>
+                <p class="form-msg" data-form-msg role="status" hidden></p>
               </div>
-            </form>
-          </div>
+              </form>
+            </section>
 
-          <p class="auth-alt"><a href="login.html">Back to log in</a></p>
+            <div class="dash-col">
+              <!-- trading account -->
+              <section class="card dash-panel" aria-labelledby="trading-title">
+                <h2 id="trading-title">Trading account</h2>
+                <p class="dash-panel-lead">We use these details to set up your license.</p>
+                <form data-trading-form novalidate>
+              <div class="field">
+                <label for="dash-mt5">MT5 account number <span class="opt">(optional)</span></label>
+                <input class="input" id="dash-mt5" name="mt5_account" type="text" autocomplete="off" aria-describedby="dash-mt5-error" inputmode="numeric">
+                <p class="field-error" id="dash-mt5-error" hidden></p>
+              </div>
+              <div class="field">
+                <label for="dash-broker">Broker <span class="opt">(optional)</span></label>
+                <input class="input" id="dash-broker" name="broker" type="text" autocomplete="off" aria-describedby="dash-broker-error">
+                <p class="field-error" id="dash-broker-error" hidden></p>
+              </div>
+              <div class="form-actions">
+                <button class="btn btn-primary" type="submit" data-submit>Save</button>
+                <p class="form-msg" data-form-msg role="status" hidden></p>
+              </div>
+                </form>
+              </section>
+
+              <!-- password -->
+              <section class="card dash-panel" aria-labelledby="password-title">
+                <h2 id="password-title">Password</h2>
+                <form data-password-form novalidate>
+              <div class="field">
+                <label for="dash-password">New password <span class="req" aria-hidden="true">*</span></label>
+                <div class="input-wrap input-wrap--action">
+                  <input class="input" id="dash-password" name="new_password" type="password" autocomplete="new-password" required aria-describedby="dash-password-error dash-password-hint">
+                  <button class="toggle-pw" type="button" data-toggle-password aria-controls="dash-password" aria-pressed="false" aria-label="Show password">
+                    <svg class="icon icon-show" aria-hidden="true"><use href="#i-eye"/></svg>
+                    <svg class="icon icon-hide" aria-hidden="true"><use href="#i-eye-off"/></svg>
+                  </button>
+                </div>
+                <p class="hint" id="dash-password-hint">At least 8 characters.</p>
+                <p class="field-error" id="dash-password-error" hidden></p>
+              </div>
+              <div class="field">
+                <label for="dash-confirm">Confirm new password <span class="req" aria-hidden="true">*</span></label>
+                <div class="input-wrap input-wrap--action">
+                  <input class="input" id="dash-confirm" name="confirm_password" type="password" autocomplete="new-password" required aria-describedby="dash-confirm-error">
+                  <button class="toggle-pw" type="button" data-toggle-password aria-controls="dash-confirm" aria-pressed="false" aria-label="Show password">
+                    <svg class="icon icon-show" aria-hidden="true"><use href="#i-eye"/></svg>
+                    <svg class="icon icon-hide" aria-hidden="true"><use href="#i-eye-off"/></svg>
+                  </button>
+                </div>
+                <p class="field-error" id="dash-confirm-error" hidden></p>
+              </div>
+              <div class="form-actions">
+                <button class="btn btn-primary" type="submit" data-submit>Update password</button>
+                <p class="form-msg" data-form-msg role="status" hidden></p>
+              </div>
+                </form>
+              </section>
+            </div>
+          </div>
         </div>
       </div>
     </section>

@@ -37,7 +37,7 @@
   font-weight: 700;
   font-size: clamp(28px, 4.5vw, 36px);
   line-height: 1.1;
-  letter-spacing: -0.03em;
+  letter-spacing: 0.01em;
 }
 .auth-lead {
   margin: 12px 0 0;
@@ -78,7 +78,7 @@
   margin: 20px 0 0;
   padding: 12px 14px;
   border: 1px solid var(--border-strong);
-  border-radius: 12px;
+  border-radius: 2px;
   background: rgba(255, 255, 255, 0.04);
   color: var(--text);
   font-size: 14px;
@@ -91,15 +91,15 @@
   color: var(--text-muted);
 }
 .auth-msg[data-tone="error"] {
-  border-color: rgba(255, 95, 126, 0.45);
-  background: rgba(255, 95, 126, 0.08);
+  border-color: rgba(255, 82, 82, 0.45);
+  background: rgba(255, 82, 82, 0.08);
 }
 .auth-msg[data-tone="error"] .icon {
   color: var(--down);
 }
 .auth-msg[data-tone="success"] {
-  border-color: rgba(0, 239, 167, 0.4);
-  background: rgba(0, 239, 167, 0.07);
+  border-color: rgba(0, 210, 120, 0.4);
+  background: rgba(0, 210, 120, 0.07);
 }
 .auth-msg[data-tone="success"] .icon {
   color: var(--mint);
@@ -137,7 +137,7 @@
   min-height: 52px;
   padding: 0 16px;
   border: 1px solid var(--border-strong);
-  border-radius: 12px;
+  border-radius: 2px;
   background-color: rgba(0, 0, 0, 0.35);
   color: var(--text);
   font: 400 16px/1.4 var(--font-body);
@@ -152,13 +152,13 @@
 .input:focus-visible {
   outline: none;
   border-color: var(--lime);
-  box-shadow: 0 0 0 3px rgba(130, 255, 0, 0.22);
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.22);
 }
 .input[aria-invalid="true"] {
   border-color: var(--down);
 }
 .input[aria-invalid="true"]:focus-visible {
-  box-shadow: 0 0 0 3px rgba(255, 95, 126, 0.25);
+  box-shadow: 0 0 0 3px rgba(255, 82, 82, 0.25);
 }
 select.input {
   padding-right: 44px;
@@ -199,7 +199,7 @@ select.input option {
   width: 44px;
   height: 44px;
   border: 0;
-  border-radius: 10px;
+  border-radius: 2px;
   background: transparent;
   color: var(--text-muted);
   cursor: pointer;
@@ -222,7 +222,7 @@ select.input option {
 }
 .field-error {
   margin: 0;
-  color: #ff8fa5;
+  color: #ff8a8a;
   font-size: 13px;
 }
 .check-field {
@@ -278,7 +278,7 @@ select.input option {
   content: "";
   width: 18px;
   height: 18px;
-  border: 2px solid rgba(5, 17, 6, 0.25);
+  border: 2px solid rgba(10, 12, 26, 0.25);
   border-top-color: currentColor;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -305,7 +305,7 @@ select.input option {
 .steps-bar li::before {
   content: "";
   height: 4px;
-  border-radius: 999px;
+  border-radius: 2px;
   background: rgba(255, 255, 255, 0.1);
   transition: background-color var(--dur) var(--ease-out);
 }
@@ -350,9 +350,9 @@ select.input option {
   width: 64px;
   height: 64px;
   margin: 0 auto 4px;
-  border: 1px solid rgba(130, 255, 0, 0.3);
+  border: 1px solid rgba(34, 211, 238, 0.3);
   border-radius: 50%;
-  background: rgba(130, 255, 0, 0.1);
+  background: rgba(34, 211, 238, 0.1);
   color: var(--lime);
 }
 .auth-done-icon .icon {
@@ -364,7 +364,7 @@ select.input option {
   font-family: var(--font-display);
   font-weight: 700;
   font-size: clamp(24px, 4vw, 30px);
-  letter-spacing: -0.02em;
+  letter-spacing: 0.01em;
 }
 .auth-done h2:focus-visible {
   outline: none;
@@ -388,11 +388,11 @@ select.input option {
   align-items: center;
   gap: 14px;
   padding: 16px 18px;
-  border: 1px solid rgba(130, 255, 0, 0.3);
+  border: 1px solid rgba(34, 211, 238, 0.3);
   border-radius: var(--radius-lg);
   background:
-    radial-gradient(120% 140% at 0% 0%, rgba(130, 255, 0, 0.14), transparent 60%),
-    rgba(130, 255, 0, 0.04);
+    radial-gradient(120% 140% at 0% 0%, rgba(34, 211, 238, 0.14), transparent 60%),
+    rgba(34, 211, 238, 0.04);
   color: var(--text);
   text-decoration: none;
 }
@@ -402,7 +402,7 @@ select.input option {
   flex: none;
   width: 44px;
   height: 44px;
-  border-radius: 12px;
+  border-radius: 2px;
   background: var(--grad);
   color: var(--on-accent);
 }
@@ -426,7 +426,7 @@ a.trial-banner {
   transition: border-color var(--dur) var(--ease-out), transform var(--dur-fast) var(--ease-out);
 }
 a.trial-banner:hover {
-  border-color: rgba(130, 255, 0, 0.6);
+  border-color: rgba(34, 211, 238, 0.6);
 }
 a.trial-banner:active {
   transform: scale(0.99);
@@ -490,7 +490,7 @@ a.trial-banner > .icon {
   background: var(--grad);
   color: var(--on-accent);
   font: 700 28px/1 var(--font-display);
-  box-shadow: 0 0 0 4px rgba(130, 255, 0, 0.12);
+  box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.12);
 }
 .avatar-lg img {
   width: 100%;
@@ -503,7 +503,7 @@ a.trial-banner > .icon {
   font-weight: 700;
   font-size: clamp(22px, 3.4vw, 28px);
   line-height: 1.15;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.01em;
   overflow-wrap: anywhere;
 }
 .account-sub {
@@ -551,8 +551,396 @@ a.trial-banner > .icon {
 .account-card[aria-busy="true"] .account-name,
 .account-card[aria-busy="true"] .account-sub,
 .account-card[aria-busy="true"] .account-rows dd {
-  border-radius: 8px;
+  border-radius: 2px;
   background: rgba(255, 255, 255, 0.08);
   color: transparent;
   animation: blink 1.4s ease-in-out infinite;
+}
+
+/* ---------- dashboard ---------- */
+.form-msg[hidden],
+.status-chip[hidden],
+[data-plan-secondary][hidden] {
+  display: none;
+}
+.dash-head,
+.dash-body {
+  max-width: 1040px;
+  margin: 0 auto;
+}
+.dash-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px;
+}
+.dash-head-text {
+  flex: 1 1 240px;
+  min-width: 0;
+}
+.dash-title {
+  margin: 10px 0 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(26px, 4.4vw, 40px);
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  overflow-wrap: anywhere;
+}
+.dash-sub {
+  margin: 6px 0 0;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.dash-cards {
+  display: grid;
+  gap: 16px;
+  margin-top: 28px;
+}
+.dash-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 24px;
+  border-radius: var(--radius-lg);
+}
+.dash-card--plan {
+  border-color: rgba(34, 211, 238, 0.35);
+  background:
+    radial-gradient(120% 80% at 0% 0%, rgba(34, 211, 238, 0.12), transparent 60%),
+    var(--surface);
+}
+.dash-card-label {
+  margin: 10px 0 0;
+  color: var(--text-muted);
+  font: 500 12px/1.2 var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.dash-card-value {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(22px, 3vw, 28px);
+  line-height: 1.15;
+  letter-spacing: 0.01em;
+}
+.dash-card-note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+.dash-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 12px;
+}
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 2px;
+  color: var(--text-muted);
+  font: 600 11px/1 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.status-chip::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.status-chip[data-tone="good"] {
+  border-color: rgba(34, 211, 238, 0.4);
+  background: rgba(34, 211, 238, 0.1);
+  color: var(--lime);
+}
+.status-chip[data-tone="warn"] {
+  border-color: rgba(255, 214, 0, 0.45);
+  background: rgba(255, 214, 0, 0.1);
+  color: var(--gold);
+}
+.status-chip[data-tone="bad"] {
+  border-color: rgba(255, 82, 82, 0.45);
+  background: rgba(255, 82, 82, 0.1);
+  color: #ff8a8a;
+}
+
+.dash-panels,
+.dash-col {
+  display: grid;
+  gap: 16px;
+  align-items: start;
+}
+.dash-panels {
+  margin-top: 16px;
+}
+.dash-panel {
+  padding: clamp(22px, 3vw, 32px);
+  border-radius: var(--radius-lg);
+}
+.dash-panel h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 22px;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+}
+.dash-panel-lead {
+  margin: 8px 0 0;
+  color: var(--text-muted);
+  font-size: 15px;
+}
+.dash-panel .form-actions {
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 22px;
+}
+.dash-panel .form-actions .btn {
+  flex: 0 0 auto;
+}
+.field-grid {
+  display: grid;
+  gap: 0 16px;
+}
+.readonly-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 22px 0 0;
+  padding: 14px 0 0;
+  border-top: 1px solid var(--border);
+  font-size: 15px;
+}
+.readonly-row dt {
+  color: var(--text-muted);
+}
+.readonly-row dd {
+  margin: 0;
+  font-weight: 500;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.form-msg {
+  margin: 0;
+  font-size: 14px;
+}
+.form-msg[data-tone="success"] {
+  color: var(--mint);
+}
+.form-msg[data-tone="error"] {
+  color: #ff8a8a;
+}
+
+@media (min-width: 560px) {
+  .field-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (min-width: 760px) {
+  .dash-cards {
+    grid-template-columns: 1.3fr 1fr 1fr;
+  }
+}
+@media (min-width: 960px) {
+  .dash-panels {
+    grid-template-columns: 1.15fr 1fr;
+  }
+}
+
+/* loading placeholders while the session is checked */
+[data-dash][aria-busy="true"] [data-dash-name],
+[data-dash][aria-busy="true"] .dash-sub,
+[data-dash][aria-busy="true"] [data-plan-name],
+[data-dash][aria-busy="true"] [data-dash-email-row] {
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  color: transparent;
+  animation: blink 1.4s ease-in-out infinite;
+}
+
+/* a signed-in client doesn't need the "Start for $0" button */
+body[data-auth-page="dashboard"] .header-cta,
+body[data-auth-page="dashboard"] .nav-menu-cta {
+  display: none;
+}
+
+/* ==========================================================================
+   Console theme for the account pages
+   Same look as the control app's login card: framed panel with corner
+   brackets, small capital labels, dark square inputs.
+   ========================================================================== */
+
+/* framed cards with corner brackets */
+.auth-card,
+.dash-card--plan {
+  border-color: var(--frame);
+  background: var(--surface);
+  box-shadow: 0 0 0 2px rgba(38, 150, 178, 0.16), 0 0 26px var(--glow);
+}
+.auth-card::before,
+.dash-card--plan::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--bracket), var(--bracket)) top left / 13px 1px,
+    linear-gradient(var(--bracket), var(--bracket)) top left / 1px 13px,
+    linear-gradient(var(--bracket), var(--bracket)) top right / 13px 1px,
+    linear-gradient(var(--bracket), var(--bracket)) top right / 1px 13px,
+    linear-gradient(var(--bracket), var(--bracket)) bottom left / 13px 1px,
+    linear-gradient(var(--bracket), var(--bracket)) bottom left / 1px 13px,
+    linear-gradient(var(--bracket), var(--bracket)) bottom right / 13px 1px,
+    linear-gradient(var(--bracket), var(--bracket)) bottom right / 1px 13px;
+  background-repeat: no-repeat;
+}
+
+/* labels: the app's small capitals */
+.field label {
+  color: var(--text-subtle);
+  font: 500 11px/1.3 var(--font-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.field .opt {
+  letter-spacing: 0.06em;
+}
+
+/* inputs: dark, square, monospaced */
+.input {
+  border-color: var(--border);
+  background-color: var(--bg);
+  color: var(--text);
+  font: 500 16px/1.4 var(--font-mono);
+}
+.input:hover {
+  border-color: var(--border-strong);
+}
+.input:focus-visible {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.2);
+}
+.input[aria-invalid="true"] {
+  border-color: var(--bad);
+}
+select.input option {
+  background: var(--surface);
+}
+
+/* messages */
+.auth-msg {
+  border-color: var(--border);
+  background: var(--surface-2);
+}
+.auth-msg[data-tone="error"] {
+  border-color: #aa3241;
+  background: #3a1422;
+}
+.auth-msg[data-tone="error"] .icon {
+  color: #ff8a8a;
+}
+.auth-msg[data-tone="success"] {
+  border-color: #00aa69;
+  background: #0a3828;
+}
+.auth-msg[data-tone="success"] .icon,
+.form-msg[data-tone="success"] {
+  color: var(--good);
+}
+
+/* sign-up steps */
+.steps-bar li::before {
+  background: var(--border);
+}
+.steps-bar li.is-done::before,
+.steps-bar li.is-current::before {
+  background: var(--cyan);
+}
+.auth-done-icon {
+  border-color: var(--frame);
+  background: var(--chip);
+  color: var(--cyan);
+}
+
+/* trial banner: a chip-coloured strip */
+.trial-banner {
+  border-color: var(--frame);
+  background: var(--chip);
+}
+.trial-banner-icon {
+  border: 1px solid var(--cyan);
+  background: var(--bg);
+  color: var(--cyan);
+}
+a.trial-banner:hover {
+  border-color: var(--cyan);
+}
+@media (min-width: 900px) {
+  .trial-panel {
+    border-color: var(--border);
+    background: var(--surface);
+  }
+}
+
+/* dashboard */
+.avatar-lg {
+  border: 1px solid var(--frame);
+  border-radius: 2px;
+  background: var(--chip);
+  color: var(--cyan);
+  box-shadow: none;
+}
+.status-chip[data-tone="good"] {
+  border-color: #00aa69;
+  background: #0a3828;
+  color: var(--good);
+}
+.status-chip[data-tone="warn"] {
+  border-color: #b98a00;
+  background: #3a2a06;
+  color: var(--warn);
+}
+.status-chip[data-tone="bad"] {
+  border-color: #aa3241;
+  background: #3a1422;
+  color: #ff8a8a;
+}
+.dash-panel h2 {
+  font-size: 20px;
+}
+
+/* the busy spinner sits on a cyan button */
+.btn.is-busy::before {
+  border-color: rgba(10, 12, 26, 0.25);
+  border-top-color: currentColor;
+}
+
+/* data rows on the dashboard: capital mono label, Oxanium value */
+.readonly-row dt,
+.account-rows dt {
+  color: var(--text-subtle);
+  font: 500 11px/1.5 var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.readonly-row dd,
+.account-rows dd {
+  color: var(--text);
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }

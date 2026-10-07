@@ -1,6 +1,6 @@
 /* ==========================================================================
    RZGS-PRO website accounts: email + password, through Supabase Auth.
-   Used by login.html, signup.html, reset-password.html and account.html.
+   Used by login.html, signup.html, reset-password.html and dashboard.html.
    Needs supabase-js loaded before it.
    ========================================================================== */
 (() => {
@@ -13,7 +13,7 @@
   const MIN_PASSWORD = 8;
   const RESEND_WAIT = 60; // seconds between "resend email" clicks
 
-  const page = document.body.dataset.authPage; // login | signup | reset | account
+  const page = document.body.dataset.authPage; // login | signup | reset | dashboard
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 
@@ -24,7 +24,7 @@
   const arrivedFrom = fromUrl('type'); // "signup" after confirming an email, "recovery" for a password reset
   const urlError = fromUrl('error_description') || fromUrl('error');
 
-  // Full address of another page in this same folder, e.g. https://site.com/account.html
+  // Full address of another page in this same folder, e.g. https://site.com/dashboard.html
   const pageUrl = (name) => new URL(name, location.href).href.split(/[?#]/)[0];
 
   /* ---------------------------------------------------------------- messages */
@@ -71,6 +71,7 @@
       email_address_not_authorized: "We couldn't send the email right now. Please contact us.",
       otp_expired: 'This link has expired. Please request a new one.',
       session_not_found: 'Your session has ended. Please log in again.',
+      reauthentication_needed: 'For your safety, please sign out, log in again, and then change your password.',
     };
     if (known[code]) return known[code];
     if (status === 429) return known.over_request_rate_limit;
@@ -108,6 +109,12 @@
       return /^[A-Za-z0-9_]{5,32}$/.test(name) ? '' : 'A Telegram username has 5 to 32 letters, numbers or underscores.';
     },
     accepted_terms: (v, form, input) => (input.checked ? '' : 'Please accept the terms to continue.'),
+    mt5_account: (v) => {
+      const digits = v.replace(/\D/g, '');
+      if (!v.trim()) return '';
+      return /^[\d\s-]+$/.test(v.trim()) && digits.length >= 4 && digits.length <= 15 ? '' : 'Enter your MT5 account number, using digits only.';
+    },
+    broker: (v) => (v.trim() && v.trim().length < 2 ? 'Enter the name of your broker.' : v.trim().length > 60 ? 'Use 60 characters or fewer.' : ''),
   };
 
   function setFieldError(input, message) {
@@ -214,7 +221,7 @@
 
     const { data: { session } } = await db.auth.getSession();
     if (session) {
-      location.replace('account.html');
+      location.replace('dashboard.html');
       return;
     }
 
@@ -222,7 +229,7 @@
     wireResend(resendButton, () => db.auth.resend({
       type: 'signup',
       email: form.elements.email.value.trim(),
-      options: { emailRedirectTo: pageUrl('account.html') },
+      options: { emailRedirectTo: pageUrl('dashboard.html') },
     }));
 
     form.addEventListener('submit', async (event) => {
@@ -242,7 +249,7 @@
         if (error.code === 'email_not_confirmed') resendButton.hidden = false;
         return;
       }
-      location.replace('account.html');
+      location.replace('dashboard.html');
     });
   }
 
@@ -279,7 +286,7 @@
 
     const { data: { session } } = await db.auth.getSession();
     if (session) {
-      location.replace('account.html');
+      location.replace('dashboard.html');
       return;
     }
 
@@ -318,7 +325,7 @@
     const resend = wireResend($('[data-resend]', done), () => db.auth.resend({
       type: 'signup',
       email: form.elements.email.value.trim(),
-      options: { emailRedirectTo: pageUrl('account.html') },
+      options: { emailRedirectTo: pageUrl('dashboard.html') },
     }));
 
     $('[data-restart]', done).addEventListener('click', () => {
@@ -346,7 +353,7 @@
         email,
         password: form.elements.new_password.value,
         options: {
-          emailRedirectTo: pageUrl('account.html'),
+          emailRedirectTo: pageUrl('dashboard.html'),
           // These details are copied into the web_users table by the database.
           data: {
             full_name: form.elements.full_name.value.trim(),
@@ -379,7 +386,7 @@
 
       if (data.session) {
         // email confirmation is switched off in Supabase: the person is already signed in
-        location.replace('account.html');
+        location.replace('dashboard.html');
         return;
       }
 
@@ -445,39 +452,67 @@
         return;
       }
       showMessage('Your password is updated. Taking you to your account.', 'success');
-      setTimeout(() => location.replace('account.html'), 1200);
+      setTimeout(() => location.replace('dashboard.html'), 1200);
     });
   }
 
-  /* -------------------------------------------------------------- account page */
-  function renderAccount(user, profile) {
-    const meta = user.user_metadata || {};
-    const pick = (key, ...fallbacks) => profile[key] || fallbacks.find(Boolean) || '';
-    const username = pick('username', meta.username, meta.preferred_username);
-    const name = pick('full_name', meta.full_name, meta.name, username, 'RZGS-PRO member');
-    const email = pick('email', user.email);
-    const telegram = pick('telegram_username', meta.telegram_username);
-    const joined = profile.created_at || user.created_at;
+  /* ------------------------------------------------------------ dashboard page */
+  const PLAN_NAMES = { trial: 'Free trial', elite: 'Elite', diamond: 'Diamond' };
+  const longDate = (value) => new Date(value).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
 
-    $('[data-account-name]').textContent = name;
-    $('[data-account-sub]').textContent = email;
-    $('[data-account-avatar]').textContent = name.trim().charAt(0).toUpperCase() || 'R';
-
-    const setRow = (key, value) => {
-      const row = $(`[data-account-row="${key}"]`);
-      row.hidden = !value;
-      $('dd', row).textContent = value || '';
-    };
-    setRow('username', username);
-    setRow('country', pick('country', meta.country));
-    setRow('phone', pick('phone', meta.phone));
-    setRow('telegram', telegram ? `@${telegram.replace(/^@/, '')}` : '');
-    setRow('joined', joined ? new Date(joined).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : '');
-
-    $('[data-account-card]').setAttribute('aria-busy', 'false');
+  // Small "Saved." / error line next to a form's own button.
+  function formMessage(form, text, tone) {
+    const line = $('[data-form-msg]', form);
+    clearTimeout(line.hideTimer);
+    line.textContent = text;
+    line.dataset.tone = tone;
+    line.hidden = false;
+    if (tone === 'success') line.hideTimer = setTimeout(() => { line.hidden = true; }, 4000);
   }
 
-  async function initAccount() {
+  // The plan and its end date are set by the site owner in the web_users table.
+  // With no plan on file, the card keeps the "get started" content written in the page.
+  function renderPlan(card, profile) {
+    const plan = PLAN_NAMES[profile.plan] ? profile.plan : null;
+    if (!plan) return;
+
+    const ends = profile.plan_expires_at ? new Date(profile.plan_expires_at) : null;
+    const daysLeft = ends ? Math.ceil((ends - Date.now()) / 86400000) : null;
+    const status = $('[data-plan-status]', card);
+    const action = $('[data-plan-action]', card);
+    const secondary = $('[data-plan-secondary]', card);
+    let note = 'Your plan is active.';
+
+    if (ends && daysLeft <= 0) {
+      status.textContent = 'Expired';
+      status.dataset.tone = 'bad';
+      note = `Ended on ${longDate(ends)}. Renew to keep the bot running.`;
+    } else if (ends && daysLeft <= 3) {
+      status.textContent = daysLeft === 1 ? 'Ends tomorrow' : `Ends in ${daysLeft} days`;
+      status.dataset.tone = 'warn';
+      note = `Valid until ${longDate(ends)}. Renew now to avoid a break.`;
+    } else {
+      status.textContent = 'Active';
+      status.dataset.tone = 'good';
+      if (ends) note = `Valid until ${longDate(ends)}.`;
+    }
+    status.hidden = false;
+    $('[data-plan-name]', card).textContent = PLAN_NAMES[plan];
+    $('[data-plan-note]', card).textContent = note;
+
+    if (plan === 'trial') {
+      action.textContent = 'Choose a plan';
+      action.href = 'index.html#pricing';
+      secondary.hidden = true;
+    } else {
+      action.textContent = 'Renew plan';
+      action.href = card.dataset[`link${plan.charAt(0).toUpperCase()}${plan.slice(1)}`] || 'index.html#pricing';
+      secondary.hidden = false;
+    }
+  }
+
+  async function initDashboard() {
+    const root = $('[data-dash]');
     // When someone arrives from the confirmation email, supabase-js signs them in here.
     const { data: { session } } = await db.auth.getSession();
     if (!session) {
@@ -486,18 +521,92 @@
     }
     if (arrivedFrom === 'signup') showMessage('Your email is confirmed. Welcome to RZGS-PRO!', 'success');
 
-    // Our own copy of the profile, kept in the web_users table by the database.
+    let user = session.user;
+    // Our own copy of the profile (plus the plan), kept in the web_users table.
     let profile = {};
     try {
       const { data } = await db
         .from('web_users')
-        .select('full_name, username, email, country, phone, telegram_username, created_at')
-        .eq('id', session.user.id)
+        .select('full_name, username, email, country, phone, telegram_username, mt5_account, broker, plan, plan_expires_at')
+        .eq('id', user.id)
         .maybeSingle();
       if (data) profile = data;
     } catch (e) { /* fall back to what the sign-up itself stored */ }
 
-    renderAccount(session.user, profile);
+    const stored = (key) => profile[key] || (user.user_metadata || {})[key] || '';
+
+    function renderHeader() {
+      const name = stored('full_name') || stored('username') || 'RZGS-PRO member';
+      const email = profile.email || user.email || '';
+      $('[data-dash-name]').textContent = name.trim().split(/\s+/)[0];
+      $('[data-dash-avatar]').textContent = name.trim().charAt(0).toUpperCase() || 'R';
+      $('[data-dash-email]').textContent = email;
+      $('[data-dash-email-row]').textContent = email;
+    }
+
+    // Each form saves a few fields of the person's own profile, then says so next to its button.
+    function wireSaveForm(form, readFields, successText) {
+      wireValidation(form);
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (!validateAll(form)) return;
+        const submit = $('[data-submit]', form);
+        const fields = readFields();
+        setBusy(submit, true);
+        const { data, error } = await db.auth.updateUser(fields.password ? fields : { data: fields });
+        setBusy(submit, false);
+        if (error) {
+          formMessage(form, friendlyError(error), 'error');
+          return;
+        }
+        if (fields.password) {
+          form.reset();
+        } else {
+          if (data && data.user) user = data.user;
+          Object.assign(profile, fields);
+          renderHeader();
+        }
+        formMessage(form, successText, 'success');
+      });
+    }
+
+    const profileForm = $('[data-profile-form]');
+    const tradingForm = $('[data-trading-form]');
+    const passwordForm = $('[data-password-form]');
+
+    // fill the forms with what is on file
+    const country = profileForm.elements.country;
+    fillCountries(country);
+    const savedCountry = stored('country');
+    if (savedCountry && ![...country.options].some((option) => option.value === savedCountry)) {
+      country.add(new Option(savedCountry, savedCountry));
+    }
+    country.value = savedCountry;
+    profileForm.elements.full_name.value = stored('full_name');
+    profileForm.elements.username.value = stored('username');
+    profileForm.elements.phone.value = stored('phone');
+    profileForm.elements.telegram_username.value = stored('telegram_username');
+    tradingForm.elements.mt5_account.value = stored('mt5_account');
+    tradingForm.elements.broker.value = stored('broker');
+
+    renderHeader();
+    renderPlan($('[data-plan-card]'), profile);
+    root.setAttribute('aria-busy', 'false');
+
+    wireSaveForm(profileForm, () => ({
+      full_name: profileForm.elements.full_name.value.trim(),
+      username: profileForm.elements.username.value.trim(),
+      country: country.value,
+      phone: profileForm.elements.phone.value.trim(),
+      telegram_username: profileForm.elements.telegram_username.value.trim().replace(/^@/, ''),
+    }), 'Profile saved.');
+
+    wireSaveForm(tradingForm, () => ({
+      mt5_account: tradingForm.elements.mt5_account.value.replace(/\D/g, ''),
+      broker: tradingForm.elements.broker.value.trim(),
+    }), 'Trading account saved.');
+
+    wireSaveForm(passwordForm, () => ({ password: passwordForm.elements.new_password.value }), 'Password updated.');
 
     const signOut = $('[data-sign-out]');
     signOut.addEventListener('click', async () => {
@@ -512,5 +621,5 @@
     });
   }
 
-  ({ login: initLogin, signup: initSignup, reset: initReset, account: initAccount }[page] || (() => {}))();
+  ({ login: initLogin, signup: initSignup, reset: initReset, dashboard: initDashboard }[page] || (() => {}))();
 })();

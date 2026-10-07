@@ -141,9 +141,9 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
    ========================================================================== */
 const canvas = document.getElementById('bg-canvas');
 const ctx = canvas.getContext('2d');
-const UP = '0, 239, 167';
-const DOWN = '255, 95, 126';
-const LIME = '130, 255, 0';
+const UP = '0, 210, 120';
+const DOWN = '255, 82, 82';
+const LIME = '34, 211, 238';
 
 let width = 0;
 let height = 0;
@@ -395,10 +395,10 @@ class LineLayer {
     ctx.arc(endX, liveY, 3.5, 0, Math.PI * 2);
     ctx.fill();
 
-    // symbol tag riding the last price (skipped on phones, where the hero art covers it)
-    if (width < 700) return;
+    // symbol tag riding the last price: only on wide screens, where it has clear space beside the content
+    if (width < 1400) return;
     const label = 'XAUUSD';
-    ctx.font = '600 10px "JetBrains Mono", ui-monospace, monospace';
+    ctx.font = '500 10px "IBM Plex Mono", ui-monospace, monospace';
     const tagW = ctx.measureText(label).width + 14;
     const tagX = width - tagW - 12;
     const tagY = Math.round(liveY - 10);
