@@ -2,47 +2,70 @@
    RZGS-PRO — design tokens
    ========================================================================== */
 :root {
-  /* Console palette: the same values as the control app (app.html) */
-  --bg: #0a0c1a;
-  --surface: #111226;        /* panel */
-  --surface-2: #171a34;      /* raised control */
-  --surface-3: #1e2242;
-  --border: #262a42;         /* line */
-  --border-strong: #343a5e;
-  --grid: rgba(38, 150, 178, 0.07);
-  --frame: #2696b2;
-  --glow: rgba(34, 211, 238, 0.14);
-  --chip: #0e3040;
-  --bracket: #96a5b9;
+  /* Neon HUD palette: deep teal-black with cyan + lime neon, taken from the brand artwork */
+  --bg: #030c13;
+  --surface: #071922;        /* panel */
+  --surface-2: #0a2330;      /* raised control */
+  --surface-3: #0e2f3e;
+  --border: #123644;         /* line */
+  --border-strong: #1c4f61;
+  --grid: rgba(25, 211, 255, 0.05);
+  --frame: #1fb6d6;
+  --glow: rgba(25, 211, 255, 0.22);
+  --chip: #062b38;
+  --bracket: #a6ff1a;
 
   /* Text */
-  --text: #f2f4fa;           /* titles */
-  --text-muted: #c8cdde;     /* body copy */
-  --text-subtle: #7f87a8;    /* labels and hints */
+  --text: #f3fbff;           /* titles */
+  --text-muted: #c9dde6;     /* body copy */
+  --text-subtle: #7fa3b3;    /* labels and hints */
 
   /* Accent and states */
-  --cyan: #22d3ee;
-  --good: #00d278;
-  --bad: #ff5252;
-  --warn: #ffd600;
+  --cyan: #19d3ff;
+  --neon: #a6ff1a;             /* lime: marks, labels and the far end of the gradient */
+  --good: #2bf391;
+  --bad: #ff5a6a;
+  --warn: #ffd23f;
   --buy: #4aa8ff;
-  --sell: #ff9800;
+  --sell: #ff9a3d;
 
-  /* Older names used throughout this stylesheet, pointed at the console palette */
+  /* Older names used throughout this stylesheet, pointed at the palette above */
   --lime: var(--cyan);
   --mint: var(--good);
   --violet: var(--buy);
   --gold: var(--warn);
   --down: var(--bad);
-  --on-accent: #0a0c1a;
-  --grad: linear-gradient(var(--cyan), var(--cyan));
+  --on-accent: #02131a;
+  --grad: linear-gradient(90deg, var(--cyan) 0%, #37efb8 52%, var(--neon) 100%);
+
+  /* Cut-corner frames. Each is a small picture stretched around a box with border-image
+     (made by a script; to change a colour, change it inside the picture's text). */
+  --hud-panel: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M10.21 0.5H47.5V37.79L37.79 47.5H0.5V10.21Z' fill='%23071922' stroke='%23164656'/%3E%3Cpath d='M.5 10.21L10.21 .5M47.5 37.79L37.79 47.5' fill='none' stroke='%231fb6d6'/%3E%3C/svg%3E");
+  --hud-panel-hot: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M10.21 0.5H47.5V37.79L37.79 47.5H0.5V10.21Z' fill='%2308222e' stroke='%231fb6d6'/%3E%3Cpath d='M.5 10.21L10.21 .5M47.5 37.79L37.79 47.5' fill='none' stroke='%23a6ff1a'/%3E%3C/svg%3E");
+  --hud-panel-dark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M10.21 0.5H47.5V37.79L37.79 47.5H0.5V10.21Z' fill='%2304131b' stroke='%23123644'/%3E%3Cpath d='M.5 10.21L10.21 .5M47.5 37.79L37.79 47.5' fill='none' stroke='%231a7f97'/%3E%3C/svg%3E");
+  --hud-callout: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M10.21 0.5H47.5V37.79L37.79 47.5H0.5V10.21Z' fill='%23062b38' stroke='%231fb6d6'/%3E%3Cpath d='M.5 10.21L10.21 .5M47.5 37.79L37.79 47.5' fill='none' stroke='%23a6ff1a'/%3E%3C/svg%3E");
+  --hud-line: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M10.21 0.5H47.5V37.79L37.79 47.5H0.5V10.21Z' fill='none' stroke='%231c5567'/%3E%3Cpath d='M.5 10.21L10.21 .5M47.5 37.79L37.79 47.5' fill='none' stroke='%231fb6d6'/%3E%3C/svg%3E");
+  --hud-frame: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cdefs%3E%3ClinearGradient id='g' gradientUnits='userSpaceOnUse' x1='24' y1='0' x2='48' y2='0'%3E%3Cstop offset='0' stop-color='%2319d3ff'/%3E%3Cstop offset='1' stop-color='%233fe9a6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M14.31 0.75H71.25V57.69L57.69 71.25H0.75V14.31Z' fill='%23061c26' stroke='url(%23g)' stroke-width='1.5'/%3E%3Cpath d='M1.5 22V14.62L14.62 1.5H22M70.5 50V57.38L57.38 70.5H50' fill='none' stroke='%23a6ff1a' stroke-width='3'/%3E%3C/svg%3E");
+  --hud-line-frame: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cdefs%3E%3ClinearGradient id='g' gradientUnits='userSpaceOnUse' x1='24' y1='0' x2='48' y2='0'%3E%3Cstop offset='0' stop-color='%2319d3ff'/%3E%3Cstop offset='1' stop-color='%233fe9a6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M14.31 0.75H71.25V57.69L57.69 71.25H0.75V14.31Z' fill='none' stroke='url(%23g)' stroke-width='1.5'/%3E%3Cpath d='M1.5 22V14.62L14.62 1.5H22M70.5 50V57.38L57.38 70.5H50' fill='none' stroke='%23a6ff1a' stroke-width='3'/%3E%3C/svg%3E");
+  --hud-btn: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='54' height='54' viewBox='0 0 54 54'%3E%3Cpath d='M13.21 0.5H53.5V40.79L40.79 53.5H0.5V13.21Z' fill='%230a2330' stroke='%231f5a6d'/%3E%3C/svg%3E");
+  --hud-btn-hot: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='54' height='54' viewBox='0 0 54 54'%3E%3Cpath d='M13.21 0.5H53.5V40.79L40.79 53.5H0.5V13.21Z' fill='%230b3342' stroke='%2319d3ff'/%3E%3C/svg%3E");
+  --hud-btn-primary: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='54' height='54' viewBox='0 0 54 54'%3E%3Cdefs%3E%3ClinearGradient id='g' gradientUnits='userSpaceOnUse' x1='18' y1='0' x2='36' y2='0'%3E%3Cstop offset='0' stop-color='%2319d3ff'/%3E%3Cstop offset='0.5' stop-color='%2337efb8'/%3E%3Cstop offset='1' stop-color='%23a6ff1a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M13 0H54V41L41 54H0V13Z' fill='url(%23g)'/%3E%3Cpath d='M0 4L4 0M0 8.5L8.5 0' stroke='%2319d3ff' stroke-width='1.5'/%3E%3Cpath d='M50 54L54 50M45.5 54L54 45.5' stroke='%23a6ff1a' stroke-width='1.5'/%3E%3C/svg%3E");
+  --hud-btn-chip: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='54' height='54' viewBox='0 0 54 54'%3E%3Cpath d='M13.21 0.5H53.5V40.79L40.79 53.5H0.5V13.21Z' fill='%2306303e' stroke='%2319b8dc'/%3E%3C/svg%3E");
+  --hud-btn-danger: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='54' height='54' viewBox='0 0 54 54'%3E%3Cpath d='M13.21 0.5H53.5V40.79L40.79 53.5H0.5V13.21Z' fill='%232c0f19' stroke='%23b23a4c'/%3E%3C/svg%3E");
+  --hud-btn-warn: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='54' height='54' viewBox='0 0 54 54'%3E%3Cpath d='M13.21 0.5H53.5V40.79L40.79 53.5H0.5V13.21Z' fill='%232e2408' stroke='%23b98f14'/%3E%3C/svg%3E");
+  --hud-pill: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Cpath d='M8.21 0.5H27.79L35.5 8.21V27.79L27.79 35.5H8.21L0.5 27.79V8.21Z' fill='%2306212c' fill-opacity='.94' stroke='%231a9fc0'/%3E%3Cpath d='M9.5 1.5L1.5 9.5V26.5L9.5 34.5M26.5 1.5L34.5 9.5V26.5L26.5 34.5' fill='none' stroke='%23a6ff1a' stroke-width='2'/%3E%3C/svg%3E");
+  --hud-tile: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Cpath d='M8.21 0.5H35.5V27.79L27.79 35.5H0.5V8.21Z' fill='%23062b38' stroke='%2319b8dc'/%3E%3C/svg%3E");
+  --hud-tile-grad: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Cdefs%3E%3ClinearGradient id='g' gradientUnits='userSpaceOnUse' x1='12' y1='0' x2='24' y2='0'%3E%3Cstop offset='0' stop-color='%2319d3ff'/%3E%3Cstop offset='1' stop-color='%23a6ff1a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M8 0H36V28L28 36H0V8Z' fill='url(%23g)'/%3E%3C/svg%3E");
+  /* the same cut as a clip shape, for boxes that keep their own background */
+  --cut-10: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+  --cut-14: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
 
   /* Type */
   --font-display: "Oxanium", "Segoe UI", system-ui, sans-serif;
   --font-body: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, Consolas, "Courier New", monospace;
 
-  /* Shape & motion: panels are square, controls have a 2px corner */
+  /* Shape & motion: frames have cut corners, small controls a 2px corner */
   --radius-sm: 2px;
   --radius: 2px;
   --radius-lg: 0px;
@@ -84,10 +107,13 @@ body {
   margin: 0;
   min-height: 100dvh;
   background-color: var(--bg);
+  /* a teal glow at the top of the page, over a fine grid */
   background-image:
+    radial-gradient(ellipse 90% 70% at 50% 0%, rgba(20, 150, 175, 0.2), transparent 70%),
     linear-gradient(var(--grid) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-  background-size: 28px 28px;
+  background-size: 100% 900px, 32px 32px, 32px 32px;
+  background-repeat: no-repeat, repeat, repeat;
   color: var(--text);
   font-family: var(--font-body);
   font-size: 16px;
@@ -227,12 +253,12 @@ a {
   background: var(--grad);
   color: var(--on-accent);
   box-shadow:
-    0 10px 30px -10px rgba(34, 211, 238, 0.55),
+    0 10px 30px -10px rgba(25, 211, 255, 0.55),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 .btn-primary:hover {
   box-shadow:
-    0 14px 40px -8px rgba(34, 211, 238, 0.7),
+    0 14px 40px -8px rgba(25, 211, 255, 0.7),
     inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
@@ -311,7 +337,7 @@ a {
 }
 .site-header.is-scrolled,
 .site-header.menu-open {
-  background: rgba(10, 12, 26, 0.78);
+  background: rgba(3, 12, 19, 0.78);
   border-bottom-color: var(--border);
   -webkit-backdrop-filter: blur(16px) saturate(140%);
   backdrop-filter: blur(16px) saturate(140%);
@@ -392,7 +418,7 @@ a {
     padding: 8px;
     border: 1px solid var(--border-strong);
     border-radius: var(--radius-lg);
-    background: rgba(17, 18, 38, 0.97);
+    background: rgba(7, 25, 34, 0.97);
     box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.8);
     opacity: 0;
     visibility: hidden;
@@ -421,7 +447,7 @@ a {
   }
   .nav-link[aria-current="page"],
   .nav-link.is-active {
-    background: rgba(34, 211, 238, 0.08);
+    background: rgba(25, 211, 255, 0.08);
     color: var(--lime);
   }
   .nav-menu-cta {
@@ -516,7 +542,7 @@ a {
   padding: 8px 14px;
   border: 1px solid var(--border-strong);
   border-radius: 2px;
-  background: rgba(17, 18, 38, 0.7);
+  background: rgba(7, 25, 34, 0.7);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
   color: var(--text-muted);
@@ -616,7 +642,7 @@ a {
   inset: 6% -6% 22%;
   z-index: -1;
   border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(0, 210, 120, 0.3), rgba(34, 211, 238, 0.1) 55%, transparent 75%);
+  background: radial-gradient(closest-side, rgba(43, 243, 145, 0.3), rgba(25, 211, 255, 0.1) 55%, transparent 75%);
   filter: blur(24px);
 }
 .hero-orbit {
@@ -628,7 +654,7 @@ a {
   translate: -50% -50%;
   z-index: -1;
   border-radius: 50%;
-  border: 1px dashed rgba(34, 211, 238, 0.18);
+  border: 1px dashed rgba(25, 211, 255, 0.18);
   animation: spin 60s linear infinite;
 }
 .hero-orbit::before,
@@ -669,7 +695,7 @@ a {
   padding: 12px 14px;
   border: 1px solid var(--border-strong);
   border-radius: 2px;
-  background: rgba(17, 18, 38, 0.72);
+  background: rgba(7, 25, 34, 0.72);
   -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
   box-shadow: 0 20px 40px -18px rgba(0, 0, 0, 0.9);
@@ -735,7 +761,7 @@ a {
   width: 32px;
   height: 32px;
   border-radius: 2px;
-  background: rgba(34, 211, 238, 0.12);
+  background: rgba(25, 211, 255, 0.12);
   color: var(--lime);
 }
 .status-icon .icon {
@@ -902,7 +928,7 @@ a {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 0%), rgba(34, 211, 238, 0.08), transparent 45%);
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 0%), rgba(25, 211, 255, 0.08), transparent 45%);
   opacity: 0;
   transition: opacity var(--dur) var(--ease-out);
   pointer-events: none;
@@ -935,9 +961,9 @@ a {
   place-items: center;
   width: 44px;
   height: 44px;
-  border: 1px solid rgba(34, 211, 238, 0.22);
+  border: 1px solid rgba(25, 211, 255, 0.22);
   border-radius: 2px;
-  background: rgba(34, 211, 238, 0.08);
+  background: rgba(25, 211, 255, 0.08);
   color: var(--lime);
 }
 .feature-copy h3 {
@@ -992,14 +1018,14 @@ a {
   height: 13px;
 }
 .chip-gold {
-  border: 1px solid rgba(255, 214, 0, 0.28);
-  background: rgba(255, 214, 0, 0.1);
+  border: 1px solid rgba(255, 210, 63, 0.28);
+  background: rgba(255, 210, 63, 0.1);
   color: var(--gold);
 }
 .chip-up {
   margin-left: auto;
-  border: 1px solid rgba(0, 210, 120, 0.28);
-  background: rgba(0, 210, 120, 0.1);
+  border: 1px solid rgba(43, 243, 145, 0.28);
+  background: rgba(43, 243, 145, 0.1);
   color: var(--mint);
 }
 
@@ -1051,9 +1077,9 @@ a {
 .candle line {
   stroke-width: 1.2;
 }
-.candle.up line { stroke: rgba(0, 210, 120, 0.7); }
+.candle.up line { stroke: rgba(43, 243, 145, 0.7); }
 .candle.up rect { fill: var(--mint); }
-.candle.dn line { stroke: rgba(255, 82, 82, 0.6); }
+.candle.dn line { stroke: rgba(255, 90, 106, 0.6); }
 .candle.dn rect { fill: var(--down); opacity: 0.85; }
 .ema {
   fill: none;
@@ -1127,7 +1153,7 @@ a {
   width: 156px;
   aspect-ratio: 1;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(34, 211, 238, 0.08), transparent 70%);
+  background: radial-gradient(circle, rgba(25, 211, 255, 0.08), transparent 70%);
 }
 .radar::before {
   /* 24 hour ticks */
@@ -1153,7 +1179,7 @@ a {
   position: absolute;
   inset: 17px;
   border-radius: 50%;
-  background: conic-gradient(transparent 0 280deg, rgba(34, 211, 238, 0.4) 360deg);
+  background: conic-gradient(transparent 0 280deg, rgba(25, 211, 255, 0.4) 360deg);
   animation: spin 4s linear infinite;
 }
 .radar-core {
@@ -1194,9 +1220,9 @@ a {
   justify-self: start;
   gap: 8px;
   padding: 6px 12px;
-  border: 1px solid rgba(34, 211, 238, 0.3);
+  border: 1px solid rgba(25, 211, 255, 0.3);
   border-radius: 2px;
-  background: rgba(34, 211, 238, 0.07);
+  background: rgba(25, 211, 255, 0.07);
   color: var(--lime);
   font: 500 11px/1 var(--font-mono);
   letter-spacing: 0.08em;
@@ -1283,9 +1309,9 @@ a {
   align-items: center;
   gap: 6px;
   padding: 5px 10px;
-  border: 1px solid rgba(34, 211, 238, 0.4);
+  border: 1px solid rgba(25, 211, 255, 0.4);
   border-radius: 2px;
-  background: rgba(34, 211, 238, 0.1);
+  background: rgba(25, 211, 255, 0.1);
   color: var(--lime);
   font: 600 11px/1 var(--font-mono);
   letter-spacing: 0.08em;
@@ -1312,7 +1338,7 @@ a {
 .ai-orb-ring {
   position: absolute;
   inset: 26px;
-  border: 1.5px solid rgba(34, 211, 238, 0.55);
+  border: 1.5px solid rgba(25, 211, 255, 0.55);
   border-radius: 50%;
   animation: ring 2.4s var(--ease-out) infinite;
 }
@@ -1328,7 +1354,7 @@ a {
   border-radius: 50%;
   background: var(--grad);
   color: var(--on-accent);
-  box-shadow: 0 0 40px rgba(34, 211, 238, 0.45);
+  box-shadow: 0 0 40px rgba(25, 211, 255, 0.45);
   transition: filter var(--dur) var(--ease-out), box-shadow var(--dur) var(--ease-out);
 }
 .ai-orb-core .icon {
@@ -1417,7 +1443,7 @@ a {
 .ai-panel[data-state="paused"] .ai-toggle {
   border-color: transparent;
   color: var(--on-accent);
-  box-shadow: 0 10px 30px -10px rgba(34, 211, 238, 0.6);
+  box-shadow: 0 10px 30px -10px rgba(25, 211, 255, 0.6);
 }
 .ai-panel[data-state="paused"] .ai-toggle::before {
   opacity: 1;
@@ -1443,16 +1469,16 @@ a {
   padding: 14px 16px;
   border: 1px solid var(--border-strong);
   border-radius: 2px;
-  background: rgba(23, 26, 52, 0.85);
+  background: rgba(10, 35, 48, 0.85);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   box-shadow: 0 16px 32px -16px rgba(0, 0, 0, 0.8);
 }
 .notif--main {
-  border-color: rgba(34, 211, 238, 0.3);
+  border-color: rgba(25, 211, 255, 0.3);
   box-shadow:
     0 16px 32px -16px rgba(0, 0, 0, 0.8),
-    0 0 0 4px rgba(34, 211, 238, 0.05);
+    0 0 0 4px rgba(25, 211, 255, 0.05);
 }
 .notif--muted {
   width: 94%;
@@ -1523,7 +1549,7 @@ a {
   height: 28px;
   flex: none;
   border-radius: 50%;
-  background: rgba(34, 211, 238, 0.14);
+  background: rgba(25, 211, 255, 0.14);
   color: var(--lime);
 }
 .notif-badge .icon {
@@ -1547,12 +1573,12 @@ a {
    ========================================================================== */
 .steps-panel {
   padding: clamp(12px, 2vw, 20px);
-  border: 1px solid rgba(38, 150, 178, 0.28);
+  border: 1px solid rgba(31, 182, 214, 0.28);
   border-radius: var(--radius-xl);
   background:
-    radial-gradient(80% 120% at 0% 0%, rgba(38, 150, 178, 0.22), transparent 60%),
-    radial-gradient(60% 100% at 100% 100%, rgba(0, 210, 120, 0.08), transparent 60%),
-    rgba(17, 18, 38, 0.7);
+    radial-gradient(80% 120% at 0% 0%, rgba(31, 182, 214, 0.22), transparent 60%),
+    radial-gradient(60% 100% at 100% 100%, rgba(43, 243, 145, 0.08), transparent 60%),
+    rgba(7, 25, 34, 0.7);
 }
 .steps {
   display: grid;
@@ -1569,7 +1595,7 @@ a {
   padding: 24px;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  background: rgba(10, 12, 26, 0.55);
+  background: rgba(3, 12, 19, 0.55);
 }
 .step-top {
   display: flex;
@@ -1584,7 +1610,7 @@ a {
   border-radius: 2px;
   background: var(--grad);
   color: var(--on-accent);
-  box-shadow: 0 10px 30px -12px rgba(34, 211, 238, 0.7);
+  box-shadow: 0 10px 30px -12px rgba(25, 211, 255, 0.7);
 }
 .step-num {
   color: var(--text-subtle);
@@ -1636,11 +1662,11 @@ a {
   border-radius: var(--radius-lg);
 }
 .price-card--featured {
-  border-color: rgba(34, 211, 238, 0.38);
+  border-color: rgba(25, 211, 255, 0.38);
   background:
-    radial-gradient(120% 60% at 50% 0%, rgba(34, 211, 238, 0.13), transparent 60%),
+    radial-gradient(120% 60% at 50% 0%, rgba(25, 211, 255, 0.13), transparent 60%),
     var(--surface);
-  box-shadow: 0 30px 80px -40px rgba(34, 211, 238, 0.5);
+  box-shadow: 0 30px 80px -40px rgba(25, 211, 255, 0.5);
 }
 .plan-top {
   display: flex;
@@ -1660,8 +1686,8 @@ a {
 }
 .price-card--featured .plan-icon,
 .license-card--featured .plan-icon {
-  border-color: rgba(34, 211, 238, 0.35);
-  background: rgba(34, 211, 238, 0.1);
+  border-color: rgba(25, 211, 255, 0.35);
+  background: rgba(25, 211, 255, 0.1);
   color: var(--lime);
 }
 .plan-tag {
@@ -2064,7 +2090,7 @@ a {
   inset: 8% -8% 20%;
   z-index: -1;
   border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(0, 210, 120, 0.3), rgba(34, 211, 238, 0.1) 55%, transparent 75%);
+  background: radial-gradient(closest-side, rgba(43, 243, 145, 0.3), rgba(25, 211, 255, 0.1) 55%, transparent 75%);
   filter: blur(24px);
 }
 .page-hero-art img {
@@ -2200,9 +2226,9 @@ a {
   display: flex;
   gap: 16px;
   padding: 22px 24px;
-  border: 1px solid rgba(34, 211, 238, 0.25);
+  border: 1px solid rgba(25, 211, 255, 0.25);
   border-radius: var(--radius-lg);
-  background: rgba(34, 211, 238, 0.05);
+  background: rgba(25, 211, 255, 0.05);
 }
 .callout > .icon {
   width: 22px;
@@ -2294,7 +2320,7 @@ a {
   border-bottom: 0;
 }
 .compare .is-featured {
-  background: rgba(34, 211, 238, 0.05);
+  background: rgba(25, 211, 255, 0.05);
 }
 .compare .icon {
   display: inline-block;
@@ -2353,7 +2379,7 @@ a {
   background: var(--grad);
   color: var(--on-accent);
   font: 700 20px/1 var(--font-display);
-  box-shadow: 0 10px 30px -12px rgba(34, 211, 238, 0.7);
+  box-shadow: 0 10px 30px -12px rgba(25, 211, 255, 0.7);
 }
 .timeline-item h3 {
   margin: 10px 0 8px;
@@ -2394,9 +2420,9 @@ a {
   border-radius: var(--radius-lg);
 }
 .license-card--featured {
-  border-color: rgba(34, 211, 238, 0.38);
+  border-color: rgba(25, 211, 255, 0.38);
   background:
-    radial-gradient(120% 60% at 50% 0%, rgba(34, 211, 238, 0.12), transparent 60%),
+    radial-gradient(120% 60% at 50% 0%, rgba(25, 211, 255, 0.12), transparent 60%),
     var(--surface);
 }
 .license-card h3 {
@@ -2555,7 +2581,7 @@ a {
   color: var(--text);
 }
 .toc a.is-active {
-  background: rgba(34, 211, 238, 0.08);
+  background: rgba(25, 211, 255, 0.08);
   color: var(--lime);
 }
 @media (min-width: 1024px) {
@@ -2626,7 +2652,7 @@ a {
 .fill {
   padding: 0 4px;
   border-radius: 2px;
-  background: rgba(255, 214, 0, 0.14);
+  background: rgba(255, 210, 63, 0.14);
   color: var(--gold);
 }
 
@@ -2644,9 +2670,9 @@ a {
   border-radius: var(--radius-xl);
 }
 .contact-card--primary {
-  border-color: rgba(34, 211, 238, 0.35);
+  border-color: rgba(25, 211, 255, 0.35);
   background:
-    radial-gradient(120% 70% at 0% 0%, rgba(34, 211, 238, 0.12), transparent 60%),
+    radial-gradient(120% 70% at 0% 0%, rgba(25, 211, 255, 0.12), transparent 60%),
     var(--surface);
 }
 .contact-card h2 {
@@ -2791,16 +2817,34 @@ a {
 }
 
 /* ==========================================================================
-   Console theme
-   The look of the control app (app.html): navy grid, flat square panels,
-   cyan frames with corner brackets, Oxanium + IBM Plex.
+   Neon HUD theme
+   The look of the brand artwork: deep teal-black, cyan + lime neon,
+   cut-corner frames with a soft glow, Oxanium + IBM Plex.
    The rules below restyle components defined above. Layout is unchanged.
+
+   How the cut corners work: every frame is one small picture (the --hud-*
+   values at the top of this file) stretched around the box with border-image,
+   so no extra HTML is needed. The box's own background is switched off and
+   the picture supplies the fill.
    ========================================================================== */
+
+::selection {
+  background-color: var(--neon);
+  color: #000;
+}
 
 /* ---------- type ---------- */
 .hero-title {
-  font-size: clamp(46px, 11.5vw, 88px);
-  line-height: 1;
+  font-size: clamp(50px, 13.5vw, 96px);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: 0.02em;
+}
+.hero-title .text-gradient {
+  filter: drop-shadow(0 0 20px rgba(25, 211, 255, 0.35));
+}
+.hero-title-sub {
+  font-weight: 700;
 }
 .section-title {
   font-size: clamp(28px, 4.4vw, 46px);
@@ -2810,83 +2854,161 @@ a {
   font-size: clamp(32px, 5.6vw, 58px);
   line-height: 1.06;
 }
+/* section label: lime capitals behind a cyan "//" mark */
 .kicker {
+  color: var(--neon);
   font-size: 11px;
   letter-spacing: 0.14em;
+}
+.kicker::before {
+  content: "//";
+  width: auto;
+  height: auto;
+  background: none;
+  color: var(--cyan);
+  letter-spacing: -0.08em;
 }
 .brand-name {
   letter-spacing: 0.03em;
 }
 
-/* ---------- buttons: square, uppercase, like the app's .btn ---------- */
+/* ---------- quiet panels: dark fill, thin teal line, two cut corners ---------- */
+.card,
+.faq-item,
+.notif,
+.toc,
+.risk,
+.step {
+  border: 1px solid transparent;
+  border-image: var(--hud-panel) 16 fill / 16px;
+  background: none;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+/* cards hide what spills out of them, so nothing may paint inside a cut corner */
+.card {
+  clip-path: var(--cut-10);
+}
+.step {
+  border-image-source: var(--hud-panel-dark);
+}
+.faq-item[open] {
+  border-image-source: var(--hud-panel-hot);
+}
+/* the brand artwork has no hover spotlight */
+.card[data-spotlight]::after {
+  display: none;
+}
+.hero::before,
+.page-hero::before {
+  /* the page background already carries the grid */
+  display: none;
+}
+
+/* ---------- key frames: cyan line, lime corner marks and a glow ---------- */
+.price-card--featured,
+.license-card--featured,
+.contact-card--primary,
+.float-card,
+.notif--main {
+  border: 1px solid transparent;
+  border-image: var(--hud-frame) 24 fill / 24px;
+  background: none;
+  box-shadow: none;
+  clip-path: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  filter: drop-shadow(0 0 14px var(--glow));
+}
+.callout {
+  border: 1px solid transparent;
+  border-image: var(--hud-callout) 16 fill / 16px;
+  background: none;
+}
+/* frames that keep their own picture or glow inside: the box is cut to shape, the line is drawn on top */
+.steps-panel,
+.cta-panel {
+  border: 1px solid transparent;
+  border-image: var(--hud-line-frame) 24 / 24px;
+  clip-path: var(--cut-14);
+  box-shadow: none;
+}
+
+/* ---------- buttons: cut corners, capitals; the main one carries the cyan-to-lime gradient ---------- */
 .btn {
-  border: 1px solid var(--border);
-  background: var(--surface-2);
+  border: 1px solid transparent;
+  border-image: var(--hud-btn) 18 fill / 18px;
+  background: none;
   color: var(--text-muted);
-  font: 600 13px/1 var(--font-display);
-  letter-spacing: 0.08em;
+  font: 700 13px/1 var(--font-display);
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   box-shadow: none;
   transition:
-    background-color var(--dur-fast) var(--ease-out),
-    border-color var(--dur-fast) var(--ease-out),
     color var(--dur-fast) var(--ease-out),
-    box-shadow var(--dur) var(--ease-out),
+    filter var(--dur) var(--ease-out),
     transform var(--dur-fast) var(--ease-out);
+}
+.btn:hover {
+  border-image-source: var(--hud-btn-hot);
+  background: none;
+  color: var(--cyan);
 }
 .btn:active {
   transform: translateY(2px);
-  filter: brightness(1.25);
+  filter: brightness(1.2);
 }
 .btn-lg {
-  padding: 0 26px;
+  padding: 0 28px;
   font-size: 14px;
 }
 .btn-sm {
   padding: 0 16px;
   font-size: 12px;
 }
-/* the main action: the app's solid "on" state */
-.btn-primary {
-  border-color: var(--cyan);
-  background: var(--cyan);
-  color: var(--bg);
+.btn-primary,
+.btn-primary:hover {
+  border-image-source: var(--hud-btn-primary);
+  background: none;
+  color: var(--on-accent);
   box-shadow: none;
 }
-.btn-primary:hover {
-  box-shadow: 0 0 24px rgba(34, 211, 238, 0.35);
+.btn-primary {
+  filter: drop-shadow(0 0 10px rgba(55, 239, 184, 0.28));
 }
-/* secondary actions: the app's neutral button, turning cyan on hover */
+.btn-primary:hover {
+  filter: brightness(1.08) drop-shadow(0 0 16px rgba(55, 239, 184, 0.55));
+}
 .btn-ghost {
-  border-color: var(--border-strong);
-  background: var(--surface-2);
+  background: none;
   color: var(--text-muted);
 }
 .btn-ghost:hover {
-  border-color: var(--frame);
-  background: var(--chip);
+  background: none;
   color: var(--cyan);
 }
 .icon-btn {
-  border-color: var(--border);
-  background: var(--surface);
-  color: var(--text-muted);
+  border: 1px solid transparent;
+  border-image: var(--hud-btn) 18 fill / 18px;
+  background: none;
+  color: var(--text);
 }
 .icon-btn:hover {
-  border-color: var(--frame);
-  background: var(--chip);
+  border-image-source: var(--hud-btn-hot);
+  background: none;
   color: var(--cyan);
 }
 .text-link {
-  font: 600 13px/1 var(--font-display);
-  letter-spacing: 0.08em;
+  font: 700 13px/1 var(--font-display);
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
 /* ---------- header ---------- */
 .site-header.is-scrolled,
 .site-header.menu-open {
-  background: rgba(10, 12, 26, 0.9);
+  background: rgba(3, 12, 19, 0.88);
 }
 .nav-link {
   color: var(--text-subtle);
@@ -2901,9 +3023,14 @@ a {
 }
 @media (max-width: 1023.98px) {
   .primary-nav {
-    border-color: var(--frame);
-    background: var(--surface);
-    box-shadow: 0 0 0 2px rgba(38, 150, 178, 0.16), 0 24px 48px -16px rgba(0, 0, 0, 0.8);
+    border: 1px solid transparent;
+    border-image: var(--hud-frame) 24 fill / 24px;
+    background: none;
+    box-shadow: none;
+    filter: drop-shadow(0 22px 30px rgba(0, 0, 0, 0.7));
+  }
+  .nav-list {
+    padding: 4px;
   }
   .nav-link {
     font-size: 12px;
@@ -2916,106 +3043,96 @@ a {
   .nav-link.is-active {
     background: var(--chip);
     color: var(--cyan);
-    box-shadow: inset 2px 0 0 var(--cyan);
+    box-shadow: inset 2px 0 0 var(--neon);
   }
 }
 
-/* ---------- panels and frames ---------- */
-.card {
-  background: var(--surface);
-}
-/* the app has no hover spotlight */
-.card[data-spotlight]::after {
-  display: none;
-}
-.hero::before,
-.page-hero::before {
-  /* the page background already carries the grid */
-  display: none;
-}
-
-/* Framed panels: cyan outline, soft glow and four corner brackets (drawn by one layer). */
-.price-card--featured,
-.license-card--featured,
-.contact-card--primary,
-.steps-panel,
-.cta-panel {
-  position: relative;
-  border-color: var(--frame);
-  box-shadow: 0 0 0 2px rgba(38, 150, 178, 0.16), 0 0 26px var(--glow);
-}
-.price-card--featured,
-.license-card--featured,
-.contact-card--primary,
-.steps-panel {
-  background: var(--surface);
-}
-.price-card--featured::before,
-.license-card--featured::before,
-.contact-card--primary::before,
-.steps-panel::before,
-.cta-panel::before {
-  content: "";
-  position: absolute;
-  inset: 8px;
-  pointer-events: none;
-  background:
-    linear-gradient(var(--bracket), var(--bracket)) top left / 13px 1px,
-    linear-gradient(var(--bracket), var(--bracket)) top left / 1px 13px,
-    linear-gradient(var(--bracket), var(--bracket)) top right / 13px 1px,
-    linear-gradient(var(--bracket), var(--bracket)) top right / 1px 13px,
-    linear-gradient(var(--bracket), var(--bracket)) bottom left / 13px 1px,
-    linear-gradient(var(--bracket), var(--bracket)) bottom left / 1px 13px,
-    linear-gradient(var(--bracket), var(--bracket)) bottom right / 13px 1px,
-    linear-gradient(var(--bracket), var(--bracket)) bottom right / 1px 13px;
-  background-repeat: no-repeat;
-}
-
-/* icon tiles: the app's chip (dark teal fill, cyan mark) */
+/* ---------- small tiles, labels and lights ---------- */
 .feature-icon,
-.step-icon,
-.timeline-num,
+.plan-icon,
 .status-icon,
-.plan-icon {
-  border: 1px solid var(--frame);
-  background: var(--chip);
+.notif-app {
+  border: 1px solid transparent;
+  border-image: var(--hud-tile) 12 fill / 12px;
+  background: none;
   color: var(--cyan);
   box-shadow: none;
+}
+/* numbered steps: the gradient tile */
+.step-icon,
+.timeline-num {
+  border: 1px solid transparent;
+  border-image: var(--hud-tile-grad) 12 fill / 12px;
+  background: none;
+  color: var(--on-accent);
+  box-shadow: none;
+  filter: drop-shadow(0 0 10px rgba(55, 239, 184, 0.3));
 }
 .timeline-num {
   font-family: var(--font-display);
 }
-
-/* status light, like the app's LED */
+.step:not(:last-child)::after {
+  border-color: var(--neon);
+}
+.pill {
+  padding: 9px 18px;
+  border: 1px solid transparent;
+  border-image: var(--hud-pill) 12 fill / 12px;
+  background: none;
+  color: var(--text-muted);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
 .live-dot {
   background: var(--good);
-  box-shadow: 0 0 0 3px rgba(0, 210, 120, 0.18);
+  box-shadow: 0 0 0 3px rgba(43, 243, 145, 0.22), 0 0 10px var(--good);
 }
 .live-dot::after {
   background: var(--good);
 }
+.chip-up,
+.engine-status,
+.ai-chip {
+  border-color: rgba(43, 243, 145, 0.5);
+  background: rgba(43, 243, 145, 0.1);
+  color: var(--good);
+}
+.chip-gold {
+  border-color: rgba(255, 210, 63, 0.5);
+  background: rgba(255, 210, 63, 0.1);
+  color: var(--warn);
+}
 
 /* ---------- hero ---------- */
-.pill {
-  border-color: var(--border);
-  background: var(--surface);
-  color: var(--text-subtle);
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-}
 .hero-points .icon {
   color: var(--good);
 }
-.float-card {
-  border-color: var(--frame);
-  background: rgba(17, 18, 38, 0.9);
-  box-shadow: 0 0 0 2px rgba(38, 150, 178, 0.16), 0 18px 36px -18px rgba(0, 0, 0, 0.9);
+.hero-orbit {
+  border-color: rgba(25, 211, 255, 0.24);
+}
+.ticker {
+  color: var(--neon);
+  font: 700 13px/1 var(--font-display);
+  letter-spacing: 0.04em;
+}
+.ticker span {
+  color: var(--text);
 }
 .trend-up {
   color: var(--good);
+  font: 600 12px/1 var(--font-display);
+  letter-spacing: 0.02em;
+}
+.spark-line {
+  stroke: var(--good);
+}
+.float-label {
+  color: var(--text-subtle);
 }
 /* gradient stops written inside the page's SVG */
-#spark-fill stop,
+#spark-fill stop {
+  stop-color: var(--good);
+}
 #cone-fill stop,
 #forecast-stroke stop {
   stop-color: var(--cyan);
@@ -3026,116 +3143,84 @@ a {
   border-color: var(--border);
   background: var(--bg);
 }
-.chip-up {
-  border-color: #00aa69;
-  background: #0a3828;
-  color: var(--good);
-}
-.chip-gold {
-  border-color: #b98a00;
-  background: #3a2a06;
-  color: var(--warn);
-}
 .radar::after {
   background: var(--cyan);
 }
 .radar-core {
-  border-color: var(--border);
+  border-color: var(--border-strong);
   background: var(--bg);
-}
-.engine-status {
-  border-color: #00aa69;
-  background: #0a3828;
-  color: var(--good);
 }
 .phone {
   border-color: var(--frame);
   background: var(--bg);
-  box-shadow: 0 0 0 2px rgba(38, 150, 178, 0.16);
+  box-shadow: 0 0 24px var(--glow);
 }
 .phone-notch {
   display: none;
 }
-.ai-chip {
-  border-color: #00aa69;
-  background: #0a3828;
-  color: var(--good);
-}
 .ai-orb-core {
-  box-shadow: 0 0 34px rgba(34, 211, 238, 0.4);
+  box-shadow: 0 0 34px rgba(55, 239, 184, 0.45);
 }
-/* the app's two state buttons: amber "Pause" while running, green "Activate" while paused */
-.ai-toggle {
-  border-color: #b98a00;
-  background: #3a2a06;
+/* the two state buttons: amber "Pause" while running, the gradient "Activate" while paused */
+.ai-toggle,
+.ai-toggle:hover {
+  overflow: visible;
+  border: 1px solid transparent;
+  border-image: var(--hud-btn-warn) 18 fill / 18px;
+  background: none;
   color: var(--warn);
-  font: 600 13px/1 var(--font-display);
-  letter-spacing: 0.08em;
+  font: 700 13px/1 var(--font-display);
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 .ai-toggle:hover {
-  border-color: var(--warn);
+  filter: brightness(1.2);
 }
 .ai-toggle::before {
   display: none;
 }
 .ai-panel[data-state="paused"] .ai-toggle {
-  border-color: var(--good);
-  background: var(--good);
-  color: #04130c;
+  border-image-source: var(--hud-btn-primary);
+  background: none;
+  color: var(--on-accent);
   box-shadow: none;
-}
-.notif {
-  border-color: var(--border);
-  background: var(--surface-2);
-  box-shadow: none;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-}
-.notif--main {
-  border-color: var(--frame);
-  box-shadow: 0 0 0 2px rgba(38, 150, 178, 0.16);
-}
-.notif-app {
-  background: var(--bg);
+  filter: drop-shadow(0 0 12px rgba(55, 239, 184, 0.4));
 }
 .pos,
 .notif-badge {
   color: var(--good);
 }
 .notif-badge {
-  background: #0a3828;
+  background: rgba(43, 243, 145, 0.14);
 }
 
 /* ---------- steps, pricing, faq ---------- */
-.step {
-  border-color: var(--border);
-  background: var(--bg);
-}
 .plan-features .icon,
 .price-card--featured .plan-features .icon {
   color: var(--good);
 }
 .price-card--featured .plan-tag {
-  color: var(--cyan);
+  color: var(--neon);
 }
-.faq-item {
-  background: var(--surface);
-}
-.faq-item[open] {
-  border-color: var(--frame);
+/* the featured plan's icon is the gradient tile */
+.price-card--featured .plan-icon,
+.license-card--featured .plan-icon {
+  border-image-source: var(--hud-tile-grad);
+  background: none;
+  color: var(--on-accent);
 }
 
 /* ---------- sub-pages ---------- */
+/* big numbers carry the gradient */
 .stat-value {
-  color: var(--cyan);
-}
-.callout {
-  border-color: var(--frame);
-  background: var(--chip);
+  background: var(--grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
 }
 .compare .is-featured {
-  background: rgba(34, 211, 238, 0.06);
+  background: rgba(25, 211, 255, 0.06);
 }
 .icon-yes,
 .check-list .icon,
@@ -3146,22 +3231,19 @@ a {
 .toc a.is-active {
   background: var(--chip);
   color: var(--cyan);
-  box-shadow: inset 2px 0 0 var(--cyan);
+  box-shadow: inset 2px 0 0 var(--neon);
 }
 .fill {
-  background: #3a2a06;
+  background: rgba(255, 210, 63, 0.14);
   color: var(--warn);
 }
 
 /* ---------- footer ---------- */
 .site-footer {
-  background: var(--bg);
-}
-.risk {
-  background: var(--surface);
+  background: rgba(2, 8, 12, 0.72);
 }
 
-/* ---------- data rows: capital mono label, Oxanium value (the app's .cap + .line) ---------- */
+/* ---------- data rows: capital mono label, Oxanium value ---------- */
 .spec-table th,
 .compare tbody th,
 .license-card dt,
@@ -3187,9 +3269,53 @@ a {
   font-family: var(--font-display);
 }
 
-/* keep the hero's floating status card inside the page on desktop */
+/* Hero cards placed around the robot: "AI model" in the empty corner beside its head and above
+   its tablet, the XAUUSD card over its arm, so neither covers the face or the tablet. */
+.float-status {
+  top: 1%;
+  right: -9%;
+  padding: 10px 12px;
+}
+.float-signal {
+  left: -9%;
+  top: 44%;
+}
+/* very small phones: slimmer cards, so the face and the chest logo stay clear */
+@media (max-width: 359.98px) {
+  .float-status .status-icon {
+    display: none;
+  }
+  .float-signal {
+    left: -10%;
+    width: 146px;
+  }
+}
+@media (min-width: 560px) {
+  .float-status {
+    top: 3%;
+    right: -16%;
+  }
+  .float-signal {
+    left: -16%;
+    top: 42%;
+  }
+}
 @media (min-width: 960px) {
   .float-status {
-    right: 0;
+    top: 5%;
+    right: -4%;
+  }
+  /* stays inside the gap between the two columns, clear of the text */
+  .float-signal {
+    left: -10%;
+    top: 40%;
+  }
+}
+
+/* nothing glows or moves more than it must when motion is reduced */
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .ai-toggle {
+    transition: none;
   }
 }

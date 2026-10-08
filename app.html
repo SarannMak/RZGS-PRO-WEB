@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0a0c1a">
+<meta name="theme-color" content="#030c13">
 <meta name="robots" content="noindex">
 <script>
 /* never run over plain http: the login and the commands must travel encrypted */
@@ -15,14 +15,30 @@ if (location.protocol === 'http:' && !/^(localhost|127\.0\.0\.1)$/.test(location
 <style>
 html{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 /* Layout: one-screen phone console. Header strip, a scrolling deck of panels, a bottom dock.
-   On wide screens the console stays a centered 480px column. Palette and corner brackets
-   follow the bot's own MT5 chart dashboard. Single dark look by choice. */
+   On wide screens the console stays a centered 480px column. Single dark look by choice.
+   The look is the website's neon HUD: see the rules at the end of this block. */
 :root{
   color-scheme:dark;
-  --bg:#0a0c1a; --panel:#111226; --panel-2:#171a34; --line:#262a42; --grid:rgba(38,150,178,.07);
-  --frame:#2696b2; --glow:rgba(34,211,238,.14); --cyan:#22d3ee; --chip:#0e3040; --bracket:#96a5b9;
-  --title:#f2f4fa; --body:#c8cdde; --muted:#7f87a8;
-  --good:#00d278; --bad:#ff5252; --warn:#ffd600; --buy:#4aa8ff; --sell:#ff9800;
+  --bg:#030c13; --panel:#071922; --panel-2:#0a2330; --line:#123644; --line-2:#1c4f61; --grid:rgba(25,211,255,.05);
+  --frame:#1fb6d6; --glow:rgba(25,211,255,.22); --cyan:#19d3ff; --neon:#a6ff1a; --chip:#062b38; --bracket:#a6ff1a;
+  --title:#f3fbff; --body:#c9dde6; --muted:#7fa3b3;
+  --good:#2bf391; --bad:#ff5a6a; --warn:#ffd23f; --buy:#4aa8ff; --sell:#ff9a3d;
+  --on:#02131a; --grad:linear-gradient(90deg,var(--cyan) 0%,#37efb8 52%,var(--neon) 100%);
+  /* cut-corner frames: small pictures stretched around a box with border-image (see the Neon HUD rules at the end) */
+  --hud-panel:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M10.21 0.5H47.5V37.79L37.79 47.5H0.5V10.21Z' fill='%23071922' stroke='%23164656'/%3E%3Cpath d='M.5 10.21L10.21 .5M47.5 37.79L37.79 47.5' fill='none' stroke='%231fb6d6'/%3E%3C/svg%3E");
+  --hud-callout:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M10.21 0.5H47.5V37.79L37.79 47.5H0.5V10.21Z' fill='%23062b38' stroke='%231fb6d6'/%3E%3Cpath d='M.5 10.21L10.21 .5M47.5 37.79L37.79 47.5' fill='none' stroke='%23a6ff1a'/%3E%3C/svg%3E");
+  --hud-line:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M10.21 0.5H47.5V37.79L37.79 47.5H0.5V10.21Z' fill='none' stroke='%231c5567'/%3E%3Cpath d='M.5 10.21L10.21 .5M47.5 37.79L37.79 47.5' fill='none' stroke='%231fb6d6'/%3E%3C/svg%3E");
+  --hud-frame:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cdefs%3E%3ClinearGradient id='g' gradientUnits='userSpaceOnUse' x1='24' y1='0' x2='48' y2='0'%3E%3Cstop offset='0' stop-color='%2319d3ff'/%3E%3Cstop offset='1' stop-color='%233fe9a6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M14.31 0.75H71.25V57.69L57.69 71.25H0.75V14.31Z' fill='%23061c26' stroke='url(%23g)' stroke-width='1.5'/%3E%3Cpath d='M1.5 22V14.62L14.62 1.5H22M70.5 50V57.38L57.38 70.5H50' fill='none' stroke='%23a6ff1a' stroke-width='3'/%3E%3C/svg%3E");
+  --hud-btn:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='54' height='54' viewBox='0 0 54 54'%3E%3Cpath d='M13.21 0.5H53.5V40.79L40.79 53.5H0.5V13.21Z' fill='%230a2330' stroke='%231f5a6d'/%3E%3C/svg%3E");
+  --hud-btn-primary:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='54' height='54' viewBox='0 0 54 54'%3E%3Cdefs%3E%3ClinearGradient id='g' gradientUnits='userSpaceOnUse' x1='18' y1='0' x2='36' y2='0'%3E%3Cstop offset='0' stop-color='%2319d3ff'/%3E%3Cstop offset='0.5' stop-color='%2337efb8'/%3E%3Cstop offset='1' stop-color='%23a6ff1a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M13 0H54V41L41 54H0V13Z' fill='url(%23g)'/%3E%3Cpath d='M0 4L4 0M0 8.5L8.5 0' stroke='%2319d3ff' stroke-width='1.5'/%3E%3Cpath d='M50 54L54 50M45.5 54L54 45.5' stroke='%23a6ff1a' stroke-width='1.5'/%3E%3C/svg%3E");
+  --hud-btn-danger:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='54' height='54' viewBox='0 0 54 54'%3E%3Cpath d='M13.21 0.5H53.5V40.79L40.79 53.5H0.5V13.21Z' fill='%232c0f19' stroke='%23b23a4c'/%3E%3C/svg%3E");
+  --hud-btn-warn:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='54' height='54' viewBox='0 0 54 54'%3E%3Cpath d='M13.21 0.5H53.5V40.79L40.79 53.5H0.5V13.21Z' fill='%232e2408' stroke='%23b98f14'/%3E%3C/svg%3E");
+  --hud-frame-danger:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cpath d='M14.31 0.75H71.25V57.69L57.69 71.25H0.75V14.31Z' fill='%231a0b12' stroke='%23b23a4c' stroke-width='1.5'/%3E%3Cpath d='M1.5 22V14.62L14.62 1.5H22M70.5 50V57.38L57.38 70.5H50' fill='none' stroke='%23ff5a6a' stroke-width='3'/%3E%3C/svg%3E");
+  --hud-btn-go:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='54' height='54' viewBox='0 0 54 54'%3E%3Cpath d='M13.21 0.5H53.5V40.79L40.79 53.5H0.5V13.21Z' fill='%23062a1f' stroke='%231fae6b'/%3E%3C/svg%3E");
+  --hud-btn-go-on:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='54' height='54' viewBox='0 0 54 54'%3E%3Cpath d='M13 0H54V41L41 54H0V13Z' fill='%232bf391'/%3E%3C/svg%3E");
+  --hud-btn-hold-on:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='54' height='54' viewBox='0 0 54 54'%3E%3Cpath d='M13 0H54V41L41 54H0V13Z' fill='%23ff9a3d'/%3E%3C/svg%3E");
+  --hud-btn-danger-on:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='54' height='54' viewBox='0 0 54 54'%3E%3Cpath d='M13 0H54V41L41 54H0V13Z' fill='%23ff5a6a'/%3E%3C/svg%3E");
+  --cut-10:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);
   --f-display:'Oxanium','Segoe UI',system-ui,sans-serif;
   --f-body:'IBM Plex Sans','Segoe UI',system-ui,sans-serif;
   --f-mono:'IBM Plex Mono',Consolas,'Courier New',monospace;
@@ -242,6 +258,61 @@ nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;st
 .set input:disabled{opacity:.75;-webkit-text-fill-color:var(--body)}
 .sw-in:disabled{opacity:.6;cursor:default}
 .set input[type=password]{flex:none;background:var(--bg);border:1px solid var(--line);padding:9px 8px;font:500 15px var(--f-mono);color:var(--title);border-radius:2px}
+/* ==========================================================================
+   Neon HUD look, the same as the website: deep teal-black, cyan + lime neon, cut-corner frames.
+   The colours are set in :root at the top. The rules below only change shapes and fills;
+   the script does not depend on any of them.
+   ========================================================================== */
+body{
+  background-image:radial-gradient(ellipse 100% 60% at 50% 0%,rgba(20,150,175,.2),transparent 70%),
+    linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:100% 720px,32px 32px,32px 32px;background-repeat:no-repeat,repeat,repeat;
+}
+/* key frame (login, core, dialogs): cyan line, lime corner marks, soft glow. The old corner brackets are not drawn. */
+.frame{border:1px solid transparent;border-image:var(--hud-frame) 24 fill / 24px;background:none;box-shadow:none;filter:drop-shadow(0 0 12px var(--glow))}
+.frame::before,.frame::after,.frame>.br::before,.frame>.br::after{display:none}
+.sheet-card{border-image-source:var(--hud-frame-danger);box-shadow:none;filter:drop-shadow(0 0 12px rgba(255,90,106,.28))}
+.panel{border:1px solid transparent;border-image:var(--hud-panel) 16 fill / 16px;background:none}
+#toast{border:1px solid transparent;border-image:var(--hud-callout) 16 fill / 16px;background:none}
+#sheet,#quit{background:rgba(1,6,10,.84)}
+
+/* buttons: cut corners; the picture supplies the fill, so the plain background is off */
+.btn,.btn.primary,.btn.go,.btn.hold,.btn.danger,.btn.on,.btn.go.on,.btn.hold.on,.btn.danger.on{
+  border:1px solid transparent;border-image:var(--hud-btn) 18 fill / 18px;background:none}
+.btn{font-weight:700;letter-spacing:.1em;transition:color .18s,filter .18s}
+.btn.primary,.btn.on{border-image-source:var(--hud-btn-primary);color:var(--on)}
+.btn.go{border-image-source:var(--hud-btn-go);color:var(--good)}
+.btn.hold{border-image-source:var(--hud-btn-warn);color:var(--warn)}
+.btn.danger{border-image-source:var(--hud-btn-danger);color:#ff9aa5}
+.btn.go.on{border-image-source:var(--hud-btn-go-on);color:#04130c}
+.btn.hold.on{border-image-source:var(--hud-btn-hold-on);color:#1a0f00}
+.btn.danger.on{border-image-source:var(--hud-btn-danger-on);color:#2a0508}
+.btn:disabled{opacity:.6}
+/* every press still flashes: the whole button lights up for a moment */
+@keyframes flash{from{filter:brightness(2.3) saturate(.45) drop-shadow(0 0 12px var(--cyan))}}
+.icon-btn{border:1px solid transparent;border-image:var(--hud-btn) 18 fill / 18px;background:none;color:var(--body)}
+
+/* switches, dock, inputs */
+.seg{border:1px solid transparent;border-image:var(--hud-line) 16 / 16px;clip-path:var(--cut-10)}
+.seg button[aria-selected="true"]{box-shadow:inset 0 -2px 0 var(--neon)}
+nav button[aria-selected="true"]{border-top-color:var(--neon)}
+.field input,.set input[type=number],.set input[type=text],.set input[type=password],.sw-in{border-color:var(--line-2)}
+.field input:focus,.set input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(25,211,255,.2)}
+.sw-in:checked{border-color:var(--cyan)}
+.sw-in:checked::after{background:var(--neon)}
+
+/* accents: gradient brand and counters, lime marks, brighter lights */
+.brand{width:fit-content;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
+  filter:drop-shadow(0 0 14px rgba(25,211,255,.3))}
+.stats .num{align-self:flex-start;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.led{box-shadow:0 0 0 3px rgba(43,243,145,.2)}
+.led.warn{box-shadow:0 0 0 3px rgba(255,210,63,.2)}
+.led.bad{box-shadow:0 0 0 3px rgba(255,90,106,.22)}
+.eye circle:nth-of-type(1){stroke:var(--line-2)}
+.eye circle:nth-of-type(2){stroke:var(--frame)}
+.eye .sweep{fill:var(--cyan)}
+.eye circle:nth-of-type(3){fill:var(--neon)}
+.demo-flag{border-color:rgba(255,210,63,.45)}
 </style>
 </head>
 <body>

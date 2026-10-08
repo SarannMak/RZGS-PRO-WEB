@@ -141,9 +141,9 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
    ========================================================================== */
 const canvas = document.getElementById('bg-canvas');
 const ctx = canvas.getContext('2d');
-const UP = '0, 210, 120';
-const DOWN = '255, 82, 82';
-const LIME = '34, 211, 238';
+const UP = '43, 243, 145';
+const DOWN = '24, 160, 200';
+const LIME = '25, 211, 255';
 
 let width = 0;
 let height = 0;
