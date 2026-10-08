@@ -434,13 +434,12 @@ a.trial-banner > .icon {
   margin-left: auto;
   color: var(--lime);
 }
+/* phones: the trial panel comes under the box, with its three points (on wide screens it sits beside the box) */
 .trial-panel {
-  order: -1;
   display: grid;
   gap: 20px;
 }
 .trial-panel .check-list {
-  display: none;
   padding: 0 4px;
 }
 
@@ -1377,4 +1376,54 @@ a.trial-banner:hover {
   @view-transition {
     navigation: none;
   }
+}
+
+/* ==========================================================================
+   Profile picture (dashboard): the tile shows the photo, or the first letter of the name when there is none
+   ========================================================================== */
+.avatar-lg,
+.avatar-xl {
+  position: relative;
+}
+.avatar-xl {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 88px;
+  height: 88px;
+  border: 1px solid transparent;
+  border-image: var(--hud-tile) 12 fill / 12px;
+  color: var(--cyan);
+  font: 700 34px/1 var(--font-display);
+}
+/* the photo sits inside the frame line and is cut at the same two corners */
+.avatar-lg img,
+.avatar-xl img {
+  position: absolute;
+  inset: 3px;
+  width: calc(100% - 6px);
+  height: calc(100% - 6px);
+  object-fit: cover;
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}
+.avatar-edit {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.avatar-edit-body {
+  flex: 1;
+  min-width: 0;
+}
+.avatar-edit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+}
+.avatar-edit-body .dash-hint {
+  margin-top: 8px;
+}
+.avatar-edit-body .form-msg {
+  margin-top: 8px;
 }

@@ -548,7 +548,7 @@
     try {
       const { data } = await db
         .from('web_users')
-        .select('full_name, username, email, country, phone, telegram_username, mt5_account, broker, plan, plan_expires_at, created_at, email_confirmed_at, last_sign_in_at, accepted_terms_at')
+        .select('full_name, username, avatar_url, email, country, phone, telegram_username, mt5_account, broker, plan, plan_expires_at, created_at, email_confirmed_at, last_sign_in_at, accepted_terms_at')
         .eq('id', user.id)
         .maybeSingle();
       if (data) profile = data;
@@ -575,12 +575,134 @@
     });
     setupTabs($$('.dash-seg [role="tab"]', root))($('.dash-seg [role="tab"]', root));
 
+    /* ----- profile picture ----- */
+    // The picture is a small file in the "avatars" storage bucket, in a folder named after the person's own id.
+    // Its address is kept in the profile (avatar_url). Only a picture from that folder is ever shown.
+    const AVATAR_BUCKET = 'avatars';
+    const avatarFolder = `${SUPABASE_URL}/storage/v1/object/public/${AVATAR_BUCKET}/${user.id}/`;
+    const avatarEdit = $('[data-avatar-edit]', root);
+    const avatarFile = $('[data-avatar-file]', avatarEdit);
+    const avatarPick = $('[data-avatar-pick]', avatarEdit);
+    const avatarRemove = $('[data-avatar-remove]', avatarEdit);
+    const avatarAddress = () => {
+      const url = stored('avatar_url');
+      return url.startsWith(avatarFolder) ? url : '';
+    };
+
+    // the photo, or the first letter of the name: at the top of the dashboard and on the Profile tab
+    function renderAvatar(name) {
+      const letter = name.trim().charAt(0).toUpperCase() || 'R';
+      const url = avatarAddress();
+      $$('[data-dash-avatar], [data-avatar-preview]', root).forEach((box) => {
+        if (!url) { box.textContent = letter; return; }
+        const img = new Image();
+        img.alt = '';
+        img.onerror = () => { box.textContent = letter; }; // the file is gone: back to the letter
+        img.src = url;
+        box.replaceChildren(img);
+      });
+      avatarRemove.hidden = !url;
+    }
+
+    // Cut the photo to a centred square of 320 px, so only a light JPEG is sent (a phone photo is several MB).
+    async function squarePhoto(file) {
+      let source;
+      try {
+        source = await createImageBitmap(file, { imageOrientation: 'from-image' });
+      } catch (e) {
+        source = await new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = reject;
+          img.src = URL.createObjectURL(file);
+        });
+      }
+      const width = source.naturalWidth || source.width;
+      const height = source.naturalHeight || source.height;
+      const side = Math.min(width, height);
+      const canvas = document.createElement('canvas');
+      canvas.width = 320;
+      canvas.height = 320;
+      canvas.getContext('2d').drawImage(source, (width - side) / 2, (height - side) / 2, side, side, 0, 0, 320, 320);
+      return new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.86));
+    }
+
+    function avatarBusy(busy) {
+      setBusy(avatarPick, busy);
+      avatarRemove.disabled = busy;
+    }
+
+    // keep one file in the person's folder (or none): older pictures are deleted
+    async function tidyAvatars(keep) {
+      try {
+        const { data } = await db.storage.from(AVATAR_BUCKET).list(user.id);
+        const old = (data || []).map((file) => `${user.id}/${file.name}`).filter((path) => path !== keep);
+        if (old.length) await db.storage.from(AVATAR_BUCKET).remove(old);
+      } catch (e) { /* a leftover file does no harm */ }
+    }
+
+    async function saveAvatar(url) {
+      const { data, error } = await db.auth.updateUser({ data: { avatar_url: url } });
+      if (error) return error;
+      if (data && data.user) user = data.user;
+      profile.avatar_url = url;
+      renderHeader();
+      return null;
+    }
+
+    avatarPick.addEventListener('click', () => avatarFile.click());
+    avatarFile.addEventListener('change', async () => {
+      const file = avatarFile.files[0];
+      avatarFile.value = ''; // the same photo can be picked again later
+      if (!file) return;
+      if (!/^image\/(jpeg|png|webp)$/.test(file.type)) {
+        formMessage(avatarEdit, 'Choose a JPG, PNG or WebP picture.', 'error');
+        return;
+      }
+      avatarBusy(true);
+      let photo = null;
+      try { photo = await squarePhoto(file); } catch (e) { /* not a picture the browser can read */ }
+      if (!photo) {
+        avatarBusy(false);
+        formMessage(avatarEdit, "We couldn't read this picture. Try another one.", 'error');
+        return;
+      }
+      // a new file name every time, so no browser keeps showing the old picture
+      const path = `${user.id}/avatar-${Date.now()}.jpg`;
+      const { error: uploadError } = await db.storage.from(AVATAR_BUCKET)
+        .upload(path, photo, { contentType: 'image/jpeg', cacheControl: '31536000' });
+      if (uploadError) {
+        avatarBusy(false);
+        formMessage(avatarEdit, navigator.onLine ? "We couldn't save the picture. Please try again." : "You're offline. Check your connection and try again.", 'error');
+        return;
+      }
+      const error = await saveAvatar(avatarFolder + path.split('/')[1]);
+      avatarBusy(false);
+      if (error) {
+        formMessage(avatarEdit, friendlyError(error), 'error');
+        return;
+      }
+      formMessage(avatarEdit, 'Profile picture saved.', 'success');
+      tidyAvatars(path);
+    });
+    avatarRemove.addEventListener('click', async () => {
+      avatarBusy(true);
+      const error = await saveAvatar('');
+      avatarBusy(false);
+      if (error) {
+        formMessage(avatarEdit, friendlyError(error), 'error');
+        return;
+      }
+      formMessage(avatarEdit, 'Profile picture removed.', 'success');
+      tidyAvatars('');
+    });
+
     /* ----- header + core ----- */
     function renderHeader() {
       const name = stored('full_name') || stored('username') || 'RZGS-PRO member';
       const email = profile.email || user.email || '';
       $('[data-dash-name]').textContent = name.trim().split(/\s+/)[0];
-      $('[data-dash-avatar]').textContent = name.trim().charAt(0).toUpperCase() || 'R';
+      renderAvatar(name);
       setAll('[data-dash-email]', email);
     }
 
