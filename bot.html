@@ -63,6 +63,11 @@
     <symbol id="i-circle-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></symbol>
     <symbol id="i-ban" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></symbol>
     <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></symbol>
+    <symbol id="i-app-core" viewBox="0 0 24 24"><path d="M12 3l7.8 4.5v9L12 21l-7.8-4.5v-9z"/><circle cx="12" cy="12" r="2.6"/></symbol>
+    <symbol id="i-app-trades" viewBox="0 0 24 24"><path d="M12 3v18M5 7h5M5 12h5M14 10h5M14 16h5"/></symbol>
+    <symbol id="i-app-control" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></symbol>
+    <symbol id="i-app-tools" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></symbol>
+    <symbol id="i-app-log" viewBox="0 0 24 24"><path d="M8 7h12M8 12h12M8 17h12M4 7h.01M4 12h.01M4 17h.01"/></symbol>
   </svg>
 
   <!-- Animated background -->
@@ -193,39 +198,40 @@
       <div class="container">
         <header class="section-head reveal">
           <p class="kicker">What's inside</p>
-          <h2 class="section-title" id="bot-features-title">Simple controls, <span class="text-gradient">smart engine</span></h2>
+          <h2 class="section-title" id="bot-features-title">The control app, <span class="text-gradient">tab by tab</span></h2>
+          <p class="section-lead">You run the bot from your phone. Five tabs, one screen at a time.</p>
         </header>
 
         <div class="feature-grid">
           <article class="card mini-feature reveal">
-            <span class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg></span>
-            <h3>Choice of AI models</h3>
-            <p>Pick the AI model you want to trade with before you start.</p>
+            <span class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-app-core"/></svg></span>
+            <h3>Core: live status</h3>
+            <p>See if the bot is active, paused or in cooldown, which grid level it is on, the risk level and the next entry price. Balance, equity, today's profit, floating P/L and drawdown update live.</p>
           </article>
           <article class="card mini-feature reveal" style="--d: 60ms">
-            <span class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-pointer"/></svg></span>
-            <h3>One-tap Activate / Pause</h3>
-            <p>Start AI trading with one tap and pause it with another, whenever you like.</p>
+            <span class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-app-trades"/></svg></span>
+            <h3>Trades: grid ladder</h3>
+            <p>A gold chart shows every open buy and sell with its lot, the next entry, and the price where each side closes. Below it are both baskets and the list of open positions.</p>
           </article>
           <article class="card mini-feature reveal" style="--d: 120ms">
-            <span class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-timer"/></svg></span>
-            <h3>Automatic closing</h3>
-            <p>Each trade runs for a fixed period and closes on its own.</p>
+            <span class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-app-control"/></svg></span>
+            <h3>Control: run the bot</h3>
+            <p>Activate or pause with one tap, or let the running cycle finish. Choose Basic, Smart or High risk lots, add a cooldown, or close buys, sells or everything. Every close asks you to confirm.</p>
           </article>
           <article class="card mini-feature reveal">
-            <span class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-target"/></svg></span>
-            <h3>Take profit</h3>
-            <p>Close the basket on your holding when you want to lock in the result.</p>
+            <span class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-app-tools"/></svg></span>
+            <h3>Tools: settings, risk and report</h3>
+            <p>See the settings your bot runs with. The risk calculator shows the floating result at each grid level if price keeps moving one way. The report shows today's closed profit, TP hits, baskets and the last 7 days.</p>
           </article>
           <article class="card mini-feature reveal" style="--d: 60ms">
-            <span class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg></span>
-            <h3>Cooldown between trades</h3>
-            <p>After a trade closes, the system waits through a short cooldown before the next one.</p>
+            <span class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-app-log"/></svg></span>
+            <h3>Log: alerts from the bot</h3>
+            <p>Every TP hit, basket close, cooldown and risk warning is listed with its time, together with the commands you sent.</p>
           </article>
           <article class="card mini-feature reveal" style="--d: 120ms">
-            <span class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-bell"/></svg></span>
-            <h3>Trade notifications</h3>
-            <p>See when a trade closes and when the system is in cooldown.</p>
+            <span class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-key"/></svg></span>
+            <h3>A private link to your bot</h3>
+            <p>Log in with your MT5 account number and the app password you set in the bot inputs. In the app you can change that password, see how many devices are logged in and log the others out.</p>
           </article>
         </div>
       </div>
