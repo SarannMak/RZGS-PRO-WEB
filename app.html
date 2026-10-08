@@ -290,6 +290,21 @@ body{
 .btn:disabled{opacity:.6}
 /* every press still flashes: the whole button lights up for a moment */
 @keyframes flash{from{filter:brightness(2.3) saturate(.45) drop-shadow(0 0 12px var(--cyan))}}
+/* gradient buttons: a neon frame flows around the button and a gloss sweeps across it (the same effect as on the website) */
+@property --beam{syntax:"<angle>";inherits:false;initial-value:0deg}
+.btn.primary,.btn.on{position:relative;isolation:isolate}
+.btn.primary::after,.btn.on:not(.go):not(.hold):not(.danger)::after{content:"";position:absolute;inset:-5px;pointer-events:none;
+  clip-path:polygon(evenodd, 15.93px 0, 100% 0, 100% calc(100% - 15.93px), calc(100% - 15.93px) 100%, 0 100%, 0 15.93px, 15.93px 0, 16.76px 2px, calc(100% - 2px) 2px, calc(100% - 2px) calc(100% - 16.76px), calc(100% - 16.76px) calc(100% - 2px), 2px calc(100% - 2px), 2px 16.76px, 16.76px 2px);
+  background:conic-gradient(from var(--beam), rgba(25, 211, 255, 0.3) 0%, var(--cyan) 26%, var(--neon) 43%, #fff 49.4%, rgba(25, 211, 255, 0.3) 50%, var(--cyan) 76%, var(--neon) 93%, #fff 99.4%, rgba(25, 211, 255, 0.3) 100%);
+  animation:beam 3.6s linear infinite}
+.btn.primary::before,.btn.on:not(.go):not(.hold):not(.danger)::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  clip-path:polygon(13px 0, 100% 0, 100% calc(100% - 13px), calc(100% - 13px) 100%, 0 100%, 0 13px);
+  background:linear-gradient(110deg, transparent 42%, rgba(255, 255, 255, 0.7) 50%, transparent 58%) 87.5% 0 / 300% 100% no-repeat;
+  animation:gloss 3.6s ease-in-out infinite}
+@keyframes beam{to{--beam:360deg}}
+@keyframes gloss{0%,55%{background-position:87.5% 0}100%{background-position:12.5% 0}}
+.btn:disabled::after,.btn:disabled::before,.btn:focus-visible::after{display:none}
+@media (prefers-reduced-motion:reduce){.btn.primary::after,.btn.on::after{background:rgba(25, 211, 255, 0.3);animation:none}.btn.primary::before,.btn.on::before{display:none}}
 .icon-btn{border:1px solid transparent;border-image:var(--hud-btn) 18 fill / 18px;background:none;color:var(--body)}
 
 /* switches, dock, inputs */

@@ -2819,6 +2819,85 @@ a {
 .btn-primary:hover {
   filter: brightness(1.08) drop-shadow(0 0 16px rgba(55, 239, 184, 0.55));
 }
+/* Gradient buttons: a neon frame flows around the button and a gloss sweeps across it.
+   ::after is a thin line just outside the button that follows the cut corners. It is always lit,
+   and a turning gradient sends two bright streams along it.
+   ::before is the gloss: a soft band of light that crosses the button face, under the label.
+   Without support for animated custom properties the frame simply stands still. */
+@property --beam {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+.btn-primary,
+.btn.is-on,
+.ai-panel[data-state="paused"] .ai-toggle {
+  position: relative;
+  isolation: isolate;
+}
+.btn-primary::after,
+.btn.is-on::after,
+.ai-panel[data-state="paused"] .ai-toggle::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  pointer-events: none;
+  clip-path: polygon(evenodd, 15.93px 0, 100% 0, 100% calc(100% - 15.93px), calc(100% - 15.93px) 100%, 0 100%, 0 15.93px, 15.93px 0, 16.76px 2px, calc(100% - 2px) 2px, calc(100% - 2px) calc(100% - 16.76px), calc(100% - 16.76px) calc(100% - 2px), 2px calc(100% - 2px), 2px 16.76px, 16.76px 2px);
+  background: conic-gradient(from var(--beam), rgba(25, 211, 255, 0.3) 0%, var(--cyan) 26%, var(--neon) 43%, #fff 49.4%, rgba(25, 211, 255, 0.3) 50%, var(--cyan) 76%, var(--neon) 93%, #fff 99.4%, rgba(25, 211, 255, 0.3) 100%);
+  animation: beam 3.6s linear infinite;
+}
+/* (a busy button keeps its ::before for the spinner) */
+.btn-primary:not(.is-busy)::before,
+.btn.is-on:not(.is-busy)::before,
+.ai-panel[data-state="paused"] .ai-toggle::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  display: block;
+  opacity: 1;
+  pointer-events: none;
+  clip-path: polygon(13px 0, 100% 0, 100% calc(100% - 13px), calc(100% - 13px) 100%, 0 100%, 0 13px);
+  background: linear-gradient(110deg, transparent 42%, rgba(255, 255, 255, 0.7) 50%, transparent 58%) 87.5% 0 / 300% 100% no-repeat;
+  animation: gloss 3.6s ease-in-out infinite;
+}
+@keyframes beam {
+  to {
+    --beam: 360deg;
+  }
+}
+/* the gloss waits, then crosses from left to right */
+@keyframes gloss {
+  0%,
+  55% {
+    background-position: 87.5% 0;
+  }
+  100% {
+    background-position: 12.5% 0;
+  }
+}
+/* no frame or gloss on a button that is busy, switched off or showing the keyboard focus ring */
+.btn:disabled::after,
+.btn:disabled:not(.is-busy)::before,
+.btn.is-busy::after,
+.btn:focus-visible::after,
+.ai-toggle:focus-visible::after {
+  display: none;
+}
+/* reduced motion: a quiet, still frame and no gloss */
+@media (prefers-reduced-motion: reduce) {
+  .btn-primary::after,
+  .btn.is-on::after,
+  .ai-panel[data-state="paused"] .ai-toggle::after {
+    background: rgba(25, 211, 255, 0.3);
+    animation: none;
+  }
+  .btn-primary:not(.is-busy)::before,
+  .btn.is-on:not(.is-busy)::before,
+  .ai-panel[data-state="paused"] .ai-toggle::before {
+    display: none;
+  }
+}
 .btn-ghost {
   background: none;
   color: var(--text-muted);
