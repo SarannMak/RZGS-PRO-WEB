@@ -331,6 +331,7 @@ body{
 @media (prefers-reduced-motion:reduce){.seg-glide{transition:none}}
 /* sliders in the settings (grid distance in Smart mode, basket profit): name left, amount right, a small round dot on the line */
 .sg{border-top:1px solid var(--line);padding-top:9px}
+.sg-first{border-top:0;padding-top:0}
 .sg-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .sg-head label{font-size:14px;color:var(--body);min-width:0}
 .sg-head label small{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:11.5px}
@@ -557,7 +558,12 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
       <form class="view" id="t-settings" autocomplete="off" novalidate>
         <section class="panel">
           <h2>Strategy</h2>
-          <div class="set"><label for="setTp">Take profit<small>points per trade</small></label><input id="setTp" type="number" inputmode="numeric" min="50" step="50"></div>
+          <div class="set" id="rowTp"><label for="setTp">Take profit<small>points per trade</small></label><input id="setTp" type="number" inputmode="numeric" min="50" step="50"></div>
+          <!-- take profit as a slider in $, with a bot that takes it from the app (it sends cfg.tpApp) -->
+          <div class="sg sg-first" id="tpBox" hidden>
+            <div class="sg-head"><label for="tpUsd">Take profit<small id="tpInfo">price move per trade</small></label><output id="tpUsdV" for="tpUsd">1.00$</output></div>
+            <div class="sg-line"><span class="sg-end">0.1</span><span class="sg-track"><input id="tpUsd" type="range" min="0.1" max="5" step="0.1" value="1"><i class="sg-ticks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></i></span><span class="sg-end" id="tpMax">5</span></div>
+          </div>
           <div class="set" id="rowGrid"><label for="setGrid">Grid distance<small>points after a TP hit</small></label><input id="setGrid" type="number" inputmode="numeric" min="50" step="50"></div>
           <!-- Smart mode: the grid distance follows the session. One slider: it shows and sets the session that counts now. -->
           <div class="sg" id="sgBox" hidden>
@@ -569,7 +575,7 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
           <!-- basket profit as a slider, with a bot that takes it from the app (it sends cfg.basketApp) -->
           <div class="sg" id="bkBox" hidden>
             <div class="sg-head"><label for="bkProfit">Basket profit<small>$ to close a whole side</small></label><output id="bkProfitV" for="bkProfit">0.10$</output></div>
-            <div class="sg-line"><span class="sg-end">0.1</span><span class="sg-track"><input id="bkProfit" type="range" min="0.1" max="1" step="0.05" value="0.1"><i class="sg-ticks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></i></span><span class="sg-end">1</span></div>
+            <div class="sg-line"><span class="sg-end">0.1</span><span class="sg-track"><input id="bkProfit" type="range" min="0.1" max="1" step="0.05" value="0.1"><i class="sg-ticks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></i></span><span class="sg-end" id="bkMax">1</span></div>
           </div>
           <div class="set"><label for="setLevels">Max grid levels<small>pairs per cycle</small></label><input id="setLevels" type="number" inputmode="numeric" min="1" max="30" step="1"></div>
           <div class="set"><label for="setCooldown">Cooldown<small>seconds after a cycle</small></label><input id="setCooldown" type="number" inputmode="numeric" min="0" step="5"></div>
@@ -1029,11 +1035,27 @@ function renderSmartGrid(s) {
   el.disabled = !online;
 }
 function renderBasket(s) {
-  const on = s.cfg.basketApp === true;
+  const c = s.cfg, on = c.basketApp === true;
   $('rowBasket').hidden = on; $('bkBox').hidden = !on;
   if (!on) return;
-  const el = $('bkProfit');
-  if (Date.now() - bkMoved > 6000 && !el.matches(':active')) { el.value = s.cfg.basket; slPaint(el, Number(s.cfg.basket).toFixed(2) + '$'); }
+  const el = $('bkProfit'), max = c.basketMax > 1 ? c.basketMax : 1;      // a bot from before basketMax takes 0.10 to 1.00
+  if (Number(el.max) !== max) { el.max = max; el.step = max > 1 ? 0.1 : 0.05; $('bkMax').textContent = max; }
+  if (Date.now() - bkMoved > 6000 && !el.matches(':active')) { el.value = c.basket; slPaint(el, Number(c.basket).toFixed(2) + '$'); }
+  el.disabled = !online;
+}
+// Take profit in $. Points mode: the price move per trade (1.00$ = 1.000 on gold); Money mode: the $ per trade.
+let tpMoved = 0;
+function tpPaint(usd, c) {
+  slPaint($('tpUsd'), Number(usd).toFixed(2) + '$');
+  $('tpInfo').textContent = c.tpMode === 'money' ? '$ per trade' : 'price move per trade = ' + Math.round(usd / c.pt) + ' points';
+}
+function renderTp(s) {
+  const c = s.cfg, on = c.tpApp === true;
+  $('rowTp').hidden = on; $('tpBox').hidden = !on;
+  if (!on) return;
+  const el = $('tpUsd');
+  if (c.tpMax > 0 && Number(el.max) !== c.tpMax) { el.max = c.tpMax; $('tpMax').textContent = c.tpMax; }
+  if (Date.now() - tpMoved > 6000 && !el.matches(':active')) { el.value = c.tpUsd; tpPaint(c.tpUsd, c); }
   el.disabled = !online;
 }
 // Lot mode bar. A tap moves the lit box at once; the bot's answer confirms it, or the box goes back.
@@ -1165,7 +1187,7 @@ function render() {
   }
   if (tab === 'tools') {
     if (tool === 'settings' && S && !settingsFilled) { fillSettings(s.cfg); settingsFilled = true; }
-    if (tool === 'settings') { renderSmartGrid(s); renderBasket(s); }
+    if (tool === 'settings') { renderTp(s); renderSmartGrid(s); renderBasket(s); }
     if (tool === 'calc') renderCalc(s);
     if (tool === 'report') renderReport(s);
     if (tool === 'account') {
@@ -1282,6 +1304,8 @@ $('sgGrid').addEventListener('input', e => { sgMoved = Date.now(); slPaint(e.tar
 $('sgGrid').addEventListener('change', e => { sgMoved = Date.now(); if (sgSes >= 0) send('sgrid', sgSes + '.' + e.target.value); });      // 0 Asia, 1 London, 2 New York
 $('bkProfit').addEventListener('input', e => { bkMoved = Date.now(); slPaint(e.target, Number(e.target.value).toFixed(2) + '$'); });
 $('bkProfit').addEventListener('change', e => { bkMoved = Date.now(); send('basket', Number(e.target.value).toFixed(2)); });
+$('tpUsd').addEventListener('input', e => { tpMoved = Date.now(); tpPaint(e.target.value, view().cfg); });
+$('tpUsd').addEventListener('change', e => { tpMoved = Date.now(); send('tp', Number(e.target.value).toFixed(2)); });
 for (const [id, k] of [['alTp', 'tp'], ['alBasket', 'basket'], ['alCool', 'cool'], ['alRisk', 'risk']]) {
   $(id).checked = show[k];
   $(id).addEventListener('change', () => { show[k] = $(id).checked; store.set('rz_show', JSON.stringify(show)); });
