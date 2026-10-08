@@ -306,6 +306,9 @@ body{
 .btn:disabled::after,.btn:disabled::before,.btn:focus-visible::after{display:none}
 @media (prefers-reduced-motion:reduce){.btn.primary::after,.btn.on::after{background:rgba(25, 211, 255, 0.3);animation:none}.btn.primary::before,.btn.on::before{display:none}}
 .icon-btn{border:1px solid transparent;border-image:var(--hud-btn) 18 fill / 18px;background:none;color:var(--body)}
+/* login box: link to the client dashboard, in the top right corner */
+.home-link{position:absolute;top:30px;right:24px;display:inline-flex;align-items:center;gap:8px;padding:0 14px;font-size:12px;text-decoration:none}
+.home-link:hover{color:var(--cyan)}
 
 /* switches, dock, inputs */
 .seg{border:1px solid transparent;border-image:var(--hud-line) 16 / 16px;clip-path:var(--cut-10)}
@@ -337,6 +340,10 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
   <section id="login">
     <form class="frame login-card" id="loginForm" autocomplete="off">
       <i class="br"></i>
+      <a class="btn home-link" href="dashboard.html">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+        Dashboard
+      </a>
       <svg class="eye" viewBox="0 0 64 64" aria-hidden="true">
         <circle cx="32" cy="32" r="29" fill="none" stroke="#262a42" stroke-width="2"/>
         <circle cx="32" cy="32" r="21" fill="none" stroke="#2696b2" stroke-width="1.5" stroke-dasharray="3 5"/>
