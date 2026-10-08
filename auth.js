@@ -733,11 +733,31 @@
     wireSaveForm(passwordForm, () => ({ password: passwordForm.elements.new_password.value }), 'Password updated.');
 
     /* ----- session ----- */
-    $$('[data-sign-out]').forEach((button) => button.addEventListener('click', async () => {
-      button.disabled = true;
-      await db.auth.signOut();
-      location.replace('login.html?signedout=1');
+    // Signing out asks first, like the power button of the control app: "Do you want to sign out?"  No / Yes
+    const confirmBox = $('[data-sign-out-dialog]');
+    const confirmMsg = $('[data-sign-out-msg]', confirmBox);
+    $$('[data-sign-out]').forEach((button) => button.addEventListener('click', () => {
+      confirmMsg.hidden = true;
+      confirmBox.showModal(); // the browser puts the cursor on "No" and gives it back when the box closes
     }));
+    $('[data-sign-out-no]', confirmBox).addEventListener('click', () => confirmBox.close());
+    // a tap on the dark area around the card also means "No"
+    confirmBox.addEventListener('click', (event) => { if (event.target === confirmBox) confirmBox.close(); });
+    $('[data-sign-out-yes]', confirmBox).addEventListener('click', async (event) => {
+      const yes = event.currentTarget;
+      setBusy(yes, true);
+      const { error } = await db.auth.signOut();
+      // When the server can't be reached, this device may or may not have been signed out. Look, don't guess.
+      const { data } = await db.auth.getSession();
+      if (error && data.session) {
+        // still signed in: say so instead of pretending
+        setBusy(yes, false);
+        confirmMsg.textContent = friendlyError(error);
+        confirmMsg.hidden = false;
+        return;
+      }
+      location.replace('login.html?signedout=1');
+    });
 
     const others = $('[data-sign-out-others]');
     others.addEventListener('click', async () => {

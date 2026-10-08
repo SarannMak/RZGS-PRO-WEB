@@ -20,12 +20,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
   <link rel="stylesheet" href="style.css?v=5">
-  <link rel="stylesheet" href="auth.css?v=6">
+  <link rel="stylesheet" href="auth.css?v=7">
 
   <script>document.documentElement.classList.add('js');</script>
   <script src="script.js?v=5" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-  <script src="auth.js?v=5" defer></script>
+  <script src="auth.js?v=6" defer></script>
 </head>
 <body data-auth-page="dashboard">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -94,6 +94,9 @@
 
       <div class="header-actions">
         <a class="btn btn-primary btn-sm header-cta" href="signup.html">Start for $0</a>
+        <button class="icon-btn" type="button" data-sign-out aria-label="Sign out" title="Sign out">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M12 3v9"/><path d="M6.3 7.2a8 8 0 1 0 11.4 0"/></svg>
+        </button>
         <button class="icon-btn menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
           <svg class="icon icon-open" aria-hidden="true"><use href="#i-menu"/></svg>
           <svg class="icon icon-close" aria-hidden="true"><use href="#i-x"/></svg>
@@ -121,9 +124,6 @@
             <h1 class="dash-title" id="page-title">Welcome, <span data-dash-name>there</span></h1>
             <p class="dash-sub" data-dash-email>loading</p>
           </div>
-          <button class="icon-btn" type="button" data-sign-out aria-label="Sign out" title="Sign out">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M12 3v9"/><path d="M6.3 7.2a8 8 0 1 0 11.4 0"/></svg>
-          </button>
         </header>
 
         <p class="auth-msg" data-auth-msg role="alert" hidden>
@@ -397,6 +397,20 @@
             </div>
           </div>
         </div>
+
+        <!-- asked before signing out, like the control app's "Do you want to quit?" -->
+        <dialog class="dash-confirm" data-sign-out-dialog aria-labelledby="signout-title" aria-describedby="signout-text">
+          <div class="dash-confirm-card">
+            <p class="cap">RZGS-PRO</p>
+            <h2 class="dash-confirm-title" id="signout-title">Do you want to sign out?</h2>
+            <p class="dash-confirm-text" id="signout-text">This device will be signed out of your dashboard. Your bot keeps running in MT5.</p>
+            <p class="form-msg" data-sign-out-msg data-tone="error" role="alert" hidden></p>
+            <div class="dash-row">
+              <button class="btn btn-ghost" type="button" data-sign-out-no>No</button>
+              <button class="btn btn-danger" type="button" data-sign-out-yes>Yes</button>
+            </div>
+          </div>
+        </dialog>
       </div>
     </section>
   </main>

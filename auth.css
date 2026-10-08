@@ -471,7 +471,10 @@ a.trial-banner > .icon {
   display: none;
 }
 
-/* the dashboard is its own app screen: no marketing button, no site footer */
+/* the dashboard is its own app screen: the top bar holds only the logo and the sign-out button,
+   and there is no site footer (the website's pages are linked from the Plan and Tools tabs) */
+body[data-auth-page="dashboard"] .primary-nav,
+body[data-auth-page="dashboard"] .menu-toggle,
 body[data-auth-page="dashboard"] .header-cta,
 body[data-auth-page="dashboard"] .nav-menu-cta,
 body[data-auth-page="dashboard"] .site-footer {
@@ -1266,4 +1269,48 @@ a.trial-banner:hover {
 .btn-danger:hover,
 .btn-chip:hover {
   filter: brightness(1.25);
+}
+
+/* ---------- "Do you want to sign out?" ---------- */
+/* the same card as the control app's quit question; the browser's own dialog keeps the keyboard inside it */
+.dash-confirm {
+  width: min(100% - 32px, 340px);
+  padding: 0;
+  border: 1px solid transparent;
+  border-image: var(--hud-frame) 24 fill / 24px;
+  background: none;
+  color: var(--text-muted);
+  filter: drop-shadow(0 0 14px var(--glow));
+}
+.dash-confirm::backdrop {
+  background: rgba(1, 6, 10, 0.84);
+}
+.dash-confirm[open] {
+  animation: confirm-in var(--dur) var(--ease-out);
+}
+@keyframes confirm-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+.dash-confirm-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 26px 22px 20px;
+}
+.dash-confirm-title {
+  margin: 0;
+  color: var(--text);
+  font: 700 19px/1.25 var(--font-display);
+  letter-spacing: 0.03em;
+}
+.dash-confirm-text {
+  margin: 0;
+  color: var(--text-subtle);
+  font-size: 13.5px;
+}
+.dash-confirm .cap {
+  margin: 0;
 }
