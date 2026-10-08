@@ -1004,31 +1004,6 @@ a {
 }
 
 /* Chips */
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
-  border-radius: 2px;
-  font: 600 11px/1 var(--font-mono);
-  letter-spacing: 0.06em;
-}
-.chip .icon {
-  width: 13px;
-  height: 13px;
-}
-.chip-gold {
-  border: 1px solid rgba(255, 210, 63, 0.28);
-  background: rgba(255, 210, 63, 0.1);
-  color: var(--gold);
-}
-.chip-up {
-  margin-left: auto;
-  border: 1px solid rgba(43, 243, 145, 0.28);
-  background: rgba(43, 243, 145, 0.1);
-  color: var(--mint);
-}
-
 /* --- Chart mock --- */
 .chart-frame {
   padding: 16px 16px 4px;
@@ -1043,37 +1018,6 @@ a {
   gap: 10px;
   margin-bottom: 6px;
 }
-.chart-tf {
-  color: var(--text-subtle);
-  font: 500 11px/1 var(--font-mono);
-}
-.mock-chart {
-  container-type: inline-size;
-}
-.chart {
-  width: 100%;
-  height: auto;
-  /* narrow cards show the most recent candles + forecast (svg uses xMaxYMid slice) */
-  aspect-ratio: 360 / 210;
-}
-@container (min-width: 500px) {
-  .chart {
-    aspect-ratio: 560 / 210;
-  }
-}
-.chart .grid line {
-  stroke: rgba(255, 255, 255, 0.06);
-  stroke-dasharray: 2 5;
-}
-.now-line {
-  stroke: rgba(255, 255, 255, 0.18);
-  stroke-dasharray: 3 4;
-}
-.chart-label {
-  fill: var(--lime);
-  font: 600 10px var(--font-mono);
-  letter-spacing: 0.12em;
-}
 .candle line {
   stroke-width: 1.2;
 }
@@ -1081,32 +1025,6 @@ a {
 .candle.up rect { fill: var(--mint); }
 .candle.dn line { stroke: rgba(255, 90, 106, 0.6); }
 .candle.dn rect { fill: var(--down); opacity: 0.85; }
-.ema {
-  fill: none;
-  stroke: var(--violet);
-  stroke-width: 1.5;
-  opacity: 0.8;
-}
-.cone {
-  fill: url(#cone-fill);
-}
-.forecast {
-  fill: none;
-  stroke: url(#forecast-stroke);
-  stroke-width: 2.5;
-  stroke-linecap: round;
-}
-.forecast-dot {
-  fill: var(--lime);
-}
-.forecast-dot-halo {
-  fill: var(--lime);
-  opacity: 0.25;
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: halo 2s var(--ease-out) infinite;
-}
-
 /* chart entrance, only when JS can reveal it */
 .js .mock-chart .candle {
   opacity: 0;
@@ -1114,30 +1032,10 @@ a {
   transition: opacity 0.5s var(--ease-out), transform 0.5s var(--ease-out);
   transition-delay: calc(var(--i) * 30ms + 150ms);
 }
-.js .mock-chart .forecast {
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  transition: stroke-dashoffset 1.1s var(--ease-out) 1s;
-}
-.js .mock-chart .cone,
-.js .mock-chart .ema {
-  opacity: 0;
-  transition: opacity 0.8s var(--ease-out) 0.9s;
-}
 .js .is-visible .mock-chart .candle {
   opacity: 1;
   transform: none;
 }
-.js .is-visible .mock-chart .forecast {
-  stroke-dashoffset: 0;
-}
-.js .is-visible .mock-chart .cone {
-  opacity: 1;
-}
-.js .is-visible .mock-chart .ema {
-  opacity: 0.8;
-}
-
 /* --- 24/7 AI running mock --- */
 .mock-always {
   display: flex;
@@ -1327,40 +1225,6 @@ a {
   border-radius: 50%;
   background: currentColor;
 }
-.ai-orb {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 116px;
-  height: 116px;
-  margin: 18px auto 12px;
-}
-.ai-orb-ring {
-  position: absolute;
-  inset: 26px;
-  border: 1.5px solid rgba(25, 211, 255, 0.55);
-  border-radius: 50%;
-  animation: ring 2.4s var(--ease-out) infinite;
-}
-.ai-orb-ring:nth-child(2) {
-  animation-delay: 1.2s;
-}
-.ai-orb-core {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: var(--grad);
-  color: var(--on-accent);
-  box-shadow: 0 0 40px rgba(25, 211, 255, 0.45);
-  transition: filter var(--dur) var(--ease-out), box-shadow var(--dur) var(--ease-out);
-}
-.ai-orb-core .icon {
-  width: 28px;
-  height: 28px;
-}
 .ai-status {
   margin: 0 0 14px;
   color: var(--text-muted);
@@ -1431,14 +1295,6 @@ a {
   border-color: var(--border-strong);
   background: rgba(255, 255, 255, 0.05);
   color: var(--text-subtle);
-}
-.ai-panel[data-state="paused"] .ai-orb-ring {
-  animation: none;
-  opacity: 0;
-}
-.ai-panel[data-state="paused"] .ai-orb-core {
-  filter: grayscale(1) brightness(0.55);
-  box-shadow: none;
 }
 .ai-panel[data-state="paused"] .ai-toggle {
   border-color: transparent;
@@ -2775,15 +2631,6 @@ a {
   from { transform: translateX(-100%); }
   to { transform: translateX(250%); }
 }
-@keyframes ring {
-  from { transform: scale(1); opacity: 0.8; }
-  to { transform: scale(1.9); opacity: 0; }
-}
-@keyframes halo {
-  0% { transform: scale(0.6); opacity: 0.5; }
-  100% { transform: scale(1.8); opacity: 0; }
-}
-
 /* ==========================================================================
    Reduced motion
    ========================================================================== */
@@ -2804,15 +2651,8 @@ a {
     opacity: 1;
     transform: none;
   }
-  .js .mock-chart .forecast,
   .spark-line {
     stroke-dashoffset: 0;
-  }
-  .js .mock-chart .cone {
-    opacity: 1;
-  }
-  .js .mock-chart .ema {
-    opacity: 0.8;
   }
 }
 
@@ -3058,8 +2898,7 @@ a {
   color: var(--cyan);
   box-shadow: none;
 }
-/* numbered steps: the gradient tile */
-.step-icon,
+/* numbered timeline on the How to Buy page: the gradient tile */
 .timeline-num {
   border: 1px solid transparent;
   border-image: var(--hud-tile-grad) 12 fill / 12px;
@@ -3070,6 +2909,40 @@ a {
 }
 .timeline-num {
   font-family: var(--font-display);
+}
+/* step icons: a plain round badge with a dashed inner ring, like the ring in the control app */
+.step-icon {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  border: 1px solid var(--frame);
+  border-radius: 50%;
+  background: var(--chip);
+  color: var(--cyan);
+  box-shadow: none;
+}
+.step-icon::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border: 1px dashed rgba(25, 211, 255, 0.45);
+  border-radius: 50%;
+}
+.step-icon .icon {
+  width: 22px;
+  height: 22px;
+  stroke-width: 1.75;
+}
+.step {
+  gap: 14px;
+}
+.step-top {
+  margin-bottom: 6px;
+}
+.step .text-link {
+  margin-top: auto;
+  min-height: 44px;
+  align-self: flex-start;
 }
 .step:not(:last-child)::after {
   border-color: var(--neon);
@@ -3090,17 +2963,11 @@ a {
 .live-dot::after {
   background: var(--good);
 }
-.chip-up,
 .engine-status,
 .ai-chip {
   border-color: rgba(43, 243, 145, 0.5);
   background: rgba(43, 243, 145, 0.1);
   color: var(--good);
-}
-.chip-gold {
-  border-color: rgba(255, 210, 63, 0.5);
-  background: rgba(255, 210, 63, 0.1);
-  color: var(--warn);
 }
 
 /* ---------- hero ---------- */
@@ -3133,10 +3000,6 @@ a {
 #spark-fill stop {
   stop-color: var(--good);
 }
-#cone-fill stop,
-#forecast-stroke stop {
-  stop-color: var(--cyan);
-}
 
 /* ---------- home: feature mockups ---------- */
 .chart-frame {
@@ -3157,9 +3020,6 @@ a {
 }
 .phone-notch {
   display: none;
-}
-.ai-orb-core {
-  box-shadow: 0 0 34px rgba(55, 239, 184, 0.45);
 }
 /* the two state buttons: amber "Pause" while running, the gradient "Activate" while paused */
 .ai-toggle,
@@ -3192,6 +3052,301 @@ a {
 }
 .notif-badge {
   background: rgba(43, 243, 145, 0.14);
+}
+
+/* ---------- home: example grid ladder (the Trades view of the control app) ---------- */
+.mock-ladder .chart-frame {
+  padding: 14px 14px 0;
+}
+.mock-ladder .chart-bar {
+  margin-bottom: 12px;
+}
+.gl-title,
+.gl-legend {
+  white-space: nowrap;
+  color: var(--text-subtle);
+  font: 500 10px/1.2 var(--font-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+/* "Example" sits in the empty top corner of the ladder, right of the middle line */
+.gl-flag {
+  position: absolute;
+  top: 0;
+  right: 70px;
+  z-index: 1;
+  padding: 3px 6px;
+  background: var(--bg);
+  border: 1px solid rgba(255, 210, 63, 0.45);
+  color: var(--warn);
+  font: 500 9.5px/1 var(--font-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.gl-seg {
+  display: flex;
+  margin-left: auto;
+  border: 1px solid var(--border);
+}
+.gl-seg span {
+  padding: 9px 12px;
+  color: var(--text-subtle);
+  font: 500 10px/1 var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.gl-seg .is-on {
+  background: var(--chip);
+  color: var(--cyan);
+}
+/* the ladder: candles left of the middle line, the price scale in a 62px column on the right */
+.gl {
+  position: relative;
+  height: 230px;
+  font: 500 10.5px/1 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.gl-plot {
+  position: absolute;
+  inset: 0 62px 0 0;
+}
+.gl-candles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+}
+.gl-candles line {
+  vector-effect: non-scaling-stroke;
+}
+.gl-axis {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: var(--text-subtle);
+  opacity: 0.55;
+}
+.gl-scale {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.gl-scale li {
+  position: absolute;
+  top: var(--y);
+  right: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  height: 0;
+  color: var(--text-subtle);
+}
+.gl-scale li::before {
+  content: "";
+  flex: 1;
+  margin-right: 6px;
+  border-top: 1px dashed var(--border);
+}
+.gl-scale span {
+  flex: none;
+  width: 56px;
+}
+.gl-buy {
+  color: var(--buy);
+}
+.gl-sell {
+  color: var(--sell);
+}
+/* level lines: live price (solid cyan), next entry (dashed grey), close lines (dashed, in the side's colour) */
+.gl-line {
+  position: absolute;
+  top: var(--y);
+  right: 0;
+  left: 0;
+  height: 0;
+  border-top: 1px solid var(--cyan);
+}
+.gl-line b {
+  position: absolute;
+  top: -8px;
+  left: 0;
+  padding: 3px 6px 3px 0;
+  background: var(--bg);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.gl-next {
+  border-top: 1px dashed var(--text-subtle);
+  color: var(--text-subtle);
+}
+.gl-exit {
+  border-top: 1px dashed currentColor;
+}
+.gl-exit.gl-sell b {
+  right: 0;
+  left: auto;
+  padding: 3px 0 3px 6px;
+}
+/* a soft band on the profit side of a basket's close line */
+.gl-band::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 14px;
+  background: currentColor;
+  opacity: 0.13;
+}
+/* open trades: label + lot, buys left of the middle line and sells right of it */
+.gl-pos {
+  position: absolute;
+  top: var(--y);
+  padding: 3px 6px;
+  border: 1px solid currentColor;
+  background: var(--surface);
+  font-size: 11px;
+  white-space: nowrap;
+  transform: translateY(-50%);
+}
+.gl-pos.gl-buy {
+  right: calc(50% + 16px);
+}
+.gl-pos.gl-sell {
+  left: calc(50% + 16px);
+}
+.gl-pos::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 12px;
+  height: 2px;
+  margin-top: -1px;
+  background: currentColor;
+}
+.gl-pos.gl-buy::after {
+  left: calc(100% + 4px);
+}
+.gl-pos.gl-sell::after {
+  right: calc(100% + 4px);
+}
+/* very small phones: slimmer trade labels so they stay inside the ladder */
+@media (max-width: 359.98px) {
+  .gl-pos {
+    padding: 3px 4px;
+    font-size: 10px;
+  }
+  .gl-pos.gl-buy {
+    right: calc(50% + 12px);
+  }
+  .gl-pos.gl-sell {
+    left: calc(50% + 12px);
+  }
+  .gl-pos::after {
+    width: 8px;
+  }
+}
+/* price tags on the scale */
+.gl-tag {
+  position: absolute;
+  top: var(--y);
+  right: 0;
+  display: flex;
+  align-items: center;
+  width: 61px;
+  height: 16px;
+  margin-top: -8px;
+  padding-left: 5px;
+  border: 1px solid currentColor;
+  background: var(--bg);
+}
+.gl-tag--price {
+  border-color: var(--cyan);
+  background: var(--cyan);
+  color: var(--bg);
+}
+.gl-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  padding-block: 12px 14px;
+  letter-spacing: 0.12em;
+}
+.gl-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.gl-sw {
+  width: 9px;
+  height: 9px;
+  border: 1px solid currentColor;
+}
+
+/* ---------- home: the control app's ring inside the one-tap card ---------- */
+.ai-ring {
+  display: block;
+  width: 118px;
+  height: 118px;
+  margin: 18px auto 12px;
+}
+.ai-ring .ring-track {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 6;
+}
+.ai-ring .ring-arc {
+  fill: none;
+  stroke: var(--cyan);
+  stroke-width: 6;
+  stroke-dasharray: 0 100;
+  transform: rotate(-90deg);
+  transform-origin: 60px 60px;
+  transition: stroke-dasharray 0.4s var(--ease-out), stroke 0.3s var(--ease-out);
+}
+.ai-ring .ring-dash {
+  fill: none;
+  stroke: var(--frame);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 6;
+  transform-origin: 60px 60px;
+  animation: spin 14s linear infinite;
+}
+.ai-ring text {
+  fill: var(--text);
+  font-family: var(--font-display);
+  text-anchor: middle;
+}
+.ai-ring .ring-big {
+  font-size: 26px;
+  font-weight: 700;
+}
+.ai-ring .ring-sub {
+  fill: var(--text-subtle);
+  font: 500 7.5px var(--font-mono);
+  letter-spacing: 0.14em;
+}
+/* paused, as in the app: full amber ring, the dashes stop, "II / PAUSED" */
+.ai-ring .ring-off,
+.ai-panel[data-state="paused"] .ai-ring .ring-on {
+  display: none;
+}
+.ai-panel[data-state="paused"] .ai-ring .ring-off {
+  display: inline;
+}
+.ai-panel[data-state="paused"] .ai-ring .ring-arc {
+  stroke: var(--sell);
+  stroke-dasharray: 100 100;
+}
+.ai-panel[data-state="paused"] .ai-ring .ring-dash {
+  stroke: var(--text-subtle);
+  animation-play-state: paused;
 }
 
 /* ---------- steps, pricing, faq ---------- */
