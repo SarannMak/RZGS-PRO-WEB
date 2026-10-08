@@ -18,10 +18,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="style.css?v=9">
+  <link rel="stylesheet" href="style.css?v=11">
 
   <script>document.documentElement.classList.add('js');</script>
-  <script src="script.js?v=5" defer></script>
+  <script src="script.js?v=6" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -86,13 +86,13 @@
           <li><a class="nav-link" href="how-to-buy.html">How to Buy</a></li>
           <li><a class="nav-link" href="license.html">License</a></li>
           <li><a class="nav-link" href="contact.html">Contact</a></li>
-          <li><a class="nav-link" href="login.html">Log in</a></li>
+          <li><a class="nav-link" href="login.html">Sign up / Login</a></li>
         </ul>
-        <a class="btn btn-primary btn-block nav-menu-cta" href="signup.html">Start now for $0</a>
+        <a class="btn btn-primary btn-block nav-menu-cta" href="#partners">Start now for $0</a>
       </nav>
 
       <div class="header-actions">
-        <a class="btn btn-primary btn-sm header-cta" href="signup.html">Start for $0</a>
+        <a class="btn btn-primary btn-sm header-cta" href="#partners">Start for $0</a>
         <button class="icon-btn menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
           <svg class="icon icon-open" aria-hidden="true"><use href="#i-menu"/></svg>
           <svg class="icon icon-close" aria-hidden="true"><use href="#i-x"/></svg>
@@ -116,11 +116,11 @@
           <p class="hero-lead">An AI model reads live gold market conditions, estimates the likely price direction, then runs each trade for a fixed period and closes it for you.</p>
 
           <div class="hero-actions">
-            <a class="btn btn-primary btn-lg" href="signup.html">
+            <a class="btn btn-primary btn-lg" href="#partners">
               Start now for $0
               <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg>
             </a>
-            <a class="btn btn-ghost btn-lg" href="login.html">Log in</a>
+            <a class="btn btn-ghost btn-lg" href="login.html">Sign up / Login</a>
           </div>
 
           <ul class="hero-points">
@@ -359,7 +359,7 @@
                 <span class="step-num" aria-hidden="true">01</span>
               </div>
               <h3>Create your free account</h3>
-              <p>Tap Start now for $0, fill in three short steps, then confirm your email.</p>
+              <p>Tap Create account, fill in three short steps, then confirm your email.</p>
               <a class="text-link" href="signup.html">Create account <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
             </li>
             <li class="step">
@@ -453,6 +453,55 @@
         </div>
 
         <p class="pricing-note reveal">Prices in US dollars. By choosing a plan you agree to our <a href="license.html">License Rules</a> and <a href="terms.html">Terms &amp; Conditions</a>. <a href="how-to-buy.html">See how buying works</a>.</p>
+      </div>
+    </section>
+
+    <!-- Partner brokers: each broker is written once here; script.js repeats the cards for the sliding row -->
+    <section class="section section--partners" id="partners" aria-labelledby="partners-title">
+      <div class="container">
+        <header class="section-head reveal">
+          <p class="kicker">Partner brokers</p>
+          <h2 class="section-title" id="partners-title">Open a partner account. <span class="text-gradient">Start with 7 days free.</span></h2>
+          <p class="section-lead">Elite ($5/month) is for traders who open their MT5 account with one of our partner brokers. Open yours with a link below, then request your free trial.</p>
+        </header>
+      </div>
+
+      <div class="partner-rail reveal" data-partner-rail>
+        <ul class="partner-track">
+          <li>
+            <a class="partner-card" href="https://one.exnessonelink.com/a/wohgwojskx" target="_blank" rel="noopener sponsored">
+              <span class="partner-mark" aria-hidden="true">EX</span>
+              <span class="partner-text"><strong>Exness</strong><small>Partner broker &middot; open account</small></span>
+              <svg class="icon" aria-hidden="true"><use href="#i-arrow-up-right"/></svg>
+            </a>
+          </li>
+          <li>
+            <a class="partner-card" href="https://investizo.net/?pid=962201&amp;cid=19606" target="_blank" rel="noopener sponsored">
+              <span class="partner-mark" aria-hidden="true">IZ</span>
+              <span class="partner-text"><strong>Investizo</strong><small>Partner broker &middot; open account</small></span>
+              <svg class="icon" aria-hidden="true"><use href="#i-arrow-up-right"/></svg>
+            </a>
+          </li>
+          <li>
+            <!-- TODO: Lirunex has no partner link yet. Put it in href (now "#partners", which stays on this section),
+                 add target="_blank" rel="noopener sponsored" like the two above, and change "link coming soon" to "open account". -->
+            <a class="partner-card" href="#partners">
+              <span class="partner-mark" aria-hidden="true">LX</span>
+              <span class="partner-text"><strong>Lirunex</strong><small>Partner broker &middot; link coming soon</small></span>
+              <svg class="icon" aria-hidden="true"><use href="#i-arrow-up-right"/></svg>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="container">
+        <div class="partner-foot reveal">
+          <a class="btn btn-primary btn-lg" href="login.html">
+            Claim your free 7-day trial
+            <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg>
+          </a>
+          <p class="pricing-note">These are referral links: we may be paid by the broker when you open an account. Trading carries risk. Read our <a href="risk-disclosure.html">Risk Disclosure</a>.</p>
+        </div>
       </div>
     </section>
 
@@ -568,5 +617,10 @@
       </div>
     </div>
   </footer>
+  <!-- Floating link to the Telegram community (bottom right) -->
+  <a class="tg-float" href="https://t.me/+NvCIdtTmMIViMjg9" target="_blank" rel="noopener">
+    <span class="tg-float-icon" aria-hidden="true"><svg class="icon"><use href="#i-send"/></svg></span>
+    <span class="tg-float-text"><strong>Join community</strong><small>Telegram &middot; Free</small></span>
+  </a>
 </body>
 </html>

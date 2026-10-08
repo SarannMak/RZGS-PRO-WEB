@@ -137,6 +137,29 @@ const yearEl = document.querySelector('[data-year]');
 if (yearEl) yearEl.textContent = new Date().getFullYear();
 
 /* ==========================================================================
+   Partner brokers: the row of cards slides slowly and never ends.
+   The page holds each broker once; the copies that fill the loop are made here.
+   ========================================================================== */
+const partnerRail = document.querySelector('[data-partner-rail]');
+
+if (partnerRail && !reducedMotion.matches) {
+  const track = partnerRail.querySelector('.partner-track');
+  const cards = [...track.children];
+  partnerRail.classList.add('is-moving');
+  const setWidth = track.scrollWidth;                                             // one set of cards
+  const sets = Math.ceil(Math.max(partnerRail.clientWidth, 2000) / setWidth) + 1; // half of the loop is wider than the screen
+  for (let i = 1; i < sets * 2; i += 1) {
+    cards.forEach((card) => {
+      const copy = card.cloneNode(true);
+      copy.setAttribute('aria-hidden', 'true');                                    // screen readers and the Tab key meet each broker once
+      copy.querySelectorAll('a').forEach((link) => { link.tabIndex = -1; });
+      track.append(copy);
+    });
+  }
+  partnerRail.style.setProperty('--partner-time', `${Math.round((setWidth * sets) / 40)}s`);   // about 40 px per second
+}
+
+/* ==========================================================================
    Background: live trading chart (candlesticks + a ticking price line)
    ========================================================================== */
 const canvas = document.getElementById('bg-canvas');

@@ -1314,3 +1314,67 @@ a.trial-banner:hover {
 .dash-confirm .cap {
   margin: 0;
 }
+
+/* ==========================================================================
+   Log in / Sign up switch at the top of the box.
+   Each side is its own page. Where the browser can animate from page to page, the lit box slides
+   across while the page changes; elsewhere the other page simply opens.
+   ========================================================================== */
+.auth-switch {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-bottom: 24px;
+  border: 1px solid transparent;
+  border-image: var(--hud-line) 16 / 16px;
+  background: var(--surface);
+  clip-path: var(--cut-10);
+}
+.auth-switch a {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  min-height: 48px;
+  padding: 10px 8px;
+  color: var(--text-subtle);
+  font: 700 14px/1 var(--font-display);
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+.auth-switch a:hover {
+  color: var(--text);
+}
+.auth-switch a[aria-current="page"] {
+  color: var(--cyan);
+  text-shadow: 0 0 12px var(--glow);
+}
+/* the lit box: left half on the log in page, right half on the sign up page */
+.auth-switch-glide {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 50%;
+  border: 1px solid transparent;
+  border-image: var(--hud-callout) 16 fill / 16px;
+  pointer-events: none;
+  view-transition-name: auth-switch-glide;
+}
+.auth-switch[data-pos="1"] .auth-switch-glide {
+  transform: translateX(100%);
+}
+@view-transition {
+  navigation: auto;
+}
+::view-transition-group(auth-switch-glide) {
+  animation-duration: 0.35s;
+  animation-timing-function: cubic-bezier(0.3, 1.2, 0.45, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+}

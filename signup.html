@@ -18,11 +18,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="style.css?v=9">
-  <link rel="stylesheet" href="auth.css?v=6">
+  <link rel="stylesheet" href="style.css?v=11">
+  <link rel="stylesheet" href="auth.css?v=8">
 
   <script>document.documentElement.classList.add('js');</script>
-  <script src="script.js?v=5" defer></script>
+  <script src="script.js?v=6" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
   <script src="auth.js?v=5" defer></script>
 </head>
@@ -86,13 +86,13 @@
           <li><a class="nav-link" href="how-to-buy.html">How to Buy</a></li>
           <li><a class="nav-link" href="license.html">License</a></li>
           <li><a class="nav-link" href="contact.html">Contact</a></li>
-          <li><a class="nav-link" href="login.html">Log in</a></li>
+          <li><a class="nav-link" href="login.html">Sign up / Login</a></li>
         </ul>
-        <a class="btn btn-primary btn-block nav-menu-cta" href="signup.html">Start now for $0</a>
+        <a class="btn btn-primary btn-block nav-menu-cta" href="index.html#partners">Start now for $0</a>
       </nav>
 
       <div class="header-actions">
-        <a class="btn btn-primary btn-sm header-cta" href="signup.html">Start for $0</a>
+        <a class="btn btn-primary btn-sm header-cta" href="index.html#partners">Start for $0</a>
         <button class="icon-btn menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
           <svg class="icon icon-open" aria-hidden="true"><use href="#i-menu"/></svg>
           <svg class="icon icon-close" aria-hidden="true"><use href="#i-x"/></svg>
@@ -113,6 +113,12 @@
       <div class="container">
         <div class="auth-layout auth-layout--split">
           <div class="card auth-card">
+            <!-- switch between the log in box and the sign up box (each one is its own page) -->
+            <nav class="auth-switch" data-pos="1" aria-label="Log in or sign up">
+              <i class="auth-switch-glide" aria-hidden="true"></i>
+              <a href="login.html">Log in</a>
+              <a href="signup.html" aria-current="page">Sign up</a>
+            </nav>
             <div data-signup-wrap>
               <p class="kicker">Start free</p>
               <h1 class="auth-title" id="page-title">Create your account</h1>

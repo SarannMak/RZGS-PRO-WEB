@@ -3547,3 +3547,230 @@ a {
     transition: none;
   }
 }
+
+/* ==========================================================================
+   Partner brokers (home page): broker links in a row that slides slowly, then the trial button.
+   script.js repeats the cards and adds .is-moving; without it, or with reduced motion, the row stays still.
+   ========================================================================== */
+.section--partners .section-head {
+  margin-bottom: clamp(28px, 4vw, 40px);
+}
+.partner-rail {
+  overflow: hidden;
+  padding-block: 4px;
+}
+.partner-track {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+  margin: 0;
+  padding: 0 20px;
+  list-style: none;
+}
+.partner-rail.is-moving {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
+}
+/* each card carries its own gap here, so half of the track is exactly one loop */
+.partner-rail.is-moving .partner-track {
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  gap: 0;
+  width: max-content;
+  padding: 0;
+  animation: partner-slide var(--partner-time, 80s) linear infinite;
+}
+.partner-rail.is-moving .partner-track > li {
+  padding-right: 16px;
+}
+.partner-rail.is-moving:hover .partner-track,
+.partner-rail.is-moving:focus-within .partner-track {
+  animation-play-state: paused;
+}
+@keyframes partner-slide {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.partner-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 272px;
+  min-height: 76px;
+  padding: 14px 18px;
+  border: 1px solid transparent;
+  border-image: var(--hud-panel) 16 fill / 16px;
+  color: var(--text);
+  text-decoration: none;
+}
+.partner-card:hover,
+.partner-card:focus-visible {
+  border-image-source: var(--hud-panel-hot);
+}
+.partner-mark {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border: 1px solid transparent;
+  border-image: var(--hud-tile) 12 fill / 12px;
+  color: var(--cyan);
+  font: 700 14px/1 var(--font-display);
+  letter-spacing: 0.06em;
+}
+.partner-text {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+.partner-text strong {
+  font: 700 17px/1.2 var(--font-display);
+}
+.partner-text small {
+  color: var(--text-subtle);
+  font: 500 10.5px/1.3 var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.partner-card > .icon {
+  width: 18px;
+  height: 18px;
+  margin-left: auto;
+  color: var(--cyan);
+}
+.partner-foot {
+  display: grid;
+  justify-items: center;
+  margin-top: clamp(28px, 4vw, 40px);
+}
+.partner-foot .pricing-note {
+  margin-top: 24px;
+}
+
+/* ==========================================================================
+   Floating "Join community" button (Telegram), bottom right on the public pages.
+   It sits under the header and its open menu.
+   ========================================================================== */
+.tg-float {
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(24px, env(safe-area-inset-bottom));
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 20px 9px 10px;
+  border: 1px solid transparent;
+  border-image: var(--hud-callout) 16 fill / 16px;
+  color: var(--text);
+  text-decoration: none;
+  filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 14px var(--glow));
+  transition: transform 0.25s var(--ease-out), filter 0.25s;
+  /* it comes in once, then hovers: it rises and sinks slowly. The hover uses "translate", so "transform" stays free
+     for the lift under the pointer. */
+  animation: tg-float-in 0.6s var(--ease-out) 0.8s backwards, tg-float-air 3.6s ease-in-out 1.4s infinite;
+}
+/* the shadow on the "ground": it stays where it is and gets smaller and lighter while the button is up */
+.tg-float::before {
+  content: "";
+  position: absolute;
+  right: 12%;
+  bottom: -16px;
+  left: 12%;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(25, 211, 255, 0.5), transparent);
+  filter: blur(3px);
+  pointer-events: none;
+  animation: tg-float-ground 3.6s ease-in-out 1.4s infinite;
+}
+.tg-float:hover,
+.tg-float:focus-visible,
+.tg-float:hover::before,
+.tg-float:focus-visible::before {
+  animation-play-state: paused;      /* it holds still under the pointer, so it is easy to press */
+}
+/* the light under the button */
+.tg-float::after {
+  content: "";
+  position: absolute;
+  right: 20%;
+  bottom: -1px;
+  left: 20%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+  pointer-events: none;
+}
+.tg-float:hover {
+  transform: translateY(-3px);
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 20px rgba(25, 211, 255, 0.45));
+}
+.tg-float-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #2aabee;
+  color: #fff;
+}
+.tg-float-icon .icon {
+  transform: translate(-1px, 1px);
+}
+.tg-float-text {
+  display: grid;
+  gap: 4px;
+}
+.tg-float-text strong {
+  font: 700 15px/1.1 var(--font-display);
+  letter-spacing: 0.02em;
+}
+.tg-float-text small {
+  color: var(--cyan);
+  font: 500 10.5px/1 var(--font-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+@keyframes tg-float-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+@keyframes tg-float-air {
+  50% {
+    translate: 0 -9px;
+  }
+}
+@keyframes tg-float-ground {
+  50% {
+    translate: 0 9px;
+    scale: 0.72;
+    opacity: 0.45;
+  }
+}
+/* the last lines of the footer stay clear of the button */
+body:has(.tg-float) .site-footer {
+  padding-bottom: 96px;
+}
+@media (max-width: 420px) {
+  .tg-float {
+    gap: 10px;
+    padding: 8px 16px 8px 8px;
+  }
+  .tg-float-icon {
+    width: 36px;
+    height: 36px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tg-float,
+  .tg-float::before {
+    transition: none;
+    animation: none;
+  }
+}
