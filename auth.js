@@ -746,9 +746,7 @@
     $('[data-sign-out-yes]', confirmBox).addEventListener('click', async (event) => {
       const yes = event.currentTarget;
       setBusy(yes, true);
-      // Only this device is signed out. The person's other phones and browsers stay logged in
-      // ("Sign out other devices" in Tools is the button for those).
-      const { error } = await db.auth.signOut({ scope: 'local' });
+      const { error } = await db.auth.signOut();
       // When the server can't be reached, this device may or may not have been signed out. Look, don't guess.
       const { data } = await db.auth.getSession();
       if (error && data.session) {
@@ -758,7 +756,7 @@
         confirmMsg.hidden = false;
         return;
       }
-      location.replace('index.html'); // signed out: back to the home page
+      location.replace('login.html?signedout=1');
     });
 
     const others = $('[data-sign-out-others]');
@@ -774,7 +772,7 @@
 
     // signed out in another tab
     db.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_OUT') location.replace('index.html');
+      if (event === 'SIGNED_OUT') location.replace('login.html?signedout=1');
     });
   }
 
