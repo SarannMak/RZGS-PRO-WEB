@@ -756,7 +756,7 @@
         confirmMsg.hidden = false;
         return;
       }
-      location.replace('login.html?signedout=1');
+      location.replace('index.html'); // signed out: back to the home page
     });
 
     const others = $('[data-sign-out-others]');
@@ -772,7 +772,7 @@
 
     // signed out in another tab
     db.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_OUT') location.replace('login.html?signedout=1');
+      if (event === 'SIGNED_OUT') location.replace('index.html');
     });
   }
 
