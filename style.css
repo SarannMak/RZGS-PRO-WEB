@@ -55,7 +55,6 @@
   --hud-btn-warn: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='54' height='54' viewBox='0 0 54 54'%3E%3Cpath d='M13.21 0.5H53.5V40.79L40.79 53.5H0.5V13.21Z' fill='%232e2408' stroke='%23b98f14'/%3E%3C/svg%3E");
   --hud-pill: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Cpath d='M8.21 0.5H27.79L35.5 8.21V27.79L27.79 35.5H8.21L0.5 27.79V8.21Z' fill='%2306212c' fill-opacity='.94' stroke='%231a9fc0'/%3E%3Cpath d='M9.5 1.5L1.5 9.5V26.5L9.5 34.5M26.5 1.5L34.5 9.5V26.5L26.5 34.5' fill='none' stroke='%23a6ff1a' stroke-width='2'/%3E%3C/svg%3E");
   --hud-tile: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Cpath d='M8.21 0.5H35.5V27.79L27.79 35.5H0.5V8.21Z' fill='%23062b38' stroke='%2319b8dc'/%3E%3C/svg%3E");
-  --hud-tile-grad: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Cdefs%3E%3ClinearGradient id='g' gradientUnits='userSpaceOnUse' x1='12' y1='0' x2='24' y2='0'%3E%3Cstop offset='0' stop-color='%2319d3ff'/%3E%3Cstop offset='1' stop-color='%23a6ff1a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M8 0H36V28L28 36H0V8Z' fill='url(%23g)'/%3E%3C/svg%3E");
   /* the same cut as a clip shape, for boxes that keep their own background */
   --cut-10: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
   --cut-14: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
@@ -2898,35 +2897,31 @@ a {
   color: var(--cyan);
   box-shadow: none;
 }
-/* numbered timeline on the How to Buy page: the gradient tile */
+/* step icons and step numbers: a plain round badge with a dashed inner ring, like the ring in the
+   control app. No gradient here; the gradient is kept for the main buttons and the big titles. */
+.step-icon,
 .timeline-num {
-  border: 1px solid transparent;
-  border-image: var(--hud-tile-grad) 12 fill / 12px;
-  background: none;
-  color: var(--on-accent);
-  box-shadow: none;
-  filter: drop-shadow(0 0 10px rgba(55, 239, 184, 0.3));
-}
-.timeline-num {
-  font-family: var(--font-display);
-}
-/* step icons: a plain round badge with a dashed inner ring, like the ring in the control app */
-.step-icon {
   position: relative;
-  width: 52px;
-  height: 52px;
   border: 1px solid var(--frame);
   border-radius: 50%;
   background: var(--chip);
   color: var(--cyan);
   box-shadow: none;
 }
-.step-icon::before {
+.step-icon::before,
+.timeline-num::before {
   content: "";
   position: absolute;
   inset: 5px;
   border: 1px dashed rgba(25, 211, 255, 0.45);
   border-radius: 50%;
+}
+.step-icon {
+  width: 52px;
+  height: 52px;
+}
+.timeline-num {
+  font-family: var(--font-display);
 }
 .step-icon .icon {
   width: 22px;
@@ -3357,12 +3352,11 @@ a {
 .price-card--featured .plan-tag {
   color: var(--neon);
 }
-/* the featured plan's icon is the gradient tile */
+/* the featured plan's icon is the same plain tile as the other plans */
 .price-card--featured .plan-icon,
 .license-card--featured .plan-icon {
-  border-image-source: var(--hud-tile-grad);
   background: none;
-  color: var(--on-accent);
+  color: var(--cyan);
 }
 
 /* ---------- sub-pages ---------- */
