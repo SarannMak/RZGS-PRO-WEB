@@ -313,39 +313,46 @@ body{
 /* switches, dock, inputs */
 .seg{border:1px solid transparent;border-image:var(--hud-line) 16 / 16px;clip-path:var(--cut-10)}
 .seg button[aria-selected="true"]{box-shadow:inset 0 -2px 0 var(--neon)}
-/* lot mode: one bar with three parts; the chosen part is a lit cut-corner box */
-.seg-mode{grid-template-columns:repeat(3,1fr)}
-.seg-mode button{border:1px solid transparent;padding:12px 4px;min-height:48px;font:700 13px var(--f-display);letter-spacing:.1em;transition:color .18s,filter .18s}
-.seg-mode button+button{box-shadow:inset 1px 0 0 var(--line-2)}
-.seg-mode button[aria-pressed="true"]{border-image:var(--hud-callout) 16 fill / 16px;color:var(--cyan);box-shadow:none;text-shadow:0 0 12px var(--glow)}
-.seg-mode button[aria-pressed="true"]+button{box-shadow:none}
+/* lot mode: one bar with three parts. The lit cut-corner box is one moving piece (.seg-glide):
+   it slides to the part that is chosen. The two thin lines between the parts belong to the bar. */
+.seg-mode{grid-template-columns:repeat(3,1fr);position:relative;
+  background:linear-gradient(var(--line-2),var(--line-2)) 33.333% 50% / 1px 56% no-repeat,
+    linear-gradient(var(--line-2),var(--line-2)) 66.667% 50% / 1px 56% no-repeat,var(--panel)}
+.seg-mode button{position:relative;z-index:1;padding:12px 4px;min-height:48px;font:700 13px var(--f-display);letter-spacing:.1em;
+  transition:color .25s,text-shadow .25s,filter .18s}
+.seg-mode button[aria-pressed="true"]{color:var(--cyan);text-shadow:0 0 12px var(--glow)}
 .seg-mode button:active{filter:brightness(1.6)}
-/* smart mode: grid distance per session, one slider each (500 to 3000, a mark every 500) */
-.sg{border-top:1px solid var(--line);padding-top:10px}
-.sg-head{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:14px;color:var(--body)}
-.sg-head small{display:block;color:var(--muted);font-size:11.5px}
-.sg-now{display:flex;align-items:baseline;gap:8px;flex:none}
-.sg-now b{font:700 20px var(--f-display);font-variant-numeric:tabular-nums;color:var(--cyan)}
-.sg-row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;column-gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
-.sg-row label{grid-column:1 / 3;display:flex;align-items:center;gap:8px;font:600 13px var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--body)}
-.sg-row output{font:700 16px var(--f-display);font-variant-numeric:tabular-nums;color:var(--title);text-align:right}
+.seg-glide{position:absolute;top:0;bottom:0;left:0;width:calc(100% / 3);border:1px solid transparent;border-image:var(--hud-callout) 16 fill / 16px;
+  pointer-events:none;opacity:0;transition:transform .38s cubic-bezier(.3,1.25,.45,1),opacity .2s}
+.seg-mode[data-pos] .seg-glide{opacity:1}
+.seg-mode[data-pos="1"] .seg-glide{transform:translateX(100%)}
+.seg-mode[data-pos="2"] .seg-glide{transform:translateX(200%)}
+.seg-mode.snap .seg-glide{transition:none}
+@media (prefers-reduced-motion:reduce){.seg-glide{transition:none}}
+/* sliders in the settings (grid distance in Smart mode, basket profit): name left, amount right, a small round dot on the line */
+.sg{border-top:1px solid var(--line);padding-top:9px}
+.sg-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.sg-head label{font-size:14px;color:var(--body);min-width:0}
+.sg-head label small{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:11.5px}
+.sg-head output{flex:none;font:700 18px var(--f-display);font-variant-numeric:tabular-nums;color:var(--cyan)}
+.sg-ses{font:600 11.5px var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--cyan)}
+.sg-live{padding:1px 6px;font:500 9px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--on);background:var(--neon)}
+.sg-line{display:grid;grid-template-columns:auto 1fr auto;align-items:center;column-gap:10px}
 .sg-end{font:500 10px var(--f-mono);color:var(--muted)}
-.sg-live{display:none;padding:2px 6px;font:500 9px var(--f-mono);letter-spacing:.12em;color:var(--on);background:var(--neon)}
-.sg-row.live label{color:var(--cyan)}
-.sg-row.live .sg-live{display:inline-block}
-.sg-track{position:relative;display:block;height:44px}
+.sg .hint{margin:0 0 9px}
+.sg-track{position:relative;display:block;height:40px}
 .sg-track input{-webkit-appearance:none;appearance:none;position:absolute;inset:0;width:100%;height:100%;margin:0;background:none;cursor:pointer;touch-action:pan-y}
-.sg-track input::-webkit-slider-runnable-track{height:4px;background:linear-gradient(90deg,var(--cyan) var(--fill,50%),var(--line-2) var(--fill,50%))}
-.sg-track input::-webkit-slider-thumb{-webkit-appearance:none;box-sizing:border-box;width:18px;height:18px;margin-top:-7px;border:2px solid var(--bg);border-radius:0;
-  background:var(--cyan);box-shadow:0 0 0 1px var(--cyan),0 0 12px var(--glow);transform:rotate(45deg)}
-.sg-track input::-moz-range-track{height:4px;background:var(--line-2)}
-.sg-track input::-moz-range-progress{height:4px;background:var(--cyan)}
-.sg-track input::-moz-range-thumb{box-sizing:border-box;width:18px;height:18px;border:2px solid var(--bg);border-radius:0;background:var(--cyan);box-shadow:0 0 0 1px var(--cyan);transform:rotate(45deg)}
-.sg-track input:active::-webkit-slider-thumb{background:var(--neon);box-shadow:0 0 0 1px var(--neon),0 0 14px rgba(166,255,26,.5)}
-.sg-track input:active::-moz-range-thumb{background:var(--neon);box-shadow:0 0 0 1px var(--neon)}
+.sg-track input::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:linear-gradient(90deg,var(--cyan) var(--fill,50%),var(--line-2) var(--fill,50%))}
+.sg-track input::-webkit-slider-thumb{-webkit-appearance:none;box-sizing:border-box;width:14px;height:14px;margin-top:-5px;border:0;border-radius:50%;
+  background:var(--cyan);box-shadow:0 0 0 3px rgba(25,211,255,.16),0 0 10px var(--glow)}
+.sg-track input::-moz-range-track{height:4px;border-radius:2px;background:var(--line-2)}
+.sg-track input::-moz-range-progress{height:4px;border-radius:2px;background:var(--cyan)}
+.sg-track input::-moz-range-thumb{box-sizing:border-box;width:14px;height:14px;border:0;border-radius:50%;background:var(--cyan);box-shadow:0 0 0 3px rgba(25,211,255,.16)}
+.sg-track input:active::-webkit-slider-thumb{background:var(--neon);box-shadow:0 0 0 4px rgba(166,255,26,.2),0 0 12px rgba(166,255,26,.5)}
+.sg-track input:active::-moz-range-thumb{background:var(--neon);box-shadow:0 0 0 4px rgba(166,255,26,.2)}
 .sg-track input:disabled{opacity:.45;cursor:default}
-.sg-ticks{position:absolute;left:9px;right:9px;top:calc(50% + 6px);display:flex;justify-content:space-between;pointer-events:none}
-.sg-ticks i{width:1px;height:6px;background:var(--line-2)}
+.sg-ticks{position:absolute;left:7px;right:7px;top:calc(50% + 6px);display:flex;justify-content:space-between;pointer-events:none}
+.sg-ticks i{width:1px;height:5px;background:var(--line-2)}
 nav button[aria-selected="true"]{border-top-color:var(--neon)}
 .field input,.set input[type=number],.set input[type=text],.set input[type=password],.sw-in{border-color:var(--line-2)}
 .field input:focus,.set input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(25,211,255,.2)}
@@ -510,6 +517,7 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
       <section class="panel">
         <h2>Lot mode (starts with the next cycle)</h2>
         <div class="seg seg-mode" id="modeRow" role="group" aria-label="Lot mode">
+          <i class="seg-glide" aria-hidden="true"></i>
           <button data-cmd="mode" data-arg="basic" aria-pressed="false">Basic</button>
           <button data-cmd="mode" data-arg="smart" aria-pressed="false">Smart</button>
           <button data-cmd="mode" data-arg="high" aria-pressed="false">Risk</button>
@@ -551,30 +559,18 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
           <h2>Strategy</h2>
           <div class="set"><label for="setTp">Take profit<small>points per trade</small></label><input id="setTp" type="number" inputmode="numeric" min="50" step="50"></div>
           <div class="set" id="rowGrid"><label for="setGrid">Grid distance<small>points after a TP hit</small></label><input id="setGrid" type="number" inputmode="numeric" min="50" step="50"></div>
-          <!-- Smart mode: the grid distance follows the session, one slider per session (sent to the bot when released) -->
+          <!-- Smart mode: the grid distance follows the session. One slider: it shows and sets the session that counts now. -->
           <div class="sg" id="sgBox" hidden>
-            <div class="sg-head"><span>Grid distance<small>Smart mode: points after a TP hit, by session</small></span><span class="sg-now"><span class="cap">Now</span><b id="sgNow">-</b></span></div>
-            <div class="sg-row" id="sgRow0">
-              <label for="sgAsia">Asia<i class="sg-live">now</i></label><output id="sgAsiaV" for="sgAsia">2500</output>
-              <span class="sg-end">500</span>
-              <span class="sg-track"><input id="sgAsia" type="range" min="500" max="3000" step="250" value="2500" aria-describedby="sgHint"><i class="sg-ticks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></i></span>
-              <span class="sg-end">3000</span>
-            </div>
-            <div class="sg-row" id="sgRow1">
-              <label for="sgLondon">London<i class="sg-live">now</i></label><output id="sgLondonV" for="sgLondon">2250</output>
-              <span class="sg-end">500</span>
-              <span class="sg-track"><input id="sgLondon" type="range" min="500" max="3000" step="250" value="2250" aria-describedby="sgHint"><i class="sg-ticks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></i></span>
-              <span class="sg-end">3000</span>
-            </div>
-            <div class="sg-row" id="sgRow2">
-              <label for="sgNY">New York<i class="sg-live">now</i></label><output id="sgNYV" for="sgNY">1500</output>
-              <span class="sg-end">500</span>
-              <span class="sg-track"><input id="sgNY" type="range" min="500" max="3000" step="250" value="1500" aria-describedby="sgHint"><i class="sg-ticks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></i></span>
-              <span class="sg-end">3000</span>
-            </div>
-            <p class="hint" id="sgHint">When two sessions are open, the one that opened first counts. A change is used for the next entry price the bot sets.</p>
+            <div class="sg-head"><label for="sgGrid">Grid distance<small><span class="sg-ses" id="sgSes">New York</span><i class="sg-live">now</i></small></label><output id="sgGridV" for="sgGrid">1500</output></div>
+            <div class="sg-line"><span class="sg-end">500</span><span class="sg-track"><input id="sgGrid" type="range" min="500" max="3000" step="250" value="1500" aria-describedby="sgHint"><i class="sg-ticks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></i></span><span class="sg-end">3000</span></div>
+            <p class="hint" id="sgHint">Smart mode: the amount changes with each session. The slider sets the session that is open now.</p>
           </div>
-          <div class="set"><label for="setBasket">Basket profit<small>$ to close a whole side</small></label><input id="setBasket" type="number" inputmode="decimal" min="0.01" step="0.05"></div>
+          <div class="set" id="rowBasket"><label for="setBasket">Basket profit<small>$ to close a whole side</small></label><input id="setBasket" type="number" inputmode="decimal" min="0.01" step="0.05"></div>
+          <!-- basket profit as a slider, with a bot that takes it from the app (it sends cfg.basketApp) -->
+          <div class="sg" id="bkBox" hidden>
+            <div class="sg-head"><label for="bkProfit">Basket profit<small>$ to close a whole side</small></label><output id="bkProfitV" for="bkProfit">0.10$</output></div>
+            <div class="sg-line"><span class="sg-end">0.1</span><span class="sg-track"><input id="bkProfit" type="range" min="0.1" max="1" step="0.05" value="0.1"><i class="sg-ticks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></i></span><span class="sg-end">1</span></div>
+          </div>
           <div class="set"><label for="setLevels">Max grid levels<small>pairs per cycle</small></label><input id="setLevels" type="number" inputmode="numeric" min="1" max="30" step="1"></div>
           <div class="set"><label for="setCooldown">Cooldown<small>seconds after a cycle</small></label><input id="setCooldown" type="number" inputmode="numeric" min="0" step="5"></div>
         </section>
@@ -600,7 +596,7 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
         <p class="err" id="setErr" role="alert"></p>
         <div class="row">
         </div>
-        <p class="hint">These are the settings the bot is running with. To change them, edit the bot inputs in MT5. In Smart mode you can set the grid distance here.</p>
+        <p class="hint">These are the settings the bot is running with. The sliders can be changed here. For the rest, edit the bot inputs in MT5.</p>
       </form>
 
       <!-- risk calculator -->
@@ -1009,26 +1005,50 @@ function basketBox(side, b, target, plEl, infoEl, barEl) {
   const span = target - low[side];
   barEl.style.width = (b.count < 2 || span <= 0 ? 0 : Math.max(0, Math.min(100, (b.profit - low[side]) / span * 100))) + '%';
 }
-// Smart mode: one grid distance slider per session. A bot from before this feature sends no "sgrid";
-// then the plain grid distance row stays.
-const SG = [['sgAsia', 'asia'], ['sgLondon', 'london'], ['sgNY', 'ny']];
-let sgMoved = 0;                                    // when a slider was last moved on this phone
-function sgPaint(el, v) {
-  el.style.setProperty('--fill', Math.max(0, Math.min(100, (el.value - 500) / 25)) + '%');
-  $(el.id + 'V').textContent = v;
+// Settings sliders. They need a bot that knows them: it sends "sgrid" (Smart mode grid distance per session)
+// and cfg.basketApp (the basket profit can be set from the app). With an older bot the plain rows stay.
+const SES = [['Asia', 'asia'], ['London', 'london'], ['New York', 'ny']];
+let sgMoved = 0, sgSes = -1;                        // when the grid slider was last moved here, and the session it shows
+let bkMoved = 0;
+function slPaint(el, text) {
+  const min = Number(el.min), max = Number(el.max);
+  el.style.setProperty('--fill', Math.max(0, Math.min(100, (el.value - min) / (max - min) * 100)) + '%');
+  $(el.id + 'V').textContent = text;
 }
+// one row: the session that counts now and its amount; both change when the next session comes
 function renderSmartGrid(s) {
-  const g = s.sgrid, on = !!g && (s.mode === 'smart' || (s.cMode === 'smart' && s.positions.length > 0));
+  const g = s.sgrid, on = !!g && g.ses >= 0 && g.ses <= 2 && (s.mode === 'smart' || (s.cMode === 'smart' && s.positions.length > 0));
   $('rowGrid').hidden = on; $('sgBox').hidden = !on;
   if (!on) return;
-  const settled = Date.now() - sgMoved > 6000;      // while a slider is moved or being saved, the bot's value does not pull it back
-  SG.forEach(([id, key], i) => {
-    const el = $(id);
-    if (settled && !el.matches(':active')) { el.value = g[key]; sgPaint(el, g[key]); }
-    el.disabled = !online;
-    cls($('sgRow' + i), 'live', g.ses === i);
-  });
-  $('sgNow').textContent = g.now;
+  const el = $('sgGrid');
+  // while the slider is moved or being saved, the bot's value (or a new session) does not pull it away
+  if (Date.now() - sgMoved > 6000 && !el.matches(':active')) {
+    sgSes = g.ses; $('sgSes').textContent = SES[sgSes][0];
+    el.value = g[SES[sgSes][1]]; slPaint(el, g[SES[sgSes][1]]);
+  }
+  el.disabled = !online;
+}
+function renderBasket(s) {
+  const on = s.cfg.basketApp === true;
+  $('rowBasket').hidden = on; $('bkBox').hidden = !on;
+  if (!on) return;
+  const el = $('bkProfit');
+  if (Date.now() - bkMoved > 6000 && !el.matches(':active')) { el.value = s.cfg.basket; slPaint(el, Number(s.cfg.basket).toFixed(2) + '$'); }
+  el.disabled = !online;
+}
+// Lot mode bar. A tap moves the lit box at once; the bot's answer confirms it, or the box goes back.
+const MODES = ['basic', 'smart', 'high'];
+let modePick = null;
+function renderModeBar(s) {
+  if (modePick && (modePick.arg === s.mode || Date.now() - modePick.t > 6000)) modePick = null;
+  const row = $('modeRow'), arg = !S ? '' : modePick ? modePick.arg : s.mode, i = MODES.indexOf(arg);
+  row.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.arg === arg));
+  if (i < 0) { delete row.dataset.pos; return; }
+  if (row.dataset.pos == null) {                    // the first time the box appears in place, it does not slide in
+    row.classList.add('snap');
+    requestAnimationFrame(() => requestAnimationFrame(() => row.classList.remove('snap')));
+  }
+  row.dataset.pos = i;
 }
 function renderCalc(s) {
   const c = s.cfg, smart = s.mode === 'smart' && !!s.sgrid, grid = smart ? s.sgrid.now : c.gridPts;
@@ -1136,7 +1156,7 @@ function render() {
       : '<p class="empty">No open positions.</p>';
   }
   if (tab === 'control') {
-    document.querySelectorAll('#modeRow button').forEach(b => b.setAttribute('aria-pressed', !!S && b.dataset.arg === s.mode));
+    renderModeBar(s);
     cls($('btnFinish'), 'on', s.finish);
     $('btnFinish').textContent = s.finish ? 'Finishing' : 'Finish';
     const cdn = $('cdNow');
@@ -1145,7 +1165,7 @@ function render() {
   }
   if (tab === 'tools') {
     if (tool === 'settings' && S && !settingsFilled) { fillSettings(s.cfg); settingsFilled = true; }
-    if (tool === 'settings') renderSmartGrid(s);
+    if (tool === 'settings') { renderSmartGrid(s); renderBasket(s); }
     if (tool === 'calc') renderCalc(s);
     if (tool === 'report') renderReport(s);
     if (tool === 'account') {
@@ -1240,6 +1260,7 @@ function onAction(e) {
   const b = e.target.closest('button'); if (!b) return;
   if (b.classList.contains('btn')) flash(b);
   if (b.dataset.cmd) send(b.dataset.cmd, b.dataset.arg);
+  if (b.dataset.cmd === 'mode' && online) { modePick = { arg: b.dataset.arg, t: Date.now() }; render(); }
   if (b.dataset.ask) {
     if (!online) { toast('The bot is offline. Nothing can be closed from here now.'); return; }
     pending = { cmd: b.dataset.ask, until: Date.now() + 30000 };
@@ -1257,11 +1278,10 @@ syncChartSeg();
 $('shCancel').addEventListener('click', () => { closeSheet(); toast('Canceled.'); });
 $('shOk').addEventListener('click', () => { const c = pending && pending.cmd; closeSheet(); if (c) send(c); });
 $('t-settings').addEventListener('submit', e => e.preventDefault());
-SG.forEach(([id], i) => {
-  const el = $(id);
-  el.addEventListener('input', () => { sgMoved = Date.now(); sgPaint(el, el.value); });
-  el.addEventListener('change', () => { sgMoved = Date.now(); send('sgrid', i + '.' + el.value); });      // 0 Asia, 1 London, 2 New York
-});
+$('sgGrid').addEventListener('input', e => { sgMoved = Date.now(); slPaint(e.target, e.target.value); });
+$('sgGrid').addEventListener('change', e => { sgMoved = Date.now(); if (sgSes >= 0) send('sgrid', sgSes + '.' + e.target.value); });      // 0 Asia, 1 London, 2 New York
+$('bkProfit').addEventListener('input', e => { bkMoved = Date.now(); slPaint(e.target, Number(e.target.value).toFixed(2) + '$'); });
+$('bkProfit').addEventListener('change', e => { bkMoved = Date.now(); send('basket', Number(e.target.value).toFixed(2)); });
 for (const [id, k] of [['alTp', 'tp'], ['alBasket', 'basket'], ['alCool', 'cool'], ['alRisk', 'risk']]) {
   $(id).checked = show[k];
   $(id).addEventListener('change', () => { show[k] = $(id).checked; store.set('rz_show', JSON.stringify(show)); });
