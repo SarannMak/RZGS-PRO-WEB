@@ -25,7 +25,7 @@
   <script>document.documentElement.classList.add('js');</script>
   <script src="script.js?v=8" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-  <script src="auth.js?v=15" defer></script>
+  <script src="auth.js?v=16" defer></script>
 </head>
 <body data-auth-page="dashboard">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -325,7 +325,31 @@
                 <h2>Email</h2>
                 <div class="dash-line"><span class="cap">Address</span><b data-dash-email>loading</b></div>
                 <div class="dash-line"><span class="cap">Status</span><b data-info="email-status">-</b></div>
-                <p class="dash-hint">To change your email address, <a class="auth-link" href="contact">contact us</a>.</p>
+                <div class="dash-line" data-email-pending hidden><span class="cap">New address</span><b data-email-new></b></div>
+                <p class="dash-hint" data-email-pending hidden>Waiting for you: we sent a link to your new address. Open it to finish the change. If a link also arrives at your old address, open that one too. Until then, log in with your old email.</p>
+                <p class="dash-hint">To change your email address, type the new one and your password. We send you a link to confirm it.</p>
+                <form data-email-form novalidate>
+                  <div class="field">
+                    <label for="dash-new-email">New email address <span class="req" aria-hidden="true">*</span></label>
+                    <input class="input" id="dash-new-email" name="email" type="email" inputmode="email" autocomplete="email" required aria-describedby="dash-new-email-error" autocapitalize="none" spellcheck="false">
+                    <p class="field-error" id="dash-new-email-error" hidden></p>
+                  </div>
+                  <div class="field">
+                    <label for="dash-email-password">Your password <span class="req" aria-hidden="true">*</span></label>
+                    <div class="input-wrap input-wrap--action">
+                      <input class="input" id="dash-email-password" name="password" type="password" autocomplete="current-password" required aria-describedby="dash-email-password-error">
+                      <button class="toggle-pw" type="button" data-toggle-password aria-controls="dash-email-password" aria-pressed="false" aria-label="Show password">
+                        <svg class="icon icon-show" aria-hidden="true"><use href="#i-eye"/></svg>
+                        <svg class="icon icon-hide" aria-hidden="true"><use href="#i-eye-off"/></svg>
+                      </button>
+                    </div>
+                    <p class="field-error" id="dash-email-password-error" hidden></p>
+                  </div>
+                  <div class="form-actions">
+                    <button class="btn btn-chip" type="submit" data-submit>Change email</button>
+                    <p class="form-msg" data-form-msg role="status" hidden></p>
+                  </div>
+                </form>
               </section>
             </div>
 

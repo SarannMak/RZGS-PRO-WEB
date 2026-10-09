@@ -21,8 +21,12 @@
   const urlQuery = new URLSearchParams(location.search);
   const urlHash = new URLSearchParams(location.hash.replace(/^#/, ''));
   const fromUrl = (key) => urlHash.get(key) || urlQuery.get(key);
-  const arrivedFrom = fromUrl('type'); // "signup" after confirming an email, "recovery" for a password reset
+  const arrivedFrom = fromUrl('type'); // "signup" after confirming an email, "recovery" for a password reset, "email_change"
   const urlError = fromUrl('error_description') || fromUrl('error');
+  // A change of email may have to be confirmed from both inboxes, the old and the new. The first link opened
+  // then comes back with a note instead of a sign-in ("... proceed to confirm link sent to the other email").
+  const firstOfTwo = /other email/i.test(fromUrl('message') || '');
+  const FIRST_OF_TWO = 'Step 1 of 2 is done. Now open the link we sent to your other email address to finish the change.';
 
   // Full address of another page in this same folder, e.g. https://site.com/dashboard.html
   // It is only used for the links in our emails. Those keep ".html": that address is the one known to work
@@ -219,6 +223,7 @@
     const resendButton = $('[data-resend]');
 
     if (urlQuery.get('signedout')) showMessage("You've signed out.", 'success');
+    else if (urlQuery.get('confirm') === 'other') showMessage(FIRST_OF_TWO, 'success');
     else if (urlError) showMessage('That link is no longer valid. Please log in, or request a new link.');
 
     const { data: { session } } = await db.auth.getSession();
@@ -540,12 +545,20 @@
     // When someone arrives from the confirmation email, supabase-js signs them in here.
     const { data: { session } } = await db.auth.getSession();
     if (!session) {
-      location.replace('login' + (urlError ? '?error=link' : ''));
+      location.replace('login' + (urlError ? '?error=link' : firstOfTwo ? '?confirm=other' : ''));
       return;
     }
     if (arrivedFrom === 'signup') showMessage('Your email is confirmed. Welcome to RZGS-PRO!', 'success');
+    else if (arrivedFrom === 'email_change') showMessage('Your email address is changed. Log in with the new one from now on.', 'success');
+    else if (firstOfTwo) showMessage(FIRST_OF_TWO, 'success');
+    else if (urlError) showMessage('That link has expired or was already used. If you were changing your email, send the request again in Profile.');
 
     let user = session.user;
+    // A change of email that was waiting may have been finished on another device since this one last looked.
+    if (user.new_email) {
+      const { data } = await db.auth.getUser();
+      if (data && data.user) user = data.user;
+    }
     // Our own copy of the profile (plus the plan), kept in the web_users table.
     // The bot_* columns are written by the Telegram sales bot once the account is connected to it.
     const PROFILE_COLUMNS = 'full_name, username, avatar_url, email, country, phone, telegram_username, mt5_account, broker, plan, plan_expires_at, created_at, email_confirmed_at, last_sign_in_at, accepted_terms_at, bot_tg_id, bot_tg_username, bot_mt5_account, bot_broker, bot_stage, bot_plan';
@@ -974,6 +987,62 @@
     }), 'Trading account saved.');
 
     wireSaveForm(passwordForm, () => ({ password: passwordForm.elements.new_password.value }), 'Password updated.');
+
+    /* ----- change email ----- */
+    // The new address counts only after the person opens the link we email to it (Supabase can also send one to
+    // the old address: then both have to be opened). Until then the old address stays the login. The password is
+    // asked for again, so a phone left unlocked is not enough to take an account away.
+    const emailForm = $('[data-email-form]');
+    function renderEmailChange() {
+      const waiting = user.new_email || '';
+      $('[data-email-new]', root).textContent = waiting;
+      $$('[data-email-pending]', root).forEach((el) => { el.hidden = !waiting; });
+    }
+    renderEmailChange();
+    wireValidation(emailForm);
+    emailForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (!validateAll(emailForm)) return;
+      const address = emailForm.elements.email;
+      const password = emailForm.elements.password;
+      const next = address.value.trim().toLowerCase();
+      if (next === (user.email || '').toLowerCase()) {
+        setFieldError(address, 'This is already your email address.');
+        address.focus();
+        return;
+      }
+      const submit = $('[data-submit]', emailForm);
+      setBusy(submit, true);
+      const check = await db.auth.signInWithPassword({ email: user.email, password: password.value });
+      if (check.error) {
+        setBusy(submit, false);
+        if (check.error.code === 'invalid_credentials') {
+          setFieldError(password, 'Wrong password.');
+          password.focus();
+        } else {
+          formMessage(emailForm, friendlyError(check.error), 'error');
+        }
+        return;
+      }
+      const { data, error } = await db.auth.updateUser({ email: next }, { emailRedirectTo: pageUrl('dashboard.html') });
+      setBusy(submit, false);
+      if (error) {
+        if (error.code === 'email_exists' || error.code === 'user_already_exists') {
+          setFieldError(address, 'This email is already used by another account.');
+          address.focus();
+        } else {
+          formMessage(emailForm, friendlyError(error), 'error');
+        }
+        return;
+      }
+      if (data && data.user) user = data.user;
+      emailForm.reset();
+      const changed = (user.email || '').toLowerCase() === next; // no confirmation asked for: it is changed already
+      if (changed) profile.email = user.email;
+      renderHeader();
+      renderEmailChange();
+      formMessage(emailForm, changed ? 'Email address changed.' : 'Link sent. Check the inbox of your new address.', 'success');
+    });
 
     /* ----- session ----- */
     // Signing out asks first, like the power button of the control app: "Do you want to sign out?"  No / Yes
