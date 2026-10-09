@@ -25,6 +25,8 @@
   const urlError = fromUrl('error_description') || fromUrl('error');
 
   // Full address of another page in this same folder, e.g. https://site.com/dashboard.html
+  // It is only used for the links in our emails. Those keep ".html": that address is the one known to work
+  // with the login provider, and the page tidies its own address when it opens (see script.js).
   const pageUrl = (name) => new URL(name, location.href).href.split(/[?#]/)[0];
 
   /* ---------------------------------------------------------------- messages */
@@ -221,7 +223,7 @@
 
     const { data: { session } } = await db.auth.getSession();
     if (session) {
-      location.replace('dashboard.html');
+      location.replace('dashboard');
       return;
     }
 
@@ -249,7 +251,7 @@
         if (error.code === 'email_not_confirmed') resendButton.hidden = false;
         return;
       }
-      location.replace('dashboard.html');
+      location.replace('dashboard');
     });
   }
 
@@ -286,7 +288,7 @@
 
     const { data: { session } } = await db.auth.getSession();
     if (session) {
-      location.replace('dashboard.html');
+      location.replace('dashboard');
       return;
     }
 
@@ -386,7 +388,7 @@
 
       if (data.session) {
         // email confirmation is switched off in Supabase: the person is already signed in
-        location.replace('dashboard.html');
+        location.replace('dashboard');
         return;
       }
 
@@ -452,7 +454,7 @@
         return;
       }
       showMessage('Your password is updated. Taking you to your account.', 'success');
-      setTimeout(() => location.replace('dashboard.html'), 1200);
+      setTimeout(() => location.replace('dashboard'), 1200);
     });
   }
 
@@ -538,7 +540,7 @@
     // When someone arrives from the confirmation email, supabase-js signs them in here.
     const { data: { session } } = await db.auth.getSession();
     if (!session) {
-      location.replace('login.html' + (urlError ? '?error=link' : ''));
+      location.replace('login' + (urlError ? '?error=link' : ''));
       return;
     }
     if (arrivedFrom === 'signup') showMessage('Your email is confirmed. Welcome to RZGS-PRO!', 'success');
@@ -995,7 +997,7 @@
         confirmMsg.hidden = false;
         return;
       }
-      location.replace('index.html'); // signed out: back to the home page
+      location.replace('./'); // signed out: back to the home page
     });
 
     const others = $('[data-sign-out-others]');
@@ -1011,7 +1013,7 @@
 
     // signed out in another tab
     db.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_OUT') location.replace('index.html');
+      if (event === 'SIGNED_OUT') location.replace('./');
     });
   }
 

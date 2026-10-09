@@ -1,3 +1,16 @@
+/* ==========================================================================
+   Clean addresses: rzgspro.com/signup, not rzgspro.com/signup.html
+   The host serves every page at both addresses and the links use the clean one. A page opened at an old
+   ".html" address (a bookmark, an email link) tidies its own address here; "?..." and "#..." are kept.
+   Only on the real site: a simple test server (an IP address, localhost) cannot open addresses without .html.
+   ========================================================================== */
+(function tidyAddress(place) {
+  const path = place.pathname.replace(/(^|\/)index\.html$/, '$1').replace(/\.html$/, '');
+  if (path !== place.pathname && /[a-z]\.[a-z]/i.test(place.hostname)) {
+    history.replaceState(null, '', (path || '/') + place.search + place.hash);
+  }
+})(window.location);
+
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 /* ==========================================================================

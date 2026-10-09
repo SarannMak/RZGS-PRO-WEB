@@ -23,9 +23,9 @@
   <link rel="stylesheet" href="auth.css?v=13">
 
   <script>document.documentElement.classList.add('js');</script>
-  <script src="script.js?v=7" defer></script>
+  <script src="script.js?v=8" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-  <script src="auth.js?v=5" defer></script>
+  <script src="auth.js?v=14" defer></script>
 </head>
 <body data-auth-page="login">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -75,25 +75,25 @@
   <!-- Header -->
   <header class="site-header" data-header>
     <div class="container header-inner">
-      <a class="brand" href="index.html" aria-label="RZGS-PRO home">
+      <a class="brand" href="./" aria-label="RZGS-PRO home">
         <img src="assets/logo-192.webp" alt="" width="40" height="40">
         <span class="brand-name">RZGS<span class="brand-accent">-PRO</span></span>
       </a>
 
       <nav class="primary-nav" id="primary-nav" aria-label="Main">
         <ul class="nav-list">
-          <li><a class="nav-link" href="bot.html">The Bot</a></li>
-          <li><a class="nav-link" href="index.html#pricing">Pricing</a></li>
-          <li><a class="nav-link" href="how-to-buy.html">How to Buy</a></li>
-          <li><a class="nav-link" href="license.html">License</a></li>
-          <li><a class="nav-link" href="contact.html">Contact</a></li>
-          <li><a class="nav-link" href="login.html" aria-current="page">Sign up / Login</a></li>
+          <li><a class="nav-link" href="bot">The Bot</a></li>
+          <li><a class="nav-link" href="./#pricing">Pricing</a></li>
+          <li><a class="nav-link" href="how-to-buy">How to Buy</a></li>
+          <li><a class="nav-link" href="license">License</a></li>
+          <li><a class="nav-link" href="contact">Contact</a></li>
+          <li><a class="nav-link" href="login" aria-current="page">Sign up / Login</a></li>
         </ul>
-        <a class="btn btn-primary btn-block nav-menu-cta" href="index.html#partners">Start now for $0</a>
+        <a class="btn btn-primary btn-block nav-menu-cta" href="./#partners">Start now for $0</a>
       </nav>
 
       <div class="header-actions">
-        <a class="btn btn-primary btn-sm header-cta" href="index.html#partners">Start for $0</a>
+        <a class="btn btn-primary btn-sm header-cta" href="./#partners">Start for $0</a>
         <button class="icon-btn menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
           <svg class="icon icon-open" aria-hidden="true"><use href="#i-menu"/></svg>
           <svg class="icon icon-close" aria-hidden="true"><use href="#i-x"/></svg>
@@ -116,8 +116,8 @@
           <!-- switch between the log in box and the sign up box (each one is its own page) -->
           <nav class="auth-switch" data-pos="0" aria-label="Log in or sign up">
             <i class="auth-switch-glide" aria-hidden="true"></i>
-            <a href="login.html" aria-current="page">Log in</a>
-            <a href="signup.html">Sign up</a>
+            <a href="login" aria-current="page">Log in</a>
+            <a href="signup">Sign up</a>
           </nav>
           <p class="kicker">Welcome back</p>
           <h1 class="auth-title" id="page-title">Log in</h1>
@@ -136,7 +136,7 @@
               <p class="field-error" id="login-email-error" hidden></p>
             </div>
             <div class="field">
-              <div class="field-row"><label for="login-password">Password <span class="req" aria-hidden="true">*</span></label><a href="reset-password.html">Forgot password?</a></div>
+              <div class="field-row"><label for="login-password">Password <span class="req" aria-hidden="true">*</span></label><a href="reset-password">Forgot password?</a></div>
               <div class="input-wrap input-wrap--action">
                 <input class="input" id="login-password" name="password" type="password" autocomplete="current-password" required aria-describedby="login-password-error">
                 <button class="toggle-pw" type="button" data-toggle-password aria-controls="login-password" aria-pressed="false" aria-label="Show password">
@@ -152,13 +152,13 @@
           </form>
           <button class="btn btn-ghost btn-block auth-resend" type="button" data-resend hidden>Resend confirmation email</button>
 
-          <a class="trial-banner" href="signup.html">
+          <a class="trial-banner" href="signup">
             <span class="trial-banner-icon"><svg class="icon" aria-hidden="true"><use href="#i-gift"/></svg></span>
             <span class="trial-banner-text"><strong>New here? Free <span class="nowrap">7-day</span> Pro trial</strong><small>Create your free account</small></span>
             <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg>
           </a>
 
-          <p class="auth-note">This login is for your website account (email and password) and opens your dashboard. The bot control app has its own login: your MT5 account number and the App Password you typed in the bot. <a class="auth-link" href="app.html">Open the control app</a></p>
+          <p class="auth-note">This login is for your website account (email and password) and opens your dashboard. The bot control app has its own login: your MT5 account number and the App Password you typed in the bot. <a class="auth-link" href="app">Open the control app</a></p>
         </div>
       </div>
     </section>
@@ -168,7 +168,7 @@
     <div class="container">
       <div class="footer-grid">
         <div class="footer-brand">
-          <a class="brand" href="index.html" aria-label="RZGS-PRO home">
+          <a class="brand" href="./" aria-label="RZGS-PRO home">
             <img src="assets/logo-192.webp" alt="" width="36" height="36" loading="lazy">
             <span class="brand-name">RZGS<span class="brand-accent">-PRO</span></span>
           </a>
@@ -182,27 +182,27 @@
         <nav aria-labelledby="footer-product">
           <h2 class="footer-title" id="footer-product">Product</h2>
           <ul class="footer-links">
-            <li><a href="bot.html">The Bot</a></li>
-            <li><a href="index.html#pricing">Pricing</a></li>
-            <li><a href="how-to-buy.html">How to Buy</a></li>
-            <li><a href="index.html#faq">FAQ</a></li>
+            <li><a href="bot">The Bot</a></li>
+            <li><a href="./#pricing">Pricing</a></li>
+            <li><a href="how-to-buy">How to Buy</a></li>
+            <li><a href="./#faq">FAQ</a></li>
           </ul>
         </nav>
 
         <nav aria-labelledby="footer-legal">
           <h2 class="footer-title" id="footer-legal">Legal</h2>
           <ul class="footer-links">
-            <li><a href="license.html">License Rules</a></li>
-            <li><a href="terms.html">Terms &amp; Conditions</a></li>
-            <li><a href="privacy.html">Privacy Policy</a></li>
-            <li><a href="risk-disclosure.html">Risk Disclosure</a></li>
+            <li><a href="license">License Rules</a></li>
+            <li><a href="terms">Terms &amp; Conditions</a></li>
+            <li><a href="privacy">Privacy Policy</a></li>
+            <li><a href="risk-disclosure">Risk Disclosure</a></li>
           </ul>
         </nav>
 
         <nav aria-labelledby="footer-support">
           <h2 class="footer-title" id="footer-support">Support</h2>
           <ul class="footer-links">
-            <li><a href="contact.html">Contact us</a></li>
+            <li><a href="contact">Contact us</a></li>
             <li><a href="https://t.me/rzgsprobot?start=free">Free trial</a></li>
           </ul>
         </nav>
@@ -210,7 +210,7 @@
 
       <p class="risk">
         <svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>
-        <span><strong>Risk warning:</strong> Trading gold (XAUUSD) and other leveraged products carries a high level of risk and may not be suitable for every investor. You could lose some or all of your capital. Past performance does not guarantee future results. RZGS-PRO is trading software and does not provide financial advice. <a href="risk-disclosure.html">Read the full Risk Disclosure</a>.</span>
+        <span><strong>Risk warning:</strong> Trading gold (XAUUSD) and other leveraged products carries a high level of risk and may not be suitable for every investor. You could lose some or all of your capital. Past performance does not guarantee future results. RZGS-PRO is trading software and does not provide financial advice. <a href="risk-disclosure">Read the full Risk Disclosure</a>.</span>
       </p>
 
       <div class="footer-bottom">

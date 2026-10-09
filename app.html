@@ -1,6 +1,9 @@
 <!doctype html>
 <html lang="en">
 <head>
+<!-- An old address ending in .html is tidied (rzgspro.com/app.html -> rzgspro.com/app). Only on the real site:
+     a simple test server cannot open addresses without .html. -->
+<script>(function (l) { var p = l.pathname.replace(/\.html$/, ''); if (p !== l.pathname && /[a-z]\.[a-z]/i.test(l.hostname)) history.replaceState(null, '', p + l.search + l.hash); })(location);</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#030c13">
@@ -384,7 +387,7 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
   <section id="login">
     <form class="frame login-card" id="loginForm" autocomplete="off">
       <i class="br"></i>
-      <a class="btn home-link" href="dashboard.html">
+      <a class="btn home-link" href="dashboard">
         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
         Dashboard
       </a>
@@ -408,7 +411,7 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
       </div>
       <p class="err" id="loginErr" role="alert"></p>
       <button class="btn primary" id="loginBtn" type="submit">Connect to bot</button>
-      <p class="hint login-note">Use your MT5 account number and the App Password you typed in the bot inputs. This is not your website login: your email and password are for the <a href="dashboard.html">dashboard</a>.</p>
+      <p class="hint login-note">Use your MT5 account number and the App Password you typed in the bot inputs. This is not your website login: your email and password are for the <a href="dashboard">dashboard</a>.</p>
     </form>
     <p class="note">First turn on <b>App link</b> in the bot inputs in MT5 and set an <b>App Password</b>.<br>Then log in here with your account number and that password.</p>
   </section>
