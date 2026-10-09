@@ -20,12 +20,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
   <link rel="stylesheet" href="style.css?v=11">
-  <link rel="stylesheet" href="auth.css?v=11">
+  <link rel="stylesheet" href="auth.css?v=12">
 
   <script>document.documentElement.classList.add('js');</script>
   <script src="script.js?v=7" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-  <script src="auth.js?v=11" defer></script>
+  <script src="auth.js?v=12" defer></script>
 </head>
 <body data-auth-page="dashboard">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -114,7 +114,7 @@
 
     <section class="auth-section" id="top" aria-labelledby="page-title">
       <div class="container dash-shell" data-dash aria-busy="true"
-           data-link-trial="https://t.me/m/kuh-_ELkNmQ1" data-link-elite="https://t.me/m/GbS3QIWgYzY1" data-link-diamond="https://t.me/m/mXXD-IlgNThl">
+           data-bot="https://t.me/rzgsprobot">
 
         <!-- header strip -->
         <header class="dash-head">
@@ -167,9 +167,9 @@
 
               <section class="dash-panel">
                 <h2>Next step</h2>
-                <p class="dash-hint" data-plan-note>Request your free 7-day Pro trial, or choose a plan. A plan you buy shows here once we activate it.</p>
+                <p class="dash-hint" data-plan-note>Request your free 7-day Pro trial, or choose a plan. The button opens our Telegram bot, and your plan shows here when your bot is delivered.</p>
                 <div class="dash-row dash-row--wide">
-                  <a class="btn btn-primary" data-plan-action href="https://t.me/m/kuh-_ELkNmQ1">Request your free trial</a>
+                  <a class="btn btn-primary" data-plan-action href="https://t.me/rzgsprobot?start=free">Request your free trial</a>
                   <a class="btn btn-ghost" href="#plan">See plans</a>
                 </div>
               </section>
@@ -181,6 +181,11 @@
                   <div class="dash-kv"><span class="cap">Email</span><b data-info="email-status">-</b></div>
                   <div class="dash-kv"><span class="cap">MT5 account</span><b data-info="mt5">-</b></div>
                   <div class="dash-kv"><span class="cap">Broker</span><b data-info="broker">-</b></div>
+                  <div class="dash-kv"><span class="cap">Telegram bot</span><b data-info="bot">-</b></div>
+                </div>
+                <div class="dash-connect" data-bot-connect hidden>
+                  <a class="btn btn-chip" data-bot-link href="https://t.me/rzgsprobot">Connect Telegram</a>
+                  <p class="dash-hint">Already got your bot in Telegram? Tap once and your plan shows here.</p>
                 </div>
               </section>
             </div>
@@ -198,11 +203,11 @@
               <section class="dash-panel">
                 <h2>Start, renew or change plan</h2>
                 <div class="dash-row">
-                  <a class="btn btn-ghost" data-plan-link="trial" href="https://t.me/m/kuh-_ELkNmQ1">Trial</a>
-                  <a class="btn btn-ghost" data-plan-link="elite" href="https://t.me/m/GbS3QIWgYzY1">Elite</a>
-                  <a class="btn btn-ghost" data-plan-link="diamond" href="https://t.me/m/mXXD-IlgNThl">Diamond</a>
+                  <a class="btn btn-ghost" data-plan-link="trial" href="https://t.me/rzgsprobot?start=free">Trial</a>
+                  <a class="btn btn-ghost" data-plan-link="elite" href="https://t.me/rzgsprobot?start=elite">Elite</a>
+                  <a class="btn btn-ghost" data-plan-link="diamond" href="https://t.me/rzgsprobot?start=diamond">Diamond</a>
                 </div>
-                <p class="dash-hint">Each button opens Telegram with a message ready to send. Your current plan is highlighted.</p>
+                <p class="dash-hint">Each button opens our Telegram bot with that plan already chosen. The bot knows this account, so there is nothing to type. Your current plan is highlighted.</p>
               </section>
 
               <section class="dash-panel">
@@ -440,7 +445,7 @@
             <span class="brand-name">RZGS<span class="brand-accent">-PRO</span></span>
           </a>
           <p>Automated gold trading bot for MetaTrader 5, with setup help and support on Telegram.</p>
-          <a class="btn btn-ghost btn-sm" href="https://t.me/m/kuh-_ELkNmQ1">
+          <a class="btn btn-ghost btn-sm" href="https://t.me/rzgsprobot?start=free">
             <svg class="icon" aria-hidden="true"><use href="#i-send"/></svg>
             Free 7-day trial
           </a>
@@ -470,7 +475,7 @@
           <h2 class="footer-title" id="footer-support">Support</h2>
           <ul class="footer-links">
             <li><a href="contact.html">Contact us</a></li>
-            <li><a href="https://t.me/m/kuh-_ELkNmQ1">Free trial</a></li>
+            <li><a href="https://t.me/rzgsprobot?start=free">Free trial</a></li>
           </ul>
         </nav>
       </div>

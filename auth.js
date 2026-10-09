@@ -500,14 +500,15 @@
     return select;
   }
 
-  // The plan and its end date are typed by the site owner in the web_users table.
+  // The plan and its end date are written to the web_users table by the Telegram sales bot when it
+  // delivers a licence (the site owner can also type them there).
   // This turns them into everything the dashboard shows about the plan.
   function planState(profile) {
     const plan = PLAN_NAMES[profile.plan] ? profile.plan : null;
     if (!plan) {
       return {
         plan: null, name: 'Not started', status: 'No plan', tone: 'off', until: '-', big: '--', sub: 'NO PLAN', arc: 0,
-        note: 'Request your free 7-day Pro trial, or choose a plan. A plan you buy shows here once we activate it.',
+        note: 'Request your free 7-day Pro trial, or choose a plan. The button opens our Telegram bot, and your plan shows here when your bot is delivered.',
       };
     }
     const ends = profile.plan_expires_at ? new Date(profile.plan_expires_at) : null;
@@ -544,15 +545,17 @@
 
     let user = session.user;
     // Our own copy of the profile (plus the plan), kept in the web_users table.
-    let profile = {};
-    try {
-      const { data } = await db
-        .from('web_users')
-        .select('full_name, username, avatar_url, email, country, phone, telegram_username, mt5_account, broker, plan, plan_expires_at, created_at, email_confirmed_at, last_sign_in_at, accepted_terms_at')
-        .eq('id', user.id)
-        .maybeSingle();
-      if (data) profile = data;
-    } catch (e) { /* fall back to what the sign-up itself stored */ }
+    // The bot_* columns are written by the Telegram sales bot once the account is connected to it.
+    const PROFILE_COLUMNS = 'full_name, username, avatar_url, email, country, phone, telegram_username, mt5_account, broker, plan, plan_expires_at, created_at, email_confirmed_at, last_sign_in_at, accepted_terms_at, bot_tg_id, bot_tg_username, bot_mt5_account, bot_broker';
+    async function fetchProfile() {
+      try {
+        const { data } = await db.from('web_users').select(PROFILE_COLUMNS).eq('id', user.id).maybeSingle();
+        return data || null;
+      } catch (e) {
+        return null;
+      }
+    }
+    const profile = (await fetchProfile()) || {}; // without it: what the sign-up itself stored
 
     const stored = (key) => profile[key] || (user.user_metadata || {})[key] || '';
     const setAll = (selector, text) => $$(selector, root).forEach((el) => { el.textContent = text; });
@@ -574,6 +577,27 @@
       if (tab && tab.getAttribute('aria-selected') !== 'true') selectTab(tab);
     });
     setupTabs($$('.dash-seg [role="tab"]', root))($('.dash-seg [role="tab"]', root));
+
+    /* ----- Telegram sales bot ----- */
+    // Plans are bought in the Telegram bot. The dashboard's Telegram buttons carry a one-time code, so the bot
+    // knows which website account the person owns without any typing ("l_<code>" or "l_<code>_<plan>").
+    // The code is renewed while the page stays open. Without one, the buttons still open the bot at the plan.
+    const BOT_URL = root.dataset.bot;
+    const BOT_PLAN = { trial: 'free', elite: 'elite', diamond: 'diamond' };
+    let linkCode = '';
+    const botLink = (plan) => {
+      const payload = [linkCode && `l_${linkCode}`, plan && BOT_PLAN[plan]].filter(Boolean).join('_');
+      return payload ? `${BOT_URL}?start=${payload}` : BOT_URL;
+    };
+    async function refreshLinkCode() {
+      try {
+        const { data } = await db.rpc('web_link_code');
+        linkCode = data && data.ok ? data.code : '';
+      } catch (e) {
+        linkCode = '';
+      }
+      renderPlan(); // puts the fresh links on the buttons
+    }
 
     /* ----- profile picture ----- */
     // The picture is a small file in the "avatars" storage bucket, in a folder named after the person's own id.
@@ -711,8 +735,12 @@
       const confirmed = profile.email_confirmed_at || user.email_confirmed_at;
       setAll('[data-info="joined"]', joined ? longDate(joined) : '-');
       setAll('[data-info="email-status"]', confirmed ? 'Confirmed' : 'Not confirmed');
-      setAll('[data-info="mt5"]', stored('mt5_account') || 'Not set');
-      setAll('[data-info="broker"]', stored('broker') || 'Not set');
+      // the account the licence was made for (written by the Telegram bot) comes before the one typed in the profile
+      setAll('[data-info="mt5"]', profile.bot_mt5_account || stored('mt5_account') || 'Not set');
+      setAll('[data-info="broker"]', profile.bot_broker || stored('broker') || 'Not set');
+      const linked = Boolean(profile.bot_tg_id);
+      setAll('[data-info="bot"]', linked ? (profile.bot_tg_username ? `@${profile.bot_tg_username}` : 'Connected') : 'Not connected');
+      $$('[data-bot-connect]', root).forEach((box) => { box.hidden = linked; });
     }
 
     function renderPlan() {
@@ -739,16 +767,18 @@
       });
       if (!state.plan) {
         action.textContent = 'Request your free trial';
-        action.href = root.dataset.linkTrial;
+        action.href = botLink('trial');
       } else if (state.plan === 'trial') {
         action.textContent = 'Choose a plan';
         action.href = '#plan';
       } else {
         action.textContent = 'Renew plan';
-        action.href = root.dataset[state.plan === 'elite' ? 'linkElite' : 'linkDiamond'];
+        action.href = botLink(state.plan);
       }
+      $$('[data-bot-link]', root).forEach((button) => { button.href = botLink(); });
       // on the Plan view, the current plan's button is shown "on"
       $$('[data-plan-link]', root).forEach((button) => {
+        button.href = botLink(button.dataset.planLink);
         const on = button.dataset.planLink === state.plan;
         button.classList.toggle('is-on', on);
         if (on) button.setAttribute('aria-current', 'true');
@@ -838,6 +868,22 @@
     renderPlan();
     renderLog();
     root.setAttribute('aria-busy', 'false');
+
+    refreshLinkCode();
+    setInterval(refreshLinkCode, 45 * 60 * 1000); // a code is good for 2 hours
+    // Back from Telegram: the bot may have connected the account or delivered a plan in the meantime.
+    let lastLook = Date.now();
+    document.addEventListener('visibilitychange', async () => {
+      if (document.hidden || Date.now() - lastLook < 5000) return;
+      lastLook = Date.now();
+      const fresh = await fetchProfile();
+      if (!fresh) return;
+      Object.assign(profile, fresh);
+      renderHeader();
+      renderInfo();
+      renderPlan();
+      renderLog();
+    });
 
     wireSaveForm(profileForm, () => ({
       full_name: profileForm.elements.full_name.value.trim(),

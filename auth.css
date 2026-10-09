@@ -1437,3 +1437,16 @@ a.trial-banner:hover {
   font-size: 13px;
   line-height: 1.6;
 }
+
+/* dashboard: the "Connect Telegram" button under the account details (shown until the bot is connected) */
+.dash-connect {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.dash-connect .dash-hint {
+  margin: 0;
+}
