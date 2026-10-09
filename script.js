@@ -113,7 +113,7 @@ document.querySelectorAll('[data-spotlight]').forEach((card) => {
 });
 
 /* ==========================================================================
-   One-tap card: Activate / Pause AI Trading demo
+   One-tap card: Activate / Pause demo
    ========================================================================== */
 const aiPanel = document.querySelector('[data-ai-panel]');
 
@@ -127,8 +127,8 @@ if (aiPanel) {
     const active = aiPanel.dataset.state !== 'active';
     aiPanel.dataset.state = active ? 'active' : 'paused';
     chip.textContent = active ? 'Active' : 'Paused';
-    toggleLabel.textContent = active ? 'Pause AI Trading' : 'Activate AI Trading';
-    status.textContent = active ? 'AI trading is active' : 'AI trading is paused';
+    toggleLabel.textContent = active ? 'Pause the bot' : 'Activate the bot';
+    status.textContent = active ? 'The bot is active' : 'The bot is paused';
   });
 }
 

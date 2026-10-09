@@ -1,0 +1,5 @@
+# Search engines may read the whole site. Pages that should not be listed say so themselves (noindex).
+User-agent: *
+Allow: /
+
+Sitemap: https://rzgspro.com/sitemap.xml

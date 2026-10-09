@@ -1,33 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Shown by the web host for every address that does not exist. All links start with / on purpose. -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Reset your password — RZGS-PRO</title>
-  <meta name="description" content="Reset the password of your RZGS-PRO account.">
+  <title>Page not found — RZGS-PRO</title>
+  <meta name="description" content="This page does not exist on RZGS-PRO.">
   <meta name="robots" content="noindex">
   <meta name="theme-color" content="#030c13">
   <meta name="color-scheme" content="dark">
 
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="Reset your password — RZGS-PRO">
-  <meta property="og:description" content="Reset the password of your RZGS-PRO account.">
-
-  <link rel="icon" type="image/png" href="assets/logo-192.png">
-  <link rel="apple-touch-icon" href="assets/logo-192.png">
+  <link rel="icon" type="image/png" href="/assets/logo-192.png">
+  <link rel="apple-touch-icon" href="/assets/logo-192.png">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="style.css?v=11">
-  <link rel="stylesheet" href="auth.css?v=11">
+  <link rel="stylesheet" href="/style.css?v=11">
 
   <script>document.documentElement.classList.add('js');</script>
-  <script src="script.js?v=7" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-  <script src="auth.js?v=5" defer></script>
+  <script src="/script.js?v=7" defer></script>
 </head>
-<body data-auth-page="reset">
+<body>
   <a class="skip-link" href="#main">Skip to content</a>
 
   <!-- Icon sprite (Lucide-style, 24px grid, stroke icons) -->
@@ -75,25 +69,25 @@
   <!-- Header -->
   <header class="site-header" data-header>
     <div class="container header-inner">
-      <a class="brand" href="index.html" aria-label="RZGS-PRO home">
-        <img src="assets/logo-192.webp" alt="" width="40" height="40">
+      <a class="brand" href="/index.html" aria-label="RZGS-PRO home">
+        <img src="/assets/logo-192.webp" alt="" width="40" height="40">
         <span class="brand-name">RZGS<span class="brand-accent">-PRO</span></span>
       </a>
 
       <nav class="primary-nav" id="primary-nav" aria-label="Main">
         <ul class="nav-list">
-          <li><a class="nav-link" href="bot.html">The Bot</a></li>
-          <li><a class="nav-link" href="index.html#pricing">Pricing</a></li>
-          <li><a class="nav-link" href="how-to-buy.html">How to Buy</a></li>
-          <li><a class="nav-link" href="license.html">License</a></li>
-          <li><a class="nav-link" href="contact.html">Contact</a></li>
-          <li><a class="nav-link" href="login.html" aria-current="page">Sign up / Login</a></li>
+          <li><a class="nav-link" href="/bot.html">The Bot</a></li>
+          <li><a class="nav-link" href="/index.html#pricing">Pricing</a></li>
+          <li><a class="nav-link" href="/how-to-buy.html">How to Buy</a></li>
+          <li><a class="nav-link" href="/license.html">License</a></li>
+          <li><a class="nav-link" href="/contact.html">Contact</a></li>
+          <li><a class="nav-link" href="/login.html">Sign up / Login</a></li>
         </ul>
-        <a class="btn btn-primary btn-block nav-menu-cta" href="index.html#partners">Start now for $0</a>
+        <a class="btn btn-primary btn-block nav-menu-cta" href="/index.html#partners">Start now for $0</a>
       </nav>
 
       <div class="header-actions">
-        <a class="btn btn-primary btn-sm header-cta" href="index.html#partners">Start for $0</a>
+        <a class="btn btn-primary btn-sm header-cta" href="/index.html#partners">Start for $0</a>
         <button class="icon-btn menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
           <svg class="icon icon-open" aria-hidden="true"><use href="#i-menu"/></svg>
           <svg class="icon icon-close" aria-hidden="true"><use href="#i-x"/></svg>
@@ -103,72 +97,17 @@
   </header>
 
   <main id="main">
-    <!-- icons used only by the account pages -->
-    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-      <symbol id="i-gift" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/></symbol>
-      <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.06 12.35a1 1 0 0 1 0-.7 10.75 10.75 0 0 1 19.88 0 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-19.88 0"/><circle cx="12" cy="12" r="3"/></symbol>
-      <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M10.73 5.08a10.74 10.74 0 0 1 11.2 6.57 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-1.44 2.49M14.08 14.16a3 3 0 0 1-4.24-4.24"/><path d="M17.48 17.5a10.75 10.75 0 0 1-15.42-5.15 1 1 0 0 1 0-.7 10.75 10.75 0 0 1 4.45-5.14M2 2l20 20"/></symbol>
-    </svg>
-
-    <section class="auth-section" id="top" aria-labelledby="page-title">
+    <section class="page-hero" id="top" aria-labelledby="page-title">
       <div class="container">
-        <div class="card auth-card auth-card--narrow">
-          <p class="kicker">Account help</p>
-          <h1 class="auth-title" id="page-title">Reset your password</h1>
-
-          <p class="auth-msg" data-auth-msg role="alert" hidden>
-            <svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>
-            <span data-auth-msg-text></span>
-          </p>
-          <noscript><p class="auth-msg" data-tone="error">Please turn on JavaScript in your browser to reset your password.</p></noscript>
-
-          <div data-reset-request>
-            <p class="auth-lead">Enter your account email and we'll send you a link to choose a new password.</p>
-            <form novalidate>
-            <div class="field">
-              <label for="reset-email">Email <span class="req" aria-hidden="true">*</span></label>
-              <input class="input" id="reset-email" name="email" type="email" autocomplete="email" required aria-describedby="reset-email-error" inputmode="email" autocapitalize="none" spellcheck="false">
-              <p class="field-error" id="reset-email-error" hidden></p>
-            </div>
-              <div class="form-actions">
-                <button class="btn btn-primary btn-lg" type="submit" data-submit>Send reset link</button>
-              </div>
-            </form>
-          </div>
-
-          <div data-reset-update hidden>
-            <p class="auth-lead">Choose a new password for your account.</p>
-            <form novalidate>
-            <div class="field">
-              <label for="reset-password">New password <span class="req" aria-hidden="true">*</span></label>
-              <div class="input-wrap input-wrap--action">
-                <input class="input" id="reset-password" name="new_password" type="password" autocomplete="new-password" required aria-describedby="reset-password-error reset-password-hint">
-                <button class="toggle-pw" type="button" data-toggle-password aria-controls="reset-password" aria-pressed="false" aria-label="Show password">
-                  <svg class="icon icon-show" aria-hidden="true"><use href="#i-eye"/></svg>
-                  <svg class="icon icon-hide" aria-hidden="true"><use href="#i-eye-off"/></svg>
-                </button>
-              </div>
-              <p class="hint" id="reset-password-hint">At least 8 characters.</p>
-              <p class="field-error" id="reset-password-error" hidden></p>
-            </div>
-            <div class="field">
-              <label for="reset-confirm">Confirm new password <span class="req" aria-hidden="true">*</span></label>
-              <div class="input-wrap input-wrap--action">
-                <input class="input" id="reset-confirm" name="confirm_password" type="password" autocomplete="new-password" required aria-describedby="reset-confirm-error">
-                <button class="toggle-pw" type="button" data-toggle-password aria-controls="reset-confirm" aria-pressed="false" aria-label="Show password">
-                  <svg class="icon icon-show" aria-hidden="true"><use href="#i-eye"/></svg>
-                  <svg class="icon icon-hide" aria-hidden="true"><use href="#i-eye-off"/></svg>
-                </button>
-              </div>
-              <p class="field-error" id="reset-confirm-error" hidden></p>
-            </div>
-              <div class="form-actions">
-                <button class="btn btn-primary btn-lg" type="submit" data-submit>Save new password</button>
-              </div>
-            </form>
-          </div>
-
-          <p class="auth-alt"><a href="login.html">Back to log in</a></p>
+        <p class="kicker">Error 404</p>
+        <h1 class="page-title" id="page-title">Page <span class="text-gradient">not found</span></h1>
+        <p class="page-lead">This page doesn't exist, or it was moved. Check the address, or use one of the buttons below.</p>
+        <div class="page-actions">
+          <a class="btn btn-primary btn-lg" href="/index.html">
+            Back to home
+            <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg>
+          </a>
+          <a class="btn btn-ghost btn-lg" href="/contact.html">Contact us</a>
         </div>
       </div>
     </section>
@@ -178,8 +117,8 @@
     <div class="container">
       <div class="footer-grid">
         <div class="footer-brand">
-          <a class="brand" href="index.html" aria-label="RZGS-PRO home">
-            <img src="assets/logo-192.webp" alt="" width="36" height="36" loading="lazy">
+          <a class="brand" href="/index.html" aria-label="RZGS-PRO home">
+            <img src="/assets/logo-192.webp" alt="" width="36" height="36" loading="lazy">
             <span class="brand-name">RZGS<span class="brand-accent">-PRO</span></span>
           </a>
           <p>Automated gold trading bot for MetaTrader 5, with setup help and support on Telegram.</p>
@@ -192,27 +131,27 @@
         <nav aria-labelledby="footer-product">
           <h2 class="footer-title" id="footer-product">Product</h2>
           <ul class="footer-links">
-            <li><a href="bot.html">The Bot</a></li>
-            <li><a href="index.html#pricing">Pricing</a></li>
-            <li><a href="how-to-buy.html">How to Buy</a></li>
-            <li><a href="index.html#faq">FAQ</a></li>
+            <li><a href="/bot.html">The Bot</a></li>
+            <li><a href="/index.html#pricing">Pricing</a></li>
+            <li><a href="/how-to-buy.html">How to Buy</a></li>
+            <li><a href="/index.html#faq">FAQ</a></li>
           </ul>
         </nav>
 
         <nav aria-labelledby="footer-legal">
           <h2 class="footer-title" id="footer-legal">Legal</h2>
           <ul class="footer-links">
-            <li><a href="license.html">License Rules</a></li>
-            <li><a href="terms.html">Terms &amp; Conditions</a></li>
-            <li><a href="privacy.html">Privacy Policy</a></li>
-            <li><a href="risk-disclosure.html">Risk Disclosure</a></li>
+            <li><a href="/license.html">License Rules</a></li>
+            <li><a href="/terms.html">Terms &amp; Conditions</a></li>
+            <li><a href="/privacy.html">Privacy Policy</a></li>
+            <li><a href="/risk-disclosure.html">Risk Disclosure</a></li>
           </ul>
         </nav>
 
         <nav aria-labelledby="footer-support">
           <h2 class="footer-title" id="footer-support">Support</h2>
           <ul class="footer-links">
-            <li><a href="contact.html">Contact us</a></li>
+            <li><a href="/contact.html">Contact us</a></li>
             <li><a href="https://t.me/m/kuh-_ELkNmQ1">Free trial</a></li>
           </ul>
         </nav>
@@ -220,7 +159,7 @@
 
       <p class="risk">
         <svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>
-        <span><strong>Risk warning:</strong> Trading gold (XAUUSD) and other leveraged products carries a high level of risk and may not be suitable for every investor. You could lose some or all of your capital. Past performance does not guarantee future results. RZGS-PRO is trading software and does not provide financial advice. <a href="risk-disclosure.html">Read the full Risk Disclosure</a>.</span>
+        <span><strong>Risk warning:</strong> Trading gold (XAUUSD) and other leveraged products carries a high level of risk and may not be suitable for every investor. You could lose some or all of your capital. Past performance does not guarantee future results. RZGS-PRO is trading software and does not provide financial advice. <a href="/risk-disclosure.html">Read the full Risk Disclosure</a>.</span>
       </p>
 
       <div class="footer-bottom">
@@ -229,5 +168,10 @@
       </div>
     </div>
   </footer>
+  <!-- Floating link to the Telegram community (bottom right) -->
+  <a class="tg-float" href="https://t.me/+NvCIdtTmMIViMjg9" target="_blank" rel="noopener">
+    <span class="tg-float-icon" aria-hidden="true"><svg class="icon"><use href="#i-send"/></svg></span>
+    <span class="tg-float-text"><strong>Join community</strong><small>Telegram &middot; Free</small></span>
+  </a>
 </body>
 </html>

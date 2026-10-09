@@ -1427,3 +1427,13 @@ a.trial-banner:hover {
 .avatar-edit-body .form-msg {
   margin-top: 8px;
 }
+
+/* small print under the log in box: which login is which */
+.auth-note {
+  margin: 20px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  color: var(--text-subtle);
+  font-size: 13px;
+  line-height: 1.6;
+}

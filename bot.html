@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>The Bot — RZGS-PRO AI Gold Trading Bot</title>
-  <meta name="description" content="Meet RZGS-PRO: an AI Expert Advisor for MetaTrader 5 that trades gold (XAUUSD). See how it works, its features and specifications.">
+  <title>The Bot — RZGS-PRO Automated Gold Trading Bot</title>
+  <meta name="description" content="Meet RZGS-PRO: an Expert Advisor for MetaTrader 5 that trades gold (XAUUSD) with buy and sell pairs, a grid and a basket close. See how it works, its features and specifications.">
   <meta name="theme-color" content="#030c13">
   <meta name="color-scheme" content="dark">
 
   <meta property="og:type" content="website">
-  <meta property="og:title" content="The Bot — RZGS-PRO AI Gold Trading Bot">
-  <meta property="og:description" content="Meet RZGS-PRO: an AI Expert Advisor for MetaTrader 5 that trades gold (XAUUSD). See how it works, its features and specifications.">
+  <meta property="og:title" content="The Bot — RZGS-PRO Automated Gold Trading Bot">
+  <meta property="og:description" content="Meet RZGS-PRO: an Expert Advisor for MetaTrader 5 that trades gold (XAUUSD) with buy and sell pairs, a grid and a basket close. See how it works, its features and specifications.">
 
   <link rel="icon" type="image/png" href="assets/logo-192.png">
   <link rel="apple-touch-icon" href="assets/logo-192.png">
@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="style.css?v=11">
 
   <script>document.documentElement.classList.add('js');</script>
-  <script src="script.js?v=6" defer></script>
+  <script src="script.js?v=7" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -114,8 +114,8 @@
           </ol>
         </nav>
           <p class="kicker">Meet the bot</p>
-          <h1 class="page-title" id="page-title">An AI trading assistant built for <span class="text-gradient">gold</span></h1>
-          <p class="page-lead">RZGS-PRO is an Expert Advisor (EA) for MetaTrader 5. It uses AI models to read the gold market (XAUUSD), estimate where the price is likely to go, and handle each trade from open to close.</p>
+          <h1 class="page-title" id="page-title">An automated trading bot built for <span class="text-gradient">gold</span></h1>
+          <p class="page-lead">RZGS-PRO is an Expert Advisor (EA) for MetaTrader 5. It trades gold (XAUUSD) with fixed rules: it opens a buy and a sell together, takes profit on one side, and manages the other side with a grid and a basket close.</p>
           <div class="page-actions">
             <a class="btn btn-primary btn-lg" href="index.html#pricing">
               See plans
@@ -140,7 +140,7 @@
           <li class="card stat"><span class="stat-value text-gradient">MT5</span><span class="stat-label">Runs on MetaTrader 5</span></li>
           <li class="card stat"><span class="stat-value">XAUUSD</span><span class="stat-label">Trades gold</span></li>
           <li class="card stat"><span class="stat-value">1</span><span class="stat-label">MT5 account per license</span></li>
-          <li class="card stat"><span class="stat-value">24/7</span><span class="stat-label">AI running while MT5 is online</span></li>
+          <li class="card stat"><span class="stat-value">24/7</span><span class="stat-label">Runs while MT5 is online</span></li>
         </ul>
       </div>
     </section>
@@ -150,8 +150,8 @@
       <div class="container">
         <header class="section-head reveal">
           <p class="kicker">How it trades</p>
-          <h2 class="section-title" id="flow-title">From market read to <span class="text-gradient">closed trade</span></h2>
-          <p class="section-lead">Once AI trading is active, every trade follows the same simple cycle.</p>
+          <h2 class="section-title" id="flow-title">From first pair to <span class="text-gradient">closed basket</span></h2>
+          <p class="section-lead">Once the bot is active, every cycle follows the same rules. The bot does not predict the price.</p>
         </header>
 
         <div class="steps-panel reveal">
@@ -161,24 +161,24 @@
                 <span class="step-icon"><svg class="icon" aria-hidden="true"><use href="#i-activity"/></svg></span>
                 <span class="step-num" aria-hidden="true">01</span>
               </div>
-              <h3>Read the market</h3>
-              <p>The AI model you selected reads current gold market conditions.</p>
+              <h3>Open a pair</h3>
+              <p>The bot opens a buy and a sell on gold at the same time. Each one has its own take profit.</p>
             </li>
             <li class="step">
               <div class="step-top">
                 <span class="step-icon"><svg class="icon" aria-hidden="true"><use href="#i-trending-up"/></svg></span>
                 <span class="step-num" aria-hidden="true">02</span>
               </div>
-              <h3>Estimate direction</h3>
-              <p>It estimates the likely price direction before opening a trade.</p>
+              <h3>Take profit</h3>
+              <p>When the price moves, one side reaches its take profit and closes. The other side stays open.</p>
             </li>
             <li class="step">
               <div class="step-top">
                 <span class="step-icon"><svg class="icon" aria-hidden="true"><use href="#i-timer"/></svg></span>
                 <span class="step-num" aria-hidden="true">03</span>
               </div>
-              <h3>Run the trade</h3>
-              <p>The trade runs for a fixed period, so you don't have to watch it.</p>
+              <h3>Add the next pair</h3>
+              <p>If the price keeps going by the grid distance, the bot opens the next pair. The lot of the side that is holding grows step by step.</p>
             </li>
             <li class="step">
               <div class="step-top">
@@ -186,7 +186,7 @@
                 <span class="step-num" aria-hidden="true">04</span>
               </div>
               <h3>Close &amp; cool down</h3>
-              <p>The trade closes automatically, then the system cools down before the next one.</p>
+              <p>When a side holds two or more trades, they close together at the basket target. When nothing is open, the bot cools down, then starts a new cycle.</p>
             </li>
           </ol>
         </div>
@@ -221,7 +221,7 @@
           <article class="card mini-feature reveal">
             <span class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-app-tools"/></svg></span>
             <h3>Tools: settings, risk and report</h3>
-            <p>See the settings your bot runs with. The risk calculator shows the floating result at each grid level if price keeps moving one way. The report shows today's closed profit, TP hits, baskets and the last 7 days.</p>
+            <p>See the settings your bot runs with, and adjust take profit, basket profit and the Smart mode grid distance. The risk calculator shows the floating result at each grid level if price keeps moving one way. The report shows today's closed profit, TP hits, baskets and the last 7 days.</p>
           </article>
           <article class="card mini-feature reveal" style="--d: 60ms">
             <span class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-app-log"/></svg></span>
@@ -250,7 +250,7 @@
             <svg class="icon" aria-hidden="true"><use href="#i-server"/></svg>
             <div>
               <h3>Keep it running 24/7</h3>
-              <p>The EA only works while MetaTrader 5 is open and online. To keep the AI running around the clock, run MT5 on a VPS, a computer in the cloud that never sleeps. Diamond includes a basic VPS while your plan is paid.</p>
+              <p>The EA only works while MetaTrader 5 is open and online. To keep the bot running around the clock, run MT5 on a VPS, a computer in the cloud that never sleeps. Diamond includes a basic VPS while your plan is paid.</p>
             </div>
           </div>
         </div>
@@ -261,9 +261,10 @@
             <tbody>
               <tr><th scope="row">Platform</th><td>MetaTrader 5 (MT5)</td></tr>
               <tr><th scope="row">Market</th><td>Gold (XAUUSD)</td></tr>
-              <tr><th scope="row">Product type</th><td>Expert Advisor (EA) with AI models</td></tr>
-              <tr><th scope="row">Trading control</th><td>One-tap Activate / Pause</td></tr>
-              <tr><th scope="row">Trade length</th><td>Fixed period, closed automatically</td></tr>
+              <tr><th scope="row">Account type</th><td>Hedging account (buy and sell open at the same time)</td></tr>
+              <tr><th scope="row">Product type</th><td>Expert Advisor (EA), rule-based hedge grid</td></tr>
+              <tr><th scope="row">Trading control</th><td>Phone control app: Activate, Pause, Finish, Close</td></tr>
+              <tr><th scope="row">How trades close</th><td>Take profit per trade, basket close per side</td></tr>
               <tr><th scope="row">Accounts per license</th><td>1 MT5 trading account</td></tr>
               <tr><th scope="row">Runs on</th><td>A computer or VPS with MT5 open</td></tr>
               <tr><th scope="row">Licenses</th><td>7-day free trial, Elite, Diamond. <a href="license.html">License rules</a></td></tr>
@@ -304,7 +305,7 @@
             <img src="assets/logo-192.webp" alt="" width="36" height="36" loading="lazy">
             <span class="brand-name">RZGS<span class="brand-accent">-PRO</span></span>
           </a>
-          <p>AI gold trading bot for MetaTrader 5, with setup help and support on Telegram.</p>
+          <p>Automated gold trading bot for MetaTrader 5, with setup help and support on Telegram.</p>
           <a class="btn btn-ghost btn-sm" href="https://t.me/m/kuh-_ELkNmQ1">
             <svg class="icon" aria-hidden="true"><use href="#i-send"/></svg>
             Free 7-day trial

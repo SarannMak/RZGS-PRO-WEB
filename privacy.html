@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="style.css?v=11">
 
   <script>document.documentElement.classList.add('js');</script>
-  <script src="script.js?v=6" defer></script>
+  <script src="script.js?v=7" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -110,7 +110,7 @@
         <p class="kicker">Legal</p>
         <h1 class="page-title" id="page-title">Privacy Policy</h1>
         <p class="page-lead">What information we collect, why we need it, and how we look after it.</p>
-        <p class="page-meta">Last updated: 24 September 2026</p>
+        <p class="page-meta">Last updated: 9 October 2026</p>
       </div>
     </section>
 
@@ -137,23 +137,27 @@
         <article class="card legal">
           <section class="legal-section" id="p-who">
             <h2>1. Who we are</h2>
-            <!-- FILL IN: your legal business name -->
-            <p>This policy explains how RZGS-PRO, operated by <span class="fill">RZGS-PRO</span> We collects and uses your information when you visit our website, request a free trial or buy a plan.</p>
+            <p>This policy explains how RZGS-PRO ("we") collects and uses your information when you visit our website, create an account, request a free trial, buy a plan or use the control app.</p>
           </section>
 
           <section class="legal-section" id="p-collect">
             <h2>2. Information we collect</h2>
             <ul>
+              <li><strong>Website account:</strong> your email address, name, username and country when you sign up, and your phone number or Telegram username if you add them. Your password is stored only in a protected (hashed) form. We cannot read it.</li>
+              <li><strong>Profile picture:</strong> a photo, if you upload one. It is saved as a small file at an address that is not listed anywhere, but anyone who has that exact address can open it. You can remove it in your dashboard.</li>
+              <li><strong>Control app data:</strong> when your bot is linked to the control app, it sends us your MT5 account number and its live status: balance, equity, open trades, profit, settings and alerts. We also keep the commands you send from the app. The app has its own App Password, also stored in a protected form.</li>
               <li><strong>Telegram details:</strong> your Telegram username and the messages you send us.</li>
               <li><strong>Trading account details:</strong> your MT5 account number and broker name, so we can link your license to your account.</li>
               <li><strong>Payment details:</strong> the information we need to confirm your payment, such as a transaction reference.</li>
               <li><strong>Email:</strong> your email address, if you contact us by email.</li>
+              <li><strong>Technical details:</strong> like most websites, the services that run our site record technical details of each visit, such as your IP address, your browser and the time.</li>
             </ul>
           </section>
 
           <section class="legal-section" id="p-use">
             <h2>3. How we use it</h2>
             <ul>
+              <li>To let you log in, show your dashboard and run the control app.</li>
               <li>To activate and manage your license.</li>
               <li>To give you setup help and support.</li>
               <li>To send you renewal reminders and important notices.</li>
@@ -166,21 +170,25 @@
             <h2>4. Who we share it with</h2>
             <p>We don't sell your information. We only share it when we need to in order to provide the service, for example:</p>
             <ul>
+              <li>with the companies that run our service for us: Supabase (login, database and file storage), GitHub (website hosting) and Resend (sending our emails);</li>
               <li>with our VPS provider, if you're on the Diamond plan;</li>
               <li>with payment providers, to confirm your payment;</li>
-              <li>with our partner broker, to confirm that an Elite account was opened through our referral.</li>
+              <li>with the partner broker you chose, to confirm that an Elite account was opened through our referral.</li>
             </ul>
             <p>We may also share information if the law requires it.</p>
           </section>
 
           <section class="legal-section" id="p-website">
             <h2>5. This website</h2>
-            <p>This website doesn't use advertising or tracking cookies. It loads fonts from Google Fonts, which means Google may receive your IP address when you visit. When you tap a Telegram button, Telegram's own privacy policy applies.</p>
+            <p>This website doesn't use advertising or tracking cookies. To keep you logged in, it saves a login key in your browser. Logging out removes it.</p>
+            <p>It loads fonts from Google Fonts, the login pages load a code library from jsDelivr, and the control app loads a small script from Telegram. These companies may receive your IP address when you open those pages.</p>
+            <p>When you tap a Telegram button or a partner broker link, you leave our website and that company's own privacy policy applies.</p>
           </section>
 
           <section class="legal-section" id="p-keep">
             <h2>6. How long we keep it</h2>
-            <p>We keep your information while your license is active, and afterwards only for as long as we need it for legal, accounting or security reasons.</p>
+            <p>We keep your information while your account or license is active, and afterwards only for as long as we need it for legal, accounting or security reasons.</p>
+            <p>The control app keeps only recent history: older alerts, commands and price data are deleted automatically.</p>
           </section>
 
           <section class="legal-section" id="p-safe">
@@ -190,7 +198,7 @@
 
           <section class="legal-section" id="p-rights">
             <h2>8. Your choices</h2>
-            <p>You can ask us to show you, correct or delete the information we hold about you at any time by contacting us. We may need to keep some information for legal reasons.</p>
+            <p>You can change your profile details and remove your profile picture in your dashboard. You can also ask us to show you, correct or delete the information we hold about you, including your account, at any time by contacting us. We may need to keep some information for legal reasons.</p>
           </section>
 
           <section class="legal-section" id="p-changes">
@@ -200,8 +208,7 @@
 
           <section class="legal-section" id="p-contact">
             <h2>10. Contact</h2>
-            <!-- FILL IN: your support email -->
-            <p>Questions about your privacy? Message us on Telegram or email <span class="fill">@sarannsadboi</span>. See all the ways to reach us on our <a href="contact.html">Contact</a> page.</p>
+            <p>Questions about your privacy? Message us on Telegram (<a href="https://t.me/sarannsadboi">@sarannsadboi</a>) or email <a href="mailto:info@rzgspro.com">info@rzgspro.com</a>. See all the ways to reach us on our <a href="contact.html">Contact</a> page.</p>
           </section>
         </article>
       </div>
@@ -216,7 +223,7 @@
             <img src="assets/logo-192.webp" alt="" width="36" height="36" loading="lazy">
             <span class="brand-name">RZGS<span class="brand-accent">-PRO</span></span>
           </a>
-          <p>AI gold trading bot for MetaTrader 5, with setup help and support on Telegram.</p>
+          <p>Automated gold trading bot for MetaTrader 5, with setup help and support on Telegram.</p>
           <a class="btn btn-ghost btn-sm" href="https://t.me/m/kuh-_ELkNmQ1">
             <svg class="icon" aria-hidden="true"><use href="#i-send"/></svg>
             Free 7-day trial

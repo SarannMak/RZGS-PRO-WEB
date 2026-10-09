@@ -309,6 +309,9 @@ body{
 /* login box: link to the client dashboard, in the top right corner */
 .home-link{position:absolute;top:30px;right:24px;display:inline-flex;align-items:center;gap:8px;padding:0 14px;font-size:12px;text-decoration:none}
 .home-link:hover{color:var(--cyan)}
+/* login box: one line that says which login this is */
+.login-note{margin:0;text-align:center}
+.login-note a{color:var(--cyan)}
 
 /* switches, dock, inputs */
 .seg{border:1px solid transparent;border-image:var(--hud-line) 16 / 16px;clip-path:var(--cut-10)}
@@ -405,6 +408,7 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
       </div>
       <p class="err" id="loginErr" role="alert"></p>
       <button class="btn primary" id="loginBtn" type="submit">Connect to bot</button>
+      <p class="hint login-note">Use your MT5 account number and the App Password you typed in the bot inputs. This is not your website login: your email and password are for the <a href="dashboard.html">dashboard</a>.</p>
     </form>
     <p class="note">First turn on <b>App link</b> in the bot inputs in MT5 and set an <b>App Password</b>.<br>Then log in here with your account number and that password.</p>
   </section>
