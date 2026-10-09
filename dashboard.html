@@ -20,12 +20,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
   <link rel="stylesheet" href="style.css?v=11">
-  <link rel="stylesheet" href="auth.css?v=12">
+  <link rel="stylesheet" href="auth.css?v=13">
 
   <script>document.documentElement.classList.add('js');</script>
   <script src="script.js?v=7" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-  <script src="auth.js?v=12" defer></script>
+  <script src="auth.js?v=13" defer></script>
 </head>
 <body data-auth-page="dashboard">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -163,6 +163,13 @@
                   <div class="dash-kv"><span class="cap">Plan</span><b data-plan-name>Not started</b></div>
                   <div class="dash-kv"><span class="cap">Valid until</span><b data-plan-until>-</b></div>
                 </div>
+              </section>
+
+              <!-- the buying steps, as the Telegram bot reports them (shown once Telegram is connected) -->
+              <section class="dash-panel" data-order hidden>
+                <h2>Your order</h2>
+                <ol class="dash-steps" data-order-steps></ol>
+                <p class="dash-hint" data-order-note></p>
               </section>
 
               <section class="dash-panel">
@@ -429,6 +436,19 @@
             <div class="dash-row">
               <button class="btn btn-ghost" type="button" data-sign-out-no>No</button>
               <button class="btn btn-danger" type="button" data-sign-out-yes>Yes</button>
+            </div>
+          </div>
+        </dialog>
+
+        <!-- shown once, right after the email is confirmed: the next step is the Telegram bot -->
+        <dialog class="dash-confirm" data-welcome-dialog aria-labelledby="welcome-title" aria-describedby="welcome-text">
+          <div class="dash-confirm-card">
+            <p class="cap">RZGS-PRO</p>
+            <h2 class="dash-confirm-title" id="welcome-title">Your account is ready</h2>
+            <p class="dash-confirm-text" id="welcome-text">Next, get your bot in our Telegram bot. It already knows this account, so there is nothing to type.</p>
+            <div class="dash-row dash-row--wide">
+              <a class="btn btn-primary" data-bot-link data-welcome-go href="https://t.me/rzgsprobot">Continue in Telegram</a>
+              <button class="btn btn-ghost" type="button" data-welcome-later>Later</button>
             </div>
           </div>
         </dialog>

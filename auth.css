@@ -1450,3 +1450,67 @@ a.trial-banner:hover {
 .dash-connect .dash-hint {
   margin: 0;
 }
+
+/* dashboard: "Your order", the buying steps reported by the Telegram bot.
+   A dot per step joined by a line; each step also says DONE / NOW in words. */
+.dash-steps {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dash-steps li {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+  color: var(--text-subtle);
+  font: 600 14px/1.3 var(--font-display);
+  letter-spacing: 0.04em;
+}
+.dash-steps li::before {
+  content: "";
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  background: var(--bg);
+}
+.dash-steps li + li::after {
+  content: "";
+  position: absolute;
+  top: -13px;
+  left: 7px;
+  width: 1px;
+  height: 26px;
+  background: var(--border-strong);
+}
+.dash-steps small {
+  margin-left: auto;
+  font: 500 10px/1 var(--font-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.dash-steps li[data-state="done"] {
+  color: var(--text-muted);
+}
+.dash-steps li[data-state="done"]::before {
+  border-color: var(--good);
+  background: var(--good);
+}
+.dash-steps li[data-state="done"] small {
+  color: var(--good);
+}
+.dash-steps li[data-state="now"] {
+  color: var(--text);
+}
+.dash-steps li[data-state="now"]::before {
+  border-color: var(--cyan);
+  background: var(--cyan);
+  box-shadow: 0 0 0 4px rgba(25, 211, 255, 0.18);
+}
+.dash-steps li[data-state="now"] small {
+  color: var(--cyan);
+}

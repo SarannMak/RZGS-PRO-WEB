@@ -546,7 +546,7 @@
     let user = session.user;
     // Our own copy of the profile (plus the plan), kept in the web_users table.
     // The bot_* columns are written by the Telegram sales bot once the account is connected to it.
-    const PROFILE_COLUMNS = 'full_name, username, avatar_url, email, country, phone, telegram_username, mt5_account, broker, plan, plan_expires_at, created_at, email_confirmed_at, last_sign_in_at, accepted_terms_at, bot_tg_id, bot_tg_username, bot_mt5_account, bot_broker';
+    const PROFILE_COLUMNS = 'full_name, username, avatar_url, email, country, phone, telegram_username, mt5_account, broker, plan, plan_expires_at, created_at, email_confirmed_at, last_sign_in_at, accepted_terms_at, bot_tg_id, bot_tg_username, bot_mt5_account, bot_broker, bot_stage, bot_plan';
     async function fetchProfile() {
       try {
         const { data } = await db.from('web_users').select(PROFILE_COLUMNS).eq('id', user.id).maybeSingle();
@@ -786,6 +786,60 @@
       });
     }
 
+    /* ----- order: the buying steps, as the Telegram bot reports them ----- */
+    // Which steps a plan has, which step each bot stage belongs to, and what the person has to do there.
+    const ORDER_NEEDS = { trial: { broker: true, pay: false }, elite: { broker: true, pay: true }, diamond: { broker: false, pay: true } };
+    const ORDER_STEP = {
+      plan: 'plan', ask_broker: 'broker', ask_broker_email: 'broker', review_referral: 'broker', pay: 'pay', review_payment: 'pay',
+      ask_mt5: 'mt5', review_mt5: 'mt5', build: 'bot', active: 'done',
+    };
+    const ORDER_NOTE = {
+      plan: 'Choose your plan in the Telegram bot.',
+      ask_broker: 'Open your MT5 account with one of our partner brokers, then tell the bot.',
+      ask_broker_email: 'Send the bot the email you used at the broker.',
+      review_referral: 'Our team is checking your broker registration.',
+      pay: 'Pay with the KHQR code in the Telegram bot, then tap "I\'ve paid" there.',
+      review_payment: 'Our team is confirming your payment.',
+      ask_mt5: 'Send your MT5 account number to the Telegram bot.',
+      review_mt5: 'Our team is checking your MT5 account.',
+      build: 'Your bot file is being prepared. It arrives in the Telegram chat.',
+      active: 'Your bot was delivered in the Telegram chat.',
+    };
+    function renderOrder() {
+      const box = $('[data-order]', root);
+      const at = ORDER_STEP[profile.bot_stage];
+      if (!profile.bot_tg_id || !at) {
+        box.hidden = true;
+        return;
+      }
+      const plan = PLAN_NAMES[profile.bot_plan] ? profile.bot_plan : null;
+      const needs = ORDER_NEEDS[plan] || { broker: true, pay: true };
+      const steps = [
+        ['plan', plan && at !== 'plan' ? `Plan: ${PLAN_NAMES[plan]}` : 'Choose a plan'],
+        needs.broker && ['broker', 'Broker account'],
+        needs.pay && ['pay', 'Payment'],
+        ['mt5', 'MT5 account'],
+        ['bot', 'Bot delivered'],
+      ].filter(Boolean);
+      const now = at === 'done' ? steps.length : steps.findIndex(([key]) => key === at);
+      const waiting = /^review_/.test(profile.bot_stage); // our team is checking: nothing for the person to do
+      $('[data-order-steps]', box).replaceChildren(...steps.map(([, label], index) => {
+        const item = document.createElement('li');
+        const state = index < now ? 'done' : index === now ? 'now' : 'todo';
+        item.dataset.state = state;
+        item.textContent = label;
+        if (state !== 'todo') {
+          const tag = document.createElement('small');
+          tag.textContent = state === 'done' ? 'Done' : waiting ? 'Checking' : 'Now';
+          item.append(tag);
+          if (state === 'now') item.setAttribute('aria-current', 'step');
+        }
+        return item;
+      }));
+      $('[data-order-note]', box).textContent = ORDER_NOTE[profile.bot_stage];
+      box.hidden = false;
+    }
+
     /* ----- log: real moments from this account, newest first ----- */
     function renderLog() {
       const state = planState(profile);
@@ -866,24 +920,41 @@
     renderHeader();
     renderInfo();
     renderPlan();
+    renderOrder();
     renderLog();
     root.setAttribute('aria-busy', 'false');
 
-    refreshLinkCode();
+    // Right after sign-up (the email was just confirmed) the next step is the Telegram bot: offer it once.
+    // The button carries the one-time code, so the bot connects this account by itself.
+    const welcome = $('[data-welcome-dialog]', root);
+    $('[data-welcome-later]', welcome).addEventListener('click', () => welcome.close());
+    $('[data-welcome-go]', welcome).addEventListener('click', () => welcome.close());
+    refreshLinkCode().then(() => {
+      if (arrivedFrom === 'signup' && !profile.bot_tg_id) welcome.showModal();
+    });
     setInterval(refreshLinkCode, 45 * 60 * 1000); // a code is good for 2 hours
-    // Back from Telegram: the bot may have connected the account or delivered a plan in the meantime.
-    let lastLook = Date.now();
-    document.addEventListener('visibilitychange', async () => {
-      if (document.hidden || Date.now() - lastLook < 5000) return;
-      lastLook = Date.now();
+
+    // The Telegram bot writes each step here as it happens (account connected, broker confirmed, payment
+    // received, bot delivered). The dashboard looks again every 20 seconds while it is on screen, and at once
+    // when the person comes back to this tab, and redraws only when something changed.
+    let seen = JSON.stringify(profile);
+    let looking = false;
+    async function refreshProfile() {
+      if (document.hidden || looking) return;
+      looking = true;
       const fresh = await fetchProfile();
-      if (!fresh) return;
+      looking = false;
+      if (!fresh || JSON.stringify(fresh) === seen) return;
       Object.assign(profile, fresh);
+      seen = JSON.stringify(fresh);
       renderHeader();
       renderInfo();
       renderPlan();
+      renderOrder();
       renderLog();
-    });
+    }
+    setInterval(refreshProfile, 20000);
+    document.addEventListener('visibilitychange', refreshProfile);
 
     wireSaveForm(profileForm, () => ({
       full_name: profileForm.elements.full_name.value.trim(),
