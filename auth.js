@@ -800,9 +800,9 @@
       ask_broker: 'Open your MT5 account with one of our partner brokers, then tell the bot.',
       ask_broker_email: 'Send the bot the email you used at the broker.',
       review_referral: 'Our team is checking your broker registration.',
-      pay: 'Pay with the KHQR code in the Telegram bot, then tap "I\'ve paid" there.',
+      pay: 'Pay with the KHQR code in the Telegram bot, then send a screenshot of your receipt there.',
       review_payment: 'Our team is confirming your payment.',
-      ask_mt5: 'Send your MT5 account number to the Telegram bot.',
+      ask_mt5: 'Send your MT5 account number (the login number) to the Telegram bot.',
       review_mt5: 'Our team is checking your MT5 account.',
       build: 'Your bot file is being prepared. It arrives in the Telegram chat.',
       active: 'Your bot was delivered in the Telegram chat.',
@@ -818,9 +818,11 @@
       const needs = ORDER_NEEDS[plan] || { broker: true, pay: true };
       const steps = [
         ['plan', plan && at !== 'plan' ? `Plan: ${PLAN_NAMES[plan]}` : 'Choose a plan'],
+        // with our broker link the account is settled before anything is paid; with any broker the payment is first
         needs.broker && ['broker', 'Broker account'],
+        needs.broker && ['mt5', 'MT5 account'],
         needs.pay && ['pay', 'Payment'],
-        ['mt5', 'MT5 account'],
+        !needs.broker && ['mt5', 'MT5 account'],
         ['bot', 'Bot delivered'],
       ].filter(Boolean);
       const now = at === 'done' ? steps.length : steps.findIndex(([key]) => key === at);
