@@ -1,0 +1,299 @@
+/* ==========================================================================
+   The path to a running bot, in 3D (how-to-buy.html). The scene is process-3d.js.
+   The four step cards are plain HTML and always there. The 3D stage above them
+   stays hidden until the scene is ready, so without WebGL the page just shows
+   the cards.
+   ========================================================================== */
+.path3d {
+  display: grid;
+  gap: 16px;
+}
+
+/* ---------- the stage ---------- */
+.path3d-stage {
+  position: relative;
+  height: clamp(420px, 64vh, 640px);
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-image: var(--hud-line) 12 / 12px;
+  /* the same two cut corners as the frame drawn by --hud-line */
+  clip-path: polygon(10.21px 0, 100% 0, 100% calc(100% - 10.21px), calc(100% - 10.21px) 100%, 0 100%, 0 10.21px);
+  background:
+    radial-gradient(70% 60% at 50% 42%, rgba(25, 211, 255, 0.12), transparent 70%),
+    rgba(3, 12, 19, 0.6);
+}
+.path3d-stage[hidden] {
+  display: none;
+}
+.path3d-canvas {
+  position: absolute;
+  inset: 0;
+}
+.path3d-canvas canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+  /* a finger still scrolls the page up and down; sideways it turns the machine */
+  touch-action: pan-y;
+  outline: none;
+}
+.path3d-canvas canvas:active {
+  cursor: grabbing;
+}
+
+/* ---------- name tags that follow the stations ---------- */
+.path3d-labels {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.path3d-tag {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 9px;
+  border: 1px solid var(--border-strong);
+  background: rgba(6, 33, 44, 0.9);
+  color: var(--text-muted);
+  font: 500 11px/1 var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: opacity 0.2s, border-color 0.2s, color 0.2s;
+  will-change: transform;
+}
+.path3d-tag b {
+  color: var(--cyan);
+  font-weight: 600;
+}
+.path3d-tag--free b {
+  color: var(--neon);
+}
+.path3d-tag--paid b {
+  color: var(--warn);
+}
+.path3d-tag.is-on {
+  border-color: var(--neon);
+  color: var(--text);
+}
+
+/* ---------- which step is on show ---------- */
+.path3d-caption {
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  max-width: calc(100% - 28px);
+  margin: 0;
+  padding: 9px 12px 10px;
+  border-left: 2px solid var(--neon);
+  background: rgba(3, 12, 19, 0.82);
+  color: var(--text);
+  font: 600 16px/1.3 var(--font-display);
+  pointer-events: none;
+}
+.path3d-caption[hidden] {
+  display: none;
+}
+.path3d-caption b {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--neon);
+  font: 500 11px/1 var(--font-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* ---------- controls ---------- */
+.path3d-bar {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  translate: -50% 0;
+  display: flex;
+  gap: 6px;
+  max-width: calc(100% - 24px);
+}
+.path3d-bar button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: rgba(6, 33, 44, 0.92);
+  color: var(--text-muted);
+  font: 600 12px/1 var(--font-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, background-color 0.2s;
+}
+.path3d-bar button:hover {
+  border-color: var(--frame);
+  color: var(--text);
+}
+.path3d-bar button[data-view][aria-pressed="true"] {
+  border-color: var(--cyan);
+  background: var(--chip);
+  color: var(--cyan);
+}
+.path3d-bar button[data-view="free"][aria-pressed="true"] {
+  border-color: var(--neon);
+  color: var(--neon);
+}
+.path3d-bar button[data-view="paid"][aria-pressed="true"] {
+  border-color: var(--warn);
+  color: var(--warn);
+}
+/* play / pause: two bars while it plays, a triangle while it is paused */
+.path3d-bar [data-play] {
+  flex: none;
+  width: 44px;
+  padding: 0;
+}
+.path3d-bar [data-play]::before {
+  content: "";
+  width: 12px;
+  height: 14px;
+  border-inline: 4px solid currentColor;
+}
+.path3d-bar [data-play].is-paused::before {
+  width: 0;
+  height: 0;
+  border-block: 7px solid transparent;
+  border-inline: 12px solid currentColor;
+  border-inline-end-width: 0;
+}
+.path3d-hint {
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  margin: 0;
+  color: var(--text-subtle);
+  font: 500 11px/1 var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+/* ---------- the four steps ---------- */
+.path3d-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.path3d-step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 14px;
+  align-content: start;
+  padding: 18px;
+}
+.path3d-step .timeline-num {
+  width: 44px;
+  height: 44px;
+  font-size: 18px;
+}
+.path3d-step h3 {
+  margin: 2px 0 8px;
+  font: 600 17px/1.3 var(--font-display);
+}
+.path3d-step p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.55;
+}
+.path3d-step p + p {
+  margin-top: 6px;
+}
+.path3d-step .lane {
+  margin-right: 6px;
+  font: 600 11px/1 var(--font-mono);
+  letter-spacing: 0.1em;
+}
+.path3d-step .lane--free {
+  color: var(--neon);
+}
+.path3d-step .lane--paid {
+  color: var(--warn);
+}
+.path3d-step.is-on {
+  border-image-source: var(--hud-panel-hot);
+}
+/* once the scene runs, each card is a button that turns the camera to its station */
+.path3d-go {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.path3d-go:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: -4px;
+}
+
+@media (max-width: 1000px) {
+  .path3d-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 700px) {
+  /* on a phone the machine is as wide as the screen allows, so the stage need not be tall */
+  .path3d-stage {
+    height: clamp(330px, 56vh, 430px);
+  }
+  .path3d-hint,
+  .path3d-more {
+    display: none;
+  }
+  .path3d-caption {
+    font-size: 14px;
+  }
+  .path3d-tag {
+    padding: 5px 7px;
+    font-size: 10px;
+  }
+  /* the long lane names would cover the machine on a phone: keep FREE and PAID only */
+  .path3d-tag--free,
+  .path3d-tag--paid {
+    font-size: 0;
+    gap: 0;
+  }
+  .path3d-tag--free b,
+  .path3d-tag--paid b {
+    font-size: 10px;
+  }
+  .path3d-bar {
+    gap: 4px;
+  }
+  .path3d-bar button {
+    padding: 0 10px;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+  }
+}
+@media (max-width: 560px) {
+  .path3d-steps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .path3d-tag,
+  .path3d-bar button {
+    transition: none;
+  }
+}

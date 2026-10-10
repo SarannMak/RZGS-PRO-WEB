@@ -20,9 +20,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
   <link rel="stylesheet" href="style.css?v=11">
+  <link rel="stylesheet" href="process-3d.css?v=1">
 
   <script>document.documentElement.classList.add('js');</script>
   <script src="script.js?v=8" defer></script>
+  <script type="module" src="process-3d.js?v=1"></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -117,6 +119,63 @@
             Start your free trial
           </a>
           <a class="btn btn-ghost btn-lg" href="#compare">Compare plans</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- The whole path, as one small machine in 3D (process-3d.js). The four cards are the same steps in words. -->
+    <section class="section section--tight" id="path" aria-labelledby="path-title">
+      <div class="container">
+        <header class="section-head reveal">
+          <p class="kicker">The whole path</p>
+          <h2 class="section-title" id="path-title">From login to a <span class="text-gradient">running bot</span></h2>
+        </header>
+
+        <div class="path3d" data-path3d>
+          <div class="path3d-stage" data-path3d-stage hidden>
+            <div class="path3d-canvas" data-path3d-canvas role="img" aria-label="A small machine in 3D. Four stations are joined by a track: log in on the website, choose the Free or the Paid offer, verify in the Telegram bot and get the bot file, then set up MetaTrader 5. The same four steps are written out below."></div>
+            <div class="path3d-labels" data-path3d-labels aria-hidden="true"></div>
+            <p class="path3d-caption" data-path3d-caption hidden></p>
+            <p class="path3d-hint" aria-hidden="true">Drag to turn</p>
+            <div class="path3d-bar">
+              <button type="button" data-view="all" aria-pressed="true" aria-label="Show the whole path"><span class="path3d-more">Whole&nbsp;</span>path</button>
+              <button type="button" data-view="free" aria-pressed="false" aria-label="Follow a Free order"><span class="path3d-more">Follow&nbsp;</span>Free</button>
+              <button type="button" data-view="paid" aria-pressed="false" aria-label="Follow a Paid order"><span class="path3d-more">Follow&nbsp;</span>Paid</button>
+              <button type="button" data-play aria-pressed="false" aria-label="Pause the animation"></button>
+            </div>
+          </div>
+
+          <ol class="path3d-steps">
+            <li class="card path3d-step" data-step>
+              <span class="timeline-num" aria-hidden="true">1</span>
+              <div>
+                <h3>Log in on the website</h3>
+                <p>Create your account on rzgspro.com, or log in.</p>
+              </div>
+            </li>
+            <li class="card path3d-step" data-step>
+              <span class="timeline-num" aria-hidden="true">2</span>
+              <div>
+                <h3>Choose one offer</h3>
+                <p><span class="lane lane--free">FREE</span>Open your broker account with our link.</p>
+                <p><span class="lane lane--paid">PAID</span>Pay for Elite or Diamond.</p>
+              </div>
+            </li>
+            <li class="card path3d-step" data-step>
+              <span class="timeline-num" aria-hidden="true">3</span>
+              <div>
+                <h3>Verify in Telegram</h3>
+                <p>Our Telegram bot checks your account and your payment, then sends you your bot file (.ex5).</p>
+              </div>
+            </li>
+            <li class="card path3d-step" data-step>
+              <span class="timeline-num" aria-hidden="true">4</span>
+              <div>
+                <h3>Set up MT5</h3>
+                <p>Put the file into MetaTrader 5, add it to a gold chart and start the bot.</p>
+              </div>
+            </li>
+          </ol>
         </div>
       </div>
     </section>
