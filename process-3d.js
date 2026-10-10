@@ -18,6 +18,12 @@
    ready, the page simply shows its four step cards.
    ========================================================================== */
 
+// This is a plain script, not a module: a page opened straight from a folder (file://) may not
+// load module scripts. Everything is inside one function, so the names in here do not meet the
+// names of the page's other scripts.
+(() => {
+'use strict';
+
 const THREE_URL = 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js';
 
 const root = document.querySelector('[data-path3d]');
@@ -1299,3 +1305,4 @@ function build(THREE, root) {
     state: () => ({ mode, playing, clock, activeStep, width, height, calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, travellers: travellers.map((traveller) => ({ lane: traveller.name, step: traveller.step, face: traveller.shown, phase: Number(traveller.phase.toFixed(3)) })) }),
   };
 }
+})();

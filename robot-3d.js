@@ -7,6 +7,10 @@
    pointer, the body turns a little with it, and the robot stays where it
    stands. Now and then it blinks.
 
+   Behind it stands its trading desk: one wide monitor and an upright one on
+   each side, showing what the bot does (the gold chart with its trades, the
+   grid of orders, the log). They reach out past the robot's box on both sides.
+
    With no mouse on the page (and on a phone, a few seconds after a touch) the
    head looks around slowly by itself. With "reduce motion" the robot stands
    still.
@@ -22,23 +26,34 @@
    the library cannot be loaded, the box stays empty.
    ========================================================================== */
 
+// This is a plain script, not a module: a page opened straight from a folder (file://) may not
+// load module scripts. Everything is inside one function, so the names in here do not meet the
+// names of the page's other scripts.
+(() => {
+'use strict';
+
 const THREE_URL = 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js';
 
 const boxes = [...document.querySelectorAll('[data-robot-3d]')];
 const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+// The cards that float beside the robot wait for the intro (the stylesheet hides them until they
+// get "is-in"). Where there will be no 3D scene, they are let in at once.
+const cardsBeside = (box) => (box.parentElement ? [...box.parentElement.querySelectorAll('.float-card')] : []);
+const letCardsIn = (box) => cardsBeside(box).forEach((card) => card.classList.add('is-in'));
 if (boxes.length) {
   (async () => {
     try {
       const THREE = await import(THREE_URL);
-      if (document.fonts && document.fonts.ready) await document.fonts.ready; // the RZ on the chest is written with the page's font
       for (const box of boxes) {
         try {
           build(THREE, box);
         } catch (error) {
+          letCardsIn(box);
           console.warn('robot-3d: the robot could not be drawn', error);
         }
       }
     } catch (error) {
+      boxes.forEach(letCardsIn);
       console.warn('robot-3d: the 3D library did not load', error);
     }
   })();
@@ -65,6 +80,7 @@ function build(THREE, box) {
   try {
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
   } catch (error) {
+    letCardsIn(box);
     return; // no WebGL: the box stays empty
   }
   renderer.setClearColor(0x000000, 0);
@@ -374,6 +390,7 @@ function build(THREE, box) {
   add(body, new THREE.TorusGeometry(0.27, 0.055, 12, 40), plate, 0, 0.14, 0).rotation.x = Math.PI / 2;
 
   // RZ on the chest.
+  let paintLogo = () => {};
   {
     const canvas = document.createElement('canvas');
     canvas.width = 512;
@@ -382,18 +399,23 @@ function build(THREE, box) {
     const fade = ctx.createLinearGradient(90, 0, 420, 0);
     fade.addColorStop(0, '#19d3ff');
     fade.addColorStop(1, '#a6ff1a');
-    ctx.font = 'italic 800 210px Oxanium, "Segoe UI", system-ui, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.shadowColor = 'rgba(25, 211, 255, 0.9)';
-    ctx.shadowBlur = 26;
-    ctx.fillStyle = fade;
-    ctx.fillText('RZ', 250, 138);
-    ctx.shadowBlur = 0;
-    ctx.fillText('RZ', 250, 138);
     const texture = new THREE.CanvasTexture(canvas);
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+    paintLogo = () => {
+      ctx.clearRect(0, 0, 512, 256);
+      ctx.font = 'italic 800 210px Oxanium, "Segoe UI", system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor = 'rgba(25, 211, 255, 0.9)';
+      ctx.shadowBlur = 26;
+      ctx.fillStyle = fade;
+      ctx.fillText('RZ', 250, 138);
+      ctx.shadowBlur = 0;
+      ctx.fillText('RZ', 250, 138);
+      texture.needsUpdate = true;
+    };
+    paintLogo();
     add(body, sheet((u, v) => onTorso(mix(-0.3, 0.3, u), mix(-0.1, -0.37, v), 1.045), 16, 8), new THREE.MeshBasicMaterial({ map: texture, transparent: true, depthWrite: false, toneMapped: false }));
   }
 
@@ -539,6 +561,210 @@ function build(THREE, box) {
     glowLine(body, [V(side * 0.42, -1.85, 0.2), V(side * 0.5, -2.6, 0.2)], 0.014, 'cyan');
   }
 
+  /* ------------------------------------------------------------ the monitors behind the robot */
+  // A trading desk: one wide monitor behind the robot's head and an upright one on each side,
+  // turned in toward the viewer. They show what the bot is doing. They stand still while the
+  // robot turns. Every screen says little, in large letters: most of it is behind the robot.
+  const desk = new THREE.Group();
+  scene.add(desk);
+  const INK = { cyan: '#19d3ff', lime: '#a6ff1a', mint: '#2bf391', red: '#ff5a6a', gold: '#ffd23f', text: '#f3fbff', muted: '#8fb4c2', dark: '#03151d' };
+  const FONT = 'Oxanium, "Segoe UI", system-ui, sans-serif';
+  // One monitor: a dark case, a lit screen with a cyan line round it. `draw` paints the screen.
+  function monitor(w, h, across, draw) {
+    const group = new THREE.Group();
+    desk.add(group);
+    const canvas = document.createElement('canvas');
+    canvas.width = across;
+    canvas.height = Math.round((across * h) / w);
+    const ctx = canvas.getContext('2d');
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+    add(group, new THREE.BoxGeometry(w + 0.08, h + 0.08, 0.06), rubber, 0, 0, -0.036);
+    const glass = new THREE.MeshBasicMaterial({ map: texture, toneMapped: false });
+    add(group, new THREE.PlaneGeometry(w, h), glass);
+    const x = w / 2 + 0.02, y = h / 2 + 0.02, corners = [V(-x, -y, 0.004), V(x, -y, 0.004), V(x, y, 0.004), V(-x, y, 0.004)];
+    corners.forEach((corner, i) => glowLine(group, [corner, corners[(i + 1) % 4]], 0.006, 'cyan'));
+    const screen = {
+      group,
+      glass,
+      home: 0, // where it stands, left to right (the intro shakes it about this place)
+      redraw() {
+        // the screen's own light and its grid, then what it shows
+        const light = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        light.addColorStop(0, '#08374a');
+        light.addColorStop(1, INK.dark);
+        ctx.fillStyle = light;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = 'rgba(25, 211, 255, 0.12)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let gx = 70; gx < canvas.width; gx += 70) {
+          ctx.moveTo(gx, 0);
+          ctx.lineTo(gx, canvas.height);
+        }
+        for (let gy = 70; gy < canvas.height; gy += 70) {
+          ctx.moveTo(0, gy);
+          ctx.lineTo(canvas.width, gy);
+        }
+        ctx.stroke();
+        draw(ctx, canvas.width, canvas.height);
+        texture.needsUpdate = true;
+      },
+    };
+    return screen;
+  }
+  const words = (ctx, text, x, y, size, color, align = 'left') => {
+    ctx.font = `800 ${size}px ${FONT}`;
+    ctx.fillStyle = color;
+    ctx.textAlign = align;
+    ctx.fillText(text, x, y);
+  };
+
+  // The gold price: a made-up walk. Every candle is one step of it; now and then the bot trades.
+  const CANDLES = 30;
+  const candles = [];
+  let price = 0.5, steps = 0;
+  function nextCandle() {
+    const open = price;
+    steps++;
+    price = clamp(price + (Math.sin(steps * 0.9 + price * 7) * 0.5 + Math.random() - 0.45) * 0.1, 0.14, 0.86);
+    return { open, close: price, high: Math.max(open, price) + Math.random() * 0.04, low: Math.min(open, price) - Math.random() * 0.04, trade: steps % 4 === 0 };
+  }
+  for (let i = 0; i < CANDLES; i++) candles.push(nextCandle());
+
+  // The wide monitor: the gold chart. A rising candle is filled, a falling one is hollow (told
+  // apart without colour too). Where the bot traded: a lime arrow up for a buy under the candle,
+  // a gold arrow down for a sell over it. The bot opens both together.
+  const chart = monitor(2.1, 1.3, 840, (ctx, w, h) => {
+    const top = 104, bottom = h - 44, tall = bottom - top, step = (w - 60) / CANDLES;
+    candles.forEach((candle, i) => {
+      const x = 30 + i * step, up = candle.close >= candle.open, wide = step * 0.62;
+      const high = bottom - candle.high * tall, low = bottom - candle.low * tall, from = bottom - Math.max(candle.open, candle.close) * tall, body = Math.max(7, Math.abs(candle.close - candle.open) * tall);
+      ctx.strokeStyle = ctx.fillStyle = up ? INK.mint : INK.red;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(x + wide / 2, high);
+      ctx.lineTo(x + wide / 2, low);
+      ctx.stroke();
+      if (up) ctx.fillRect(x, from, wide, body);
+      else {
+        ctx.fillStyle = INK.dark;
+        ctx.fillRect(x, from, wide, body);
+        ctx.strokeRect(x + 1.5, from + 1.5, wide - 3, body - 3);
+      }
+      if (!candle.trade) return;
+      for (const [color, tip, base] of [[INK.lime, low + 12, low + 34], [INK.gold, high - 12, high - 34]]) {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(x + wide / 2, tip);
+        ctx.lineTo(x + wide / 2 - 13, base);
+        ctx.lineTo(x + wide / 2 + 13, base);
+        ctx.closePath();
+        ctx.fill();
+      }
+    });
+    // the price now: a dashed line across the chart
+    const now = bottom - price * tall;
+    ctx.strokeStyle = INK.cyan;
+    ctx.lineWidth = 3;
+    ctx.setLineDash([12, 9]);
+    ctx.beginPath();
+    ctx.moveTo(0, now);
+    ctx.lineTo(w, now);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    words(ctx, 'XAUUSD', 28, 68, 54, INK.text);
+    words(ctx, 'M5', 262, 66, 30, INK.muted);
+  });
+  const DESK = { y: 0.96, back: -1.25, turn: 0.6, reach: 1.66 }; // reach: how far the desk shows to each side of the robot's middle
+  chart.group.position.set(0, DESK.y, DESK.back);
+  add(desk, new THREE.BoxGeometry(0.14, 1.7, 0.06), rubber, 0, DESK.y - 1.45, DESK.back - 0.1); // its arm, behind the robot
+
+  // The left monitor: the grid. Orders wait above and below the price, larger the further away:
+  // sells above (hollow), buys below (filled). The cyan line is the price.
+  const grid = monitor(0.78, 1.22, 360, (ctx, w, h) => {
+    words(ctx, 'GRID', 24, 70, 58, INK.lime);
+    const now = 150 + (1 - price) * (h - 250);
+    for (let level = 1; level <= 4; level++) for (const side of [-1, 1]) {
+      const y = now + side * level * 58;
+      if (y < 110 || y > h - 28) continue;
+      const long = 60 + level * 50;
+      if (side > 0) {
+        ctx.fillStyle = INK.mint;
+        ctx.fillRect(w - 22 - long, y - 14, long, 28);
+      } else {
+        ctx.strokeStyle = INK.red;
+        ctx.lineWidth = 4;
+        ctx.strokeRect(w - 20 - long, y - 12, long - 4, 24);
+      }
+      words(ctx, (side > 0 ? 'B' : 'S') + level, 24, y + 11, 30, INK.muted);
+    }
+    ctx.fillStyle = INK.cyan;
+    ctx.fillRect(0, now - 3, w, 6);
+  });
+  // The right monitor: the bot's log, the newest line on top.
+  const LOG = [['BUY L1', INK.mint], ['SELL L1', INK.red], ['TP HIT', INK.lime], ['BUY L2', INK.mint], ['SELL L2', INK.red], ['TP HIT', INK.lime], ['CLOSED', INK.cyan]];
+  let logged = 0;
+  const log = monitor(0.78, 1.22, 360, (ctx, w, h) => {
+    words(ctx, 'LOG', 24, 70, 58, INK.cyan);
+    for (let row = 0; row < 6; row++) {
+      const [text, color] = LOG[(logged + LOG.length * 8 - row) % LOG.length], y = 150 + row * 72;
+      if (y > h - 20) break;
+      ctx.globalAlpha = 1 - row * 0.15;
+      ctx.fillStyle = color;
+      ctx.fillRect(24, y - 34, 9, 44);
+      words(ctx, text, 48, y, 42, row ? INK.muted : INK.text);
+    }
+    ctx.globalAlpha = 1;
+  });
+  for (const [screen, side] of [[grid, -1], [log, 1]]) {
+    // hinged to the wide monitor's edge and turned in toward the viewer
+    const hinge = side * (1.05 + 0.07), half = 0.39;
+    screen.group.position.set(hinge + side * half * Math.cos(DESK.turn), DESK.y, DESK.back + half * Math.sin(DESK.turn));
+    screen.group.rotation.y = -side * DESK.turn;
+    for (const up of [-0.42, 0.42]) add(desk, new THREE.BoxGeometry(0.07, 0.16, 0.07), plate, hinge - side * 0.02, DESK.y + up, DESK.back - 0.03);
+  }
+  const screens = [chart, grid, log];
+  screens.forEach((screen) => {
+    screen.home = screen.group.position.x;
+    screen.redraw();
+  });
+  // A monitor comes on with a glitch: a thin bright line, two blackouts, a jump to the side, and
+  // then the picture stands. `u` runs from 0 (still off) to 1 (on).
+  function flicker(screen, u) {
+    const group = screen.group;
+    group.visible = u > 0;
+    if (u <= 0) return;
+    if (u >= 1) {
+      group.scale.set(1, 1, 1);
+      group.position.x = screen.home;
+      glassOf(screen).setScalar(1);
+      return;
+    }
+    const beat = Math.floor(u * 10), chance = Math.abs(Math.sin(beat * 12.9898 + screen.home * 78.233) * 43758.5453) % 1;
+    group.visible = beat !== 2 && beat !== 5;
+    group.scale.set(u < 0.3 ? 1.05 : 1, u < 0.3 ? 0.03 : u < 0.6 ? mix(0.45, 0.9, chance) : 1, 1);
+    group.position.x = screen.home + (u < 0.8 ? (chance - 0.5) * 0.16 : 0);
+    glassOf(screen).setScalar(u < 0.6 ? 1.8 : mix(1.8, 1, (u - 0.6) / 0.4));
+  }
+  const glassOf = (screen) => screen.glass.color;
+  // Every beat: one new candle; the grid follows the price; every second beat the log gets a line.
+  let beatAt = 0, beats = 0;
+  function runDesk(time) {
+    if (time - beatAt < 0.9) return;
+    beatAt = time;
+    beats++;
+    candles.shift();
+    candles.push(nextCandle());
+    chart.redraw();
+    grid.redraw();
+    if (beats % 2 === 0) {
+      logged++;
+      log.redraw();
+    }
+  }
+
   /* ------------------------------------------------------------ the view */
   // The camera sees one upright frame, 2 wide and 3 high, with the whole robot in it.
   const FRAME = { top: 1.52, bottom: -2.06 };
@@ -555,21 +781,30 @@ function build(THREE, box) {
   const canvas = renderer.domElement;
   canvas.setAttribute('aria-hidden', 'true'); // the box itself carries the words for a screen reader
   canvas.style.opacity = '0';
-  canvas.style.transition = 'opacity 0.6s';
+  canvas.style.transition = 'opacity 0.25s';
   box.appendChild(canvas);
 
-  // The canvas fills the box (the stylesheet sizes it). `crop` is the part of the whole frame the
-  // box shows: left, top, width, height.
+  // The box holds the robot; the canvas is as high as the box and wider (the stylesheet sizes it),
+  // so the side monitors show past the box on both sides. `crop` is the part of the whole frame
+  // the box shows: left, top, width, height.
   let crop = [0, 0, 1, 1];
   function layout() {
     const w = box.clientWidth, h = box.clientHeight;
     if (!w || !h) return false;
+    const wide = Math.max(w, canvas.clientWidth), beside = (wide - w) / 2;
     renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
-    renderer.setSize(w, h, false);
+    renderer.setSize(wide, h, false);
     const shape = w / h;
     crop = shape > WHOLE ? [0, (1 - WHOLE / shape) * HEADROOM, 1, WHOLE / shape] : [(1 - shape / WHOLE) * 0.5, 0, shape / WHOLE, 1];
     const fullW = w / crop[2], fullH = h / crop[3];
-    camera.setViewOffset(fullW, fullH, crop[0] * fullW, crop[1] * fullH, w, h);
+    camera.setViewOffset(fullW, fullH, crop[0] * fullW - beside, crop[1] * fullH, wide, h);
+    // Where the page has little room beside the box (a phone, a narrow window), the desk is made
+    // smaller, so its side monitors are whole and not cut off by the edge of the screen.
+    const rect = box.getBoundingClientRect(), middle = rect.left + rect.width / 2;
+    const room = Math.min(middle, document.documentElement.clientWidth - middle, wide / 2) - 4;
+    const fits = clamp(room / ((DESK.reach * fullH) / (FRAME.top - FRAME.bottom)), 0.7, 1);
+    desk.scale.setScalar(fits);
+    desk.position.y = DESK.y * (1 - fits); // it keeps its height
     return true;
   }
 
@@ -581,15 +816,29 @@ function build(THREE, box) {
       // nobody is pointing: look around slowly
       return [Math.sin(seconds * 0.5) * 0.6, Math.sin(seconds * 0.37 + 1.3) * 0.35 + 0.05];
     }
-    const box = canvas.getBoundingClientRect();
-    const x = box.left + ((HEAD_AT[0] - crop[0]) / crop[2]) * box.width;
-    const y = box.top + ((HEAD_AT[1] - crop[1]) / crop[3]) * box.height;
+    const rect = box.getBoundingClientRect();
+    const x = rect.left + ((HEAD_AT[0] - crop[0]) / crop[2]) * rect.width;
+    const y = rect.top + ((HEAD_AT[1] - crop[1]) / crop[3]) * rect.height;
     return [clamp((pointer.x - x) / Math.max(260, innerWidth * 0.36), -1, 1), clamp((pointer.y - y) / Math.max(220, innerHeight * 0.42), -1, 1)];
   }
 
   const STANCE = 0.2; // the body stands turned this much toward the viewer's right; the head is counted from straight ahead
   const look = { head: [0, 0], body: [0, 0] };
   let blink = 0, nextBlink = 2.2, held = false, shown = false, clock = 0;
+  // The intro, one second in all, counted in `intro` (seconds since the scene came up): the robot
+  // comes up into its place, then the monitors flicker on one after the other, then the cards
+  // beside the robot come in. With "reduce motion" there is none: everything is simply there.
+  const INTRO = { robot: 0.35, monitors: 0.25, apart: 0.07, glitch: 0.3, cards: 0.68, between: 0.1, over: 1.1 };
+  const cards = cardsBeside(box);
+  let intro = still ? INTRO.over : 0, cardsIn = 0, settled = false;
+  function playIntro() {
+    const rise = 1 - (1 - clamp(intro / INTRO.robot, 0, 1)) ** 3;
+    robot.scale.setScalar(mix(0.88, 1, rise));
+    robot.position.y -= (1 - rise) * 0.2;
+    screens.forEach((screen, i) => flicker(screen, (intro - INTRO.monitors - i * INTRO.apart) / INTRO.glitch));
+    while (cardsIn < cards.length && intro >= INTRO.cards + cardsIn * INTRO.between) cards[cardsIn++].classList.add('is-in');
+    settled = intro >= INTRO.over;
+  }
   function pose() {
     // the head turns far, the body a little; nothing leaves its place
     const dip = Math.sin(nod * Math.PI); // a quick nod after a click on the head
@@ -601,6 +850,7 @@ function build(THREE, box) {
     robot.position.y = Math.sin(clock * 1.5) * 0.012; // breathing
     tablet.position.y = TABLET.y + Math.sin(clock * 1.9 + 1) * 0.008;
     for (const eye of eyes) eye.scale.y = (1 - 0.94 * blink) * (1 - 0.5 * dip);
+    if (!settled) playIntro();
   }
   function draw() {
     pose();
@@ -677,7 +927,7 @@ function build(THREE, box) {
   }
   const ray = new THREE.Raycaster(), spot = new THREE.Vector2();
   function hitsHead(x, y) {
-    const rect = box.getBoundingClientRect();
+    const rect = canvas.getBoundingClientRect(); // the camera's picture is the whole canvas, wider than the box
     if (!rect.width || !rect.height) return false;
     spot.set(((x - rect.left) / rect.width) * 2 - 1, 1 - ((y - rect.top) / rect.height) * 2);
     scene.updateMatrixWorld();
@@ -703,6 +953,15 @@ function build(THREE, box) {
     if (event.pointerType === 'mouse') box.style.cursor = !busy && hitsHead(event.clientX, event.clientY) ? 'pointer' : '';
   });
 
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => {
+      // the scene did not wait for the page's font: now that it is here, the words are painted again
+      paintLogo();
+      screens.forEach((screen) => screen.redraw());
+      if (shown && (still || held)) draw();
+    });
+  }
+
   if (still) {
     // "reduce motion": the robot stands still, its head a little turned
     look.head = [-0.25, 0.1];
@@ -713,14 +972,15 @@ function build(THREE, box) {
     return;
   }
 
-  let running = false, onScreen = true, lost = false, last = 0;
+  let running = false, onScreen = true, lost = false, last = 0, ready = false;
   function frame(now) {
     if (!running) return;
     requestAnimationFrame(frame);
-    const dt = Math.min(0.05, Math.max(0, (now - last) / 1000));
+    const passed = Math.max(0, (now - last) / 1000), dt = Math.min(0.05, passed);
     last = now;
     if (held) return;
     clock += dt;
+    intro += Math.min(0.12, passed); // the intro keeps to real time, so a slow phone does not stretch it
     const goal = wanted(clock, now), quick = 1 - Math.exp(-dt * 8), slow = 1 - Math.exp(-dt * 3.5);
     for (let i = 0; i < 2; i++) {
       look.head[i] += (goal[i] - look.head[i]) * quick;
@@ -731,10 +991,11 @@ function build(THREE, box) {
     if (nextBlink < -0.2) nextBlink = 2.4 + Math.random() * 3;
     blink = nextBlink < 0 ? Math.sin((-nextBlink / 0.2) * Math.PI) : 0;
     nod = Math.max(0, nod - dt / 0.5);
+    runDesk(clock);
     draw();
   }
   function run() {
-    const should = onScreen && !lost && !document.hidden;
+    const should = ready && onScreen && !lost && !document.hidden;
     if (should === running) return;
     running = should;
     if (running) {
@@ -760,17 +1021,26 @@ function build(THREE, box) {
     run();
   });
 
-  if (layout()) draw();
-  run();
+  // The first picture. The shaders are made ready first (where the browser can do that without
+  // holding the page up), so the intro does not begin with a stall.
+  const start = () => {
+    ready = true;
+    if (layout()) draw();
+    run();
+  };
+  if (renderer.compileAsync) renderer.compileAsync(scene, camera).then(start, start);
+  else start();
 
   // For checks from the browser console and automated tests; not used by the page.
   (window.__robot3d = window.__robot3d || []).push({
     canvas,
-    snap(across, down, closed = 0) {
+    snap(across, down, closed = 0, introAt = INTRO.over) {
       held = true;
       look.head = [across, down];
       look.body = [across, down];
       blink = closed;
+      intro = introAt; // a moment of the intro can be held too
+      settled = false;
       layout();
       draw();
     },
@@ -785,3 +1055,4 @@ function build(THREE, box) {
     state: () => ({ head: look.head.slice(), goal: wanted(clock, performance.now()), blink, running, calls: renderer.info.render.calls, triangles: renderer.info.render.triangles }),
   });
 }
+})();

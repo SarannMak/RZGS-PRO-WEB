@@ -635,93 +635,42 @@ a {
   justify-self: center;
   width: min(80vw, 330px);
 }
-/* Behind the robot: a HUD screen. A cut-corner frame with a fine grid and a ruler on its left
-   edge; the robot's head stands out above it. In the screen small green (bullish) and red
-   (bearish) candles bob up and down, in four groups where the screen shows beside the robot.
-   The screen stays inside the robot's own box, so nothing is cut off at the edge of the
-   page, and it fades out at the bottom together with the robot. The same element, with the
-   same three <i> for the candles, stands behind the robot on The Bot page (.page-hero-art). */
+/* Behind the robot: a soft cyan light, so the dark robot stands out. (Its trading desk, the three
+   monitors, is part of the 3D scene: see robot-3d.js.) */
 .hero-visual::before,
 .page-hero-art::after {
-  /* a soft back light, so the dark robot stands out */
   content: "";
   position: absolute;
   inset: 12% 10% 30%;
   z-index: -2;
   background: radial-gradient(closest-side, rgba(25, 211, 255, 0.26), transparent);
 }
-.hero-screen {
-  position: absolute;
-  inset: 13% 4% 2%;
-  z-index: -1;
-  border: 1px solid transparent;
-  border-image: var(--hud-line) 12 / 12px;
-  /* the same two cut corners as the frame drawn by --hud-line */
-  clip-path: polygon(10.21px 0, 100% 0, 100% calc(100% - 10.21px), calc(100% - 10.21px) 100%, 0 100%, 0 10.21px);
-  background:
-    /* ruler: a long tick every 50px, a short one every 10px */
-    repeating-linear-gradient(to bottom, rgba(166, 255, 26, 0.8) 0 1px, transparent 1px 50px) 7px 22px / 8px calc(100% - 44px) no-repeat,
-    repeating-linear-gradient(to bottom, rgba(25, 211, 255, 0.5) 0 1px, transparent 1px 10px) 7px 22px / 4px calc(100% - 44px) no-repeat,
-    /* the screen's own light, then its grid */
-    linear-gradient(to bottom, rgba(25, 211, 255, 0.16), rgba(25, 211, 255, 0.05) 70%),
-    linear-gradient(rgba(25, 211, 255, 0.1) 1px, transparent 1px) 0 0 / 100% 28px,
-    linear-gradient(90deg, rgba(25, 211, 255, 0.1) 1px, transparent 1px) 0 0 / 28px 100%;
-  -webkit-mask-image: linear-gradient(to bottom, #000 60%, transparent 97%);
-  mask-image: linear-gradient(to bottom, #000 60%, transparent 97%);
-}
-/* The candles: three layers as large as the screen, every third candle on the same layer, each
-   layer bobbing at its own pace. So neighbouring candles never move together, and the screen's
-   frame and fade-out still cut them. A layer only ever moves as a whole (cheap to draw). */
-.hero-screen i {
-  position: absolute;
-  inset: 0;
-  background: center / 100% 100% no-repeat;
-  animation: candle-bob 4.2s ease-in-out infinite;
-  will-change: transform;
-}
-.hero-screen i:nth-child(1) {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 400' preserveAspectRatio='none'%3E%3Cpath d='M27.5 57V80' stroke='%232bf391' stroke-width='1.3' stroke-opacity='.9'/%3E%3Crect x='24' y='62' width='7' height='14' rx='1' fill='%232bf391' fill-opacity='.92'/%3E%3Cpath d='M72.5 60V83' stroke='%23ff5a6a' stroke-width='1.3' stroke-opacity='.9'/%3E%3Crect x='69' y='64' width='7' height='14' rx='1' fill='%23ff5a6a' fill-opacity='.92'/%3E%3Cpath d='M201.5 39V59' stroke='%23ff5a6a' stroke-width='1.3' stroke-opacity='.9'/%3E%3Crect x='198' y='44' width='7' height='10' rx='1' fill='%23ff5a6a' fill-opacity='.92'/%3E%3Cpath d='M246.5 25V50' stroke='%232bf391' stroke-width='1.3' stroke-opacity='.9'/%3E%3Crect x='243' y='30' width='7' height='16' rx='1' fill='%232bf391' fill-opacity='.92'/%3E%3Cpath d='M239 294V323' stroke='%23ff5a6a' stroke-width='1.3' stroke-opacity='.9'/%3E%3Crect x='236' y='300' width='6' height='18' rx='1' fill='%23ff5a6a' fill-opacity='.92'/%3E%3Cpath d='M275 273V295' stroke='%23ff5a6a' stroke-width='1.3' stroke-opacity='.9'/%3E%3Crect x='272' y='278' width='6' height='12' rx='1' fill='%23ff5a6a' fill-opacity='.92'/%3E%3Cpath d='M37 297V319' stroke='%23ff5a6a' stroke-width='1.3' stroke-opacity='.9'/%3E%3Crect x='34' y='302' width='6' height='12' rx='1' fill='%23ff5a6a' fill-opacity='.92'/%3E%3C/svg%3E");
-}
-.hero-screen i:nth-child(2) {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 400' preserveAspectRatio='none'%3E%3Cpath d='M42.5 47V68' stroke='%232bf391' stroke-width='1.3' stroke-opacity='.9'/%3E%3Crect x='39' y='52' width='7' height='12' rx='1' fill='%232bf391' fill-opacity='.92'/%3E%3Cpath d='M87.5 45V71' stroke='%232bf391' stroke-width='1.3' stroke-opacity='.9'/%3E%3Crect x='84' y='50' width='7' height='16' rx='1' fill='%232bf391' fill-opacity='.92'/%3E%3Cpath d='M216.5 31V54' stroke='%232bf391' stroke-width='1.3' stroke-opacity='.9'/%3E%3Crect x='213' y='36' width='7' height='14' rx='1' fill='%232bf391' fill-opacity='.92'/%3E%3Cpath d='M261.5 31V51' stroke='%23ff5a6a' stroke-width='1.3' stroke-opacity='.9'/%3E%3Crect x='258' y='36' width='7' height='10' rx='1' fill='%23ff5a6a' fill-opacity='.92'/%3E%3Cpath d='M251 281V307' stroke='%232bf391' stroke-width='1.3' stroke-opacity='.9'/%3E%3Crect x='248' y='286' width='6' height='16' rx='1' fill='%232bf391' fill-opacity='.92'/%3E%3Cpath d='M287 253V283' stroke='%232bf391' stroke-width='1.3' stroke-opacity='.9'/%3E%3Crect x='284' y='258' width='6' height='20' rx='1' fill='%232bf391' fill-opacity='.92'/%3E%3Cpath d='M49 279V305' stroke='%232bf391' stroke-width='1.3' stroke-opacity='.9'/%3E%3Crect x='46' y='284' width='6' height='16' rx='1' fill='%232bf391' fill-opacity='.92'/%3E%3C/svg%3E");
-  animation-duration: 5.3s;
-  animation-delay: -1.8s;
-}
-.hero-screen i:nth-child(3) {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 400' preserveAspectRatio='none'%3E%3Cpath d='M57.5 51V71' stroke='%23ff5a6a' stroke-width='1.3' stroke-opacity='.9'/%3E%3Crect x='54' y='56' width='7' height='10' rx='1' fill='%23ff5a6a' fill-opacity='.92'/%3E%3Cpath d='M102.5 35V58' stroke='%232bf391' stroke-width='1.3' stroke-opacity='.9'/%3E%3Crect x='99' y='40' width='7' height='14' rx='1' fill='%232bf391' fill-opacity='.92'/%3E%3Cpath d='M231.5 37V57' stroke='%23ff5a6a' stroke-width='1.3' stroke-opacity='.9'/%3E%3Crect x='228' y='42' width='7' height='10' rx='1' fill='%23ff5a6a' fill-opacity='.92'/%3E%3Cpath d='M276.5 17V44' stroke='%232bf391' stroke-width='1.3' stroke-opacity='.9'/%3E%3Crect x='273' y='22' width='7' height='18' rx='1' fill='%232bf391' fill-opacity='.92'/%3E%3Cpath d='M263 267V293' stroke='%232bf391' stroke-width='1.3' stroke-opacity='.9'/%3E%3Crect x='260' y='272' width='6' height='16' rx='1' fill='%232bf391' fill-opacity='.92'/%3E%3Cpath d='M25 291V317' stroke='%232bf391' stroke-width='1.3' stroke-opacity='.9'/%3E%3Crect x='22' y='296' width='6' height='16' rx='1' fill='%232bf391' fill-opacity='.92'/%3E%3C/svg%3E");
-  animation-duration: 3.4s;
-  animation-delay: -2.6s;
-}
-/* a scan line falls through the screen, with a faint trail above it. With reduced motion it
-   rests at the bottom, where the screen has faded out. */
-.hero-screen::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, transparent calc(100% - 90px), rgba(25, 211, 255, 0.12) calc(100% - 3px), rgba(140, 236, 255, 0.85) calc(100% - 1.5px), transparent);
-  animation: screen-scan 6s linear infinite;
-}
 
-/* The robot is a 3D model: robot-3d.js draws it on a canvas inside this box. The box keeps the
-   robot's place while the model loads, and fades out at the bottom. Its full shape is 2 wide by
-   3 high; on a phone the home page gives it a less tall box, which shows the robot's upper part. */
+/* The robot is a 3D model: robot-3d.js draws it on a canvas. This box is the robot's own place
+   (2 wide by 3 high) and keeps it while the model loads. The canvas is as high as the box and
+   wider: the monitors behind the robot stand out past it on both sides. The canvas fades out at
+   the bottom. On a phone the home page gives the box a less tall shape, which shows the robot's
+   upper part. */
 .robot-3d {
   position: relative;
   width: 100%;
   aspect-ratio: 2 / 3;
-  -webkit-mask-image: linear-gradient(to bottom, #000 70%, transparent 98%);
-  mask-image: linear-gradient(to bottom, #000 70%, transparent 98%);
 }
 .robot-3d canvas {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: -20%;
   display: block;
-  width: 100%;
+  width: 140%;
   height: 100%;
   pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, #000 70%, transparent 98%);
+  mask-image: linear-gradient(to bottom, #000 70%, transparent 98%);
 }
 .hero-visual .robot-3d {
   aspect-ratio: 4 / 5;
+}
+.hero-visual .robot-3d canvas {
   -webkit-mask-image: linear-gradient(to bottom, #000 58%, transparent 94%);
   mask-image: linear-gradient(to bottom, #000 58%, transparent 94%);
 }
@@ -818,6 +767,43 @@ a {
   font-weight: 600;
   font-size: 14px;
 }
+/* The hero's intro (robot-3d.js runs it when the 3D scene is ready, one second in all): first the
+   robot, then the monitors flicker on, then these two cards, one after the other. Until then the
+   cards are not shown; the script lets each in with "is-in". If the script never runs, the cards
+   come by themselves after six seconds. Without JavaScript they are simply there. */
+.js .hero-visual .float-card {
+  opacity: 0;
+  scale: 0.9;
+  transition: opacity 0.2s ease-out, scale 0.2s cubic-bezier(0.2, 1.5, 0.4, 1);
+}
+.js .hero-visual .float-card.is-in {
+  opacity: 1;
+  scale: 1;
+}
+.js .hero-visual .float-card:not(.is-in) {
+  animation-name: float, card-late;
+  animation-duration: 7s, 0.4s;
+  animation-timing-function: ease-in-out, ease-out;
+  animation-iteration-count: infinite, 1;
+  animation-fill-mode: none, forwards;
+  animation-delay: 0s, 6s;
+}
+.js .hero-visual .float-status:not(.is-in) {
+  animation-delay: -3.5s, 6s;
+}
+@keyframes card-late {
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .js .hero-visual .float-card {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
 /* A click on the robot's head (robot-3d.js): the card types one line about RZGS-PRO, letter by
    letter, instead of "Running". The lines are listed in the page, inside the card. */
 .float-value[hidden],
@@ -922,6 +908,8 @@ a {
   }
   .hero-visual .robot-3d {
     aspect-ratio: 2 / 3;
+  }
+  .hero-visual .robot-3d canvas {
     -webkit-mask-image: linear-gradient(to bottom, #000 70%, transparent 98%);
     mask-image: linear-gradient(to bottom, #000 70%, transparent 98%);
   }
@@ -2011,7 +1999,7 @@ a {
   justify-self: center;
   width: min(72vw, 300px);
 }
-/* (the screen behind the robot is the home page's: see .hero-screen; the robot's box is .robot-3d) */
+/* (the robot's box is .robot-3d, as on the home page) */
 @media (min-width: 960px) {
   .page-hero-grid {
     grid-template-columns: 1.2fr 0.8fr;
@@ -2687,16 +2675,6 @@ a {
 @keyframes sweep {
   from { transform: translateX(-100%); }
   to { transform: translateX(250%); }
-}
-@keyframes screen-scan {
-  from { transform: translateY(-100%); }
-  to { transform: translateY(0); }
-}
-/* the candles in the screen behind the robot: up a little, and back */
-@keyframes candle-bob {
-  0%, 100% { transform: translateY(3px); }
-  50% { transform: translateY(-4px); }
-}
 }
 /* ==========================================================================
    Reduced motion
