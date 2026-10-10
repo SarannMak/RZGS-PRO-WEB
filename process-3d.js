@@ -184,14 +184,17 @@ function build(THREE, root) {
   /* ------------------------------------------------------------ painted screens */
   const DISPLAY = 'Oxanium, "Segoe UI", system-ui, sans-serif';
   const MONO = '"IBM Plex Mono", ui-monospace, Consolas, monospace';
+  // The screens are painted larger than they are measured, so their words stay sharp close up.
+  const SHARP = 1.5;
   function painted(w, h, draw) {
     const canvas = document.createElement('canvas');
-    canvas.width = w;
-    canvas.height = h;
+    canvas.width = w * SHARP;
+    canvas.height = h * SHARP;
     const ctx = canvas.getContext('2d');
+    ctx.scale(SHARP, SHARP);
     const texture = new THREE.CanvasTexture(canvas);
     texture.colorSpace = THREE.SRGBColorSpace;
-    texture.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
+    texture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
     const screen = {
       texture,
       redraw(state) {
@@ -374,13 +377,15 @@ function build(THREE, root) {
 
   /* ------------------------------------------------------------ the stations */
   // `focus` is how the camera looks at a station: what it aims at, from how far, from which side.
+  // `close` is the same for a phone, where the stage is upright and small: what to aim at, how much
+  // must fit across (`span`) and up (`rise`), and where a card stops at this station.
   const stations = [];
-  function station(index, name, x, z, focus) {
+  function station(index, name, x, z, focus, close) {
     const group = new THREE.Group();
     group.position.set(x, 0, z);
     group.userData.step = index;
     machine.add(group);
-    const entry = { index, name, group, focus, lamps: [] };
+    const entry = { index, name, group, focus, close, lamps: [] };
     stations.push(entry);
     return entry;
   }
@@ -400,41 +405,39 @@ function build(THREE, root) {
   }
 
   // 1. LOG IN: a kiosk with the login page on its screen, and a gate the card passes through.
-  const login = station(0, 'Log in', -4.7, 0.3, { target: [-4.7, 0.95, 0.6], distance: 7.4, side: 0.4 });
+  const login = station(0, 'Log in', -4.7, 0.3, { target: [-4.7, 0.95, 0.6], distance: 7.4, side: 0.4 }, { target: [-4.7, 1.2, 0.4], span: 2.5, rise: 3.5, side: 0.3, stop: GATE });
+  // Every screen says little, in large letters: on a phone it is a few centimetres wide.
   const loginScreen = painted(512, 352, (ctx, w, h, ok) => {
     fillFrame(ctx, 2, 2, w - 4, h - 4, INK.panel, INK.line, 22);
     ctx.fillStyle = INK.panelHi;
-    ctx.fillRect(4, 4, w - 8, 44);
+    ctx.fillRect(4, 4, w - 8, 48);
     for (let i = 0; i < 3; i++) {
       ctx.fillStyle = [INK.red, INK.gold, INK.mint][i];
       ctx.beginPath();
-      ctx.arc(28 + i * 22, 26, 6, 0, TAU);
+      ctx.arc(28 + i * 22, 28, 6, 0, TAU);
       ctx.fill();
     }
-    write(ctx, 'rzgspro.com/login', 110, 33, 19, INK.muted, 500, MONO);
+    write(ctx, 'rzgspro.com', 110, 37, 24, INK.muted, 500, MONO);
     if (ok) {
       ctx.strokeStyle = INK.lime;
-      ctx.lineWidth = 6;
+      ctx.lineWidth = 8;
       ctx.beginPath();
-      ctx.arc(w / 2, 150, 52, 0, TAU);
+      ctx.arc(w / 2, 150, 62, 0, TAU);
       ctx.stroke();
-      tick(ctx, w / 2, 150, 56, INK.lime);
-      write(ctx, 'WELCOME', w / 2, 254, 40, INK.text, 800, DISPLAY, 'center');
-      write(ctx, 'You are logged in', w / 2, 292, 21, INK.lime, 500, MONO, 'center');
+      tick(ctx, w / 2, 150, 66, INK.lime);
+      write(ctx, 'LOGGED IN', w / 2, 302, 60, INK.text, 800, DISPLAY, 'center');
       return;
     }
-    write(ctx, 'LOG IN', 36, 100, 38, INK.text, 800);
-    for (const [label, value, y] of [['EMAIL', 'you@email.com', 122], ['PASSWORD', '• • • • • • • •', 190]]) {
-      write(ctx, label, 36, y + 14, 13, INK.dim, 500, MONO);
-      fillFrame(ctx, 36, y + 22, w - 72, 36, INK.ink, INK.line, 8);
-      write(ctx, value, 50, y + 47, 18, INK.muted, 500, MONO);
+    write(ctx, 'LOG IN', 36, 116, 58, INK.text, 800);
+    for (const [value, y] of [['you@email.com', 136], ['• • • • • • •', 202]]) {
+      fillFrame(ctx, 36, y, w - 72, 54, INK.ink, INK.line, 10);
+      write(ctx, value, 54, y + 37, 27, INK.muted, 500, MONO);
     }
     const grad = ctx.createLinearGradient(36, 0, w - 36, 0);
     grad.addColorStop(0, INK.cyan);
     grad.addColorStop(1, INK.lime);
-    fillFrame(ctx, 36, 268, w - 72, 46, grad, null, 14);
-    write(ctx, 'LOG IN', w / 2, 300, 22, INK.ink, 800, DISPLAY, 'center');
-    write(ctx, 'New here?  Sign up', w / 2, 338, 15, INK.dim, 500, MONO, 'center');
+    fillFrame(ctx, 36, 272, w - 72, 60, grad, null, 16);
+    write(ctx, 'LOG IN', w / 2, 315, 36, INK.ink, 800, DISPLAY, 'center');
   });
   {
     const b = batch(login.group);
@@ -443,7 +446,8 @@ function build(THREE, root) {
     b.box(0.22, 0.5, 0.2, 0, 0.84, -0.42, { mat: MAT.hi, cut: 0.04 });
     b.box(1.74, 1.22, 0.1, 0, 1.2, -0.44, { mat: MAT.hi, cut: 0.1, rx: -0.14 });
     // the gate over the track
-    for (const z of [0.42, 1.14]) b.box(0.16, 1.18, 0.16, 0, 0.12, z, { mat: MAT.hi, cut: 0.03 });
+    b.box(0.16, 1.18, 0.16, 0, 0.12, 0.42, { mat: MAT.hi, cut: 0.03 });
+    b.box(0.16, 0.2, 0.16, 0, 0.12, 1.14, { mat: MAT.hi, cut: 0.03 }); // the nearer post is low: it must not hide the card
     b.box(0.16, 0.12, 0.88, 0, 1.3, 0.78, { mat: MAT.hi, cut: 0.03 });
     b.done();
     panel(login.group, loginScreen, 1.58, 1.086, ...frontOf(0, 1.2, -0.44, 1.22, 0.1, -0.14));
@@ -452,34 +456,32 @@ function build(THREE, root) {
   }
 
   // 2. CHOOSE ONE OFFER: a post with two boards, then one module on each lane.
-  const offer = station(1, 'Choose one offer', -1.95, -0.1, { target: [-0.75, 0.75, 0.85], distance: 11.2, side: 0.22 });
+  const offer = station(1, 'Choose one offer', -1.95, -0.1, { target: [-0.75, 0.75, 0.85], distance: 11.2, side: 0.22 }, { target: [-1.9, 1.3, 0.35], span: 3.5, rise: 3.5, side: 0.14 });
   function board(title, color, lines, chip) {
     return painted(384, 256, (ctx, w, h) => {
       fillFrame(ctx, 2, 2, w - 4, h - 4, INK.panel, color, 20);
       ctx.fillStyle = color;
       ctx.fillRect(4, 4, 10, h - 28);
-      write(ctx, title, 34, 74, 62, color, 800);
-      write(ctx, lines[0], 36, 118, 22, INK.text, 600);
-      write(ctx, lines[1], 36, 160, 19, INK.muted, 500, MONO);
-      write(ctx, lines[2], 36, 186, 19, INK.muted, 500, MONO);
-      ctx.font = `600 15px ${MONO}`;
-      fillFrame(ctx, 36, 206, ctx.measureText(chip).width + 28, 32, null, color, 8);
-      write(ctx, chip, 50, 228, 15, color, 600, MONO);
+      write(ctx, title, 32, 88, 86, color, 800);
+      write(ctx, lines[0], 34, 136, 32, INK.text, 700);
+      write(ctx, lines[1], 34, 174, 25, INK.muted, 600);
+      ctx.font = `600 21px ${MONO}`;
+      fillFrame(ctx, 34, 196, ctx.measureText(chip).width + 32, 42, null, color, 10);
+      write(ctx, chip, 50, 225, 21, color, 600, MONO);
     });
   }
-  const freeBoard = board('FREE', INK.lime, ['7-day trial  ·  $0', 'Open a broker account', 'with our link'], 'NO PAYMENT');
-  const paidBoard = board('PAID', INK.gold, ['Elite $5  ·  Diamond $49', 'Pay with the KHQR code', 'and send your receipt'], 'A MONTH');
+  const freeBoard = board('FREE', INK.lime, ['7-day trial  ·  $0', 'Open a broker account'], 'WITH OUR LINK');
+  const paidBoard = board('PAID', INK.gold, ['Elite or Diamond', '$5 or $49 a month'], 'PAY BY KHQR');
   const brokerScreen = painted(512, 240, (ctx, w, h, ok) => {
     fillFrame(ctx, 2, 2, w - 4, h - 4, INK.panel, INK.lime, 20);
-    write(ctx, '// PARTNER BROKERS', 28, 44, 18, INK.lime, 500, MONO);
+    write(ctx, 'OPEN YOUR ACCOUNT', 26, 56, 40, INK.text, 800);
+    write(ctx, 'WITH OUR LINK', 26, 102, 40, INK.lime, 800);
     ['EXNESS', 'INVESTIZO', 'LIRUNEX'].forEach((name, i) => {
-      fillFrame(ctx, 28 + i * 156, 62, 144, 50, INK.panelHi, INK.line, 10);
-      write(ctx, name, 28 + i * 156 + 72, 95, 19, INK.text, 700, DISPLAY, 'center');
+      fillFrame(ctx, 26 + i * 156, 122, 146, 52, INK.panelHi, INK.line, 10);
+      write(ctx, name, 26 + i * 156 + 73, 157, 22, INK.text, 700, DISPLAY, 'center');
     });
-    write(ctx, 'Open your account with', 28, 156, 24, INK.text, 600);
-    write(ctx, 'OUR LINK', 316, 156, 24, INK.lime, 800);
-    write(ctx, ok ? 'Account found under our link' : 'Then the bot can find your account', 28, 200, 18, ok ? INK.lime : INK.muted, 500, MONO);
-    if (ok) tick(ctx, w - 50, 192, 30, INK.lime);
+    if (ok) tick(ctx, 44, 205, 30, INK.lime);
+    write(ctx, ok ? 'Account found' : 'Choose one broker', ok ? 72 : 26, 215, 27, ok ? INK.lime : INK.muted, 600);
   });
   const qrPicture = painted(256, 300, (ctx, w) => {
     ctx.fillStyle = '#f3fbff';
@@ -502,26 +504,24 @@ function build(THREE, root) {
       ctx.fillStyle = INK.ink;
       ctx.fillRect(origin + (col + 2) * cell, origin + (row + 2) * cell, cell * 3, cell * 3);
     }
-    write(ctx, 'KHQR', w / 2, 278, 30, INK.ink, 800, DISPLAY, 'center');
+    write(ctx, 'KHQR', w / 2, 283, 40, INK.ink, 800, DISPLAY, 'center');
   });
   const receiptPicture = painted(192, 288, (ctx, w, h, ok) => {
     ctx.fillStyle = '#f3fbff';
     ctx.fillRect(0, 0, w, h);
-    write(ctx, 'RECEIPT', w / 2, 44, 24, INK.ink, 800, DISPLAY, 'center');
+    write(ctx, 'RECEIPT', w / 2, 46, 32, INK.ink, 800, DISPLAY, 'center');
     ctx.strokeStyle = '#7fa3b3';
     ctx.setLineDash([6, 6]);
     ctx.beginPath();
-    ctx.moveTo(16, 62);
-    ctx.lineTo(w - 16, 62);
+    ctx.moveTo(16, 64);
+    ctx.lineTo(w - 16, 64);
     ctx.stroke();
     ctx.setLineDash([]);
-    write(ctx, 'RZGS-PRO', 18, 100, 17, '#2c4853', 500, MONO);
-    write(ctx, 'Plan', 18, 132, 17, '#2c4853', 500, MONO);
-    write(ctx, '$5.00', w - 18, 132, 17, '#2c4853', 600, MONO, 'right');
-    write(ctx, 'APV 123456', 18, 164, 17, '#2c4853', 500, MONO);
+    write(ctx, 'RZGS-PRO', w / 2, 104, 24, '#2c4853', 600, MONO, 'center');
+    write(ctx, '$5.00', w / 2, 162, 46, INK.ink, 800, DISPLAY, 'center');
     ctx.fillStyle = ok ? '#12a85f' : '#7fa3b3';
-    ctx.fillRect(18, 196, w - 36, 54);
-    write(ctx, ok ? 'PAID' : 'PAY', w / 2, 234, 30, '#f3fbff', 800, DISPLAY, 'center');
+    ctx.fillRect(18, 190, w - 36, 72);
+    write(ctx, ok ? 'PAID' : 'PAY', w / 2, 242, 44, '#f3fbff', 800, DISPLAY, 'center');
   });
   {
     const b = batch(offer.group);
@@ -569,7 +569,7 @@ function build(THREE, root) {
   }
 
   // 3. TELEGRAM: a tower with a paper plane on it. It checks, then hands out the .ex5 file.
-  const telegram = station(2, 'Verify in Telegram', 2.9, 0, { target: [2.95, 1.5, 0.3], distance: 7.9, side: 0.34 });
+  const telegram = station(2, 'Verify in Telegram', 2.9, 0, { target: [2.95, 1.5, 0.3], distance: 7.9, side: 0.34 }, { target: [3.22, 1.42, 0.3], span: 2.15, rise: 3.5, side: 0.3, stop: TOWER });
   const planeBadge = painted(256, 256, (ctx, w) => {
     ctx.fillStyle = INK.cyan;
     ctx.beginPath();
@@ -592,31 +592,28 @@ function build(THREE, root) {
     ctx.closePath();
     ctx.fill();
   });
-  const CHECKS = ['Account under our link', 'Payment received', 'MT5 login number'];
+  const CHECKS = ['ACCOUNT', 'PAYMENT', 'MT5 LOGIN'];
   const chatScreen = painted(416, 448, (ctx, w, h, done = 4) => {
     fillFrame(ctx, 2, 2, w - 4, h - 4, INK.panel, INK.line, 22);
     ctx.fillStyle = INK.panelHi;
-    ctx.fillRect(4, 4, w - 8, 58);
-    ctx.fillStyle = INK.cyan;
-    ctx.beginPath();
-    ctx.arc(40, 33, 17, 0, TAU);
-    ctx.fill();
-    write(ctx, 'RZGS-PRO bot', 70, 30, 21, INK.text, 700);
-    write(ctx, done < 3 ? 'checking…' : 'online', 70, 51, 14, done < 3 ? INK.gold : INK.mint, 500, MONO);
+    ctx.fillRect(4, 4, w - 8, 66);
+    ctx.drawImage(planeBadge.texture.image, 16, 13, 48, 48); // the Telegram mark
+    write(ctx, 'RZGS-PRO BOT', 76, 49, 33, INK.text, 800);
     CHECKS.forEach((label, i) => {
-      const y = 86 + i * 62, ok = done > i;
-      fillFrame(ctx, 20, y, w - 96, 46, ok ? '#0c3a2b' : INK.ink, ok ? INK.mint : INK.line, 10);
-      write(ctx, label, 36, y + 30, 18, ok ? INK.text : INK.dim, 500, MONO);
-      if (ok) tick(ctx, w - 108, y + 23, 22, INK.mint);
+      const y = 82 + i * 86, ok = done > i;
+      fillFrame(ctx, 18, y, w - 36, 74, ok ? '#0c3a2b' : INK.ink, ok ? INK.mint : INK.line, 12);
+      write(ctx, label, 36, y + 52, 42, ok ? INK.text : INK.dim, 700);
+      if (ok) tick(ctx, w - 58, y + 37, 34, INK.mint);
     });
-    if (done < 4) return;
+    if (done < 4) {
+      write(ctx, done < 3 ? 'checking…' : 'sending…', w / 2, 400, 32, INK.gold, 500, MONO, 'center');
+      return;
+    }
     // the file the bot sends
-    fillFrame(ctx, 76, 284, w - 96, 130, '#0b3a4b', INK.cyan, 14);
-    fillFrame(ctx, 94, 302, 64, 82, INK.lime, null, 12);
-    write(ctx, '.ex5', 126, 352, 21, INK.ink, 800, DISPLAY, 'center');
-    write(ctx, 'RZGS-PRO.ex5', 174, 330, 23, INK.text, 700);
-    write(ctx, 'Your bot file', 174, 358, 16, INK.muted, 500, MONO);
-    write(ctx, '+ Bot Password', 174, 384, 16, INK.lime, 500, MONO);
+    fillFrame(ctx, 18, 344, w - 36, 90, '#0b3a4b', INK.cyan, 14);
+    fillFrame(ctx, 32, 356, 104, 66, INK.lime, null, 12);
+    write(ctx, '.ex5', 84, 402, 36, INK.ink, 800, DISPLAY, 'center');
+    write(ctx, 'BOT FILE', 152, 404, 42, INK.text, 800);
   });
   {
     const b = batch(telegram.group);
@@ -625,7 +622,7 @@ function build(THREE, root) {
     b.box(1.14, 0.1, 0.72, 0, 2.17, -0.05, { mat: MAT.hi, cut: 0.1 });
     b.tube(0.03, 0.42, 0.42, 2.27, -0.2, { mat: MAT.hi, edge: null, sides: 8 });
     // where the card goes in, and the chute the file comes out of
-    b.box(0.62, 0.86, 0.05, 0, 0.3, 0.415, { mat: MAT.dark, cut: 0.05 });
+    b.box(0.62, 0.72, 0.05, 0, 0.3, 0.415, { mat: MAT.dark, cut: 0.05 });
     b.box(0.5, 0.1, 0.46, 0.72, 0.32, 0.62, { mat: MAT.hi, cut: 0.04, edge: LINE.lime, rz: -0.12 });
     b.done();
     const badge = new THREE.Mesh(new THREE.CircleGeometry(0.3, 40), new THREE.MeshBasicMaterial({ map: planeBadge.texture, toneMapped: false, transparent: true }));
@@ -635,12 +632,12 @@ function build(THREE, root) {
     panel(telegram.group, chatScreen, 0.98, 1.055, 0, 1.62, 0.412);
     telegram.chat = { screen: chatScreen, done: 4 };
     telegram.antenna = lamp(telegram, lightBar(telegram.group, MAT.lime, 0.09, 0.09, 0.09, 0.42, 2.69, -0.2), 0.8);
-    telegram.slot = lamp(telegram, lightBar(telegram.group, MAT.cyan, 0.5, 0.03, 0.03, 0, 1.19, 0.45));
+    telegram.slot = lamp(telegram, lightBar(telegram.group, MAT.cyan, 0.5, 0.03, 0.03, 0, 1.04, 0.45));
     glow(telegram.group, HEX.cyan, 3.2, 0, 0.2, 0.34);
   }
 
   // 4. MT5: a desk, a wide screen with a live chart, and the computer the file goes into.
-  const mt5 = station(3, 'Set up MT5', 5.0, 0.2, { target: [4.85, 0.95, 0.55], distance: 8.0, side: -0.2 });
+  const mt5 = station(3, 'Set up MT5', 5.0, 0.2, { target: [4.85, 0.95, 0.55], distance: 8.0, side: -0.2 }, { target: [4.98, 1.05, 0.5], span: 3.2, rise: 3.3, side: -0.1, stop: SLOT });
   const candles = Array.from({ length: 30 }, () => 0);
   let price = 0.5;
   function nextCandle() {
@@ -652,20 +649,20 @@ function build(THREE, root) {
   const chartScreen = painted(672, 400, (ctx, w, h, running = true) => {
     fillFrame(ctx, 2, 2, w - 4, h - 4, INK.panel, INK.line, 22);
     ctx.fillStyle = INK.panelHi;
-    ctx.fillRect(4, 4, w - 8, 46);
-    write(ctx, 'XAUUSD', 22, 35, 24, INK.text, 800);
-    write(ctx, 'M5  ·  MetaTrader 5', 136, 34, 16, INK.dim, 500, MONO);
-    fillFrame(ctx, w - 232, 11, 212, 30, running ? '#0c3a2b' : INK.ink, running ? INK.mint : INK.line, 8);
-    write(ctx, running ? 'ALGO TRADING  ON' : 'ALGO TRADING  OFF', w - 126, 32, 15, running ? INK.mint : INK.dim, 600, MONO, 'center');
+    ctx.fillRect(4, 4, w - 8, 58);
+    write(ctx, 'XAUUSD', 22, 45, 38, INK.text, 800);
+    write(ctx, 'MT5', 192, 44, 24, INK.dim, 600, MONO);
+    fillFrame(ctx, w - 292, 11, 272, 40, running ? '#0c3a2b' : INK.ink, running ? INK.mint : INK.line, 10);
+    write(ctx, running ? 'ALGO TRADING ON' : 'ALGO TRADING OFF', w - 156, 39, 23, running ? INK.mint : INK.dim, 600, MONO, 'center');
     ctx.strokeStyle = 'rgba(25, 211, 255, 0.12)';
     ctx.lineWidth = 1;
-    for (let y = 90; y < h - 20; y += 52) {
+    for (let y = 104; y < h - 20; y += 52) {
       ctx.beginPath();
       ctx.moveTo(16, y);
-      ctx.lineTo(w - 190, y);
+      ctx.lineTo(w - 212, y);
       ctx.stroke();
     }
-    const top = 70, bottom = h - 34, span = bottom - top, step = (w - 220) / candles.length;
+    const top = 84, bottom = h - 30, span = bottom - top, step = (w - 244) / candles.length;
     candles.forEach((candle, i) => {
       const x = 22 + i * step, up = candle.close >= candle.open;
       ctx.strokeStyle = ctx.fillStyle = up ? INK.mint : INK.red;
@@ -678,17 +675,15 @@ function build(THREE, root) {
       ctx.fillRect(x, a, step * 0.64, Math.max(3, Math.abs(candle.close - candle.open) * span));
     });
     // the bot's own panel, at the right of the chart
-    fillFrame(ctx, w - 176, 66, 156, h - 92, INK.ink, INK.cyan, 14);
-    write(ctx, 'RZGS-PRO', w - 98, 100, 21, INK.cyan, 800, DISPLAY, 'center');
+    fillFrame(ctx, w - 198, 76, 178, h - 98, INK.ink, INK.cyan, 14);
+    write(ctx, 'RZGS-PRO', w - 109, 120, 27, INK.cyan, 800, DISPLAY, 'center');
     ctx.fillStyle = running ? INK.lime : INK.dim;
     ctx.beginPath();
-    ctx.arc(w - 98, 152, 22, 0, TAU);
+    ctx.arc(w - 109, 180, 30, 0, TAU);
     ctx.fill();
-    write(ctx, running ? 'RUNNING' : 'WAITING', w - 98, 208, 19, running ? INK.lime : INK.dim, 700, DISPLAY, 'center');
-    write(ctx, 'BUY + SELL', w - 98, 246, 14, INK.muted, 500, MONO, 'center');
-    write(ctx, 'GRID  ·  BASKET', w - 98, 270, 14, INK.muted, 500, MONO, 'center');
-    write(ctx, 'Bot Password', w - 98, 322, 13, INK.dim, 500, MONO, 'center');
-    write(ctx, '• • • • • •', w - 98, 346, 17, INK.text, 600, MONO, 'center');
+    write(ctx, running ? 'RUNNING' : 'WAITING', w - 109, 258, 32, running ? INK.lime : INK.dim, 800, DISPLAY, 'center');
+    write(ctx, 'BUY + SELL', w - 109, 302, 19, INK.muted, 500, MONO, 'center');
+    write(ctx, 'GRID · BASKET', w - 109, 332, 19, INK.muted, 500, MONO, 'center');
   });
   {
     const b = batch(mt5.group);
@@ -753,16 +748,16 @@ function build(THREE, root) {
         ctx.arc(w / 2, 236, 50, Math.PI, 0);
         ctx.fill();
       }
-      ctx.font = `500 19px ${MONO}`;
+      ctx.font = `600 26px ${MONO}`;
       const words = line.split(' ');
-      const rows = ctx.measureText(line).width > w - 40 ? [words.slice(0, 2).join(' '), words.slice(2).join(' ')] : [line];
-      rows.forEach((row, i) => write(ctx, row, w / 2, 280 + i * 26 - (rows.length - 1) * 8, 19, INK.text, 500, MONO, 'center'));
+      const rows = ctx.measureText(line).width > w - 28 ? [words.slice(0, 2).join(' '), words.slice(2).join(' ')] : [line];
+      rows.forEach((row, i) => write(ctx, row, w / 2, 288 + i * 30 - (rows.length - 1) * 16, 26, INK.text, 600, MONO, 'center'));
     });
   }
   const fileLabel = painted(256, 176, (ctx, w, h) => {
     fillFrame(ctx, 3, 3, w - 6, h - 6, INK.panel, INK.lime, 24);
-    write(ctx, '.ex5', w / 2, 92, 64, INK.lime, 800, DISPLAY, 'center');
-    write(ctx, 'RZGS-PRO BOT FILE', w / 2, 138, 17, INK.text, 500, MONO, 'center');
+    write(ctx, '.ex5', w / 2, 94, 72, INK.lime, 800, DISPLAY, 'center');
+    write(ctx, 'BOT FILE', w / 2, 144, 32, INK.text, 700, DISPLAY, 'center');
   });
   const travellers = ['free', 'paid'].map((laneName, i) => {
     const lane = LANE[laneName];
@@ -959,6 +954,7 @@ function build(THREE, root) {
       el.append(lane);
     }
     el.append(tag.words);
+    el.style.opacity = '0'; // not shown before it has a place
     labelLayer.append(el);
     tag.el = el;
   }
@@ -976,8 +972,9 @@ function build(THREE, root) {
   function placeTags() {
     for (const tag of tags) {
       projected.copy(tag.at).project(camera);
-      // the two lane tags would crowd the whole view: they show while the offer step is on
-      const wanted = !tag.lane || activeStep === 1;
+      // the two lane tags would crowd the whole view: they show while the offer step is on.
+      // Close up on a phone a tag would cover what it names, and the caption says the step already.
+      const wanted = narrow && mode !== 'all' ? false : !tag.lane || activeStep === 1;
       const seen = wanted && projected.z < 1 && Math.abs(projected.x) < 1 && projected.y > -1.1 && projected.y < 1.3;
       tag.el.style.opacity = seen ? '' : '0';
       if (!seen) continue;
@@ -995,46 +992,88 @@ function build(THREE, root) {
   // The camera circles a point: `side` is the angle around it, `lift` the angle down from straight above.
   const view = { target: new THREE.Vector3(0, 0.55, 0.3), side: 0.42, lift: 1.02, distance: 20 };
   const goal = { target: new THREE.Vector3(0, 0.55, 0.3), side: 0.42, lift: 1.02, distance: 20 };
-  let width = 1, height = 1, narrow = false, fitDistance = 20, wide = 1;
+  let width = 1, height = 1, narrow = false, fitDistance = 20, wide = 1, lens = 1, rideStep = -1, turned = 0;
   let mode = 'all'; // all | free | paid | a step number
-  let activeStep = -1, playing = !reduceMotion, clock = reduceMotion ? LAP * 0.3 : 0, sway = 0, dragging = false, held = 0;
+  let activeStep = -1, playing = !reduceMotion, clock = reduceMotion ? LAP * 0.395 : 0, sway = 0, dragging = false, held = 0;
+  let ratio = 0; // the pixel ratio a slow device was brought down to (0: never)
   function frameSize() {
     width = holder.clientWidth;
     height = holder.clientHeight;
     if (!width || !height) return false;
     narrow = width < 700;
-    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, narrow ? 1.5 : 1.75));
+    // a phone's stage is small, so it can be drawn at more of the screen's own sharpness
+    const sharpest = Math.min(devicePixelRatio || 1, narrow ? 2.5 : 1.75);
+    renderer.setPixelRatio(ratio ? Math.min(ratio, sharpest) : sharpest);
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
-    const half = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-    fitDistance = Math.max(14.8 / (2 * half * camera.aspect * 0.92), 6.5 / (2 * half * 0.9));
-    wide = Math.max(1, 1.25 / camera.aspect); // on an upright phone a station needs more room
+    lens = 2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+    fitDistance = Math.max(14.8 / (lens * camera.aspect * 0.92), 6.5 / (lens * 0.9));
+    wide = Math.max(1, 1.25 / camera.aspect); // on an upright stage a station needs more room
     measureTags();
     return true;
   }
+  // How far the camera stands so that `span` (across) and `rise` (up) both fit the stage.
+  const fit = (span, rise) => Math.max(span / (lens * camera.aspect), rise / lens);
+  const CLOSE_LIFT = 1.14;
   function aim() {
+    rideStep = -1;
+    turned = 0;
     if (typeof mode === 'number') {
-      const focus = stations[mode].focus;
-      goal.target.fromArray(focus.target);
-      goal.distance = focus.distance * wide;
-      goal.side = focus.side;
-      goal.lift = 1.08;
+      const { focus, close } = stations[mode];
+      if (narrow) {
+        goal.target.fromArray(close.target);
+        goal.distance = fit(close.span, close.rise);
+        goal.side = close.side;
+        goal.lift = CLOSE_LIFT;
+      } else {
+        goal.target.fromArray(focus.target);
+        goal.distance = focus.distance * wide;
+        goal.side = focus.side;
+        goal.lift = 1.08;
+      }
     } else if (mode === 'all') {
       goal.target.set(0, 0.55, 0.3);
       goal.distance = fitDistance;
       goal.side = 0.42;
-      goal.lift = narrow ? 0.9 : 1.02;
-    } else {
+      goal.lift = narrow ? 0.74 : 1.02;
+    } else if (!narrow) {
       goal.distance = 8.4 * wide;
       goal.lift = 1.06;
       goal.side = 0.36;
     }
   }
+  // On a phone the camera rides close beside the followed card, so the screens can be read:
+  // it stays with the card on the way, and turns to the station as the card arrives.
+  function rideClose(followed) {
+    const { close } = stations[followed.step];
+    const at = followed.position;
+    if (followed.step !== rideStep) {
+      rideStep = followed.step;
+      turned = 0;
+      goal.side = close.side;
+      goal.lift = CLOSE_LIFT;
+    }
+    if (followed.step === 1) {
+      // First the board of this card's own offer. When the card leaves the fork, the place its lane
+      // leads to: the brokers' sign (Free) or the QR code (Paid). The card then arrives in that view.
+      // Each is watched from the side where the QR stand, in the middle of the plate, is not in the way.
+      const free = followed.name === 'free', stop = followed.lane.stop;
+      const board = 1 - Math.min(1, Math.max(0, (at.x - FORK.x) / 0.7));
+      goal.target.set(mix(stop.x, at.x + (free ? -0.86 : 0.94), board), close.target[1], mix(stop.z - (free ? 0.85 : 0.6), at.z - 0.6, board));
+      goal.side = (free ? 0.42 : mix(0.14, -0.4, board)) + turned;
+      goal.distance = fit(2.6, close.rise);
+      return;
+    }
+    const pull = Math.min(1, Math.max(0.15, (at.distanceTo(close.stop) - 0.4) / 1.6));
+    goal.target.set(mix(close.target[0], at.x, pull), close.target[1], mix(close.target[2], at.z - 0.6, pull));
+    goal.distance = fit(close.span, close.rise);
+  }
   function placeCamera(dt) {
     if (mode === 'free' || mode === 'paid') {
       const followed = travellers.find((traveller) => traveller.name === mode);
-      goal.target.set(followed.position.x, 0.8, followed.position.z * 0.55 + 0.35);
+      if (narrow) rideClose(followed);
+      else goal.target.set(followed.position.x, 0.8, followed.position.z * 0.55 + 0.35);
     }
     const speed = dt < 0 ? 1 : 1 - Math.exp(-dt * 3.2);
     view.target.lerp(goal.target, speed);
@@ -1051,8 +1090,18 @@ function build(THREE, root) {
 
   /* ------------------------------------------------------------ what the page shows */
   const STEP_TITLES = ['Log in on the website', 'Choose one offer', 'Verify in Telegram and get your bot file', 'Set up MT5 and the bot'];
+  // One plain line under the title: what happens here. At step 2 the Free and the Paid journey differ.
+  const STEP_NOTES = [
+    { all: 'Create your account, or log in.' },
+    { all: 'Free with our broker link, or Paid by KHQR.', free: 'Free: open a broker account with our link.', paid: 'Paid: pay by KHQR, then send your receipt.' },
+    { all: 'The bot checks you, then sends your bot file.' },
+    { all: 'Put the file into MT5 and start the bot.' },
+  ];
+  let captionKey = '';
   function showStep(step) {
-    if (step === activeStep) return;
+    const lane = mode === 'free' || mode === 'paid' ? mode : 'all';
+    if (captionKey === step + lane) return;
+    captionKey = step + lane;
     activeStep = step;
     cards.forEach((card, i) => card.classList.toggle('is-on', i === step));
     if (step < 0) {
@@ -1064,7 +1113,9 @@ function build(THREE, root) {
     caption.textContent = '';
     const number = document.createElement('b');
     number.textContent = `Step ${step + 1} of 4`;
-    caption.append(number, STEP_TITLES[step]);
+    const note = document.createElement('small');
+    note.textContent = STEP_NOTES[step][lane] || STEP_NOTES[step].all;
+    caption.append(number, STEP_TITLES[step], note);
     measureTags();
   }
   function setMode(next) {
@@ -1125,6 +1176,7 @@ function build(THREE, root) {
     if (dragging) {
       if (Math.hypot(event.clientX - downX, event.clientY - downY) > 6) moved = true;
       goal.side -= (event.clientX - lastX) * 0.006;
+      turned -= (event.clientX - lastX) * 0.006;
       goal.lift = Math.min(1.36, Math.max(0.5, goal.lift - (event.clientY - lastY) * 0.004));
       lastX = event.clientX;
       lastY = event.clientY;
@@ -1148,7 +1200,7 @@ function build(THREE, root) {
   canvas.addEventListener('pointercancel', release);
 
   /* ------------------------------------------------------------ run */
-  let seen = true, lost = false, last = performance.now(), chartAt = 0, frames = 0, measured = 0, ratio = 0;
+  let seen = true, lost = false, last = performance.now(), chartAt = 0, frames = 0, measured = 0;
   new IntersectionObserver((entries) => {
     seen = entries[0].isIntersecting;
     last = performance.now();
@@ -1198,9 +1250,10 @@ function build(THREE, root) {
     frames++;
     measured += dt;
     if (measured > 4) {
-      ratio = ratio || renderer.getPixelRatio();
-      if (frames / measured < 40 && ratio > 1) {
-        ratio = Math.max(1, ratio - 0.25);
+      const least = narrow ? 1.5 : 1; // under this the screens of the machine could not be read on a phone
+      const current = renderer.getPixelRatio();
+      if (frames / measured < 40 && current > least) {
+        ratio = Math.max(least, current - 0.25);
         renderer.setPixelRatio(ratio);
         renderer.setSize(width, height, false);
       }
@@ -1210,7 +1263,7 @@ function build(THREE, root) {
   }
 
   frameSize();
-  setMode('all');
+  setMode(narrow ? 'free' : 'all'); // a phone starts close, riding with the Free card; "Path" shows the whole machine
   setPlaying(playing);
   view.target.copy(goal.target);
   view.side = goal.side;
@@ -1229,6 +1282,10 @@ function build(THREE, root) {
     pause: () => setPlaying(false),
     seek: (seconds) => {
       clock = seconds;
+    },
+    settle: () => {
+      for (const traveller of travellers) move(traveller, clock);
+      placeCamera(-1);
     },
     state: () => ({ mode, playing, clock, activeStep, width, height, calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, travellers: travellers.map((traveller) => ({ lane: traveller.name, step: traveller.step, face: traveller.shown, phase: Number(traveller.phase.toFixed(3)) })) }),
   };
