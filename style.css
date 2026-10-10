@@ -503,7 +503,7 @@ a {
 .hero {
   position: relative;
   overflow-x: clip;
-  padding: 8px 0 clamp(72px, 10vw, 128px);
+  padding: 8px 0 clamp(24px, 3vw, 40px);
 }
 .hero::before,
 .page-hero::before {
@@ -940,12 +940,12 @@ a {
    Sections
    ========================================================================== */
 .section {
-  padding: clamp(72px, 10vw, 120px) 0;
+  padding: clamp(40px, 5vw, 64px) 0;
 }
 
 .section-head {
   max-width: 720px;
-  margin: 0 auto clamp(40px, 6vw, 64px);
+  margin: 0 auto clamp(32px, 4vw, 48px);
   text-align: center;
 }
 
@@ -1772,7 +1772,7 @@ a {
    Final CTA
    ========================================================================== */
 .section--cta {
-  padding-top: clamp(40px, 6vw, 80px);
+  padding-top: clamp(24px, 3vw, 40px);
 }
 .cta-panel {
   position: relative;

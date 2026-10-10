@@ -1365,12 +1365,44 @@ a.trial-banner:hover {
 .auth-switch[data-pos="1"] .auth-switch-glide {
   transform: translateX(100%);
 }
+/* While the page changes, the lit box is drawn on its own, above the page. The two words get
+   their own layers too, above the box: without them the box covers the word it stands on and
+   the word it slides onto, and for a moment the switch shows no word there. */
+.auth-switch a:nth-of-type(1) {
+  view-transition-name: auth-switch-login;
+}
+.auth-switch a:nth-of-type(2) {
+  view-transition-name: auth-switch-signup;
+}
 @view-transition {
   navigation: auto;
 }
 ::view-transition-group(auth-switch-glide) {
   animation-duration: 0.35s;
   animation-timing-function: cubic-bezier(0.3, 1.2, 0.45, 1);
+}
+
+/* The box stands in the same place on the log in page and on the sign up page, at every width:
+   both pages use the same layout. Up to 900px it is one column, no wider than a form should be;
+   from 900px the box is the left column and the trial panel the right one (set further up).
+   On the log in page the panel beside the box invites to sign up. On a phone the banner inside
+   the box does that already, so there the panel is left out. */
+.auth-layout--split {
+  max-width: 560px;
+}
+.auth-layout--login .trial-panel {
+  display: none;
+}
+@media (min-width: 900px) {
+  .auth-layout--split {
+    max-width: 980px;
+  }
+  .auth-layout--login .trial-panel {
+    display: grid;
+  }
+  .auth-layout--login .auth-card > a.trial-banner {
+    display: none;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   @view-transition {

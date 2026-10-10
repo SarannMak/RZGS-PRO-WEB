@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
   <link rel="stylesheet" href="style.css?v=11">
-  <link rel="stylesheet" href="auth.css?v=13">
+  <link rel="stylesheet" href="auth.css?v=14">
 
   <script>document.documentElement.classList.add('js');</script>
   <script src="script.js?v=8" defer></script>
@@ -112,7 +112,9 @@
 
     <section class="auth-section" id="top" aria-labelledby="page-title">
       <div class="container">
-        <div class="card auth-card auth-card--narrow">
+        <!-- the same two columns as the sign up page: the box, and so its switch, stands in the same place on both -->
+        <div class="auth-layout auth-layout--split auth-layout--login">
+        <div class="card auth-card">
           <!-- switch between the log in box and the sign up box (each one is its own page) -->
           <nav class="auth-switch" data-pos="0" aria-label="Log in or sign up">
             <i class="auth-switch-glide" aria-hidden="true"></i>
@@ -159,6 +161,20 @@
           </a>
 
           <p class="auth-note">This login is for your website account (email and password) and opens your dashboard. The bot control app has its own login: your MT5 account number and the App Password you typed in the bot. <a class="auth-link" href="app">Open the control app</a></p>
+        </div>
+          <!-- beside the box on wide screens (on a phone the banner inside the box says the same) -->
+          <aside class="trial-panel" aria-label="Free trial">
+            <div class="trial-banner">
+              <span class="trial-banner-icon"><svg class="icon" aria-hidden="true"><use href="#i-gift"/></svg></span>
+              <span class="trial-banner-text"><strong>Free <span class="nowrap">7-day</span> Pro trial</strong><small>No payment needed to start.</small></span>
+            </div>
+            <ul class="check-list">
+              <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>7-day EA license after approval</li>
+              <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>1 MT5 trading account</li>
+              <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Setup help on Telegram</li>
+            </ul>
+            <a class="btn btn-ghost btn-block" href="signup">New here? Create your free account</a>
+          </aside>
         </div>
       </div>
     </section>
