@@ -19,10 +19,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="style.css?v=19">
+  <link rel="stylesheet" href="style.css?v=22">
 
   <script>document.documentElement.classList.add('js');</script>
   <script src="script.js?v=8" defer></script>
+  <script type="module" src="robot-3d.js?v=4"></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -127,10 +128,7 @@
         </div>
         <div class="page-hero-art">
           <div class="hero-screen" aria-hidden="true"><i></i><i></i><i></i></div>
-          <picture>
-            <source type="image/webp" srcset="assets/robot-560.webp 560w, assets/robot-880.webp 880w" sizes="(min-width: 960px) 400px, 300px">
-            <img src="assets/robot-560.webp" alt="The RZGS-PRO robot mascot holding a tablet with a chart" width="560" height="840" fetchpriority="high">
-          </picture>
+          <div class="robot-3d" data-robot-3d role="img" aria-label="The RZGS-PRO robot mascot holding a tablet with a chart"></div>
         </div>
       </div>
     </section>

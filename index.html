@@ -19,10 +19,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="style.css?v=19">
+  <link rel="stylesheet" href="style.css?v=22">
 
   <script>document.documentElement.classList.add('js');</script>
   <script src="script.js?v=8" defer></script>
+  <script type="module" src="robot-3d.js?v=4"></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -133,10 +134,7 @@
 
         <div class="hero-visual">
           <div class="hero-screen" aria-hidden="true"><i></i><i></i><i></i></div>
-          <picture>
-            <source type="image/webp" srcset="assets/robot-560.webp 560w, assets/robot-880.webp 880w" sizes="(min-width: 960px) 460px, 320px">
-            <img class="hero-robot" src="assets/robot-560.webp" alt="The RZGS-PRO robot mascot checking a gold chart on its tablet" width="1024" height="1536" fetchpriority="high">
-          </picture>
+          <div class="robot-3d" data-robot-3d role="img" aria-label="The RZGS-PRO robot mascot checking a gold chart on its tablet"></div>
 
           <div class="float-card float-signal" aria-hidden="true">
             <div class="float-row">
@@ -155,12 +153,31 @@
             </svg>
           </div>
 
-          <div class="float-card float-status" aria-hidden="true">
+          <div class="float-card float-status" data-robot-says aria-hidden="true">
             <span class="status-icon"><svg class="icon" aria-hidden="true"><use href="#i-sparkles"/></svg></span>
             <span>
               <span class="float-label">Bot</span>
-              <span class="float-value">Running<span class="dots"><i></i><i></i><i></i></span></span>
+              <span class="float-value" data-robot-rest>Running<span class="dots"><i></i><i></i><i></i></span></span>
+              <span class="float-value float-reply" data-robot-reply hidden></span>
             </span>
+            <!-- What the robot says when its head is clicked: one of these lines, picked at random,
+                 shown here for a few seconds. Add, change or remove lines; keep each one short. -->
+            <ul data-robot-lines hidden>
+              <li>I open a buy and a sell on gold at the same time.</li>
+              <li>I take profit on the side that wins.</li>
+              <li>I manage the other side with a grid and a basket close.</li>
+              <li>Each of my trades has its own take profit.</li>
+              <li>I work day and night while MetaTrader 5 is online.</li>
+              <li>One tap starts me. One more tap pauses me.</li>
+              <li>You can watch my trades on your phone.</li>
+              <li>Try me free for 7 days.</li>
+              <li>Elite is $5 a month. Diamond is $49 a month.</li>
+              <li>With Diamond you keep your own broker.</li>
+              <li>One plan covers one MT5 account.</li>
+              <li>I need an MT5 hedging account that can trade gold.</li>
+              <li>Our Telegram bot sets me up with you, step by step.</li>
+              <li>Trading has risk. Only use money you can afford to lose.</li>
+            </ul>
           </div>
         </div>
       </div>

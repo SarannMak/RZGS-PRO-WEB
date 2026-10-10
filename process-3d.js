@@ -14,12 +14,11 @@
 
    Used by how-to-buy.html: it looks for [data-path3d]. Everything is drawn in
    code (three.js, loaded from a CDN only when the section comes near the
-   screen): no models, and one picture, the robot. Without WebGL, or before
-   the scene is ready, the page simply shows its four step cards.
+   screen): no models and no pictures. Without WebGL, or before the scene is
+   ready, the page simply shows its four step cards.
    ========================================================================== */
 
 const THREE_URL = 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js';
-const ROBOT_PICTURE = 'assets/robot-560.webp';
 
 const root = document.querySelector('[data-path3d]');
 if (root) {
@@ -701,17 +700,27 @@ function build(THREE, root) {
     mt5.chart = { screen: chartScreen };
     mt5.power = lamp(mt5, lightBar(mt5.group, MAT.lime, 0.3, 0.035, 0.03, -0.95, 0.95, 0.83), 0.6);
     glow(mt5.group, HEX.lime, 3.6, 0.1, 0.35, 0.3);
-    // The robot stands beside the screen: the bot, at work. One picture, always turned to the viewer.
-    const robot = new THREE.Mesh(new THREE.PlaneGeometry(0.92, 1.38), new THREE.MeshBasicMaterial({ transparent: true, toneMapped: false, alphaTest: 0.04, opacity: 0 }));
-    robot.position.set(1.02, 0.81, 0.98);
+    // The robot stands beside the screen: the bot, at work. A small figure of blocks, like the rest
+    // of the machine: headphones, two lit eyes, a lime V on the chest.
+    const robot = new THREE.Group();
+    robot.position.set(1.05, 0.12, 0.95);
     mt5.group.add(robot);
     mt5.robot = robot;
-    new THREE.TextureLoader().load(ROBOT_PICTURE, (texture) => {
-      texture.colorSpace = THREE.SRGBColorSpace;
-      robot.material.map = texture;
-      robot.material.opacity = 1;
-      robot.material.needsUpdate = true;
-    });
+    const r = batch(robot);
+    for (const x of [-0.12, 0.12]) r.box(0.17, 0.4, 0.2, x, 0, 0, { mat: MAT.dark, cut: 0.04 }); // legs
+    r.box(0.5, 0.2, 0.28, 0, 0.38, 0, { cut: 0.06 }); // hips
+    r.box(0.6, 0.36, 0.32, 0, 0.56, 0, { mat: MAT.hi, cut: 0.08 }); // chest
+    for (const x of [-0.38, 0.38]) {
+      r.box(0.2, 0.2, 0.24, x, 0.74, 0, { cut: 0.05, edge: LINE.lime }); // shoulders
+      r.box(0.14, 0.4, 0.16, x, 0.36, 0.02, { mat: MAT.dark, cut: 0.03 }); // arms
+    }
+    r.box(0.16, 0.08, 0.16, 0, 0.92, 0, { mat: MAT.dark, cut: 0.03, edge: LINE.dim }); // neck
+    r.box(0.42, 0.4, 0.38, 0, 0.99, 0, { mat: MAT.dark, cut: 0.1 }); // head
+    for (const x of [-0.25, 0.25]) r.box(0.09, 0.24, 0.24, x, 1.06, 0, { mat: MAT.hi, cut: 0.03, edge: LINE.lime }); // headphones
+    r.box(0.56, 0.05, 0.1, 0, 1.39, 0, { mat: MAT.hi, cut: 0.02, edge: LINE.lime }); // their band
+    r.done();
+    for (const x of [-0.09, 0.09]) lightBar(robot, MAT.cyan, 0.1, 0.04, 0.02, x, 1.19, 0.185); // eyes
+    for (const turn of [-0.5, 0.5]) lightBar(robot, MAT.lime, 0.2, 0.03, 0.02, turn * 0.17, 0.69, 0.165).rotation.z = -turn; // the V on the chest
   }
 
   /* ------------------------------------------------------------ the two cards */
@@ -927,8 +936,8 @@ function build(THREE, root) {
     telegram.badge.rotation.y = camera.userData.side || 0;
     telegram.badge.position.y = 2.72 + Math.sin(time * 1.6) * 0.04;
     mt5.power.level = any(T.ride, T.run) ? 1 : 0.15;
-    mt5.robot.rotation.y = (camera.userData.side || 0) - mt5.group.rotation.y;
-    mt5.robot.position.y = 0.81 + Math.sin(time * 1.3) * 0.03;
+    mt5.robot.rotation.y = -0.3 + Math.sin(time * 0.7) * 0.22; // it looks from the chart to the visitor and back
+    mt5.robot.position.y = 0.12 + Math.abs(Math.sin(time * 1.3)) * 0.02;
     for (const entry of stations) for (const light of entry.lamps) light.material.emissiveIntensity += (light.rest + light.level * 2.4 - light.material.emissiveIntensity) * Math.min(1, dt * 8);
   }
 
