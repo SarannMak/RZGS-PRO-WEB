@@ -503,7 +503,7 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
           <div class="basket"><span class="cap" style="color:var(--sell)">Sell side</span><span class="num" id="bkSellPL">+0.00$</span>
             <span class="cap bk-meta" id="bkSellInfo"><span>0 trades</span><span>0.00 lots</span></span><div class="bar"><i id="bkSellBar"></i></div></div>
         </div>
-        <p class="hint">A side with 2 or more trades closes together when its total reaches +0.10$. The bar shows how close it is.</p>
+        <p class="hint">A side with 2 or more trades closes together when its total reaches <span id="bkTargetTxt">+0.10$</span>. The bar shows how close it is.</p>
       </section>
       <section class="panel">
         <h2 id="posTitle">Open positions</h2>
@@ -723,6 +723,17 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
     </div>
   </div>
 </div>
+<div id="pwConfirm" hidden style="position:fixed;inset:0;background:rgba(1,6,10,.84);display:flex;align-items:center;justify-content:center;z-index:45;padding:16px">
+  <div class="frame quit-card" role="dialog" aria-modal="true" aria-labelledby="pwConfirmTitle"><i class="br"></i>
+    <span class="cap warn">MT5 Must Be Open</span>
+    <h3 id="pwConfirmTitle">Change App Password now?</h3>
+    <p>Make sure you have MetaTrader 5 open. Right after changing it here, you must open the bot inputs in MT5 and type the same new password into <b style="color:var(--title)">App Password</b>, or the bot link will go offline.</p>
+    <div class="row">
+      <button class="btn" type="button" id="pwCancel">Cancel</button>
+      <button class="btn primary" type="button" id="pwProceed">Yes, change it</button>
+    </div>
+  </div>
+</div>
 <script>
 (() => {
 'use strict';
@@ -746,9 +757,20 @@ const store = {
   set(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
 };
 async function rpc(fn, args) {
-  const r = await fetch(SERVER + fn, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: APIKEY }, body: JSON.stringify(args) });
-  if (!r.ok) throw new Error('HTTP ' + r.status);
-  return r.json();
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 8000);
+  try {
+    const r = await fetch(SERVER + fn, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: APIKEY },
+      body: JSON.stringify(args),
+      signal: ctrl.signal
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return await r.json();
+  } finally {
+    clearTimeout(t);
+  }
 }
 
 /* ---------- data from the server ---------- */
@@ -1176,6 +1198,7 @@ function render() {
     renderLadder(s, $('ladder'));
     basketBox('buy', s.buy, s.basketTarget, $('bkBuyPL'), $('bkBuyInfo'), $('bkBuyBar'));
     basketBox('sell', s.sell, s.basketTarget, $('bkSellPL'), $('bkSellInfo'), $('bkSellBar'));
+    $('bkTargetTxt').textContent = money(s.basketTarget);
     $('posTitle').textContent = 'Open positions (' + s.positions.length + ')';
     $('posList').innerHTML = s.positions.length ? s.positions.map(p =>
       '<div class="pos"><span class="tag ' + p.side + '">' + p.side.toUpperCase() + ' ' + esc(p.tag) + '</span>' +
@@ -1317,20 +1340,47 @@ for (const [id, k] of [['alTp', 'tp'], ['alBasket', 'basket'], ['alCool', 'cool'
   $(id).checked = show[k];
   $(id).addEventListener('change', () => { show[k] = $(id).checked; store.set('rz_show', JSON.stringify(show)); });
 }
+function closePwConfirm() { $('pwConfirm').hidden = true; }
 $('pwForm').addEventListener('submit', async e => {
   e.preventDefault();
   const msg = $('pwMsg'), oldP = $('pwOld').value, newP = $('pwNew').value;
-  msg.className = 'err';
+  msg.className = 'err'; msg.style.color = '';
+  if (!oldP) { msg.textContent = 'Type your current password.'; return; }
   if (newP.length < 8) { msg.textContent = 'The new password needs 8 or more characters.'; return; }
+  if (newP === oldP) { msg.textContent = 'The new password must be different from the current one.'; return; }
   try {
     const r = await rpc('app_change_password', { p_token: token, p_old: oldP, p_new: newP });
     if (r.ok) {
       msg.className = 'hint'; msg.style.color = 'var(--good)';
-      msg.textContent = 'Password changed. Now type the new password in the bot inputs in MT5 (App Password).';
+      msg.textContent = 'Password changed. All other devices have been logged out.';
       $('pwOld').value = ''; $('pwNew').value = '';
     } else msg.textContent = r.err === 'password' ? 'The current password is wrong.' : r.err === 'short' ? 'The new password needs 8 or more characters.'
                            : r.err === 'session' ? 'Log in again.' : 'Could not change the password.';
   } catch (x) { msg.textContent = 'No connection to the server.'; }
+});
+$('pwCancel').addEventListener('click', closePwConfirm);
+$('pwConfirm').addEventListener('click', e => { if (e.target === $('pwConfirm')) closePwConfirm(); });
+$('pwProceed').addEventListener('click', async () => {
+  const msg = $('pwMsg'), oldP = $('pwOld').value, newP = $('pwNew').value, btn = $('pwProceed');
+  btn.disabled = true; btn.textContent = 'Saving...';
+  try {
+    const r = await rpc('app_change_password', { p_token: token, p_old: oldP, p_new: newP });
+    closePwConfirm();
+    if (r.ok) {
+      msg.className = 'hint'; msg.style.color = 'var(--good)';
+      msg.textContent = 'Password changed. Now type the new password in the bot inputs in MT5 (App Password).';
+      $('pwOld').value = ''; $('pwNew').value = '';
+    } else {
+      msg.textContent = r.err === 'password' ? 'The current password is wrong.'
+                      : r.err === 'short'    ? 'The new password needs 8 or more characters.'
+                      : r.err === 'session'  ? 'Log in again.'
+                      : 'Could not change the password.';
+    }
+  } catch (x) {
+    closePwConfirm();
+    msg.textContent = 'No connection to the server.';
+  }
+  btn.disabled = false; btn.textContent = 'Yes, change it';
 });
 document.addEventListener('visibilitychange', () => { if (!document.hidden) poll(); });
 
