@@ -19,13 +19,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="style.css?v=25">
+  <link rel="stylesheet" href="style.css?v=26">
 
   <script>document.documentElement.classList.add('js');</script>
   <script src="script.js?v=8" defer></script>
   <!-- the 3D library the robot needs: asked for at once, so the robot can come up sooner -->
   <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js">
-  <script src="robot-3d.js?v=7" defer></script>
+  <script src="robot-3d.js?v=8" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -142,15 +142,17 @@
               <span class="ticker">XAU<span>USD</span></span>
               <span class="trend-up"><svg class="icon" aria-hidden="true"><use href="#i-trending-up"/></svg>Buy + Sell</span>
             </div>
-            <svg class="sparkline" viewBox="0 0 120 32" preserveAspectRatio="none">
+            <!-- robot-3d.js makes this graph run like a live price (slow, fast, slow ...); as written here it is the still picture -->
+            <svg class="sparkline" data-spark viewBox="0 0 120 32" preserveAspectRatio="none">
               <defs>
                 <linearGradient id="spark-fill" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0" stop-color="#82ff00" stop-opacity=".35"/>
                   <stop offset="1" stop-color="#82ff00" stop-opacity="0"/>
                 </linearGradient>
               </defs>
-              <path d="M0 24 L12 22 L22 26 L34 20 L46 21 L58 15 L70 17 L82 11 L94 12 L106 6 L120 4 L120 32 L0 32 Z" fill="url(#spark-fill)"/>
-              <path class="spark-line" d="M0 24 L12 22 L22 26 L34 20 L46 21 L58 15 L70 17 L82 11 L94 12 L106 6 L120 4" pathLength="1"/>
+              <path data-spark-area d="M0 24 L12 22 L22 26 L34 20 L46 21 L58 15 L70 17 L82 11 L94 12 L106 6 L120 4 L120 32 L0 32 Z" fill="url(#spark-fill)"/>
+              <path class="spark-line" data-spark-line d="M0 24 L12 22 L22 26 L34 20 L46 21 L58 15 L70 17 L82 11 L94 12 L106 6 L120 4" pathLength="1"/>
+              <path class="spark-dot" data-spark-dot d="M117 4h0.01"/>
             </svg>
           </div>
 
@@ -503,7 +505,7 @@
             </a>
           </li>
           <li>
-            <a class="partner-card" href="https://client.lirunextrd.com/partner/signup?partnerId=372166" target="_blank" rel="noopener sponsored">
+            <a class="partner-card" href="https://client.lirunextrd.com/auth/signup?partnerId=372166&amp;affiliateId=76983" target="_blank" rel="noopener sponsored">
               <span class="partner-mark" aria-hidden="true">LX</span>
               <span class="partner-text"><strong>Lirunex</strong><small>Partner broker &middot; open account</small></span>
               <svg class="icon" aria-hidden="true"><use href="#i-arrow-up-right"/></svg>

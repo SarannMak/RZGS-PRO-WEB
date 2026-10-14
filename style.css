@@ -742,6 +742,25 @@ a {
   stroke-dashoffset: 1;
   animation: draw 1.6s var(--ease-out) 0.4s forwards;
 }
+/* When robot-3d.js runs the graph like a live price, the line is whole from the start (it is not
+   drawn in), and a dot marks the newest price at its right end. */
+.sparkline.is-live .spark-line {
+  stroke-dasharray: none;
+  stroke-dashoffset: 0;
+  animation: none;
+}
+.spark-dot {
+  display: none;
+  fill: none;
+  stroke: #eafff4;
+  stroke-width: 5;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 0 3px var(--good));
+}
+.sparkline.is-live .spark-dot {
+  display: inline;
+}
 .status-icon {
   display: grid;
   place-items: center;

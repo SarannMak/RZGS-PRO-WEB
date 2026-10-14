@@ -15,6 +15,9 @@
    head looks around slowly by itself. With "reduce motion" the robot stands
    still.
 
+   The other card beside the robot holds a small graph (svg[data-spark]): it
+   runs like a live price, slowly for a while, then fast, then slowly again.
+
    A click on its head: it nods, and the card beside it ([data-robot-says])
    types one line about RZGS-PRO, letter by letter. The lines are written in
    the page, inside that card. One click, one line: while a line is being
@@ -57,6 +60,108 @@ if (boxes.length) {
       console.warn('robot-3d: the 3D library did not load', error);
     }
   })();
+}
+
+/* ---------------------------------------------------------------- the small graph in the XAUUSD card */
+// The line runs from right to left like a live price, the newest price at its right end. It goes
+// slowly for a spell, then fast, then slowly again; how long a spell lasts, how fast it is and
+// how far the price jumps are left to chance. It needs nothing of the 3D scene. With "reduce
+// motion" the graph stays as the page drew it.
+for (const svg of document.querySelectorAll('svg[data-spark]')) liveGraph(svg);
+
+function liveGraph(svg) {
+  const line = svg.querySelector('[data-spark-line]'), area = svg.querySelector('[data-spark-area]'), dot = svg.querySelector('[data-spark-dot]');
+  if (!line || !area || !dot || still) return;
+  // The drawing is 120 wide and 32 high. The line ends a little before the right edge, where the
+  // dot has room. STEPS: how many steps of the price fit across.
+  const WIDE = 117, TALL = 32, TOP = 5, LOW = 27, STEPS = 14;
+  const clamp = (x, low, high) => Math.min(high, Math.max(low, x));
+  const mix = (a, b, x) => a + (b - a) * x;
+  // The price at every step: prices[i] is the price at step `first + i` (0 = lowest, 1 = highest).
+  // The first steps climb, like the still picture; after that the price walks by chance, and is
+  // drawn back toward the middle so it never leaves the card.
+  const prices = [];
+  let first = 0, price = 0.24, fast = false;
+  for (let i = 0; i <= STEPS + 1; i++) prices.push((price = clamp(0.24 + (i / STEPS) * 0.5 + (Math.random() - 0.5) * 0.1, 0.06, 0.94)));
+  let lean = 0, walked = 0;
+  function walk() {
+    if (walked++ % 5 === 0) lean = (Math.random() - 0.5) * 0.12; // every five steps it leans a new way, so hills and valleys form
+    price += (Math.random() - 0.5) * 2 * (fast ? 0.28 : 0.15) + lean + (0.5 - price) * 0.1;
+    if (price > 0.94) price = 1.88 - price; // it bounces off the top and the bottom
+    if (price < 0.06) price = 0.12 - price;
+    price = clamp(price, 0.06, 0.94);
+    return price;
+  }
+  const at = (step) => prices[step - first];
+  // The picture is fitted to the prices on show, as a real chart is: the lowest of them sits near
+  // the bottom, the highest near the top. The fit follows gently, so the line does not jump.
+  let floor = 0.2, ceiling = 0.8;
+  const high = (value) => mix(LOW, TOP, clamp((value - floor) / (ceiling - floor), -0.08, 1.08));
+
+  // `now` is the step at the right end. `pace` is how many steps go by in a second; it eases
+  // toward `aim`, which jumps between slow and fast every time a spell is over.
+  let now = STEPS, pace = 0.7, aim = 0.7, spell = 1.4;
+  function draw(dt) {
+    spell -= dt;
+    if (spell <= 0) {
+      fast = !fast;
+      spell = fast ? 0.7 + Math.random() * 1.3 : 1.4 + Math.random() * 2.2;
+      aim = fast ? 4.5 + Math.random() * 3.5 : 0.4 + Math.random() * 0.6;
+    }
+    pace += (aim - pace) * (1 - Math.exp(-dt * 5));
+    now += pace * dt;
+    while (first + prices.length <= Math.floor(now) + 1) prices.push(walk());
+    while (first < Math.floor(now - STEPS) - 1) {
+      prices.shift();
+      first++;
+    }
+    const left = now - STEPS, start = Math.floor(left), end = Math.floor(now);
+    let lowest = 1, highest = 0;
+    for (let step = start; step <= end + 1; step++) {
+      lowest = Math.min(lowest, at(step));
+      highest = Math.max(highest, at(step));
+    }
+    const room = Math.max(0, 0.3 - (highest - lowest)) / 2; // a flat stretch is not blown up to fill the card
+    const follow = dt ? 1 - Math.exp(-dt * 3) : 1;
+    floor += (lowest - room - floor) * follow;
+    ceiling += (highest + room - ceiling) * follow;
+    let path = '';
+    for (let step = start; step <= end; step++) path += `${path ? ' L' : 'M'}${(((step - left) / STEPS) * WIDE).toFixed(1)} ${high(at(step)).toFixed(1)}`;
+    const head = high(mix(at(end), at(end + 1), now - end)).toFixed(1);
+    path += ` L${WIDE} ${head}`;
+    line.setAttribute('d', path);
+    area.setAttribute('d', `${path} L${WIDE} ${TALL} L${(((start - left) / STEPS) * WIDE).toFixed(1)} ${TALL} Z`);
+    dot.setAttribute('d', `M${WIDE} ${head}h0.01`);
+  }
+
+  // It runs only while it can be seen.
+  let running = false, onScreen = true, last = 0;
+  function frame(time) {
+    if (!running) return;
+    requestAnimationFrame(frame);
+    draw(Math.min(0.05, Math.max(0, (time - last) / 1000)));
+    last = time;
+  }
+  function run() {
+    const should = onScreen && !document.hidden;
+    if (should === running) return;
+    running = should;
+    if (running) {
+      last = performance.now();
+      requestAnimationFrame(frame);
+    }
+  }
+  svg.classList.add('is-live');
+  draw(0);
+  new IntersectionObserver((entries) => {
+    onScreen = entries[0].isIntersecting;
+    run();
+  }).observe(svg);
+  document.addEventListener('visibilitychange', run);
+  run();
+
+  // For checks from the browser console and automated tests; not used by the page.
+  (window.__spark = window.__spark || []).push({ step: (seconds) => draw(seconds), state: () => ({ now, pace, aim, fast, spell, path: line.getAttribute('d') }) });
 }
 
 // One pointer for all robots on the page. A mouse is looked at for as long as it is on the page,
