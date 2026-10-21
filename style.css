@@ -3836,3 +3836,894 @@ body:has(.tg-float) .site-footer {
     animation: none;
   }
 }
+
+/* ==========================================================================
+   Features in 3D (21 Oct 2026): the scenes of the video "How RZGS-PRO works",
+   drawn live by features-3d.js. A row holds the copy and a stage (.fx-stage):
+   the 3D canvas, and a 2D canvas over it for the labels. Rows take turns:
+   copy left, then copy right.
+   ========================================================================== */
+.fx {
+  display: grid;
+  gap: clamp(40px, 7vw, 84px);
+}
+.fx-row {
+  display: grid;
+  gap: 20px;
+  align-items: center;
+}
+.fx-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+.fx-kicker {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0;
+  color: var(--text-subtle);
+  font: 700 15px/1 var(--font-mono);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.fx-kicker span {
+  padding-right: 12px;
+  border-right: 2px solid var(--neon);
+  color: var(--cyan);
+  font: 800 30px/1 var(--font-display);
+  letter-spacing: 0;
+  text-shadow: 0 0 16px rgba(25, 211, 255, 0.35);
+}
+.fx-title {
+  margin: 0;
+  font: 700 clamp(22px, 2.6vw, 30px)/1.2 var(--font-display);
+  letter-spacing: 0.01em;
+}
+.fx-stage {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-image: var(--hud-frame) 24 fill / 24px;
+  clip-path: var(--cut-14);
+  background: radial-gradient(80% 70% at 50% 40%, rgba(25, 211, 255, 0.08), transparent 70%);
+}
+.fx-stage canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.fx-ov {
+  pointer-events: none;
+}
+/* the stage fades in once its scene is drawn */
+.js .fx-stage canvas {
+  opacity: 0;
+  transition: opacity 0.6s var(--ease-out);
+}
+.js .fx-stage.is-live canvas {
+  opacity: 1;
+}
+.fx-flag {
+  position: absolute;
+  right: 14px;
+  bottom: 12px;
+  z-index: 2;
+  padding: 5px 10px;
+  border: 1px solid rgba(255, 210, 63, 0.7);
+  background: rgba(255, 210, 63, 0.12);
+  color: var(--warn);
+  font: 700 10px/1 var(--font-mono);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+/* 01: the four steps, the one of the moment lit (features-3d.js sets .is-on) */
+.fx-steps {
+  position: relative;
+  display: grid;
+  gap: 16px;
+  margin: 8px 0 0;
+  padding: 0 0 0 22px;
+  list-style: none;
+}
+.fx-steps::before {
+  content: "";
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 5px;
+  width: 2px;
+  background: rgba(127, 163, 179, 0.25);
+}
+.fx-steps li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  transition: opacity 0.35s var(--ease-out);
+}
+.fx-steps li::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: -22px;
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(127, 163, 179, 0.5);
+  border-radius: 50%;
+  background: var(--bg);
+}
+.fx-steps li.is-on::before {
+  border-color: var(--neon);
+  background: var(--neon);
+  box-shadow: 0 0 12px var(--neon);
+}
+/* only while the chart runs are the other steps dimmed */
+.fx-row:has(.fx-stage.is-live) .fx-steps li:not(.is-on) {
+  opacity: 0.42;
+}
+.fx-steps b {
+  color: var(--text-subtle);
+  font: 800 28px/1 var(--font-display);
+}
+.fx-steps li.is-on b {
+  background: var(--grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+.fx-steps span {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--cyan);
+  font: 500 13px/1.5 var(--font-mono);
+}
+.fx-steps strong {
+  color: var(--text);
+  font: 700 15px/1.3 var(--font-display);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* 02: the tab of the moment, big */
+.fx-tabcount {
+  margin: 8px 0 0;
+  color: var(--text-subtle);
+  font: 600 11px/1 var(--font-mono);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+.fx-tabname {
+  margin: 0;
+  font: 800 clamp(44px, 6vw, 72px)/1.05 var(--font-display);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  filter: drop-shadow(0 0 18px rgba(55, 239, 184, 0.3));
+}
+.fx-tabsub {
+  min-height: 3em;
+  margin: 0;
+  color: var(--text-muted);
+  font: 500 14px/1.5 var(--font-mono);
+}
+.fx-dots {
+  display: flex;
+  gap: 8px;
+  margin: 2px 0 6px;
+}
+.fx-dots i {
+  width: 14px;
+  height: 5px;
+  background: rgba(127, 163, 179, 0.35);
+  transition: width 0.3s var(--ease-out), background-color 0.3s var(--ease-out);
+}
+.fx-dots i.is-on {
+  width: 28px;
+  background: var(--neon);
+  box-shadow: 0 0 8px var(--neon);
+}
+.fx-copy .text-link {
+  align-self: flex-start;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* 03: the example week */
+.fx-cap {
+  margin: 6px 0 0;
+  color: var(--text-subtle);
+  font: 600 11px/1 var(--font-mono);
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+}
+.fx-total {
+  margin: 0;
+  font: 800 clamp(46px, 6.4vw, 76px)/1 var(--font-display);
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  filter: drop-shadow(0 0 18px rgba(55, 239, 184, 0.3));
+}
+.fx-sub {
+  margin: 0;
+  color: var(--text-muted);
+  font: 500 14px/1.5 var(--font-mono);
+}
+.fx-badge {
+  align-self: flex-start;
+  padding: 6px 12px;
+  border: 1px solid rgba(255, 210, 63, 0.75);
+  background: rgba(255, 210, 63, 0.12);
+  color: var(--warn);
+  font: 700 11px/1 var(--font-mono);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+.fx-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 8px 0 0;
+}
+.fx-stats div {
+  padding: 12px 14px;
+  border: 1px solid transparent;
+  border-image: var(--hud-panel) 16 fill / 16px;
+}
+.fx-stats dt {
+  color: var(--text-subtle);
+  font: 600 10px/1.2 var(--font-mono);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.fx-stats dd {
+  margin: 6px 0 0;
+  font: 800 28px/1 var(--font-display);
+  font-variant-numeric: tabular-nums;
+}
+.fx-stats dd.is-good {
+  color: var(--good);
+}
+.fx-stats dd.is-bad {
+  color: var(--bad);
+}
+.fx-note {
+  margin: 4px 0 0;
+  color: var(--text-subtle);
+  font-size: 13px;
+  line-height: 1.55;
+}
+.fx-note a {
+  color: var(--cyan);
+}
+
+/* 04: the four limits, each with a lime hexagon */
+.fx-limits {
+  display: grid;
+  gap: 10px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.fx-limits li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 12px 14px 12px 46px;
+  border: 1px solid transparent;
+  border-image: var(--hud-panel) 16 fill / 16px;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.fx-limits li::before {
+  content: "";
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  width: 18px;
+  height: 20px;
+  background: var(--neon);
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  filter: drop-shadow(0 0 6px rgba(166, 255, 26, 0.6));
+}
+.fx-limits strong {
+  color: var(--text);
+  font: 700 14px/1.3 var(--font-display);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+@media (min-width: 960px) {
+  .fx-row {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: clamp(28px, 4vw, 56px);
+  }
+  .fx-row--flip {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  }
+  .fx-row--flip .fx-copy {
+    order: 2;
+  }
+  .fx-stage--phone {
+    aspect-ratio: 5 / 4;
+  }
+}
+@media (max-width: 599.98px) {
+  .fx-stage--chart,
+  .fx-stage--bars {
+    aspect-ratio: 4 / 3;
+  }
+  /* on a phone the words beside each box stay small, so the boxes lead; the label beside the number stays big */
+  .fx-row {
+    gap: 14px;
+  }
+  .fx-copy {
+    gap: 8px;
+  }
+  .fx-kicker {
+    gap: 12px;
+    font-size: 13px;
+  }
+  .fx-kicker span {
+    padding-right: 12px;
+    font-size: 26px;
+  }
+  .fx-title {
+    font-size: 19px;
+  }
+  .fx-steps {
+    gap: 9px;
+    margin-top: 2px;
+    padding-left: 18px;
+  }
+  .fx-steps::before {
+    top: 6px;
+    bottom: 6px;
+    left: 4px;
+  }
+  .fx-steps li {
+    grid-template-columns: 24px minmax(0, 1fr);
+    gap: 8px;
+  }
+  .fx-steps li::before {
+    top: 4px;
+    left: -18px;
+    width: 10px;
+    height: 10px;
+  }
+  .fx-steps b {
+    font-size: 16px;
+  }
+  .fx-steps strong {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+  }
+  .fx-steps span {
+    gap: 2px;
+    font: 400 12.5px/1.45 var(--font-body);
+  }
+  .fx-tabcount {
+    margin-top: 2px;
+    font-size: 10px;
+  }
+  .fx-tabname {
+    font-size: 30px;
+  }
+  .fx-tabsub {
+    min-height: 2.9em;
+    font: 400 13px/1.45 var(--font-body);
+  }
+  .fx-cap {
+    margin-top: 2px;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+  }
+  .fx-total {
+    font-size: 34px;
+  }
+  .fx-sub {
+    font-size: 12px;
+  }
+  .fx-badge {
+    padding: 5px 9px;
+    font-size: 9.5px;
+  }
+  .fx-stats {
+    gap: 8px;
+    margin-top: 2px;
+  }
+  .fx-stats div {
+    padding: 8px 11px;
+  }
+  .fx-stats dt {
+    font-size: 9px;
+  }
+  .fx-stats dd {
+    margin-top: 4px;
+    font-size: 20px;
+  }
+  .fx-note {
+    font-size: 12px;
+  }
+  .fx-limits {
+    gap: 7px;
+    margin-top: 2px;
+  }
+  .fx-limits li {
+    gap: 2px;
+    padding: 8px 12px 8px 36px;
+    font-size: 12.5px;
+    line-height: 1.4;
+  }
+  .fx-limits li::before {
+    top: 10px;
+    left: 13px;
+    width: 13px;
+    height: 15px;
+  }
+  .fx-limits strong {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+  }
+}
+@media (max-width: 959.98px) {
+  .fx-stage--phone {
+    width: 100%;
+    max-width: 460px;
+    margin-inline: auto;
+    aspect-ratio: 4 / 5;
+  }
+  .fx-stage--shield {
+    aspect-ratio: 4 / 3;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fx-row:has(.fx-stage.is-live) .fx-steps li:not(.is-on) {
+    opacity: 1;
+  }
+}
+
+/* ==========================================================================
+   How to use (21 Oct 2026): a picture guide, one step under the other.
+   A numbered line runs down the left; each step is a card with its words and
+   a small picture of what you see at that moment.
+   ========================================================================== */
+.guide {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+}
+.guide::before {
+  content: "";
+  position: absolute;
+  top: 30px;
+  bottom: 30px;
+  left: 23px;
+  width: 2px;
+  background: linear-gradient(180deg, var(--cyan), var(--neon));
+  opacity: 0.45;
+}
+.guide-step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+.guide-num {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin-top: 10px;
+  border: 1px solid var(--frame);
+  border-radius: 50%;
+  background: var(--chip);
+  color: var(--cyan);
+  font: 700 20px/1 var(--font-display);
+  box-shadow: 0 0 0 6px var(--bg), 0 0 18px rgba(25, 211, 255, 0.3);
+}
+.guide-num::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border: 1px dashed rgba(25, 211, 255, 0.45);
+  border-radius: 50%;
+}
+.guide-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid transparent;
+  border-image: var(--hud-panel) 16 fill / 16px;
+}
+.guide-text h3 {
+  margin: 2px 0 6px;
+  font: 600 19px/1.3 var(--font-display);
+  letter-spacing: 0.01em;
+}
+.guide-text p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+.guide-text .text-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 8px;
+}
+.guide-pic {
+  display: grid;
+  place-items: center;
+  min-height: 140px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  background:
+    radial-gradient(90% 90% at 50% 0%, rgba(25, 211, 255, 0.1), transparent 70%),
+    rgba(3, 12, 19, 0.7);
+  clip-path: var(--cut-10);
+}
+@media (min-width: 760px) {
+  .guide {
+    gap: 18px;
+  }
+  .guide::before {
+    left: 27px;
+  }
+  .guide-step {
+    grid-template-columns: 56px minmax(0, 1fr);
+    gap: 20px;
+  }
+  .guide-num {
+    width: 56px;
+    height: 56px;
+    margin-top: 18px;
+    font-size: 22px;
+  }
+  .guide-card {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    align-items: center;
+    gap: 24px;
+    padding: 22px 24px;
+  }
+}
+
+/* the small pictures */
+.gp-plans {
+  display: flex;
+  gap: 6px;
+}
+.gp-plan {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 62px;
+  padding: 12px 8px;
+  border: 1px solid var(--border-strong);
+  background: rgba(7, 25, 34, 0.92);
+  color: var(--text);
+  font: 800 20px/1 var(--font-display);
+  clip-path: var(--cut-10);
+}
+.gp-plan b {
+  color: var(--text-subtle);
+  font: 600 10px/1 var(--font-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.gp-plan.is-hot {
+  border-color: var(--neon);
+  color: var(--neon);
+  box-shadow: inset 0 0 18px rgba(166, 255, 26, 0.16);
+}
+.gp-tap {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  animation: gp-tap 2.4s ease-out infinite;
+}
+@keyframes gp-tap {
+  0%,
+  55% {
+    box-shadow: 0 0 0 0 rgba(166, 255, 26, 0.7);
+  }
+  100% {
+    box-shadow: 0 0 0 14px rgba(166, 255, 26, 0);
+  }
+}
+.gp-brokers {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  max-width: 290px;
+}
+.gp-broker {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  background: rgba(7, 25, 34, 0.92);
+  color: var(--text);
+  font: 600 13px/1 var(--font-display);
+}
+.gp-broker i {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--frame);
+  border-radius: 50%;
+  background: var(--chip);
+  color: var(--cyan);
+  font: 700 10px/1 var(--font-mono);
+  font-style: normal;
+}
+.gp-broker em {
+  padding: 5px 8px;
+  background: var(--neon);
+  color: var(--on-accent);
+  font: 700 9px/1 var(--font-mono);
+  font-style: normal;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.gp-broker.is-hot {
+  border-color: var(--frame);
+  box-shadow: 0 0 14px rgba(25, 211, 255, 0.2);
+}
+.gp-chat {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  max-width: 290px;
+}
+.gp-msg {
+  max-width: 92%;
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 12px;
+  color: var(--text);
+  font: 500 13px/1.35 var(--font-body);
+}
+.gp-me {
+  justify-self: end;
+  border-bottom-right-radius: 4px;
+  background: #1d5a72;
+}
+.gp-bot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-self: start;
+  border: 1px solid var(--border-strong);
+  border-bottom-left-radius: 4px;
+  background: #0e2f3e;
+}
+.gp-ok {
+  position: relative;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--good);
+}
+.gp-ok::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 5px;
+  width: 4px;
+  height: 7px;
+  border: solid #04130c;
+  border-width: 0 2px 2px 0;
+  rotate: 45deg;
+}
+.gp-qrcode {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  padding: 3px;
+  border-radius: 4px;
+  background: #fff;
+  fill: #02131a;
+}
+.gp-msg em {
+  display: block;
+  color: var(--text-subtle);
+  font: 400 11px/1.4 var(--font-mono);
+  font-style: normal;
+}
+.gp-fileicon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 38px;
+  height: 44px;
+  border: 1px solid var(--frame);
+  background: var(--chip);
+  color: var(--cyan);
+  font: 700 10px/1 var(--font-mono);
+  clip-path: polygon(0 0, 70% 0, 100% 25%, 100% 100%, 0 100%);
+}
+.gp-keys {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 4px 10px;
+  font: 500 11px/1.4 var(--font-mono);
+}
+.gp-keys span {
+  color: var(--text-subtle);
+}
+.gp-keys code {
+  color: var(--neon);
+  letter-spacing: 0.1em;
+}
+.gp-run {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.gp-mt5 {
+  display: grid;
+  gap: 4px;
+  flex: 0 1 170px;
+  min-width: 0;
+  padding: 6px;
+  border: 1px solid var(--border-strong);
+  background: #050f16;
+}
+.gp-bar {
+  padding: 3px 5px;
+  background: #0c1820;
+  color: var(--text-subtle);
+  font: 500 9px/1.2 var(--font-mono);
+}
+.gp-candles {
+  width: 100%;
+  height: 44px;
+}
+.gp-candles path {
+  stroke-width: 1;
+}
+.gp-candles .up {
+  fill: var(--good);
+  stroke: var(--good);
+}
+.gp-candles .dn {
+  fill: var(--bad);
+  stroke: var(--bad);
+}
+.gp-ea {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--good);
+  font: 600 9px/1.2 var(--font-mono);
+  letter-spacing: 0.04em;
+}
+.gp-ea i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--good);
+  box-shadow: 0 0 6px var(--good);
+}
+.gp-phone {
+  display: grid;
+  flex: none;
+  justify-items: center;
+  gap: 8px;
+  width: 76px;
+  padding: 12px 8px;
+  border: 2px solid var(--frame);
+  border-radius: 14px;
+  background: #030c13;
+  box-shadow: 0 0 16px rgba(25, 211, 255, 0.25);
+}
+.gp-ring {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 3px solid #123644;
+  border-top-color: var(--cyan);
+  border-right-color: var(--cyan);
+  border-radius: 50%;
+  color: var(--text);
+  font: 700 14px/1 var(--font-display);
+}
+.gp-act {
+  padding: 5px 8px;
+  background: var(--good);
+  color: #04130c;
+  font: 700 9px/1 var(--font-display);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .gp-tap {
+    animation: none;
+  }
+}
+
+/* ==========================================================================
+   Pricing like the video (21 Oct 2026): every card has the frame of the
+   video's panels, a thin line with cut corners and cyan corner marks; Elite
+   has a lime frame with a glow and the "Most popular" badge on its top edge.
+   ========================================================================== */
+:root {
+  --hud-plan: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cdefs%3E%3Cfilter id='g' x='-20%25' y='-20%25' width='140%25' height='140%25'%3E%3CfeGaussianBlur stdDeviation='2.5'/%3E%3C/filter%3E%3C/defs%3E%3Cpath d='M14.5 .5H159.5V145.5L145.5 159.5H.5V14.5Z' fill='%23061a24' fill-opacity='.92' stroke='%231c4f61'/%3E%3Cg fill='none' stroke='%2319d3ff' stroke-width='3'%3E%3Cpath filter='url(%23g)' d='M1.5 58V15L15 1.5H62M158.5 102V145L145 158.5H98'/%3E%3Cpath d='M1.5 58V15L15 1.5H62M158.5 102V145L145 158.5H98'/%3E%3C/g%3E%3C/svg%3E");
+  --hud-plan-hot: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cdefs%3E%3Cfilter id='g' x='-20%25' y='-20%25' width='140%25' height='140%25'%3E%3CfeGaussianBlur stdDeviation='2.5'/%3E%3C/filter%3E%3C/defs%3E%3Cpath d='M14.31 .75H159.25V145.69L145.69 159.25H.75V14.31Z' fill='%23071f1c' fill-opacity='.94' stroke='%23a6ff1a' stroke-width='1.5'/%3E%3Cg fill='none' stroke='%23a6ff1a' stroke-width='3'%3E%3Cpath filter='url(%23g)' d='M1.5 58V15L15 1.5H62M158.5 102V145L145 158.5H98'/%3E%3Cpath d='M1.5 58V15L15 1.5H62M158.5 102V145L145 158.5H98'/%3E%3C/g%3E%3C/svg%3E");
+  --hud-btn-outline: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='54' height='54' viewBox='0 0 54 54'%3E%3Cpath d='M13.21 0.5H53.5V40.79L40.79 53.5H0.5V13.21Z' fill='%23061c26' fill-opacity='.6' stroke='%2319b8dc'/%3E%3C/svg%3E");
+}
+.price-card,
+.price-card--featured {
+  position: relative;
+  overflow: visible;
+  padding: 34px 28px 28px;
+  border: 1px solid transparent;
+  border-image: var(--hud-plan) 76 fill / 76px;
+  background: none;
+  box-shadow: none;
+  clip-path: none;
+  filter: none;
+}
+.price-card--featured {
+  border-image-source: var(--hud-plan-hot);
+  filter: drop-shadow(0 0 18px rgba(166, 255, 26, 0.26));
+}
+.plan-badge {
+  position: absolute;
+  top: -13px;
+  left: 50%;
+  z-index: 1;
+  translate: -50% 0;
+  padding: 7px 16px;
+  background: var(--neon);
+  color: var(--on-accent);
+  font: 700 11px/1 var(--font-mono);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+}
+.price-card .plan-features .icon {
+  color: var(--neon);
+}
+.price-card .btn-ghost {
+  border-image-source: var(--hud-btn-outline);
+  color: var(--cyan);
+}
+.price-card .btn-ghost:hover {
+  border-image-source: var(--hud-btn-hot);
+}

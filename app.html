@@ -131,6 +131,10 @@ button{cursor:pointer}
 .tbl tr.now td{background:var(--chip);color:var(--cyan)}
 .tbl tr.off td{color:var(--muted)}
 .bars{width:100%;height:150px;display:block}
+/* Report: the range switch over the chart, the four figures under it; Log: the type switch */
+.seg-range{margin-bottom:12px}
+.seg-range button,.seg-log button{letter-spacing:.06em;padding-inline:2px}
+.rp-sum{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
 .bars text{font:500 9px var(--f-mono);fill:var(--muted);text-anchor:middle}
 .row{display:flex;gap:10px;flex-wrap:wrap}
 .row>.btn{flex:1 1 0;min-width:0}
@@ -188,16 +192,27 @@ nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;st
 
 /* ---------- trades ---------- */
 .ladder{position:relative;height:330px;overflow:hidden}
+/* the chart moves: drag through time, pinch to zoom; an up-and-down swipe still scrolls the page */
+.ladder{touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
+.ladder:active{cursor:grabbing}
+.ld-now{position:absolute;right:6px;bottom:6px;min-height:26px;padding:0 10px;background:var(--chip);border:1px solid var(--frame);
+  color:var(--cyan);font:600 9px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
 .ladder canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .ladder .empty{padding-top:8px}
 .ld-plot{position:absolute;left:0;top:0;bottom:0;right:62px}
-.ld-tick{position:absolute;width:12px;height:2px;margin-top:-1px}
-.ld-tick.buy{right:50%;background:var(--buy)} .ld-tick.sell{left:50%;background:var(--sell)}
 .panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
 .panel-head h2{font:500 10px/1.2 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0}
 .mini-seg{display:flex;border:1px solid var(--line)}
-.mini-seg button{background:none;border:0;padding:0 12px;min-height:36px;font:500 10px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.mini-seg button{background:none;border:0;padding:0 8px;min-height:28px;font:500 9px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .mini-seg button[aria-pressed="true"]{background:var(--chip);color:var(--cyan)}
+/* beside Candles / Line: the History switch, the profits of closed trades on the chart shown or hidden */
+.panel-head{flex-wrap:wrap;row-gap:8px}
+.ld-tools{display:flex;align-items:center;gap:6px}
+.hist-btn{display:inline-flex;align-items:center;gap:5px;background:none;border:1px solid var(--line);padding:0 8px;min-height:28px;
+  font:500 9px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.hist-btn svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.hist-btn[aria-pressed="true"]{background:var(--chip);color:var(--cyan)}
+.hist-btn .off{display:none} .hist-btn[aria-pressed="false"] .off{display:inline}
 .legend b{color:var(--title);font-size:13px;letter-spacing:0;margin-left:3px}
 /* Activate / Pause bar: its own row between the scrolling deck and the dock, so it never covers content */
 .actbar{padding-block:10px;border-top:1px solid var(--line);background:var(--bg)}
@@ -205,10 +220,7 @@ nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;st
 .quit-card{width:100%;max-width:340px;padding:26px 22px 20px;display:flex;flex-direction:column;gap:14px}
 .quit-card h3{font:700 19px var(--f-display);color:var(--title);margin:0;letter-spacing:.03em}
 .quit-card p{margin:0;font-size:13.5px;color:var(--muted)}
-.ld-axis{position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--muted);opacity:.55}
-.ld-pos{position:absolute;transform:translateY(-50%);font:500 11px/1 var(--f-mono);padding:3px 6px;border:1px solid;background:var(--panel);white-space:nowrap}
-.ld-pos.buy{right:calc(50% + 16px);color:var(--buy)} .ld-pos.sell{left:calc(50% + 16px);color:var(--sell)}
-.ld-line{position:absolute;left:0;right:0;border-top:1px solid var(--cyan)}
+.ld-line{position:absolute;left:0;right:0;border-top:1px dashed var(--cyan)}
 .ld-line span{position:absolute;right:0;top:-9px;background:var(--panel);font:500 10.5px/1 var(--f-mono);padding:3px 0 3px 6px;color:var(--cyan)}
 .ld-line.next{border-top:1px dashed var(--muted)} .ld-line.next span{left:0;right:auto;padding:3px 6px 3px 0;color:var(--muted)}
 /* TP of a single trade / close price of a basket: dashed in the side colour, word at that side's edge */
@@ -216,12 +228,16 @@ nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;st
 .ld-line.exit.buy{color:var(--buy)} .ld-line.exit.sell{color:var(--sell)}
 .ld-line.exit span{color:inherit}
 .ld-line.exit.buy span{left:0;right:auto;padding:3px 6px 3px 0}
-.ld-line.exit.sell span{right:0;left:auto;padding:3px 0 3px 6px}
+.ld-line.exit.sell span{left:50%;right:auto;padding:3px 6px}   /* the right edge holds the tags of the open trades */
 /* basket: a soft band on the profit side of the line marks the close zone */
 .ld-line.exit.band::after{content:"";position:absolute;left:0;right:0;height:14px;background:currentColor;opacity:.13}
 .ld-line.exit.band.buy::after{bottom:0} .ld-line.exit.band.sell::after{top:0}
 .legend{display:flex;gap:16px;margin-top:10px;flex-wrap:wrap}
 .legend span{display:flex;align-items:center;gap:6px}
+/* legend marks: the ◀ of an open trade in its colour, the dot of a closed one */
+.mk{display:inline-block;width:6px;height:9px;background:var(--buy);clip-path:polygon(100% 0,0 50%,100% 100%)}
+.mk.sell{background:var(--warn)}
+.mk-dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--good)}
 .sw{width:9px;height:9px;border:1px solid}
 .baskets{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .basket{display:flex;flex-direction:column;gap:6px;min-width:0}
@@ -242,6 +258,7 @@ nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;st
 .ev:first-child{border-top:0;padding-top:0}
 .ev time{font:400 11px var(--f-mono);color:var(--muted);padding-top:2px}
 .ev p{margin:0;color:var(--title);font-size:14px}
+.ev p b{font-weight:600;font-variant-numeric:tabular-nums}
 .ev .k{grid-column:2;font:500 9.5px var(--f-mono);letter-spacing:.14em;text-transform:uppercase}
 .k.tp{color:var(--good)} .k.basket{color:var(--cyan)} .k.cool{color:var(--warn)} .k.risk{color:var(--bad)} .k.cmd{color:var(--muted)}
 
@@ -261,6 +278,14 @@ nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;st
 .set input:disabled{opacity:.75;-webkit-text-fill-color:var(--body)}
 .sw-in:disabled{opacity:.6;cursor:default}
 .set input[type=password]{flex:none;background:var(--bg);border:1px solid var(--line);padding:9px 8px;font:500 15px var(--f-mono);color:var(--title);border-radius:2px}
+/* Change App Password: an eye in each box shows what is typed (the box keeps its look as text or password) */
+.pw-box{position:relative;flex:none;width:170px}
+.set .pw-box input{width:100%;padding:9px 40px 9px 8px;text-align:left;font:500 15px var(--f-mono);background:var(--bg);border:1px solid var(--line-2);color:var(--title);border-radius:2px}
+.set .pw-box input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(25,211,255,.2);outline:none}
+.pw-eye{position:absolute;top:0;right:0;bottom:0;width:40px;display:grid;place-items:center;background:none;border:0;color:var(--muted)}
+.pw-eye svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.pw-eye[aria-pressed="true"]{color:var(--cyan)}
+.pw-eye .slash{display:none} .pw-eye[aria-pressed="true"] .slash{display:inline}
 /* ==========================================================================
    Neon HUD look, the same as the website: deep teal-black, cyan + lime neon, cut-corner frames.
    The colours are set in :root at the top. The rules below only change shapes and fills;
@@ -378,6 +403,21 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
 .eye .sweep{fill:var(--cyan)}
 .eye circle:nth-of-type(3){fill:var(--neon)}
 .demo-flag{border-color:rgba(255,210,63,.45)}
+
+/* ==========================================================================
+   Home (21 Oct 2026): the equity card at the top, then one Account box with the day's figures and the license.
+   ========================================================================== */
+:root{
+  /* equity card: cut corners, a cyan corner mark top left and bottom right with a soft glow */
+  --hud-eq:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cdefs%3E%3Cfilter id='g' x='-20%25' y='-20%25' width='140%25' height='140%25'%3E%3CfeGaussianBlur stdDeviation='2.5'/%3E%3C/filter%3E%3C/defs%3E%3Cpath d='M14.5 .5H159.5V145.5L145.5 159.5H.5V14.5Z' fill='%23071922' fill-opacity='.94' stroke='%231c4f61'/%3E%3Cg fill='none' stroke='%2319d3ff' stroke-width='3'%3E%3Cpath filter='url(%23g)' d='M1.5 58V15L15 1.5H62M158.5 102V145L145 158.5H98'/%3E%3Cpath d='M1.5 58V15L15 1.5H62M158.5 102V145L145 158.5H98'/%3E%3C/g%3E%3C/svg%3E");
+}
+.hcap{font:500 11px/1.2 var(--f-mono);letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin:0}
+.eqcard{border:1px solid transparent;border-image:var(--hud-eq) 76 fill / 76px;padding:22px 22px 16px;display:flex;flex-direction:column;gap:6px}
+.eq-big{font:700 clamp(34px,11vw,46px)/1.05 var(--f-display);color:var(--title);letter-spacing:.01em;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.eq-day{font:500 14px var(--f-mono);font-variant-numeric:tabular-nums}
+.eq-spark{width:100%;height:60px;display:block;margin-top:8px;overflow:visible}
+.eq-spark .eq-line{filter:drop-shadow(0 0 4px rgba(55,239,184,.55))}
+.hlines{margin-top:12px}
 </style>
 </head>
 <body>
@@ -432,6 +472,44 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
 
     <!-- HOME -->
     <div class="view" id="v-home">
+      <!-- equity card (21 Oct 2026, in place of the status card with the ring) -->
+      <section class="eqcard" aria-label="Equity">
+        <span class="hcap">Equity</span>
+        <b class="eq-big" id="vEq">$0.00</b>
+        <span class="eq-day good" id="vDay">+$0.00 today</span>
+        <svg class="eq-spark" id="spark" viewBox="0 0 300 60" role="img" aria-label="Equity while this app is open"></svg>
+      </section>
+
+      <section class="panel">
+        <h2>Account</h2>
+        <div class="grid2">
+          <div class="kv"><span class="cap">Balance</span><span class="num" id="vBal">0.00$</span></div>
+          <div class="kv"><span class="cap">Floating P/L</span><span class="num" id="vFloat">+0.00$</span></div>
+          <div class="kv"><span class="cap">Drawdown</span><span class="num" id="vDD">0.00%</span></div>
+          <div class="kv"><span class="cap">Trades today</span><span class="num" id="vTrades">0</span></div>
+        </div>
+        <div class="hlines">
+          <div class="line"><span class="cap">Mode</span><b id="vMode">BASIC</b></div>
+          <div class="line"><span class="cap">Cycles closed today</span><b id="vCycles">0</b></div>
+          <div class="line"><span class="cap">License</span><b class="good" id="vLic">4d 12h left</b></div>
+          <div class="line"><span class="cap">Session</span>
+            <span class="chips"><span class="chipx" id="sesAS">ASIA</span><span class="chipx" id="sesLN">LONDON</span><span class="chipx" id="sesNY">NEW YORK</span></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="stats">
+          <div><span class="num" id="stBuy">0</span><span class="cap">Buy trades</span></div>
+          <div><span class="num" id="stSell">0</span><span class="cap">Sell trades</span></div>
+          <div><span class="num" id="stLots">0.00</span><span class="cap">Total lots</span></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- TRADES -->
+    <div class="view" id="v-trades" hidden>
+      <!-- the bot status, above the grid ladder (on Home until 21 Oct 2026) -->
       <section class="frame core"><i class="br"></i>
         <svg class="ring" id="ring" viewBox="0 0 120 120" role="img" aria-label="Grid ladder level">
           <circle class="ring-track" cx="60" cy="60" r="52"/>
@@ -446,53 +524,22 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
           <div class="kv"><span class="cap">Next entry</span><b id="nextText">-</b></div>
         </div>
       </section>
-
-      <section class="panel">
-        <h2>Account</h2>
-        <div class="grid2">
-          <div class="kv"><span class="cap">Balance</span><span class="num" id="vBal">0.00$</span></div>
-          <div class="kv"><span class="cap">Equity</span><span class="num" id="vEq">0.00$</span></div>
-          <div class="kv"><span class="cap">Profit today</span><span class="num" id="vDay">+0.00$</span></div>
-          <div class="kv"><span class="cap">Floating P/L</span><span class="num" id="vFloat">+0.00$</span></div>
-          <div class="kv"><span class="cap">Drawdown</span><span class="num" id="vDD">0.00%</span></div>
-          <div class="kv"><span class="cap">Trades today</span><span class="num" id="vTrades">0</span></div>
-        </div>
-        <svg class="spark" id="spark" viewBox="0 0 300 132" role="img" aria-label="Equity chart with four money levels"></svg>
-        <span class="cap">Equity while this app is open</span>
-      </section>
-
-      <section class="panel">
-        <div class="stats">
-          <div><span class="num" id="stBuy">0</span><span class="cap">Buy trades</span></div>
-          <div><span class="num" id="stSell">0</span><span class="cap">Sell trades</span></div>
-          <div><span class="num" id="stLots">0.00</span><span class="cap">Total lots</span></div>
-        </div>
-      </section>
-
-      <section class="panel">
-        <div class="line"><span class="cap">Mode</span><b id="vMode">BASIC</b></div>
-        <div class="line"><span class="cap">Cycles closed today</span><b id="vCycles">0</b></div>
-        <div class="line"><span class="cap">License</span><b class="good" id="vLic">4d 12h left</b></div>
-        <div class="line"><span class="cap">Session</span>
-          <span class="chips"><span class="chipx" id="sesAS">ASIA</span><span class="chipx" id="sesLN">LONDON</span><span class="chipx" id="sesNY">NEW YORK</span></span>
-        </div>
-      </section>
-    </div>
-
-    <!-- TRADES -->
-    <div class="view" id="v-trades" hidden>
       <section class="panel">
         <div class="panel-head"><h2>Grid ladder</h2>
-          <div class="mini-seg" id="chartSeg">
-            <button type="button" data-chart="candle" aria-pressed="true">Candles</button>
-            <button type="button" data-chart="line" aria-pressed="false">Line</button>
+          <div class="ld-tools">
+            <button type="button" class="hist-btn" id="histBtn" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="off" d="M3 3l18 18"/></svg>History</button>
+            <div class="mini-seg" id="chartSeg">
+              <button type="button" data-chart="candle" aria-pressed="true">Candles</button>
+              <button type="button" data-chart="line" aria-pressed="false">Line</button>
+            </div>
           </div>
         </div>
         <div class="ladder" id="ladder"></div>
         <div class="legend cap">
-          <span><i class="sw" style="color:var(--buy)"></i>Buy (left)</span>
-          <span><i class="sw" style="color:var(--sell)"></i>Sell (right)</span>
-          <span id="ldTf">Label + lot</span>
+          <span><i class="mk buy" aria-hidden="true"></i>Buy</span>
+          <span><i class="mk sell" aria-hidden="true"></i>Sell</span>
+          <span id="lgClosed"><i class="mk-dot" aria-hidden="true"></i>Closed</span>
+          <span id="ldTf">M1 chart</span>
         </div>
       </section>
       <section class="panel">
@@ -603,7 +650,6 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
           <h2>Alerts to show in the log</h2>
           <div class="set"><label for="alTp">TP hits</label><input id="alTp" class="sw-in" type="checkbox"></div>
           <div class="set"><label for="alBasket">Basket closed</label><input id="alBasket" class="sw-in" type="checkbox"></div>
-          <div class="set"><label for="alCool">Cooldown after a cycle</label><input id="alCool" class="sw-in" type="checkbox"></div>
           <div class="set"><label for="alRisk">Risk warnings</label><input id="alRisk" class="sw-in" type="checkbox"></div>
         </section>
         <p class="err" id="setErr" role="alert"></p>
@@ -636,9 +682,21 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
           </div>
         </section>
         <section class="panel">
-          <h2>Closed profit, last 7 days ($)</h2>
-          <svg class="bars" id="rpBars" viewBox="0 0 300 150" role="img" aria-label="Closed profit for the last 7 days"></svg>
-          <p class="hint">Closed profit of this bot per day, from the account history.</p>
+          <h2 id="rpTitle">Closed profit this week ($)</h2>
+          <div class="seg seg-range" id="rpSeg" role="tablist" aria-label="Time range">
+            <button role="tab" data-range="week" aria-selected="true">This week</button>
+            <button role="tab" data-range="last" aria-selected="false">Last week</button>
+            <button role="tab" data-range="month" aria-selected="false">Month</button>
+            <button role="tab" data-range="all" aria-selected="false">All time</button>
+          </div>
+          <svg class="bars" id="rpBars" viewBox="0 0 300 150" role="img" aria-label="Closed profit"></svg>
+          <div class="grid2 rp-sum">
+            <div class="kv"><span class="cap">Total</span><span class="num" id="rpTotal">+0.00$</span></div>
+            <div class="kv"><span class="cap" id="rpAvgCap">Average a day</span><span class="num" id="rpAvg">+0.00$</span></div>
+            <div class="kv"><span class="cap" id="rpBestCap">Best day</span><span class="num" id="rpBest">+0.00$</span></div>
+            <div class="kv"><span class="cap" id="rpWorstCap">Worst day</span><span class="num" id="rpWorst">+0.00$</span></div>
+          </div>
+          <p class="hint" id="rpHint">Closed profit of this bot, from the account history.</p>
         </section>
       </div>
 
@@ -661,37 +719,44 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
         </section>
         <form class="panel" id="pwForm" autocomplete="off" novalidate>
           <h2>Change app password</h2>
-          <div class="set"><label for="pwOld">Current password</label><input id="pwOld" type="password" autocomplete="current-password" style="width:150px"></div>
-          <div class="set"><label for="pwNew">New password<small>8 or more characters</small></label><input id="pwNew" type="password" autocomplete="new-password" style="width:150px"></div>
+          <div class="set"><label for="pwOld">Current password</label><span class="pw-box"><input id="pwOld" type="password" autocomplete="current-password"><button type="button" class="pw-eye" data-eye="pwOld" aria-label="Show password" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="slash" d="M3 3l18 18"/></svg></button></span></div>
+          <div class="set"><label for="pwNew">New password<small>8 or more characters</small></label><span class="pw-box"><input id="pwNew" type="password" autocomplete="new-password"><button type="button" class="pw-eye" data-eye="pwNew" aria-label="Show password" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="slash" d="M3 3l18 18"/></svg></button></span></div>
+          <div class="set"><label for="pwNew2">New password again<small>the same, to be sure</small></label><span class="pw-box"><input id="pwNew2" type="password" autocomplete="new-password"><button type="button" class="pw-eye" data-eye="pwNew2" aria-label="Show password" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="slash" d="M3 3l18 18"/></svg></button></span></div>
           <p class="err" id="pwMsg" role="alert"></p>
           <div class="row"><button class="btn primary" type="submit">Change password</button></div>
-          <p class="hint">After you change it here, type the same new password in the bot inputs in MT5 (App Password). All other devices are logged out.</p>
+          <p class="hint">The new password works right away. All other devices are logged out.</p>
         </form>
         <div class="row"><button class="btn" type="button" id="acLogoutOthers">Log out all other devices</button></div>
         <div class="row"><button class="btn danger" type="button" id="acLogout">Disconnect this phone</button></div>
       </div>
     </div>
 
-    <!-- LOG -->
+    <!-- LOG: sorted by type (21 Oct 2026); cooldown messages are not shown any more -->
     <div class="view" id="v-log" hidden>
+      <div class="seg seg-log" id="logSeg" role="tablist" aria-label="Type of alert">
+        <button role="tab" data-log="all" aria-selected="true">All</button>
+        <button role="tab" data-log="tp" aria-selected="false">Take profit</button>
+        <button role="tab" data-log="basket" aria-selected="false">Basket</button>
+        <button role="tab" data-log="risk" aria-selected="false">Risk</button>
+      </div>
       <section class="panel">
-        <h2>Alerts from the bot</h2>
+        <h2 id="logTitle">Alerts from the bot</h2>
         <div id="logList"></div>
       </section>
     </div>
   </main>
 
-  <!-- Activate / Pause: pinned above the dock on the Core tab, never scrolls away -->
+  <!-- Activate / Pause: pinned above the dock on the Home tab, never scrolls away -->
   <div class="actbar row" id="actbar" hidden>
     <button class="btn go" data-cmd="activate" data-state="activate">Activate</button>
     <button class="btn hold" data-cmd="pause" data-state="pause">Pause</button>
   </div>
 
   <nav id="dock" hidden role="tablist">
-    <button role="tab" data-tab="home" aria-selected="true"><svg viewBox="0 0 24 24"><path d="M12 3l7.8 4.5v9L12 21l-7.8-4.5v-9z"/><circle cx="12" cy="12" r="2.6"/></svg>Core</button>
+    <button role="tab" data-tab="home" aria-selected="true"><svg viewBox="0 0 24 24"><path d="M3.5 11.2L12 4l8.5 7.2"/><path d="M5.5 9.6V20h13V9.6"/><path d="M10 20v-5.5h4V20"/></svg>Home</button>
     <button role="tab" data-tab="trades" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M12 3v18M5 7h5M5 12h5M14 10h5M14 16h5"/></svg>Trades</button>
-    <button role="tab" data-tab="control" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>Control</button>
-    <button role="tab" data-tab="tools" aria-selected="false"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>Tools</button>
+    <button role="tab" data-tab="control" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M12 3l7.8 4.5v9L12 21l-7.8-4.5v-9z"/><circle cx="12" cy="12" r="2.6"/></svg>Control</button>
+    <button role="tab" data-tab="tools" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>Tools</button>
     <button role="tab" data-tab="log" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M8 7h12M8 12h12M8 17h12M4 7h.01M4 12h.01M4 17h.01"/></svg>Log</button>
   </nav>
 </div>
@@ -725,9 +790,9 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
 </div>
 <div id="pwConfirm" hidden style="position:fixed;inset:0;background:rgba(1,6,10,.84);display:flex;align-items:center;justify-content:center;z-index:45;padding:16px">
   <div class="frame quit-card" role="dialog" aria-modal="true" aria-labelledby="pwConfirmTitle"><i class="br"></i>
-    <span class="cap warn">MT5 Must Be Open</span>
+    <span class="cap">Confirm</span>
     <h3 id="pwConfirmTitle">Change App Password now?</h3>
-    <p>Make sure you have MetaTrader 5 open. Right after changing it here, you must open the bot inputs in MT5 and type the same new password into <b style="color:var(--title)">App Password</b>, or the bot link will go offline.</p>
+    <p>The new password works right away. All other devices logged in to this bot are logged out.</p>
     <div class="row">
       <button class="btn" type="button" id="pwCancel">Cancel</button>
       <button class="btn primary" type="button" id="pwProceed">Yes, change it</button>
@@ -747,10 +812,12 @@ const OFFLINE_AFTER = 15;                    // seconds without a report = bot o
 const $ = id => document.getElementById(id);
 const money  = v => (v >= -0.004 ? '+' : '-') + Math.abs(v).toFixed(2) + '$';
 const money0 = v => Number(v).toFixed(2) + '$';
+const usd    = v => (v < 0 ? '-' : '') + '$' + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });  // $1,245.78
 const cls    = (el, name, on) => el.classList.toggle(name, !!on);
 const esc    = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 let dig = 3;
 const px = v => Number(v).toFixed(dig);
+const pxg = (v, d = dig) => Number(v).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });   // 4,121.000
 
 const store = {
   get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
@@ -865,7 +932,7 @@ function ago(sec) {
 function setTab(name) {
   tab = name;
   for (const v of ['home', 'trades', 'control', 'tools', 'log']) $('v-' + v).hidden = v !== name;
-  $('actbar').hidden = name !== 'home';              // Activate / Pause stay pinned on the Core tab
+  $('actbar').hidden = name !== 'home';              // Activate / Pause stay pinned on the Home tab
   document.querySelectorAll('nav button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === name));
   $('main').scrollTop = 0;
   if (name === 'tools') setTool(tool); else render();
@@ -883,55 +950,107 @@ function fillSettings(c) {
   $('setAsym').checked = c.asym; $('setReset').checked = c.reset;
   $('setMaxLots').value = c.maxLots; $('setEqStop').value = c.eqStop; $('setTarget').value = c.target;
 }
+// The line in the equity card: the equity while this app is open, in the brand colours, no scale.
+// A calm summary, not every tick: the readings (one a second) are averaged into at most 36 points, softened once
+// more with their neighbours, and joined with smooth curves. The exact equity is the big number above it.
 function renderSpark() {
-  const el = $('spark'), n = eq.length;
-  if (n < 2) { el.innerHTML = ''; return; }
-  // 4 dashed levels on round money values, each labelled on the right (3500$, 3450$, ...)
-  const nice = raw => { const p = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / p; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * p; };
-  const lo = Math.min(...eq), hi = Math.max(...eq);
-  let step = nice(Math.max((hi - lo) / 3, hi * 0.0002, 0.05)), base = Math.floor(lo / step) * step;
-  while (base + 3 * step < hi - 1e-9) { step = nice(step * 1.01); base = Math.floor(lo / step) * step; }
-  const top = base + 3 * step;
-  const dec = Math.abs(step - Math.round(step)) < 1e-9 ? 0 : Math.abs(step * 10 - Math.round(step * 10)) < 1e-9 ? 1 : 2;
-  const W = Math.max(220, el.clientWidth || 300), H = 132, padT = 10, padB = 10, labW = 60;
-  const x0 = 3, x1 = W - labW - 10;
-  const x = i => (x0 + i / (n - 1) * (x1 - x0)).toFixed(1);
-  const y = v => (padT + (top - v) / (top - base) * (H - padT - padB)).toFixed(1);
+  const el = $('spark'), W = Math.max(200, el.clientWidth || 300), H = 60;
   el.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
-  let h = '';
-  for (let k = 3; k >= 0; k--) {
-    const v = base + k * step, yy = y(v);
-    h += '<line x1="0" y1="' + yy + '" x2="' + (W - labW - 2) + '" y2="' + yy + '" stroke="var(--line)" stroke-dasharray="3 5"/>' +
-         '<text x="' + (W - 1) + '" y="' + yy + '" dy="3.5" text-anchor="end">' + v.toFixed(dec) + '$</text>';
+  const per = Math.max(1, Math.ceil(eq.length / 36)), avg = [];
+  for (let i = 0; i < eq.length; i += per) { const part = eq.slice(i, i + per); avg.push(part.reduce((a, v) => a + v, 0) / part.length); }
+  const pts = avg.map((v, i) => i === 0 || i === avg.length - 1 ? v : (avg[i - 1] + v + avg[i + 1]) / 3), n = pts.length;
+  if (n < 2) { el.innerHTML = '<line x1="0" y1="' + H / 2 + '" x2="' + W + '" y2="' + H / 2 + '" stroke="var(--line-2)" stroke-dasharray="3 6"/>'; return; }
+  const lo = Math.min(...pts), hi = Math.max(...pts);
+  const x = i => 3 + Math.min(n - 1, Math.max(0, i)) / (n - 1) * (W - 6);
+  const y = i => (hi - lo < 1e-9 ? H / 2 : 8 + (hi - pts[Math.min(n - 1, Math.max(0, i))]) / (hi - lo) * (H - 16));
+  // Catmull-Rom through the points, written as cubic curves
+  let d = 'M' + x(0).toFixed(1) + ' ' + y(0).toFixed(1);
+  for (let i = 0; i < n - 1; i++) {
+    const c = [x(i) + (x(i + 1) - x(i - 1)) / 6, y(i) + (y(i + 1) - y(i - 1)) / 6, x(i + 1) - (x(i + 2) - x(i)) / 6, y(i + 1) - (y(i + 2) - y(i)) / 6, x(i + 1), y(i + 1)];
+    d += 'C' + c.map(v => v.toFixed(1)).join(' ');
   }
-  let d = '';
-  eq.forEach((v, i) => { d += (i ? 'L' : 'M') + x(i) + ' ' + y(v); });
-  const lx = x(n - 1), ly = y(eq[n - 1]);
-  h += '<path d="' + d + 'L' + lx + ' ' + y(base) + 'L' + x(0) + ' ' + y(base) + 'Z" fill="var(--cyan)" opacity=".10"/>' +
-       '<path d="' + d + '" fill="none" stroke="var(--cyan)" stroke-width="1.8" stroke-linejoin="round"/>' +
-       '<circle cx="' + lx + '" cy="' + ly + '" r="7" fill="var(--cyan)" opacity=".18"/>' +
-       '<circle cx="' + lx + '" cy="' + ly + '" r="3.5" fill="var(--cyan)"/>';
-  el.innerHTML = h;
+  el.innerHTML = '<defs><linearGradient id="eqLine" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="' + W + '" y2="0">' +
+      '<stop offset="0" stop-color="#19d3ff"/><stop offset=".55" stop-color="#37efb8"/><stop offset="1" stop-color="#a6ff1a"/></linearGradient>' +
+      '<linearGradient id="eqFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#37efb8" stop-opacity=".16"/><stop offset="1" stop-color="#37efb8" stop-opacity="0"/></linearGradient></defs>' +
+    '<path d="' + d + 'L' + x(n - 1).toFixed(1) + ' ' + H + 'L' + x(0).toFixed(1) + ' ' + H + 'Z" fill="url(#eqFill)"/>' +
+    '<path class="eq-line" d="' + d + '" fill="none" stroke="url(#eqLine)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
 }
 let chartType = (typeof store !== 'undefined' && store.get('rz_chart')) || 'candle';
-// Price chart with the grid ladder on top. It cannot be moved or scrolled: it always shows the newest bars.
+// Price chart with the trades on it, drawn like the MT5 chart in the RZGS-PRO showreel. An open trade is a ◀ on the
+// candle it opened on and a dashed line from there to its tag (L1 0.01: blue for a buy, yellow for a sell) in the free
+// space right of the newest candle. A trade closed in the last hour leaves its profit where it closed (+1.00$ TP; a side
+// closed together: +12.40$ BASKET). A bot from before 21 Oct 2026 does not say on which candle a trade opened (its
+// line starts at the newest candle that reached the open price) and sends no closed trades.
+// The chart moves like MT5 (21 Oct 2026): drag it to go back in time, up to 3 hours; pinch it (or turn the mouse wheel)
+// for more or fewer candles; double-tap it or tap NOW to follow the price again. The bot sends its last 60 one-minute
+// bars with every report; the older ones come from the server once a minute (app_bars) while the Trades tab is open.
+const MIN_BARS = 20, MAX_BARS = 180;
+const chartView = { back: 0, count: 45, total: 0, bw: 6 };   // bars hidden right of the screen, bars on it, bars known, px a bar
+let oldBars = [], oldBarsAt = 0, oldBarsBusy = false;
+async function loadOldBars() {
+  if (oldBarsBusy || !token || Date.now() - oldBarsAt < 60000) return;
+  oldBarsBusy = true; oldBarsAt = Date.now();
+  try {
+    const r = await rpc('app_bars', { p_token: token, p_minutes: MAX_BARS });
+    if (r.ok && Array.isArray(r.bars)) { oldBars = r.bars; render(); }
+  } catch (e) {}                                   // the chart keeps the bars it has and asks again in a minute
+  oldBarsBusy = false;
+}
+// The bot's bars with the server's older ones in front: the server's newest bar is the current minute, like the bot's
+// newest, so a server bar goes in front when it is older than the bot's oldest. `before`: how many went in front.
+function chartBars(s) {
+  const sent = s.bars || [];
+  if (s.barTf !== 'M1' || !oldBars.length || !sent.length) return { all: sent, before: 0 };
+  const first = oldBars[oldBars.length - 1][0] - (sent.length - 1) * 60;
+  const older = oldBars.filter(b => b[0] < first).slice(-(MAX_BARS - sent.length)).map(b => [b[1], b[2], b[3], b[4]]);
+  return { all: older.concat(sent), before: older.length };
+}
 function renderLadder(s, el) {
-  const bars = (s.bars || []).slice(-45), n = bars.length;      // the newest 45 bars fit left of the middle line
+  const src = chartBars(s), every = src.all, total = every.length;
+  // moved back, the chart stays on the same candles while new ones come in; at 0 it follows the price
+  if (chartView.back > 0 && chartView.total && total > chartView.total) chartView.back += total - chartView.total;
+  chartView.total = total;
+  chartView.count = Math.max(MIN_BARS, Math.min(MAX_BARS, chartView.count));
+  chartView.back = Math.max(0, Math.min(chartView.back, total - Math.min(chartView.count, total)));
+  const end = total - chartView.back, start = Math.max(0, end - chartView.count);
+  const bars = every.slice(start, end), n = bars.length, live = chartView.back === 0;
   const tf = document.getElementById('ldTf');
-  if (tf) tf.textContent = n >= 2 ? (s.barTf || 'M1') + ' chart' : 'Label + lot';
-  if (!s.positions.length && n < 2) { el.innerHTML = '<p class="empty">No open trades. The ladder appears when a cycle starts.</p>'; return; }
+  if (tf) tf.textContent = (s.barTf || 'M1') + ' chart';
+  if (!s.positions.length && n < 2) { el.innerHTML = '<p class="empty">No open trades. The chart appears when a cycle starts.</p>'; return; }
   if (!el.querySelector('canvas')) el.innerHTML = '<canvas aria-hidden="true"></canvas><div class="ld-plot"></div>';
   const cv = el.firstChild, plot = el.lastChild;
   const W = el.clientWidth, H = el.clientHeight, SW = 62, PW = W - SW;        // SW = price scale on the right
   if (W < 120) return;
   const D = typeof dig === 'number' ? dig : 3;
-  const E = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  // a bar as the bot counts them (0 = the oldest of its 60, -1 = older than those) as a bar of the whole chart,
+  // and that on screen: below 0 it is left of the screen, above n - 1 right of it
+  const fromBot = i => (typeof i !== 'number' ? null : i < 0 ? -Infinity : i + src.before);
+  const scr = e => (e === null ? null : e - start);
 
-  // price range: open trades, current price, next entries and the bars on screen
-  const all = s.positions.map(p => p.open);
-  if (s.bid) all.push(s.bid);
-  if (s.nextUp) all.push(s.nextUp);
-  if (s.nextDn) all.push(s.nextDn);
+  // open trades as levels. Without the bot's word on the candle, the newest candle that reached the open price stands
+  // in for it, so the line never starts left of where the trade can have opened. A trade that opened right of the
+  // screen (the chart is moved back) is not on it.
+  const guess = price => { for (let j = total - 1; j >= 0; j--) if (every[j][2] <= price && price <= every[j][1]) return j; return -Infinity; };
+  const levels = s.positions.map(p => ({ side: p.side, tag: String(p.tag), lot: Number(p.lot), price: Number(p.open),
+    e: typeof p.bar === 'number' ? fromBot(p.bar) : guess(Number(p.open)) })).filter(l => scr(l.e) <= n - 1);
+  // trades closed on screen: [side 0 buy / 1 sell, open bar, open price, close bar, close price, profit $], newest first.
+  // One side closing in one minute is one basket.
+  const closed = [];
+  if (n >= 2 && showHist) for (const t of s.hist || []) {
+    const at = scr(fromBot(t[3])), profit = typeof t[5] === 'number' ? t[5] : null;
+    if (at === null || at < 0 || at > n - 1) continue;
+    const same = closed.find(c => c.side === t[0] && c.at === at);
+    if (same) { same.count++; same.profit = same.profit === null || profit === null ? null : same.profit + profit; }
+    else closed.push({ side: t[0], at, price: Number(t[4]), count: 1, profit });
+  }
+
+  // price range: open trades, closed trades and the bars on screen; following the price, also the price now and the
+  // next entries (moved back, the range fits the candles shown, as in MT5)
+  const all = levels.map(l => l.price);
+  for (const c of closed) all.push(c.price);
+  if (live && s.bid) all.push(s.bid);
+  if (live && s.nextUp) all.push(s.nextUp);
+  if (live && s.nextDn) all.push(s.nextDn);
   // exit levels: the TP of a side with one trade, and the price where a basket (2+ trades) reaches its close profit
   const pv = (s.cfg && s.cfg.pv) || 100, exits = [];
   if (s.bid) for (const side of ['buy', 'sell']) {
@@ -947,7 +1066,7 @@ function renderLadder(s, el) {
       exits.push({ side, price: s.bid + dir * (s.basketTarget - profit) / (lots * pv), text: 'BASKET', band: true });
     }
   }
-  for (const x of exits) all.push(x.price);
+  if (live) for (const x of exits) all.push(x.price);
   for (const b of bars) all.push(b[1], b[2]);
   let lo = Math.min(...all), hi = Math.max(...all);
   const pad = Math.max((hi - lo) * .08, hi * 0.00012);
@@ -974,10 +1093,16 @@ function renderLadder(s, el) {
   for (let v = Math.ceil(lo / step) * step; v <= hi; v += step) {
     const yy = Math.round(y(v)) + .5;
     g.beginPath(); g.moveTo(0, yy); g.lineTo(PW, yy); g.stroke();
-    if (yy > 8 && yy < H - 8) g.fillText(v.toFixed(sd), PW + 7, yy);
+    if (yy > 8 && yy < H - 8) g.fillText(pxg(v, sd), PW + 7, yy);
   }
-  // the chart ends at the middle line: newest bar there, older bars to the left, right half stays free
-  const mid = PW / 2, bw = mid / Math.max(n, 24), bx = i => mid - (n - i - .5) * bw;
+  // the tags of the open trades (L1 0.01) get the free space right of the newest candle, so no candle is under them
+  const mono = (w, size) => w + ' ' + size + 'px "IBM Plex Mono", Consolas, monospace';
+  g.font = mono(600, 9.5);
+  const tagged = levels.map(l => { const text = l.tag + ' ' + l.lot.toFixed(2); return { l, text, w: Math.ceil(g.measureText(text).width) + 14 }; });
+  const room = Math.max(40, ...tagged.map(t => t.w + 8));
+  // newest bar left of that space, older bars to the left of it
+  const right = PW - room, bw = right / Math.max(n, 30), bx = i => right - (n - i - .5) * bw;
+  chartView.bw = bw;                                         // a drag of one bar width moves the chart one bar
   for (let i = n - 1; i >= 0; i -= 10) { const xx = Math.round(bx(i)) + .5; g.beginPath(); g.moveTo(xx, 0); g.lineTo(xx, H); g.stroke(); }
   g.setLineDash([]);
   g.beginPath(); g.moveTo(PW + .5, 0); g.lineTo(PW + .5, H); g.stroke();
@@ -988,7 +1113,7 @@ function renderLadder(s, el) {
       g.strokeStyle = col('--body'); g.globalAlpha = .9; g.lineWidth = 1.5; g.lineJoin = 'round';
       g.beginPath();
       bars.forEach((b, i) => { if (i) g.lineTo(bx(i), y(b[3])); else g.moveTo(bx(i), y(b[3])); });
-      if (s.bid) g.lineTo(mid, y(s.bid));                       // join the line to the current price on the middle line
+      if (live && s.bid) g.lineTo(bx(n - 1), y(s.bid));         // the newest point is the price now
       g.stroke();
     } else {
       const body = Math.max(1, Math.min(9, bw * .62)), up = col('--good'), dn = col('--bad');
@@ -1002,35 +1127,80 @@ function renderLadder(s, el) {
     }
     g.globalAlpha = 1; g.lineWidth = 1;
   }
+
+  const C = { buy: col('--buy'), sell: col('--warn'), good: col('--good'), bad: col('--bad') };     // a buy is blue, a sell yellow
+  // where the tags go: above their line in the free space on the right, never on top of each other
+  const tags = tagged.map(t => ({ ...t, x: PW - t.w - 4, top: y(t.l.price) - 19, h: 16 })).sort((a, b) => a.top - b.top);
+  for (let i = 1; i < tags.length; i++) tags[i].top = Math.max(tags[i].top, tags[i - 1].top + tags[i - 1].h + 2);
+  const taken = tags.map(t => [t.x, t.top, t.x + t.w, t.top + t.h]);
+  const free = r => taken.every(q => r[2] < q[0] || r[0] > q[2] || r[3] < q[1] || r[1] > q[3]);
+
+  // closed trades: a dot where each closed and its profit over it; the newest keep their words when they would overlap
+  g.font = mono(700, 9.5);
+  for (const c of closed) {
+    const xx = bx(c.at), yy = y(c.price), win = c.profit === null || c.profit >= -0.004, colour = win ? C.good : C.bad;
+    g.globalAlpha = .8; g.fillStyle = colour;
+    g.beginPath(); g.arc(xx, yy, 2.2, 0, Math.PI * 2); g.fill();
+    if (c.profit !== null) {
+      const text = (win ? '+' : '-') + Math.abs(c.profit).toFixed(2) + '$ ' + (c.count > 1 ? 'BASKET' : win ? 'TP' : 'CLOSE');
+      const w = g.measureText(text).width, x0 = Math.max(2, Math.min(PW - w - 2, xx - w / 2)), y0 = yy - 16 < 6 ? yy + 14 : yy - 16;
+      const r = [x0 - 2, y0 - 6, x0 + w + 2, y0 + 6];
+      if (free(r)) { g.shadowColor = colour; g.shadowBlur = 6; g.fillText(text, x0, y0); g.shadowBlur = 0; taken.push(r); }
+    }
+    g.globalAlpha = 1;
+  }
+
+  // open trades: ◀ on the candle it opened on (its tip on the candle), a thin dashed line to the right edge, the tag in a cut-corner box
+  for (const t of tags) {
+    const l = t.l, c = C[l.side], yy = Math.round(y(l.price)) + .5, o = scr(l.e), x0 = o >= 0 ? bx(o) : 0;
+    g.save();
+    g.strokeStyle = c; g.lineWidth = 1; g.setLineDash([5, 4]); g.shadowColor = c; g.shadowBlur = 3;
+    g.beginPath(); g.moveTo(x0, yy); g.lineTo(PW, yy); g.stroke();
+    g.setLineDash([]);
+    if (o >= 0) { g.fillStyle = c; g.beginPath(); g.moveTo(x0, yy); g.lineTo(x0 + 6, yy - 5); g.lineTo(x0 + 6, yy + 5); g.closePath(); g.fill(); }
+    g.shadowBlur = 0;
+    const cut = 4, L = t.x, T = t.top, R = t.x + t.w, B = t.top + t.h;
+    g.beginPath(); g.moveTo(L + cut, T); g.lineTo(R, T); g.lineTo(R, B - cut); g.lineTo(R - cut, B); g.lineTo(L, B); g.lineTo(L, T + cut); g.closePath();
+    g.fillStyle = 'rgba(4,16,24,.92)'; g.fill(); g.strokeStyle = c; g.lineWidth = 1; g.stroke();
+    g.font = mono(600, 9.5); g.fillStyle = c; g.fillText(t.text, L + 7, T + t.h / 2 + .5);
+    g.restore();
+  }
+  g.font = mono(500, 10);
+
   // exit levels: outlined price tag on the scale, in the colour of the side
   for (const x of exits) {
     const yy = Math.max(8, Math.min(H - 8, y(x.price))), c = col(x.side === 'buy' ? '--buy' : '--sell');
     g.fillStyle = col('--panel'); g.fillRect(PW + 1, yy - 8, SW - 1, 16);
     g.strokeStyle = c; g.strokeRect(PW + 1.5, yy - 7.5, SW - 2, 15);
-    g.fillStyle = c; g.fillText(px(x.price), PW + 6, yy + .5);
+    g.fillStyle = c; g.fillText(pxg(x.price), PW + 6, yy + .5);
   }
   // current price: tag on the scale, like MT5
   if (s.bid) {
     const yy = Math.max(8, Math.min(H - 8, y(s.bid)));
     g.fillStyle = col('--cyan'); g.fillRect(PW + 1, yy - 8, SW - 1, 16);
-    g.fillStyle = col('--bg'); g.fillText(px(s.bid), PW + 6, yy + .5);
+    g.fillStyle = col('--bg'); g.fillText(pxg(s.bid), PW + 6, yy + .5);
   }
 
-  // ladder on top: middle line, a dash on it for every trade, the label beside it
+  // lines on top: the price now, the next entries, where a side closes
   const yp = p => (y(p) / H * 100).toFixed(2) + '%';
-  let h = '<div class="ld-axis"></div>';
+  let h = '';
   if (s.bid) h += '<div class="ld-line" style="top:' + yp(s.bid) + '"></div>';
   if (s.nextUp) h += '<div class="ld-line next" style="top:' + yp(s.nextUp) + '"><span>NEXT ' + px(s.nextUp) + '</span></div>';
   if (s.nextDn) h += '<div class="ld-line next" style="top:' + yp(s.nextDn) + '"><span>NEXT ' + px(s.nextDn) + '</span></div>';
   for (const x of exits) h += '<div class="ld-line exit ' + x.side + (x.band ? ' band' : '') + '" style="top:' + yp(x.price) + '"><span>' + x.text + '</span></div>';
-  for (const p of s.positions) {
-    h += '<i class="ld-tick ' + p.side + '" style="top:' + yp(p.open) + '"></i>' +
-         '<div class="ld-pos ' + p.side + '" style="top:' + yp(p.open) + '">' + E(p.tag) + ' ' + Number(p.lot).toFixed(2) + '</div>';
-  }
+  if (!live) h += '<button type="button" class="ld-now">Now</button>';      // moved back: one tap follows the price again
   plot.innerHTML = h;
 }
 function syncChartSeg() {
   document.querySelectorAll('#chartSeg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.chart === chartType));
+}
+// the History switch: the profits of closed trades on the chart, shown unless hidden on this phone
+let showHist = store.get('rz_hist') !== 'off';
+function syncHistBtn() {
+  const b = $('histBtn');
+  b.setAttribute('aria-pressed', showHist);
+  b.title = showHist ? 'Hide the profit of closed trades' : 'Show the profit of closed trades';
+  $('lgClosed').hidden = !showHist;
 }
 const low = { buy: 0, sell: 0 };
 function basketBox(side, b, target, plEl, infoEl, barEl) {
@@ -1121,26 +1291,121 @@ function renderCalc(s) {
     (smart ? 'Smart mode: this table uses the grid distance of the session now (' + grid + ' points). ' : '') +
     (blockedAt ? 'From L' + blockedAt + ' the max total lots limit (' + Number(c.maxLots).toFixed(2) + ') blocks new pairs.' : '');
 }
+// Report: closed profit by range. This week and Last week: a bar a day, Monday to Sunday; Month: a bar a week for the
+// last 5 weeks; All time: a bar a week since the first trade, a bar a month after half a year. From the bot's "rep"
+// (the broker's server days); a bot from before 21 Oct 2026 sends only the last 7 days, shown whatever the range.
+const MON = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+const WD = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+let rpRange = ['week', 'last', 'month', 'all'].includes(store.get('rz_range')) ? store.get('rz_range') : 'week';
+const dateLabel = sec => { const d = new Date(sec * 1000); return d.getUTCDate() + ' ' + MON[d.getUTCMonth()]; };   // server time
+function reportSeries(s) {
+  const r = s.rep;
+  if (!r || !Array.isArray(r.d14) || !Array.isArray(r.wk) || !r.wk.length) {
+    // a bot without the history: its 7 days under This week, and the other ranges say plainly that it is not sent
+    if (rpRange !== 'week') return { title: { last: 'Closed profit last week ($)', month: 'Closed profit a week, last 5 weeks ($)',
+                                              all: 'Closed profit since the start ($)' }[rpRange], vals: [], labels: [], now: -1,
+                                     unit: rpRange === 'last' ? 'day' : 'week', old: true, empty: true };
+    const names = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'], today = new Date().getDay(), vals = s.days.slice(0, 7);
+    return { title: 'Closed profit, last 7 days ($)', vals, labels: vals.map((v, i) => i === 6 ? 'TODAY' : names[(today + i + 1) % 7]),
+             now: 6, unit: 'day', old: true };
+  }
+  const wd = (new Date(r.day0 * 1000).getUTCDay() + 6) % 7;            // today, 0 = Monday
+  if (rpRange === 'week' || rpRange === 'last') {
+    const from = 13 - wd - (rpRange === 'last' ? 7 : 0), vals = [], labels = [];
+    for (let i = 0; i < 7; i++) {
+      const k = from + i;
+      vals.push(k <= 13 ? Number(r.d14[k]) : null);                   // null: a day still to come
+      labels.push(rpRange === 'week' && k === 13 ? 'TODAY' : WD[i]);
+    }
+    return { title: rpRange === 'week' ? 'Closed profit this week ($)' : 'Closed profit last week ($)', vals, labels,
+             now: rpRange === 'week' ? wd : -1, unit: 'day' };
+  }
+  const WEEK = 7 * 86400, n = r.wk.length;
+  if (rpRange === 'month') {
+    const k0 = Math.max(0, n - 5), vals = r.wk.slice(k0).map(Number);
+    return { title: 'Closed profit a week, last 5 weeks ($)', vals, labels: vals.map((v, i) => dateLabel(r.wk0 + (k0 + i) * WEEK)),
+             now: vals.length - 1, unit: 'week' };
+  }
+  if (n <= 26) return { title: 'Closed profit a week, since the start ($)', vals: r.wk.map(Number),
+                        labels: r.wk.map((v, i) => dateLabel(r.wk0 + i * WEEK)), now: n - 1, unit: 'week' };
+  const months = [];                                                    // a week counts in the month of its Monday
+  r.wk.forEach((v, i) => {
+    const d = new Date((r.wk0 + i * WEEK) * 1000), key = d.getUTCFullYear() * 12 + d.getUTCMonth(), last = months[months.length - 1];
+    if (last && last.key === key) last.v += Number(v);
+    else months.push({ key, v: Number(v), label: MON[d.getUTCMonth()] + ' ' + String(d.getUTCFullYear()).slice(2) });
+  });
+  return { title: 'Closed profit a month, since the start ($)', vals: months.map(m => m.v), labels: months.map(m => m.label),
+           now: months.length - 1, unit: 'month' };
+}
+// bars over and under the zero line; the bar now is cyan, a loss red; amounts over the bars while they fit
+function drawBars(el, vals, labels, now) {
+  if (!vals.length) {
+    el.innerHTML = '<text x="150" y="66" style="fill:var(--body);font-size:11px">Not sent by this bot yet</text>' +
+                   '<text x="150" y="86" style="font-size:10px">Update the bot to see this range</text>';
+    return;
+  }
+  const nums = vals.filter(v => v !== null), n = vals.length;
+  let hi = Math.max(0, ...nums), lo = Math.min(0, ...nums); if (hi - lo < 1) hi = lo + 1;
+  const top = 18, bot = 122, y = v => top + (hi - v) / (hi - lo) * (bot - top), cw = 300 / n, bw = Math.min(26, cw * .64);
+  const every = Math.ceil(n / 7), amounts = n <= 12;
+  let h = '<line x1="0" y1="' + y(0).toFixed(1) + '" x2="300" y2="' + y(0).toFixed(1) + '" stroke="var(--line)"/>';
+  vals.forEach((v, i) => {
+    const cx = cw * (i + .5), cur = i === now;
+    if (v !== null) {
+      const y0 = y(Math.max(v, 0)), y1 = y(Math.min(v, 0));
+      h += '<rect x="' + (cx - bw / 2).toFixed(1) + '" y="' + y0.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + Math.max(1, y1 - y0).toFixed(1) +
+           '" fill="' + (v < 0 ? 'var(--bad)' : cur ? 'var(--cyan)' : 'var(--frame)') + '"/>';
+      if (amounts) h += '<text x="' + cx.toFixed(1) + '" y="' + (v < 0 ? y1 + 11 : y0 - 5).toFixed(1) + '" style="fill:var(--body)">' +
+                        Number(v).toFixed(Math.abs(v) >= 100 ? 0 : 1) + '</text>';
+    }
+    if ((n - 1 - i) % every === 0)                                      // the newest always has its name
+      h += '<text x="' + cx.toFixed(1) + '" y="144"' + (cur ? ' style="fill:var(--cyan)"' : v === null ? ' style="opacity:.45"' : '') + '>' + labels[i] + '</text>';
+  });
+  el.innerHTML = h;
+}
 function renderReport(s) {
   pnl($('rpDay'), s.dayProfit);
   const dd = $('rpDD'); dd.textContent = s.maxDD > 0.004 ? '-' + Number(s.maxDD).toFixed(2) + '%' : '0.00%'; cls(dd, 'bad', s.maxDD > 0.004);
   $('rpTp').textContent = s.tpHits; $('rpBk').textContent = s.baskets; $('rpCy').textContent = s.cycles; $('rpTr').textContent = s.trades;
-  const days = s.days.slice(0, 7), names = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-  let hi = Math.max(0, ...days), lo = Math.min(0, ...days); if (hi - lo < 1) hi = lo + 1;
-  const top = 18, bot = 122, y = v => top + (hi - v) / (hi - lo) * (bot - top), today = new Date().getDay();
-  let h = '<line x1="0" y1="' + y(0).toFixed(1) + '" x2="300" y2="' + y(0).toFixed(1) + '" stroke="var(--line)"/>';
-  days.forEach((v, i) => {
-    const cx = 300 / 7 * (i + .5), y0 = y(Math.max(v, 0)), y1 = y(Math.min(v, 0)), last = i === 6;
-    h += '<rect x="' + (cx - 13).toFixed(1) + '" y="' + y0.toFixed(1) + '" width="26" height="' + Math.max(1, y1 - y0).toFixed(1) +
-         '" fill="' + (v < 0 ? 'var(--bad)' : last ? 'var(--cyan)' : 'var(--frame)') + '"/>' +
-         '<text x="' + cx.toFixed(1) + '" y="' + (v < 0 ? y1 + 11 : y0 - 5).toFixed(1) + '" style="fill:var(--body)">' + Number(v).toFixed(1) + '</text>' +
-         '<text x="' + cx.toFixed(1) + '" y="144"' + (last ? ' style="fill:var(--cyan)"' : '') + '>' + (last ? 'TODAY' : names[(today + i + 1) % 7]) + '</text>';
-  });
-  $('rpBars').innerHTML = h;
+  const ser = reportSeries(s);
+  $('rpTitle').textContent = ser.title;
+  drawBars($('rpBars'), ser.vals, ser.labels, ser.now);
+  // the figures count the days (weeks, months) that had closed trades; a day without any is not a bad day
+  const nums = ser.vals.filter(v => v !== null && Math.abs(v) > 0.004), total = nums.reduce((a, v) => a + v, 0);
+  pnl($('rpTotal'), total);
+  pnl($('rpAvg'), nums.length ? total / nums.length : 0);
+  pnl($('rpBest'), nums.length ? Math.max(...nums) : 0);
+  pnl($('rpWorst'), nums.length ? Math.min(...nums) : 0);
+  if (ser.empty) for (const id of ['rpTotal', 'rpAvg', 'rpBest', 'rpWorst']) { const el = $(id); el.textContent = '-'; el.className = 'num'; }
+  $('rpAvgCap').textContent = 'Average a ' + ser.unit;
+  $('rpBestCap').textContent = 'Best ' + ser.unit;
+  $('rpWorstCap').textContent = 'Worst ' + ser.unit;
+  $('rpHint').textContent = ser.old ? 'This bot sends only the last 7 days. Update it to see last week, the month and all time.'
+                                    : 'Closed profit of this bot from the account history, by the broker’s server days.';
+}
+// Log: All (the newest 50 of every type), Take profit, Basket, Risk (each its own list from the server, app_events,
+// asked again every 5 seconds while it is open). Cooldowns are not shown.
+const LOG_KINDS = { all: 'Alerts from the bot', tp: 'Take profit', basket: 'Baskets closed', risk: 'Risk alerts' };
+let logTab = LOG_KINDS[store.get('rz_logtab')] ? store.get('rz_logtab') : 'all';
+const kindEvents = {}, kindAt = {};
+async function loadKind(kind) {
+  if (!token || Date.now() - (kindAt[kind] || 0) < 5000) return;
+  kindAt[kind] = Date.now();
+  try {
+    const r = await rpc('app_events', { p_token: token, p_kind: kind, p_limit: 100 });
+    if (r.ok && Array.isArray(r.events)) { kindEvents[kind] = r.events; if (tab === 'log' && logTab === kind) render(); }
+  } catch (e) {}                                   // the list stays as it is and is asked for again in 5 seconds
+}
+// the money in a message, "+1.20$" green and "-4.80$" red (the text is escaped already)
+const moneyMarks = html => html.replace(/([+-])\d[\d,]*(?:\.\d+)?\$/g, (m, sign) => '<b class="' + (sign === '-' ? 'bad' : 'good') + '">' + m + '</b>');
+// a time today is "20:03:35", an older one "21 OCT 20:03"
+function when(t) {
+  const d = new Date(t), time = d.toTimeString().slice(0, 8);
+  return d.toDateString() === new Date().toDateString() ? time : d.getDate() + ' ' + MON[d.getMonth()] + ' ' + time.slice(0, 5);
 }
 function render() {
   const s = view();
-  // ---- link + status
+  // ---- link + status (the status card is on the Trades tab, above the grid ladder)
   const status = !S ? 'WAITING FOR BOT' : online ? s.status : 'BOT OFFLINE';
   const tone = !S ? 'off' : online ? s.tone : 'bad';
   $('whoLine').textContent = '#' + account + (symbol ? ' | ' + symbol : '');
@@ -1182,8 +1447,11 @@ function render() {
   if (tab === 'home') {
     $('stBuy').textContent = s.buy.count; $('stSell').textContent = s.sell.count;
     $('stLots').textContent = (s.buy.lots + s.sell.lots).toFixed(2);
-    $('vBal').textContent = money0(s.balance); $('vEq').textContent = money0(s.equity);
-    pnl($('vDay'), s.dayProfit); pnl($('vFloat'), s.floating);
+    $('vEq').textContent = usd(s.equity);
+    const day = $('vDay'), up = s.dayProfit >= -0.004;
+    day.textContent = (up ? '+' : '-') + usd(Math.abs(s.dayProfit)) + ' today';
+    cls(day, 'good', up); cls(day, 'bad', !up);
+    $('vBal').textContent = money0(s.balance); pnl($('vFloat'), s.floating);
     const dd = $('vDD'); dd.textContent = s.drawdown > 0.004 ? '-' + Number(s.drawdown).toFixed(2) + '%' : '0.00%';
     cls(dd, 'bad', s.drawdown > 0.004); cls(dd, 'good', s.drawdown <= 0.004);
     $('vTrades').textContent = s.trades; $('vCycles').textContent = s.cycles;
@@ -1195,6 +1463,7 @@ function render() {
     renderSpark();
   }
   if (tab === 'trades') {
+    loadOldBars();                                  // the candles before the bot's last hour, once a minute
     renderLadder(s, $('ladder'));
     basketBox('buy', s.buy, s.basketTarget, $('bkBuyPL'), $('bkBuyInfo'), $('bkBuyBar'));
     basketBox('sell', s.sell, s.basketTarget, $('bkSellPL'), $('bkSellInfo'), $('bkSellBar'));
@@ -1229,11 +1498,22 @@ function render() {
     }
   }
   if (tab === 'log') {
-    const names = { tp: 'TP hit', basket: 'Basket', cool: 'Cycle', risk: 'Risk', cmd: 'Command' };
-    const list = events.filter(e => show[e.kind] !== false);
+    const names = { tp: 'TP hit', basket: 'Basket', risk: 'Risk', cmd: 'Command' };
+    let list;
+    if (logTab === 'all') list = events.filter(e => e.kind !== 'cool' && show[e.kind] !== false);
+    else {
+      loadKind(logTab);
+      // the newest from the live report first, then the server's list; each message once, newest on top
+      const seen = new Set();
+      list = events.filter(e => e.kind === logTab).concat(kindEvents[logTab] || [])
+        .filter(e => { const k = e.t + '|' + e.text; if (seen.has(k)) return false; seen.add(k); return true; })
+        .sort((a, b) => b.t - a.t);
+    }
+    $('logTitle').textContent = LOG_KINDS[logTab] + (logTab === 'all' ? '' : ' (' + list.length + ')');
     $('logList').innerHTML = list.length ? list.map(e =>
-      '<div class="ev"><time>' + new Date(e.t).toTimeString().slice(0, 8) + '</time><p>' + esc(e.text) + '</p>' +
-      '<span class="k ' + esc(e.kind) + '">' + (names[e.kind] || esc(e.kind)) + '</span></div>').join('') : '<p class="empty">No alerts yet.</p>';
+      '<div class="ev"><time>' + when(e.t) + '</time><p>' + moneyMarks(esc(e.text)) + '</p>' +
+      '<span class="k ' + esc(e.kind) + '">' + (names[e.kind] || esc(e.kind)) + '</span></div>').join('')
+      : '<p class="empty">' + (logTab === 'all' ? 'No alerts yet.' : 'Nothing here yet.') + '</p>';
   }
   if (pending) {
     const left = Math.ceil((pending.until - Date.now()) / 1000);
@@ -1260,6 +1540,8 @@ function leave(message) {
   clearInterval(timer); closeSheet(); closeQuit();
   token = null; store.set('rz_token', null);
   S = null; age = null; events = []; online = false; eq.length = 0; ownBars.length = 0; waiting.clear();
+  oldBars = []; oldBarsAt = 0; chartView.back = 0;
+  for (const k in kindEvents) { delete kindEvents[k]; delete kindAt[k]; }
   for (const id of ['hdr', 'main', 'dock', 'actbar']) $(id).hidden = true;
   $('login').hidden = false;
   $('loginBtn').textContent = 'Connect to bot'; $('loginBtn').disabled = false;
@@ -1303,11 +1585,23 @@ $('acLogoutOthers').addEventListener('click', async () => {
 $('quitNo').addEventListener('click', closeQuit);
 $('quitYes').addEventListener('click', logout);
 $('quit').addEventListener('click', e => { if (e.target === $('quit')) closeQuit(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeQuit(); if (pending) { closeSheet(); toast('Canceled.'); } } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeQuit(); closePwConfirm(); if (pending) { closeSheet(); toast('Canceled.'); } } });
 
 /* ---------- events ---------- */
 $('dock').addEventListener('click', e => { const b = e.target.closest('button[data-tab]'); if (b) setTab(b.dataset.tab); });
 $('toolSeg').addEventListener('click', e => { const b = e.target.closest('button[data-tool]'); if (b) setTool(b.dataset.tool); });
+// the Log type switch and the Report range switch; each choice is kept on this phone
+const syncSeg = (id, attr, val) => document.querySelectorAll('#' + id + ' button').forEach(b => b.setAttribute('aria-selected', b.dataset[attr] === val));
+$('logSeg').addEventListener('click', e => {
+  const b = e.target.closest('button[data-log]'); if (!b) return;
+  logTab = b.dataset.log; store.set('rz_logtab', logTab); syncSeg('logSeg', 'log', logTab); render();
+});
+$('rpSeg').addEventListener('click', e => {
+  const b = e.target.closest('button[data-range]'); if (!b) return;
+  rpRange = b.dataset.range; store.set('rz_range', rpRange); syncSeg('rpSeg', 'range', rpRange); render();
+});
+syncSeg('logSeg', 'log', logTab);
+syncSeg('rpSeg', 'range', rpRange);
 function onAction(e) {
   const b = e.target.closest('button'); if (!b) return;
   if (b.classList.contains('btn')) flash(b);
@@ -1327,6 +1621,55 @@ $('chartSeg').addEventListener('click', e => {
   chartType = b.dataset.chart; store.set('rz_chart', chartType); syncChartSeg(); render();
 });
 syncChartSeg();
+// moving the chart with a finger or the mouse (see renderLadder): one finger drags through time, two fingers pinch to
+// show more or fewer candles, a double tap or NOW follows the price again. The mouse wheel zooms, a sideways one drags.
+(() => {
+  const el = $('ladder'), pts = new Map();
+  let from = null, lastTap = 0, moved = false;
+  const redraw = () => renderLadder(view(), el);
+  const spread = () => { const xs = [...pts.values()]; return xs.length > 1 ? Math.abs(xs[0] - xs[1]) : 0; };
+  const anchor = () => { from = { back: chartView.back, count: chartView.count, x: [...pts.values()][0], span: spread() }; };
+  const toNow = () => { chartView.back = 0; chartView.count = 45; redraw(); };
+  el.addEventListener('pointerdown', e => {
+    if (e.target.closest('.ld-now')) return;
+    pts.set(e.pointerId, e.clientX);
+    moved = pts.size > 1;
+    try { el.setPointerCapture(e.pointerId); } catch (x) {}
+    anchor();
+  });
+  el.addEventListener('pointermove', e => {
+    if (!pts.has(e.pointerId) || !from) return;
+    pts.set(e.pointerId, e.clientX);
+    if (pts.size > 1) {
+      const span = spread();                       // fingers apart: fewer, wider candles
+      if (from.span > 20 && span > 20) chartView.count = Math.round(from.count * from.span / span);
+    } else {
+      const dx = e.clientX - from.x;              // dragged right: older candles come in from the left
+      if (Math.abs(dx) > 4) moved = true;
+      chartView.back = Math.round(from.back + dx / (chartView.bw || 6));
+    }
+    redraw();
+  });
+  const up = e => {
+    if (!pts.has(e.pointerId)) return;
+    pts.delete(e.pointerId);
+    if (pts.size) { anchor(); return; }
+    from = null;
+    if (e.type !== 'pointerup' || moved) return;
+    if (Date.now() - lastTap < 320) { lastTap = 0; toNow(); } else lastTap = Date.now();
+  };
+  el.addEventListener('pointerup', up);
+  el.addEventListener('pointercancel', up);
+  el.addEventListener('wheel', e => {
+    e.preventDefault();
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) chartView.back = Math.round(chartView.back - e.deltaX / (chartView.bw || 6));
+    else chartView.count = Math.round(chartView.count * (e.deltaY > 0 ? 1.15 : 1 / 1.15));
+    redraw();
+  }, { passive: false });
+  el.addEventListener('click', e => { if (e.target.closest('.ld-now')) toNow(); });
+})();
+$('histBtn').addEventListener('click', () => { showHist = !showHist; store.set('rz_hist', showHist ? null : 'off'); syncHistBtn(); render(); });
+syncHistBtn();
 $('shCancel').addEventListener('click', () => { closeSheet(); toast('Canceled.'); });
 $('shOk').addEventListener('click', () => { const c = pending && pending.cmd; closeSheet(); if (c) send(c); });
 $('t-settings').addEventListener('submit', e => e.preventDefault());
@@ -1336,27 +1679,36 @@ $('bkProfit').addEventListener('input', e => { bkMoved = Date.now(); slPaint(e.t
 $('bkProfit').addEventListener('change', e => { bkMoved = Date.now(); send('basket', Number(e.target.value).toFixed(2)); });
 $('tpUsd').addEventListener('input', e => { tpMoved = Date.now(); tpPaint(e.target.value, view().cfg); });
 $('tpUsd').addEventListener('change', e => { tpMoved = Date.now(); send('tp', Number(e.target.value).toFixed(2)); });
-for (const [id, k] of [['alTp', 'tp'], ['alBasket', 'basket'], ['alCool', 'cool'], ['alRisk', 'risk']]) {
+for (const [id, k] of [['alTp', 'tp'], ['alBasket', 'basket'], ['alRisk', 'risk']]) {
   $(id).checked = show[k];
   $(id).addEventListener('change', () => { show[k] = $(id).checked; store.set('rz_show', JSON.stringify(show)); });
 }
 function closePwConfirm() { $('pwConfirm').hidden = true; }
-$('pwForm').addEventListener('submit', async e => {
+// an eye in each password box shows what is typed, and hides it again
+$('pwForm').addEventListener('click', e => {
+  const b = e.target.closest('.pw-eye'); if (!b) return;
+  const show = b.getAttribute('aria-pressed') !== 'true';
+  $(b.dataset.eye).type = show ? 'text' : 'password';
+  b.setAttribute('aria-pressed', show); b.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+});
+function hidePasswords() {
+  document.querySelectorAll('#pwForm .pw-eye').forEach(b => {
+    $(b.dataset.eye).type = 'password'; b.setAttribute('aria-pressed', 'false'); b.setAttribute('aria-label', 'Show password');
+  });
+}
+// Change password: checked here first, then the pop-up asks once more. Only "Yes, change it" sends it (pwProceed),
+// so a tap with a half-typed password changes nothing.
+$('pwForm').addEventListener('submit', e => {
   e.preventDefault();
   const msg = $('pwMsg'), oldP = $('pwOld').value, newP = $('pwNew').value;
   msg.className = 'err'; msg.style.color = '';
   if (!oldP) { msg.textContent = 'Type your current password.'; return; }
   if (newP.length < 8) { msg.textContent = 'The new password needs 8 or more characters.'; return; }
   if (newP === oldP) { msg.textContent = 'The new password must be different from the current one.'; return; }
-  try {
-    const r = await rpc('app_change_password', { p_token: token, p_old: oldP, p_new: newP });
-    if (r.ok) {
-      msg.className = 'hint'; msg.style.color = 'var(--good)';
-      msg.textContent = 'Password changed. All other devices have been logged out.';
-      $('pwOld').value = ''; $('pwNew').value = '';
-    } else msg.textContent = r.err === 'password' ? 'The current password is wrong.' : r.err === 'short' ? 'The new password needs 8 or more characters.'
-                           : r.err === 'session' ? 'Log in again.' : 'Could not change the password.';
-  } catch (x) { msg.textContent = 'No connection to the server.'; }
+  if ($('pwNew2').value !== newP) { msg.textContent = 'The two new passwords are not the same. Type them again.'; return; }
+  msg.textContent = '';
+  $('pwConfirm').hidden = false;
+  $('pwCancel').focus();
 });
 $('pwCancel').addEventListener('click', closePwConfirm);
 $('pwConfirm').addEventListener('click', e => { if (e.target === $('pwConfirm')) closePwConfirm(); });
@@ -1368,8 +1720,9 @@ $('pwProceed').addEventListener('click', async () => {
     closePwConfirm();
     if (r.ok) {
       msg.className = 'hint'; msg.style.color = 'var(--good)';
-      msg.textContent = 'Password changed. Now type the new password in the bot inputs in MT5 (App Password).';
-      $('pwOld').value = ''; $('pwNew').value = '';
+      msg.textContent = 'Password changed. All other devices are logged out.';
+      $('pwOld').value = ''; $('pwNew').value = ''; $('pwNew2').value = '';
+      hidePasswords();
     } else {
       msg.textContent = r.err === 'password' ? 'The current password is wrong.'
                       : r.err === 'short'    ? 'The new password needs 8 or more characters.'

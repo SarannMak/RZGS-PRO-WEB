@@ -19,13 +19,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="style.css?v=26">
+  <link rel="stylesheet" href="style.css?v=33">
 
   <script>document.documentElement.classList.add('js');</script>
   <script src="script.js?v=8" defer></script>
   <!-- the 3D library the robot needs: asked for at once, so the robot can come up sooner -->
   <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js">
   <script src="robot-3d.js?v=8" defer></script>
+  <!-- the Features section in 3D: the scenes of the video "How RZGS-PRO works" -->
+  <script src="features-3d.js?v=13" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -195,214 +197,168 @@
           <p class="section-lead">From the first pair to the closed basket, RZGS-PRO follows the same rules every time. You watch and control it from your phone.</p>
         </header>
 
-        <div class="bento">
-          <!-- Live grid ladder -->
-          <article class="card feature feature--analysis reveal" data-spotlight>
-            <div class="feature-copy">
-              <span class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-activity"/></svg></span>
-              <h3>Live grid ladder</h3>
-              <p>See every open trade, its lot, its take profit and the next entry price on a live gold chart in the control app.</p>
+        <div class="fx">
+          <!-- 01 the strategy: one cycle of the bot on a 3D gold chart (features-3d.js); the steps light up in turn -->
+          <article class="fx-row reveal">
+            <div class="fx-copy">
+              <p class="fx-kicker"><span>01</span>The strategy</p>
+              <h3 class="fx-title">One cycle, step by step</h3>
+              <ol class="fx-steps">
+                <li class="is-on" data-fx-step><b>01</b><span><strong>Open both sides</strong>A buy and a sell open together on gold.</span></li>
+                <li data-fx-step><b>02</b><span><strong>The winner takes profit</strong>The side that moves right closes at +1.00$.</span></li>
+                <li data-fx-step><b>03</b><span><strong>The grid steps in</strong>A new pair every 2.00$. Only the holding side grows.</span></li>
+                <li data-fx-step><b>04</b><span><strong>The basket closes the rest</strong>The holding side closes together, in profit.</span></li>
+              </ol>
             </div>
-
-            <div class="mock mock-chart mock-ladder" role="img" aria-label="Example of the grid ladder in the control app: gold candles with the live price, two buy trades and one sell trade with their lots, the next entry level, the buy basket's close line and the sell trade's take profit">
-              <div class="chart-frame">
-                <div class="chart-bar" aria-hidden="true">
-                  <span class="gl-title">Grid ladder</span>
-                  <span class="gl-seg"><span class="is-on">Candles</span><span>Line</span></span>
-                </div>
-                <div class="gl" aria-hidden="true">
-                  <span class="gl-flag">Example</span>
-                  <ol class="gl-scale">
-                  <li style="--y: 8.33%"><span>4011.00</span></li>
-                  <li style="--y: 25.00%"><span>4009.00</span></li>
-                  <li style="--y: 41.67%"><span>4007.00</span></li>
-                  <li style="--y: 58.33%"><span>4005.00</span></li>
-                  <li style="--y: 75.00%"><span>4003.00</span></li>
-                  <li style="--y: 91.67%"><span>4001.00</span></li>
-                  </ol>
-                  <div class="gl-plot">
-                    <svg class="gl-candles" viewBox="0 0 240 220" preserveAspectRatio="none">
-                    <g class="candle up" style="--i:0"><line x1="5.5" x2="5.5" y1="37.6" y2="56.8"/><rect x="2.5" y="44.0" width="6" height="7.3"/></g>
-                    <g class="candle up" style="--i:1"><line x1="16.4" x2="16.4" y1="22.0" y2="47.7"/><rect x="13.4" y="31.2" width="6" height="12.8"/></g>
-                    <g class="candle up" style="--i:2"><line x1="27.3" x2="27.3" y1="16.5" y2="35.7"/><rect x="24.3" y="22.0" width="6" height="9.2"/></g>
-                    <g class="candle dn" style="--i:3"><line x1="38.2" x2="38.2" y1="13.8" y2="42.2"/><rect x="35.2" y="22.0" width="6" height="12.8"/></g>
-                    <g class="candle up" style="--i:4"><line x1="49.1" x2="49.1" y1="22.9" y2="40.3"/><rect x="46.1" y="27.5" width="6" height="7.3"/></g>
-                    <g class="candle dn" style="--i:5"><line x1="60.0" x2="60.0" y1="22.0" y2="55.9"/><rect x="57.0" y="27.5" width="6" height="20.2"/></g>
-                    <g class="candle dn" style="--i:6"><line x1="70.9" x2="70.9" y1="44.0" y2="68.8"/><rect x="67.9" y="47.7" width="6" height="14.7"/></g>
-                    <g class="candle up" style="--i:7"><line x1="81.8" x2="81.8" y1="45.8" y2="66.9"/><rect x="78.8" y="53.2" width="6" height="9.2"/></g>
-                    <g class="candle dn" style="--i:8"><line x1="92.7" x2="92.7" y1="47.7" y2="78.1"/><rect x="89.7" y="53.2" width="6" height="17.6"/></g>
-                    <g class="candle dn" style="--i:9"><line x1="103.6" x2="103.6" y1="66.2" y2="91.7"/><rect x="100.6" y="70.8" width="6" height="15.4"/></g>
-                    <g class="candle up" style="--i:10"><line x1="114.5" x2="114.5" y1="70.6" y2="89.8"/><rect x="111.5" y="77.0" width="6" height="9.2"/></g>
-                    <g class="candle dn" style="--i:11"><line x1="125.5" x2="125.5" y1="73.3" y2="99.9"/><rect x="122.5" y="77.0" width="6" height="16.5"/></g>
-                    <g class="candle dn" style="--i:12"><line x1="136.4" x2="136.4" y1="88.0" y2="115.7"/><rect x="133.4" y="93.5" width="6" height="13.9"/></g>
-                    <g class="candle up" style="--i:13"><line x1="147.3" x2="147.3" y1="91.7" y2="111.1"/><rect x="144.3" y="99.0" width="6" height="8.4"/></g>
-                    <g class="candle dn" style="--i:14"><line x1="158.2" x2="158.2" y1="95.3" y2="121.9"/><rect x="155.2" y="99.0" width="6" height="16.5"/></g>
-                    <g class="candle up" style="--i:15"><line x1="169.1" x2="169.1" y1="100.8" y2="120.1"/><rect x="166.1" y="106.3" width="6" height="9.2"/></g>
-                    <g class="candle dn" style="--i:16"><line x1="180.0" x2="180.0" y1="101.8" y2="130.2"/><rect x="177.0" y="106.3" width="6" height="16.5"/></g>
-                    <g class="candle dn" style="--i:17"><line x1="190.9" x2="190.9" y1="119.2" y2="142.1"/><rect x="187.9" y="122.8" width="6" height="11.0"/></g>
-                    <g class="candle up" style="--i:18"><line x1="201.8" x2="201.8" y1="114.6" y2="137.5"/><rect x="198.8" y="121.0" width="6" height="12.8"/></g>
-                    <g class="candle dn" style="--i:19"><line x1="212.7" x2="212.7" y1="115.5" y2="136.6"/><rect x="209.7" y="121.0" width="6" height="9.2"/></g>
-                    <g class="candle up" style="--i:20"><line x1="223.6" x2="223.6" y1="118.2" y2="134.7"/><rect x="220.6" y="122.8" width="6" height="7.3"/></g>
-                    <g class="candle dn" style="--i:21"><line x1="234.5" x2="234.5" y1="117.3" y2="133.1"/><rect x="231.5" y="122.8" width="6" height="4.8"/></g>
-                    </svg>
-                    <span class="gl-axis"></span>
-                    <span class="gl-line gl-exit gl-buy gl-band" style="--y: 43.00%"><b>Basket</b></span>
-                    <span class="gl-line gl-price" style="--y: 58.00%"></span>
-                    <span class="gl-line gl-next" style="--y: 65.50%"><b>Next 4004.14</b></span>
-                    <span class="gl-line gl-exit gl-sell" style="--y: 90.50%"><b>TP</b></span>
-                    <span class="gl-pos gl-buy" style="--y: 32.17%">L1 0.01</span>
-                    <span class="gl-pos gl-buy" style="--y: 48.83%">L2 0.02</span>
-                    <span class="gl-pos gl-sell" style="--y: 48.83%">L1 0.01</span>
-                  </div>
-                  <span class="gl-tag gl-buy" style="--y: 43.00%">4006.84</span>
-                  <span class="gl-tag gl-tag--price" style="--y: 58.00%">4005.04</span>
-                  <span class="gl-tag gl-sell" style="--y: 90.50%">4001.14</span>
-                </div>
-                <div class="gl-legend" aria-hidden="true">
-                  <span><i class="gl-sw gl-buy"></i>Buy (left)</span>
-                  <span><i class="gl-sw gl-sell"></i>Sell (right)</span>
-                  <span>M1 chart</span>
-                </div>
-              </div>
+            <div class="fx-stage fx-stage--chart" data-fx3d="strategy" role="img" aria-label="Animated example of one cycle on a gold chart: a buy and a sell open together, the buy side takes profit, new pairs open every 2 dollars, and the three sells close together as one basket.">
+              <span class="fx-flag">Example</span>
             </div>
           </article>
 
-          <!-- Runs 24/7 -->
-          <article class="card feature feature--always reveal" data-spotlight style="--d: 80ms">
-            <div class="feature-copy">
-              <span class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-bot"/></svg></span>
-              <h3>Runs 24/7</h3>
-              <p>The bot keeps working around the clock, through the Asia, London and New York sessions, as long as MetaTrader 5 is online.</p>
+          <!-- 02 the app: the control app on a 3D phone, tab after tab; the copy names the tab of the moment -->
+          <article class="fx-row fx-row--flip reveal">
+            <div class="fx-copy">
+              <p class="fx-kicker"><span>02</span>The app</p>
+              <h3 class="fx-title">Run and watch it from your phone</h3>
+              <p class="fx-tabcount" data-fx-tabcount>Tab 1 / 4</p>
+              <p class="fx-tabname text-gradient" data-fx-tabname>Home</p>
+              <p class="fx-tabsub" data-fx-tabsub>Equity, balance and your account, live every second.</p>
+              <div class="fx-dots" aria-hidden="true"><i class="is-on" data-fx-dot></i><i data-fx-dot></i><i data-fx-dot></i><i data-fx-dot></i></div>
+              <a class="text-link" href="app">Open the control app <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
             </div>
-
-            <div class="mock mock-always" aria-hidden="true">
-              <div class="radar">
-                <div class="radar-sweep"></div>
-                <div class="radar-core">
-                  <span class="radar-big text-gradient">24/7</span>
-                  <span class="radar-small">Always on</span>
-                </div>
-              </div>
-              <div class="engine">
-                <div class="engine-status"><span class="live-dot"></span>Bot running</div>
-                <ul class="sessions">
-                  <li><span>Asia</span><span class="session-bar"><i></i></span></li>
-                  <li><span>London</span><span class="session-bar"><i style="--s: -0.8s"></i></span></li>
-                  <li><span>New York</span><span class="session-bar"><i style="--s: -1.6s"></i></span></li>
-                </ul>
-              </div>
-            </div>
+            <div class="fx-stage fx-stage--phone" data-fx3d="app" role="img" aria-label="The RZGS-PRO control app on a phone, showing its Home, Trades, Control and Tools tabs in turn."></div>
           </article>
 
-          <!-- One-tap control: Activate / Pause -->
-          <article class="card feature feature--trade reveal" data-spotlight>
-            <div class="feature-copy">
-              <span class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-pointer"/></svg></span>
-              <h3>One-tap control</h3>
-              <p>One tap activates the bot, another pauses it. While it is paused it opens no new trades, but open baskets are still managed.</p>
+          <!-- 03 results: one example week as 3D columns; the figures count up while they rise -->
+          <article class="fx-row reveal">
+            <div class="fx-copy">
+              <p class="fx-kicker"><span>03</span>Results</p>
+              <h3 class="fx-title">The Report tab, one example week</h3>
+              <p class="fx-cap">Closed profit &middot; last 7 days</p>
+              <p class="fx-total text-gradient" data-fx-count="59.15" data-fx-dec="2" data-fx-prefix="+" data-fx-suffix="$">+59.15$</p>
+              <p class="fx-sub">100.00$ &rarr; 159.15$ &middot; 0.01 lot</p>
+              <span class="fx-badge">Example figures</span>
+              <dl class="fx-stats">
+                <div><dt>TP hits</dt><dd data-fx-count="3638">3,638</dd></div>
+                <div><dt>Baskets</dt><dd data-fx-count="2159">2,159</dd></div>
+                <div><dt>Cycles</dt><dd data-fx-count="481">481</dd></div>
+                <div><dt>Max drawdown</dt><dd class="is-bad" data-fx-count="23.63" data-fx-dec="2" data-fx-suffix="%">23.63%</dd></div>
+              </dl>
             </div>
-
-            <div class="mock mock-trade">
-              <div class="phone ai-panel" data-ai-panel data-state="active">
-                <div class="phone-notch" aria-hidden="true"></div>
-                <div class="ai-head" aria-hidden="true">
-                  <span class="ai-title">Bot control</span>
-                  <span class="ai-chip"><span class="ai-chip-dot"></span><span data-ai-chip>Active</span></span>
-                </div>
-                <svg class="ai-ring" viewBox="0 0 120 120" aria-hidden="true">
-                  <circle class="ring-track" cx="60" cy="60" r="52"/>
-                  <circle class="ring-arc" cx="60" cy="60" r="52" pathLength="100"/>
-                  <circle class="ring-dash" cx="60" cy="60" r="42"/>
-                  <text class="ring-big ring-on" x="60" y="66">L0</text>
-                  <text class="ring-sub ring-on" x="60" y="80">OF 12</text>
-                  <text class="ring-big ring-off" x="60" y="66">II</text>
-                  <text class="ring-sub ring-off" x="60" y="80">PAUSED</text>
-                </svg>
-                <p class="ai-status" role="status" data-ai-status>The bot is active</p>
-                <button class="ai-toggle" type="button" data-ai-toggle>
-                  <svg class="icon icon-pause" aria-hidden="true"><use href="#i-pause"/></svg>
-                  <svg class="icon icon-play" aria-hidden="true"><use href="#i-play"/></svg>
-                  <span data-ai-toggle-label>Pause the bot</span>
-                </button>
-                <p class="ai-hint">Demo · tap to try</p>
-              </div>
-            </div>
+            <div class="fx-stage fx-stage--bars" data-fx3d="results" role="img" aria-label="Example week as five columns, Monday to Friday: 10.12, 13.01, 11.96, 9.63 and 14.43 dollars, with the balance rising behind them."></div>
           </article>
 
-          <!-- Take profit -->
-          <article class="card feature feature--profit reveal" data-spotlight style="--d: 80ms">
-            <div class="feature-copy">
-              <span class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-target"/></svg></span>
-              <h3>Take profit</h3>
-              <p>Each trade has its own take profit. When a side holds two or more trades, they close together at the basket target. Every close is listed in the app log.</p>
-              <a class="text-link" href="bot">Learn more <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+          <!-- 04 protection: the four limits as shields around the logo -->
+          <article class="fx-row fx-row--flip reveal">
+            <div class="fx-copy">
+              <p class="fx-kicker"><span>04</span>Protection</p>
+              <h3 class="fx-title">Limits you set. The bot keeps them.</h3>
+              <ul class="fx-limits">
+                <li><strong>Max spread</strong>No new order while the spread is wider than your limit.</li>
+                <li><strong>Max total lots</strong>No new pair once your open lots reach the limit.</li>
+                <li><strong>Smart shield</strong>New pairs open at a distance set for each session: Asia, London and New York.</li>
+                <li><strong>Daily target</strong>No new cycle once the day&rsquo;s profit reaches your target.</li>
+              </ul>
             </div>
-
-            <div class="mock mock-notify" aria-hidden="true">
-              <div class="notif notif--main">
-                <span class="notif-app"><img src="assets/logo-192.webp" alt="" width="28" height="28" loading="lazy"></span>
-                <div class="notif-body">
-                  <div class="notif-head"><strong>Basket</strong><span>Just now</span></div>
-                  <div class="notif-text">Buy Basket Closed: <span class="pos">+0.70$</span> (3 trades)</div>
-                </div>
-                <span class="notif-badge"><svg class="icon"><use href="#i-check"/></svg></span>
-              </div>
-              <div class="notif notif--muted">
-                <span class="notif-app"><img src="assets/logo-192.webp" alt="" width="28" height="28" loading="lazy"></span>
-                <div class="notif-body">
-                  <div class="notif-head"><strong>TP hit</strong><span>1m ago</span></div>
-                  <div class="notif-text">Buy L1 Hits TP: <span class="pos">+1.00$</span></div>
-                </div>
-              </div>
-              <div class="notif notif--ghost">
-                <span class="notif-app"></span>
-                <div class="notif-body"><span class="skeleton"></span><span class="skeleton short"></span></div>
-              </div>
-            </div>
+            <div class="fx-stage fx-stage--shield" data-fx3d="protection" data-fx-logo="assets/logo-512.png" role="img" aria-label="The four limits, max spread, max total lots, smart shield and daily target, as shields around the RZGS-PRO logo."></div>
           </article>
         </div>
       </div>
     </section>
 
-    <!-- How it works -->
+    <!-- How to use: a picture guide, one step under the other -->
     <section class="section" id="how-it-works" aria-labelledby="steps-title">
       <div class="container">
         <header class="section-head reveal">
           <p class="kicker">How to use</p>
-          <h2 class="section-title" id="steps-title"><span class="text-gradient">3 steps</span> to using the bot</h2>
+          <h2 class="section-title" id="steps-title">From zero to a running bot in <span class="text-gradient">5 steps</span></h2>
+          <p class="section-lead">Follow the pictures from top to bottom. Our Telegram bot guides you through every step.</p>
         </header>
 
-        <div class="steps-panel reveal">
-          <ol class="steps">
-            <li class="step">
-              <div class="step-top">
-                <span class="step-icon"><svg class="icon" aria-hidden="true"><use href="#i-gem"/></svg></span>
-                <span class="step-num" aria-hidden="true">01</span>
+        <ol class="guide">
+          <li class="guide-step reveal">
+            <span class="guide-num" aria-hidden="true">1</span>
+            <div class="guide-card">
+              <div class="guide-text">
+                <h3>Pick a plan</h3>
+                <p>Free for 7 days, Elite or Diamond. Tap the plan&rsquo;s button: our Telegram bot opens with that plan already chosen.</p>
+                <a class="text-link" href="#pricing">See the plans <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
               </div>
-              <h3>Pick a plan</h3>
-              <p>Choose the free trial, Elite or Diamond. The button opens our Telegram bot with your plan already chosen.</p>
-              <a class="text-link" href="#pricing">See plans <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
-            </li>
-            <li class="step">
-              <div class="step-top">
-                <span class="step-icon"><svg class="icon" aria-hidden="true"><use href="#i-send"/></svg></span>
-                <span class="step-num" aria-hidden="true">02</span>
+              <div class="guide-pic" aria-hidden="true">
+                <div class="gp-plans">
+                  <span class="gp-plan"><b>Free</b>$0</span>
+                  <span class="gp-plan is-hot"><b>Elite</b>$5<i class="gp-tap"></i></span>
+                  <span class="gp-plan"><b>Diamond</b>$49</span>
+                </div>
               </div>
-              <h3>Follow the bot in Telegram</h3>
-              <p>It gives you the broker link, takes your payment if the plan has one, asks for your MT5 account number, then sends your bot file with its passwords.</p>
-              <a class="text-link" href="https://t.me/rzgsprobot">Open the Telegram bot <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
-            </li>
-            <li class="step">
-              <div class="step-top">
-                <span class="step-icon"><svg class="icon" aria-hidden="true"><use href="#i-power"/></svg></span>
-                <span class="step-num" aria-hidden="true">03</span>
+            </div>
+          </li>
+          <li class="guide-step reveal">
+            <span class="guide-num" aria-hidden="true">2</span>
+            <div class="guide-card">
+              <div class="guide-text">
+                <h3>Open your broker account</h3>
+                <p>Free and Elite: open your MT5 account with one of our partner links. Diamond: any broker you like. It has to be a hedging account.</p>
+                <a class="text-link" href="#partners">Partner brokers <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
               </div>
-              <h3>Open the control app and tap Activate</h3>
-              <p>Log in with your MT5 account number and the App Password the bot sent you. One tap starts the bot, another pauses it.</p>
-              <a class="text-link" href="app">Open control app <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
-            </li>
-          </ol>
-        </div>
+              <div class="guide-pic" aria-hidden="true">
+                <div class="gp-brokers">
+                  <span class="gp-broker"><i>EX</i>Exness<em>Our link</em></span>
+                  <span class="gp-broker is-hot"><i>IZ</i>Investizo<em>Our link</em></span>
+                  <span class="gp-broker"><i>LX</i>Lirunex<em>Our link</em></span>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li class="guide-step reveal">
+            <span class="guide-num" aria-hidden="true">3</span>
+            <div class="guide-card">
+              <div class="guide-text">
+                <h3>Chat with our Telegram bot</h3>
+                <p>Send it the email you registered with and your MT5 account number. For Elite and Diamond, pay with the KHQR code and send the receipt.</p>
+                <a class="text-link" href="https://t.me/rzgsprobot">Open the Telegram bot <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+              </div>
+              <div class="guide-pic" aria-hidden="true">
+                <div class="gp-chat">
+                  <p class="gp-msg gp-me">you@email.com</p>
+                  <p class="gp-msg gp-bot"><span class="gp-ok"></span>Account verified</p>
+                  <p class="gp-msg gp-bot gp-pay"><svg class="gp-qrcode" viewBox="0 0 21 21" aria-hidden="true"><path d="M0 0h7v7H0zM2 2v3h3V2zM14 0h7v7h-7zM16 2v3h3V2zM0 14h7v7H0zM2 16v3h3v-3zM9 0h2v2H9zM12 2h1v3h-1zM9 4h2v2H9zM8 8h3v1H8zM13 8h2v2h-2zM17 8h4v1h-4zM9 10h1v3H9zM11 11h3v1h-3zM15 11h2v3h-2zM18 10h1v2h-1zM8 14h2v2H8zM11 14h3v1h-3zM12 16h2v2h-2zM15 15h1v3h-1zM17 15h4v1h-4zM19 17h2v4h-2zM9 18h2v3H9zM12 19h3v2h-3zM16 19h1v2h-1zM0 8h2v2H0zM3 9h3v1H3zM1 11h4v1H1z"/></svg><span>Pay with KHQR<em>then send the receipt</em></span></p>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li class="guide-step reveal">
+            <span class="guide-num" aria-hidden="true">4</span>
+            <div class="guide-card">
+              <div class="guide-text">
+                <h3>Get your bot file</h3>
+                <p>The bot sends your bot file (.ex5) with your Bot Password, your App Password and the install steps, right in the chat.</p>
+              </div>
+              <div class="guide-pic" aria-hidden="true">
+                <div class="gp-chat">
+                  <p class="gp-msg gp-bot gp-file"><span class="gp-fileicon">EX5</span><span>RZGS-PRO bot file<em>made for your plan and broker</em></span></p>
+                  <p class="gp-msg gp-bot gp-keys"><span>Bot Password</span><code>&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</code><span>App Password</span><code>&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</code></p>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li class="guide-step reveal">
+            <span class="guide-num" aria-hidden="true">5</span>
+            <div class="guide-card">
+              <div class="guide-text">
+                <h3>Start it in MT5, then tap Activate</h3>
+                <p>Copy the file into MT5, put it on a gold (XAUUSD) chart and type your passwords. Then open the control app, log in and tap Activate.</p>
+                <a class="text-link" href="app">Open the control app <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+              </div>
+              <div class="guide-pic" aria-hidden="true">
+                <div class="gp-run">
+                  <div class="gp-mt5"><span class="gp-bar">MetaTrader 5 &middot; XAUUSD, M1</span><svg class="gp-candles" viewBox="0 0 120 44" aria-hidden="true"><g class="up"><path d="M6 30v10M14 24v12M30 18v12M38 12v14M62 14v12M70 8v14M94 10v12M102 4v14"/><rect x="4" y="32" width="4" height="6"/><rect x="12" y="26" width="4" height="8"/><rect x="28" y="20" width="4" height="8"/><rect x="36" y="14" width="4" height="10"/><rect x="60" y="16" width="4" height="8"/><rect x="68" y="10" width="4" height="10"/><rect x="92" y="12" width="4" height="8"/><rect x="100" y="6" width="4" height="10"/></g><g class="dn"><path d="M22 22v12M46 14v12M54 18v12M78 12v12M86 14v10M110 6v10"/><rect x="20" y="24" width="4" height="8"/><rect x="44" y="16" width="4" height="8"/><rect x="52" y="20" width="4" height="8"/><rect x="76" y="14" width="4" height="8"/><rect x="84" y="16" width="4" height="6"/><rect x="108" y="8" width="4" height="6"/></g></svg><span class="gp-ea"><i></i>RZGS-PRO.BOT running</span></div>
+                  <div class="gp-phone"><span class="gp-ring">L1</span><span class="gp-act">Active</span></div>
+                </div>
+              </div>
+            </div>
+          </li>
+        </ol>
       </div>
     </section>
 
@@ -436,6 +392,7 @@
           </article>
 
           <article class="card price-card price-card--featured reveal" style="--d: 80ms">
+            <span class="plan-badge">Most popular</span>
             <div class="plan-top">
               <span class="plan-icon"><svg class="icon" aria-hidden="true"><use href="#i-hexagon"/></svg></span>
               <span class="plan-tag">Referral supported</span>
