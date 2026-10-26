@@ -11,6 +11,43 @@
   }
 })(window.location);
 
+/* ==========================================================================
+   Activity count for the daily Telegram report: one "visit" per page opened, plus clicks on
+   the bot / plan buttons ("interested"), broker referral links ("referral") and the Telegram group ("other").
+   Only a random browser id, the page and the link are sent; nothing about the person.
+   Only on the real site, so test servers don't add to the numbers.
+   ========================================================================== */
+(function trackActivity(place) {
+  if (!/(^|\.)rzgspro\.com$/.test(place.hostname)) return;
+  const endpoint = 'https://zaziizzsbytkdlatoutv.supabase.co/rest/v1/web_activity';
+  const key = 'sb_publishable_ojfdWkyt22zlG0Uz_CUd4w_IufedKpK';
+  let visitor;
+  try {
+    visitor = localStorage.getItem('rz_visitor');
+    if (!visitor) localStorage.setItem('rz_visitor', visitor = crypto.randomUUID());
+  } catch (error) {
+    visitor = crypto.randomUUID();
+  }
+  const page = place.pathname.slice(0, 200);
+  function send(kind, target) {
+    fetch(endpoint, {
+      method: 'POST',
+      keepalive: true,
+      headers: { apikey: key, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      body: JSON.stringify({ kind, visitor, page, target: target ? target.slice(0, 300) : null }),
+    }).catch(() => {});
+  }
+  send('visit', document.referrer || null);
+  document.addEventListener('click', (event) => {
+    const link = event.target.closest('a[href]');
+    if (!link) return;
+    const href = link.href;
+    if (/^https:\/\/t\.me\/rzgsprobot/.test(href)) send('interested', href);
+    else if (link.relList.contains('sponsored')) send('referral', href);
+    else if (/^https:\/\/t\.me\//.test(href)) send('other', href);
+  });
+})(window.location);
+
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 /* ==========================================================================
