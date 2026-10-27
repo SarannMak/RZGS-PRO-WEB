@@ -551,7 +551,7 @@
     if (arrivedFrom === 'signup') showMessage('Your email is confirmed. Welcome to RZGS-PRO!', 'success');
     else if (arrivedFrom === 'email_change') showMessage('Your email address is changed. Log in with the new one from now on.', 'success');
     else if (firstOfTwo) showMessage(FIRST_OF_TWO, 'success');
-    else if (urlError) showMessage('That link has expired or was already used. If you were changing your email, send the request again in Profile.');
+    else if (urlError) showMessage('That link has expired or was already used. If you were changing your email, send the request again in Tools, under Security.');
 
     let user = session.user;
     // A change of email that was waiting may have been finished on another device since this one last looked.

@@ -466,6 +466,7 @@ a.trial-banner > .icon {
 .form-msg[hidden],
 .dash-view[hidden],
 .dash-tool[hidden],
+.dash-line[hidden],
 .dash-empty[hidden] {
   display: none;
 }

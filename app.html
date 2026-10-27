@@ -118,6 +118,8 @@ button{cursor:pointer}
   font:500 15px var(--f-mono);color:var(--title);text-align:right;border-radius:2px}
 .set input.wide{width:100%;text-align:left;font-size:13px}
 .set.col{flex-direction:column;align-items:stretch;gap:8px}
+/* every value box in Settings has one look: the same colour, size and weight (27 Oct 2026) */
+.set input[type=number],.set input[type=text]{color:var(--body);-webkit-text-fill-color:var(--body);font-size:13px;font-weight:400}
 .set input:focus{border-color:var(--cyan);outline:none}
 .sw-in{appearance:none;-webkit-appearance:none;flex:none;width:46px;height:26px;border:1px solid var(--line);background:var(--bg);position:relative;cursor:pointer;margin:0;transition:background .18s,border-color .18s}
 .sw-in::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;background:var(--muted);transition:transform .18s,background .18s}
@@ -130,6 +132,11 @@ button{cursor:pointer}
 .tbl th:first-child,.tbl td:first-child{text-align:left;padding-left:0;color:var(--title)}
 .tbl tr.now td{background:var(--chip);color:var(--cyan)}
 .tbl tr.off td{color:var(--muted)}
+/* risk calculator: the facts above the table (27 Oct 2026) */
+.calc-sum{margin:14px 0 0;padding:10px 12px;border-left:2px solid var(--warn);background:rgba(255,210,63,.06);font-size:13px;line-height:1.5;color:var(--body)}
+.calc-sum p{margin:0}
+.calc-sum p+p{margin-top:6px}
+.calc-sum b{color:var(--title)}
 .bars{width:100%;height:150px;display:block}
 /* Report: the range switch over the chart, the four figures under it; Log: the type switch */
 .seg-range{margin-bottom:12px}
@@ -275,7 +282,7 @@ nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;st
 @media (prefers-reduced-motion:reduce){.ring-dash,.eye .sweep,.btn.flash{animation:none}.ring-arc,.bar i{transition:none}}
 /* phones: the ring and its text stay side by side, just a little smaller */
 @media (max-width:400px){.core{padding:18px 14px;gap:14px}.ring{width:98px;height:98px}.stats .num{font-size:24px}}
-.set input:disabled{opacity:.75;-webkit-text-fill-color:var(--body)}
+.set input:disabled{-webkit-text-fill-color:var(--body);cursor:default}
 .sw-in:disabled{opacity:.6;cursor:default}
 .set input[type=password]{flex:none;background:var(--bg);border:1px solid var(--line);padding:9px 8px;font:500 15px var(--f-mono);color:var(--title);border-radius:2px}
 /* Change App Password: an eye in each box shows what is typed (the box keeps its look as text or password) */
@@ -385,6 +392,44 @@ body{
 .sg-track input:disabled{opacity:.45;cursor:default}
 .sg-ticks{position:absolute;left:7px;right:7px;top:calc(50% + 6px);display:flex;justify-content:space-between;pointer-events:none}
 .sg-ticks i{width:1px;height:5px;background:var(--line-2)}
+/* the slider stays closed until its value is tapped; a change waits for Confirm (27 Oct 2026) */
+.sg:not(.is-open)>.sg-line,.sg:not(.is-open)>.hint{display:none}
+.sg:not(.is-open){padding-bottom:9px}
+/* the value box looks like the number fields: dark, small mono text, with a small arrow */
+.sg-val{flex:none;display:inline-flex;align-items:center;justify-content:flex-end;gap:6px;width:104px;padding:9px 8px;border:1px solid var(--line-2);background:var(--bg);border-radius:2px;color:var(--body)}
+.sg-val output{font:400 13px var(--f-mono);color:inherit;font-variant-numeric:tabular-nums}
+.sg-val .sg-chev{width:14px;height:14px;color:var(--muted)}
+.sg-val:hover{border-color:var(--frame)}
+.sg.is-open .sg-val{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(25,211,255,.2)}
+.sg-chev{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+.sg.is-open .sg-chev{transform:rotate(180deg)}
+/* the change and its two small buttons on one line */
+.sg-ok{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 10px;padding:2px 0 10px}
+.sg-ok .row{flex:none;gap:8px;flex-wrap:nowrap}
+.sg-ok .row>.btn{flex:none;min-width:84px;min-height:34px;padding:6px 12px;font-size:11px;letter-spacing:.12em}
+.set-ok{padding:0 0 9px}
+.sg-chg.bad b{color:var(--bad)}
+/* option lists (28 Oct 2026): a value box opens a few choices under it, Custom shows the field to type in */
+.pick-list{display:flex;flex-direction:column;gap:10px;padding:0 0 10px}
+.chips{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.chip{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:40px;padding:6px 4px;border:1px solid var(--line-2);background:var(--bg);border-radius:2px;color:var(--body);font:400 13px var(--f-mono)}
+.chip small{font:400 9.5px var(--f-mono);letter-spacing:.06em;color:var(--muted)}
+.chip.risky small{color:var(--bad)}
+.chip:hover{border-color:var(--frame)}
+.chip[aria-pressed="true"]{border-color:var(--cyan);background:var(--chip);color:var(--cyan);box-shadow:0 0 0 2px rgba(25,211,255,.14)}
+.pick-row>input{display:none}
+.pick-row.is-custom>input{display:block;border-color:var(--cyan);box-shadow:0 0 0 3px rgba(25,211,255,.2)}
+.pick-row.is-custom .pick-val{display:none}
+.pick-row>input::-webkit-inner-spin-button,.pick-row>input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.pick-row>input{-moz-appearance:textfield;appearance:textfield}
+.pick-row.is-open .sg-val{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(25,211,255,.2)}
+.pick-row.is-open .sg-chev{transform:rotate(180deg)}
+.sg-val:disabled{cursor:default}
+.sg-val:disabled .sg-chev{display:none}
+.sg-chg{margin:0;font:500 12px var(--f-mono);letter-spacing:.04em;color:var(--muted)}
+.sg-chg b{font:700 14px var(--f-display);color:var(--body)}
+.sg-chg i{font-style:normal;margin:0 8px;color:var(--muted)}
+.sg-chg b:last-child{color:var(--neon)}
 nav button[aria-selected="true"]{border-top-color:var(--neon)}
 .field input,.set input[type=number],.set input[type=text],.set input[type=password],.sw-in{border-color:var(--line-2)}
 .field input:focus,.set input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(25,211,255,.2)}
@@ -418,6 +463,32 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
 .eq-spark{width:100%;height:60px;display:block;margin-top:8px;overflow:visible}
 .eq-spark .eq-line{filter:drop-shadow(0 0 4px rgba(55,239,184,.55))}
 .hlines{margin-top:12px}
+
+/* ==========================================================================
+   Computer screens (27 Oct 2026): laid out like the website dashboard. The header runs across the top,
+   the menu is a column on the left with Activate / Pause under it, and the screens fill the room on the
+   right; only the screens scroll. Phones and narrow windows keep the one-column console above.
+   ========================================================================== */
+@media (min-width:1024px){
+  .app{max-width:1200px;padding-inline:32px;display:grid;grid-template-columns:230px minmax(0,1fr);grid-template-rows:auto auto 1fr;column-gap:28px}
+  #login{grid-column:1/-1;width:100%;max-width:480px;margin-inline:auto}
+  header{grid-column:1/-1;padding-block:22px 18px}
+  header h1{font-size:22px}
+  nav{grid-column:1;grid-row:2;align-self:start;display:flex;flex-direction:column;border:1px solid transparent;
+    border-image:var(--hud-line) 16 / 16px;background:var(--panel);clip-path:var(--cut-10)}
+  nav button{flex-direction:row;justify-content:flex-start;gap:14px;min-height:54px;margin:0;padding:0 18px;
+    border-top:1px solid var(--line);font-size:11px;letter-spacing:.16em}
+  nav button:first-child{border-top:0}
+  nav button:hover{background:var(--panel-2);color:var(--body)}
+  nav button[aria-selected="true"]{background:var(--chip);color:var(--cyan);border-top-color:var(--line);box-shadow:inset 2px 0 0 var(--neon)}
+  nav button:first-child[aria-selected="true"]{border-top:0}
+  nav svg{width:20px;height:20px}
+  #actbar{grid-column:1;grid-row:3;align-self:start;flex-direction:column;gap:10px;margin-top:14px;padding:0;border:0;background:none}
+  #actbar>.btn{flex:none;min-height:52px}
+  main{grid-column:2;grid-row:2/4;min-height:0;padding:0 6px 28px 0}
+  header{padding-right:6px}                     /* the LIVE light and the power key end where the panels end */
+  .ladder{height:430px}
+}
 </style>
 </head>
 <body>
@@ -602,10 +673,10 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
     <!-- TOOLS -->
     <div class="view" id="v-tools" hidden>
       <div class="seg" id="toolSeg" role="tablist">
-        <button role="tab" data-tool="settings" aria-selected="true">Settings</button>
+        <button role="tab" data-tool="account" aria-selected="true">Account</button>
         <button role="tab" data-tool="calc" aria-selected="false">Risk calc</button>
         <button role="tab" data-tool="report" aria-selected="false">Report</button>
-        <button role="tab" data-tool="account" aria-selected="false">Account</button>
+        <button role="tab" data-tool="settings" aria-selected="false">Settings</button>
       </div>
 
       <!-- settings -->
@@ -615,23 +686,35 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
           <div class="set" id="rowTp"><label for="setTp">Take profit<small>points per trade</small></label><input id="setTp" type="number" inputmode="numeric" min="50" step="50"></div>
           <!-- take profit as a slider in $, with a bot that takes it from the app (it sends cfg.tpApp) -->
           <div class="sg sg-first" id="tpBox" hidden>
-            <div class="sg-head"><label for="tpUsd">Take profit<small id="tpInfo">price move per trade</small></label><output id="tpUsdV" for="tpUsd">1.00$</output></div>
+            <div class="sg-head"><label for="tpUsd">Take profit<small id="tpInfo">price move per trade</small></label><button class="sg-val" type="button" data-sl-open="tpUsd" aria-expanded="false"><output id="tpUsdV" for="tpUsd">1.00$</output><svg class="sg-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button></div>
             <div class="sg-line"><span class="sg-end">0.1</span><span class="sg-track"><input id="tpUsd" type="range" min="0.1" max="5" step="0.1" value="1"><i class="sg-ticks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></i></span><span class="sg-end" id="tpMax">5</span></div>
+            <div class="sg-ok" id="tpUsdOk" hidden>
+              <p class="sg-chg" id="tpUsdChg"></p>
+              <div class="row"><button class="btn" type="button" data-sl-cancel="tpUsd">Cancel</button><button class="btn primary" type="button" data-sl-ok="tpUsd">Confirm</button></div>
+            </div>
           </div>
           <div class="set" id="rowGrid"><label for="setGrid">Grid distance<small>points after a TP hit</small></label><input id="setGrid" type="number" inputmode="numeric" min="50" step="50"></div>
           <!-- Smart mode: the grid distance follows the session. One slider: it shows and sets the session that counts now. -->
           <div class="sg" id="sgBox" hidden>
-            <div class="sg-head"><label for="sgGrid">Grid distance<small><span class="sg-ses" id="sgSes">New York</span><i class="sg-live">now</i></small></label><output id="sgGridV" for="sgGrid">1500</output></div>
+            <div class="sg-head"><label for="sgGrid">Grid distance<small><span class="sg-ses" id="sgSes">New York</span><i class="sg-live">now</i></small></label><button class="sg-val" type="button" data-sl-open="sgGrid" aria-expanded="false"><output id="sgGridV" for="sgGrid">1500</output><svg class="sg-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button></div>
             <div class="sg-line"><span class="sg-end">500</span><span class="sg-track"><input id="sgGrid" type="range" min="500" max="3000" step="250" value="1500" aria-describedby="sgHint"><i class="sg-ticks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></i></span><span class="sg-end">3000</span></div>
             <p class="hint" id="sgHint">Smart mode: the amount changes with each session. The slider sets the session that is open now.</p>
+            <div class="sg-ok" id="sgGridOk" hidden>
+              <p class="sg-chg" id="sgGridChg"></p>
+              <div class="row"><button class="btn" type="button" data-sl-cancel="sgGrid">Cancel</button><button class="btn primary" type="button" data-sl-ok="sgGrid">Confirm</button></div>
+            </div>
           </div>
           <div class="set" id="rowBasket"><label for="setBasket">Basket profit<small>$ to close a whole side</small></label><input id="setBasket" type="number" inputmode="decimal" min="0.01" step="0.05"></div>
           <!-- basket profit as a slider, with a bot that takes it from the app (it sends cfg.basketApp) -->
           <div class="sg" id="bkBox" hidden>
-            <div class="sg-head"><label for="bkProfit">Basket profit<small>$ to close a whole side</small></label><output id="bkProfitV" for="bkProfit">0.10$</output></div>
+            <div class="sg-head"><label for="bkProfit">Basket profit<small>$ to close a whole side</small></label><button class="sg-val" type="button" data-sl-open="bkProfit" aria-expanded="false"><output id="bkProfitV" for="bkProfit">0.10$</output><svg class="sg-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button></div>
             <div class="sg-line"><span class="sg-end">0.1</span><span class="sg-track"><input id="bkProfit" type="range" min="0.1" max="1" step="0.05" value="0.1"><i class="sg-ticks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></i></span><span class="sg-end" id="bkMax">1</span></div>
+            <div class="sg-ok" id="bkProfitOk" hidden>
+              <p class="sg-chg" id="bkProfitChg"></p>
+              <div class="row"><button class="btn" type="button" data-sl-cancel="bkProfit">Cancel</button><button class="btn primary" type="button" data-sl-ok="bkProfit">Confirm</button></div>
+            </div>
           </div>
-          <div class="set"><label for="setLevels">Max grid levels<small>pairs per cycle</small></label><input id="setLevels" type="number" inputmode="numeric" min="1" max="30" step="1"></div>
+          <div class="set"><label for="setLevels">Max grid levels<small>pairs per cycle</small></label><input id="setLevels" type="number" inputmode="numeric" min="1" max="50" step="1"></div>
           <div class="set"><label for="setCooldown">Cooldown<small>seconds after a cycle</small></label><input id="setCooldown" type="number" inputmode="numeric" min="0" step="5"></div>
         </section>
         <section class="panel">
@@ -655,15 +738,16 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
         <p class="err" id="setErr" role="alert"></p>
         <div class="row">
         </div>
-        <p class="hint">These are the settings the bot is running with. The sliders can be changed here. For the rest, edit the bot inputs in MT5.</p>
+        <p class="hint" id="setHint">These are the settings the bot is running with. Tap a value to change it, then confirm. For the rest, edit the bot inputs in MT5.</p>
       </form>
 
       <!-- risk calculator -->
       <div class="view" id="t-calc" hidden>
         <section class="panel">
           <h2>If price keeps moving one way</h2>
-          <p class="hint" style="margin:0 0 12px">Uses your saved settings and current balance. Each row is the moment that grid level opens. The marked row is where the bot is now.</p>
+          <p class="hint" style="margin:0 0 12px">Max loss is the most your open trades can be down while the bot is at that level: just before the next level opens. The marked row is where the bot is now.</p>
           <div class="scroll-x"><table class="tbl" id="calcTbl"></table></div>
+          <div class="calc-sum" id="calcSum"></div>
           <p class="hint" id="calcNote"></p>
         </section>
       </div>
@@ -788,6 +872,17 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
     </div>
   </div>
 </div>
+<div id="setWarn" hidden style="position:fixed;inset:0;background:rgba(1,6,10,.84);display:flex;align-items:center;justify-content:center;z-index:45;padding:16px">
+  <div class="frame quit-card" role="dialog" aria-modal="true" aria-labelledby="setWarnTitle"><i class="br"></i>
+    <span class="cap bad">Higher risk</span>
+    <h3 id="setWarnTitle">Are you sure?</h3>
+    <p id="setWarnText"></p>
+    <div class="row">
+      <button class="btn" type="button" id="setWarnNo">Cancel</button>
+      <button class="btn danger" type="button" id="setWarnYes">Yes, use it</button>
+    </div>
+  </div>
+</div>
 <div id="pwConfirm" hidden style="position:fixed;inset:0;background:rgba(1,6,10,.84);display:flex;align-items:center;justify-content:center;z-index:45;padding:16px">
   <div class="frame quit-card" role="dialog" aria-modal="true" aria-labelledby="pwConfirmTitle"><i class="br"></i>
     <span class="cap">Confirm</span>
@@ -860,7 +955,7 @@ function addOwnBar(price) {
   if (!b || b[4] !== slot) { ownBars.push([price, price, price, price, slot]); if (ownBars.length > 60) ownBars.shift(); }
   else { b[1] = Math.max(b[1], price); b[2] = Math.min(b[2], price); b[3] = price; }
 }
-let timer = 0, tab = 'home', tool = 'settings', pending = null, toastT = 0, settingsFilled = false;
+let timer = 0, tab = 'home', tool = 'account', pending = null, toastT = 0, settingsFilled = false;
 const show = { tp: true, basket: true, cool: true, risk: true };      // log filter, kept on this phone
 try { Object.assign(show, JSON.parse(store.get('rz_show') || '{}')); } catch (e) {}
 
@@ -943,6 +1038,178 @@ function setTool(name) {
   document.querySelectorAll('#toolSeg button').forEach(b => b.setAttribute('aria-selected', b.dataset.tool === name));
   render();
 }
+// Settings that can be changed here with a bot that sends cfg.setApp (27 Oct 2026): the field is free, a change
+// shows the old and new value with Cancel and Confirm under its row, and Confirm sends "set key=value".
+const pctOff = (v) => (v > 0 ? v + '%' : 'off');
+const SETS = {
+  setGrid: { key: 'grid', cfg: 'gridPts', fmt: (v) => v + ' points', ok: (v, c) => Number.isInteger(v) && v * c.pt >= 0.05 - 1e-9 && v * c.pt <= 50 + 1e-9, err: (c) => 'use ' + Math.ceil(0.05 / c.pt) + ' to ' + Math.floor(50 / c.pt) },
+  setLevels: { key: 'levels', cfg: 'maxLevels', fmt: String, ok: (v) => Number.isInteger(v) && v >= 1 && v <= 50, err: () => 'use 1 to 50' },
+  setCooldown: { key: 'cool', cfg: 'cooldown', fmt: (v) => v + ' s', ok: (v) => Number.isInteger(v) && v >= 0 && v <= 3600, err: () => 'use 0 to 3600' },
+  setAsym: { key: 'asym', cfg: 'asym', check: true, fmt: (v) => (v ? 'on' : 'off') },
+  setReset: { key: 'reset', cfg: 'reset', check: true, fmt: (v) => (v ? 'on' : 'off') },
+  setMaxLots: { key: 'maxlots', cfg: 'maxLots', fmt: (v) => (v > 0 ? v.toFixed(2) : 'off'), ok: (v) => v >= 0 && v <= 1000, err: () => 'use 0 to 1000 (0 = off)' },
+  setEqStop: { key: 'eqstop', cfg: 'eqStop', fmt: pctOff, ok: (v) => v >= 0 && v <= 100, err: () => 'use 0 to 100 (0 = off)' },
+  setTarget: { key: 'target', cfg: 'target', fmt: (v) => (v > 0 ? v.toFixed(2) + '$' : 'off'), ok: (v) => v >= 0, err: () => 'use 0 or more (0 = off)' },
+};
+const setSent = {};                                 // when each field was last confirmed: the bot's answer is awaited
+function setValue(id) { const el = $(id); return SETS[id].check ? el.checked : (el.value.trim() === '' ? NaN : Number(el.value)); }
+function setShow(id, v) { const el = $(id); if (SETS[id].check) el.checked = !!v; else el.value = v; }
+function setCheck(id) {
+  const d = SETS[id], c = view().cfg, v = setValue(id), was = d.check ? !!c[d.cfg] : Number(c[d.cfg]);
+  const changed = d.check ? v !== was : !(Math.abs(v - was) < 1e-9), bad = !d.check && (Number.isNaN(v) || !d.ok(v, c));
+  $(id + 'Ok').hidden = !changed;
+  if (!changed) return;
+  const chg = $(id + 'Chg');
+  chg.classList.toggle('bad', bad);
+  chg.innerHTML = bad ? '<b>' + esc(d.err(c)) + '</b>' : '<b>' + esc(d.fmt(was)) + '</b><i>to</i><b>' + esc(d.fmt(v)) + '</b>';
+  $(id + 'Ok').querySelector('[data-set-ok]').disabled = bad;
+}
+// the bot's values, into every field that is not being changed here
+function syncSettings(c) {
+  const on = c.setApp === true;
+  for (const id of Object.keys(SETS)) {
+    const el = $(id), busy = !$(id + 'Ok').hidden || document.activeElement === el || Date.now() - (setSent[id] || 0) < 6000;
+    el.disabled = !on || !online;
+    if (!busy) setShow(id, c[SETS[id].cfg]);
+    if (PICKS[id]) { $(id + 'Pick').disabled = el.disabled; pickPaint(id); }
+  }
+  $('setHint').textContent = on
+    ? 'These are the settings the bot is running with. Tap a value to change it, then confirm. The lot list is set in the bot inputs in MT5.'
+    : 'These are the settings the bot is running with. Tap a value with an arrow to change it, then confirm. For the rest, edit the bot inputs in MT5.';
+}
+for (const id of Object.keys(SETS)) {
+  const el = $(id), row = el.closest('.set');
+  row.insertAdjacentHTML('afterend', '<div class="sg-ok set-ok" id="' + id + 'Ok" hidden><p class="sg-chg" id="' + id + 'Chg"></p>' +
+    '<div class="row"><button class="btn" type="button" data-set-cancel="' + id + '">Cancel</button><button class="btn primary" type="button" data-set-ok="' + id + '">Confirm</button></div></div>');
+  el.addEventListener('input', () => setCheck(id));
+  el.addEventListener('change', () => setCheck(id));
+}
+document.addEventListener('click', (e) => {
+  const cancel = e.target.closest('[data-set-cancel]'), ok = e.target.closest('[data-set-ok]');
+  if (cancel) {
+    setUndo(cancel.dataset.setCancel);
+  } else if (ok && !ok.disabled) {
+    const id = ok.dataset.setOk;
+    if (!askWarn(id, setValue(id))) setSend(id);
+  }
+});
+function setSend(id) {
+  const v = setValue(id);
+  setSent[id] = Date.now();
+  send('set', SETS[id].key + '=' + (SETS[id].check ? (v ? 1 : 0) : v));
+  $(id + 'Ok').hidden = true;
+  $(id).blur();
+  if (PICKS[id]) pickClose(id);
+}
+// Back to the bot's value (Cancel, or Cancel in the warning box)
+function setUndo(id) {
+  setShow(id, view().cfg[SETS[id].cfg]);
+  $(id + 'Ok').hidden = true;
+  if (PICKS[id]) { pickCustom[id] = false; $(id).closest('.set').classList.remove('is-custom'); pickPaint(id); }
+}
+
+// A riskier choice opens this box; its Yes sends it at once (it is the confirmation), Cancel puts the old value back.
+const WARN = {
+  setLevels: (v) => v > 15 && { title: 'Use ' + v + ' grid levels?', text: 'More than 15 levels: in a long move one way the bot keeps adding bigger lots, and the loss can grow very fast. Check the Risk calc first.' },
+  setMaxLots: (v) => (v >= 2 || v === 0) && (v === 0
+    ? { title: 'Turn off the max total lots?', text: 'With no limit the bot keeps opening bigger pairs up to the max grid levels. One long move can take a large part of your balance.' }
+    : { title: 'Allow ' + v.toFixed(2) + ' lots in total?', text: '2 lots or more lets the bot open much bigger trades. One long move can take a large part of your balance. Check the Risk calc first.' }),
+  setAsym: (v) => !v && { title: 'Turn off "Only the holding side grows"?', text: 'Both trades of each new pair will use the bigger lot, so your open lots and your risk grow about twice as fast.' },
+  setReset: (v) => !v && { title: 'Turn off "Restart at L1 after a basket"?', text: 'After a basket closes, the trades still open keep their high level, so the next pairs open with bigger lots and the risk stays high for longer.' },
+};
+let warnFor = null;
+function askWarn(id, v) {
+  const w = WARN[id] && WARN[id](v);
+  if (!w) return false;
+  warnFor = id;
+  $('setWarnTitle').textContent = w.title;
+  $('setWarnText').textContent = w.text;
+  $(id + 'Ok').hidden = true;
+  $('setWarn').hidden = false;
+  return true;
+}
+$('setWarnNo').addEventListener('click', () => { $('setWarn').hidden = true; if (warnFor) setUndo(warnFor); warnFor = null; });
+$('setWarnYes').addEventListener('click', () => { $('setWarn').hidden = true; if (warnFor) setSend(warnFor); warnFor = null; });
+// the two switches: switching one off asks at once
+for (const id of ['setAsym', 'setReset']) $(id).addEventListener('change', () => { if (!$(id).checked && view().cfg[SETS[id].cfg]) askWarn(id, false); });
+
+// Option lists (28 Oct 2026): max grid levels, cooldown and max total lots are picked from a few choices under their
+// value box, or typed with Custom. For max total lots each choice shows the deepest level the bot can reach with it.
+const CHEV = '<svg class="sg-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
+const PICKS = {
+  setLevels: { opts: [5, 7, 12, 15, 17, 22, 35], fmt: String },
+  setCooldown: { opts: [1, 5, 10, 20, 30, 60, 120], fmt: (v) => v + ' s' },
+  setMaxLots: { opts: [0.5, 1.2, 2, 3, 5], fmt: (v) => (v > 0 ? Number(v).toFixed(2) : 'off'), reach: true },
+};
+const pickCustom = {};
+// the deepest level that opens with this max total lots (the rule of the bot and of the risk calculator)
+function lotsReach(max, c) {
+  let hold = 0, last = 0;
+  for (let n = 1; n <= c.maxLevels; n++) {
+    const lot = lotAt(n - 1); hold += lot;
+    if (max > 0 && hold + (c.asym ? lotAt(0) : lot) > max + 1e-9) break;
+    last = n;
+  }
+  return last;
+}
+function pickPaint(id) {
+  const v = setValue(id), d = PICKS[id], c = view().cfg, list = $(id + 'List');
+  $(id + 'Pick').querySelector('output').textContent = Number.isNaN(v) ? '-' : d.fmt(v);
+  let hit = false;
+  list.querySelectorAll('.chip').forEach((b) => {
+    if (b.dataset.v === 'custom') return;
+    const o = Number(b.dataset.v), on = !pickCustom[id] && Math.abs(o - v) < 1e-9;
+    if (on) hit = true;
+    b.setAttribute('aria-pressed', String(on));
+    if (d.reach && c.maxLevels) { const r = lotsReach(o, c); b.querySelector('small').textContent = r >= c.maxLevels ? 'all L' + r : 'to L' + r; }
+  });
+  list.querySelector('[data-v="custom"]').setAttribute('aria-pressed', String(!!pickCustom[id] || !hit));
+}
+function pickClose(id) {
+  $(id + 'List').hidden = true;
+  pickCustom[id] = false;
+  $(id).closest('.set').classList.remove('is-custom');
+  $(id + 'Pick').closest('.set').classList.remove('is-open');
+  $(id + 'Pick').setAttribute('aria-expanded', 'false');
+}
+for (const [id, d] of Object.entries(PICKS)) {
+  const el = $(id), row = el.closest('.set'), w = WARN[id];
+  row.classList.add('pick-row');
+  row.insertAdjacentHTML('beforeend', '<button class="sg-val pick-val" type="button" id="' + id + 'Pick" aria-expanded="false"><output>-</output>' + CHEV + '</button>');
+  const list = document.createElement('div');
+  list.className = 'pick-list'; list.id = id + 'List'; list.hidden = true;
+  list.innerHTML = '<div class="chips">' +
+    d.opts.map((o) => '<button class="chip' + (w && w(o) ? ' risky' : '') + '" type="button" data-pick="' + id + '" data-v="' + o + '" aria-pressed="false">' + d.fmt(o) +
+      (d.reach ? '<small></small>' : w && w(o) ? '<small>risk</small>' : '') + '</button>').join('') +
+    '<button class="chip" type="button" data-pick="' + id + '" data-v="custom" aria-pressed="false">Custom</button></div>';
+  row.after(list);
+  row.appendChild(el);                                         // Custom: the field takes the place of the value box
+  el.addEventListener('input', () => pickPaint(id));
+  // left without a change: back to the value box
+  el.addEventListener('blur', () => { if ($(id + 'Ok').hidden && $('setWarn').hidden) { pickCustom[id] = false; row.classList.remove('is-custom'); pickPaint(id); } });
+}
+document.addEventListener('click', (e) => {
+  const box = e.target.closest('.pick-val'), chip = e.target.closest('[data-pick]');
+  if (box && !box.disabled) {
+    const id = box.id.slice(0, -4), list = $(id + 'List'), open = list.hidden;
+    if (!open) { setUndo(id); pickClose(id); return; }        // a second tap closes it and keeps the bot's value
+    list.hidden = false;
+    box.closest('.set').classList.add('is-open');
+    box.setAttribute('aria-expanded', 'true');
+    pickPaint(id);
+  } else if (chip) {
+    const id = chip.dataset.pick, el = $(id), row = el.closest('.set');
+    if (chip.dataset.v === 'custom') {
+      pickCustom[id] = true; row.classList.add('is-custom'); pickPaint(id);
+      el.focus(); el.select();
+      return;
+    }
+    pickCustom[id] = false; row.classList.remove('is-custom');
+    el.value = chip.dataset.v;
+    setCheck(id); pickPaint(id);
+    if (!$(id + 'Ok').hidden) askWarn(id, Number(el.value));     // a riskier choice asks at once
+  }
+});
 function fillSettings(c) {
   $('setTp').value = c.tpPts; $('setGrid').value = c.gridPts; $('setBasket').value = c.basket;
   $('setLevels').value = c.maxLevels; $('setCooldown').value = c.cooldown;
@@ -1227,7 +1494,7 @@ function renderSmartGrid(s) {
   if (!on) return;
   const el = $('sgGrid');
   // while the slider is moved or being saved, the bot's value (or a new session) does not pull it away
-  if (Date.now() - sgMoved > 6000 && !el.matches(':active')) {
+  if (Date.now() - sgMoved > 6000 && !el.matches(':active') && !editing(el)) {
     sgSes = g.ses; $('sgSes').textContent = SES[sgSes][0];
     el.value = g[SES[sgSes][1]]; slPaint(el, g[SES[sgSes][1]]);
   }
@@ -1239,7 +1506,7 @@ function renderBasket(s) {
   if (!on) return;
   const el = $('bkProfit'), max = c.basketMax > 1 ? c.basketMax : 1;      // a bot from before basketMax takes 0.10 to 1.00
   if (Number(el.max) !== max) { el.max = max; el.step = max > 1 ? 0.1 : 0.05; $('bkMax').textContent = max; }
-  if (Date.now() - bkMoved > 6000 && !el.matches(':active')) { el.value = c.basket; slPaint(el, Number(c.basket).toFixed(2) + '$'); }
+  if (Date.now() - bkMoved > 6000 && !el.matches(':active') && !editing(el)) { el.value = c.basket; slPaint(el, Number(c.basket).toFixed(2) + '$'); }
   el.disabled = !online;
 }
 // Take profit in $. Points mode: the price move per trade (1.00$ = 1.000 on gold); Money mode: the $ per trade.
@@ -1254,7 +1521,7 @@ function renderTp(s) {
   if (!on) return;
   const el = $('tpUsd');
   if (c.tpMax > 0 && Number(el.max) !== c.tpMax) { el.max = c.tpMax; $('tpMax').textContent = c.tpMax; }
-  if (Date.now() - tpMoved > 6000 && !el.matches(':active')) { el.value = c.tpUsd; tpPaint(c.tpUsd, c); }
+  if (Date.now() - tpMoved > 6000 && !el.matches(':active') && !editing(el)) { el.value = c.tpUsd; tpPaint(c.tpUsd, c); }
   el.disabled = !online;
 }
 // Lot mode bar. A tap moves the lit box at once; the bot's answer confirms it, or the box goes back.
@@ -1271,25 +1538,61 @@ function renderModeBar(s) {
   }
   row.dataset.pos = i;
 }
+// Risk calculator: if price keeps moving one way. Every level holds its open loss until the next level opens, so a
+// level's risk is the loss just before the next one opens. The last level that can open (max grid levels, or the
+// max total lots) has no next one: from there the loss grows by its hold lots for every 1.00$ the price moves on.
+// Take profits collected on the way are not counted, so the real drop is a little smaller.
 function renderCalc(s) {
   const c = s.cfg, smart = s.mode === 'smart' && !!s.sgrid, grid = smart ? s.sgrid.now : c.gridPts;
-  const step = (c.tpPts + grid) * c.pt, lots = [];
-  let hold = 0, blockedAt = 0;
-  let h = '<tr><th>Level</th><th>Lot</th><th>Hold lots</th><th>Move</th><th>Floating</th><th>% bal</th></tr>';
+  const step = (c.tpPts + grid) * c.pt, pv = c.pv || 100, bal = s.balance > 0 ? s.balance : 0;
+  const lv = [];                                    // every level: its lot, the lots held, where it opens, and if it can open
+  let hold = 0;
   for (let n = 1; n <= c.maxLevels; n++) {
-    const lot = lotAt(n - 1); lots.push(lot); hold += lot;
-    const dist = (n - 1) * step;
-    let loss = 0; lots.forEach((l, i) => { loss += l * (dist - i * step) * c.pv; });
-    const blocked = c.maxLots > 0 && hold + (c.asym ? lotAt(0) : lot) > c.maxLots + 1e-9;
-    if (blocked && !blockedAt) blockedAt = n;
-    const now = !s.smart && s.positions.length > 0 && n === s.level;
-    h += '<tr class="' + (blocked ? 'off' : now ? 'now' : '') + '"><td>L' + n + '</td><td>' + lot.toFixed(2) + '</td><td>' + hold.toFixed(2) +
-         '</td><td>' + dist.toFixed(1) + '</td><td>' + money(-loss) + '</td><td>' + (s.balance > 0 ? (loss / s.balance * 100).toFixed(1) : '0.0') + '%</td></tr>';
+    const lot = lotAt(n - 1); hold += lot;
+    const blocked = (lv.length > 0 && lv[lv.length - 1].blocked) || (c.maxLots > 0 && hold + (c.asym ? lotAt(0) : lot) > c.maxLots + 1e-9);
+    lv.push({ n, lot, hold, at: (n - 1) * step, blocked });
+  }
+  const open = lv.filter(l => !l.blocked), last = open[open.length - 1];
+  const lossAt = (k, d) => open.slice(0, k).reduce((sum, l) => sum + l.lot * (d - l.at) * pv, 0);   // levels 1..k, d from the first pair
+  const pct = (loss) => {
+    if (!bal) return '-';
+    const p = loss / bal * 100;
+    return '<span class="' + (p >= 100 ? 'bad' : p >= 30 ? 'warn' : '') + '">' + (p >= 1000 ? '999+' : p.toFixed(1)) + '%</span>';
+  };
+  let h = '<tr><th>Level</th><th>Lot</th><th>Hold lots</th><th>Move</th><th>Max loss</th><th>% bal</th></tr>';
+  for (const l of lv) {
+    const k = open.indexOf(l) + 1, now = !s.smart && s.positions.length > 0 && l.n === s.level;
+    let worst, share;
+    if (l.blocked) { worst = 'not opened'; share = '-'; }
+    else if (l === last) { worst = '<span class="bad">no limit</span>'; share = '-'; }
+    else { const loss = lossAt(k, open[k].at); worst = '<span class="' + (bal && loss >= bal ? 'bad' : '') + '">' + money(-loss) + '</span>'; share = pct(loss); }
+    h += '<tr class="' + (l.blocked ? 'off' : now ? 'now' : '') + '"><td>L' + l.n + '</td><td>' + l.lot.toFixed(2) + '</td><td>' + l.hold.toFixed(2) +
+         '</td><td>' + l.at.toFixed(1) + '</td><td>' + worst + '</td><td>' + share + '</td></tr>';
   }
   $('calcTbl').innerHTML = h;
-  $('calcNote').textContent = 'Move is the price distance from the first pair. ' +
-    (smart ? 'Smart mode: this table uses the grid distance of the session now (' + grid + ' points). ' : '') +
-    (blockedAt ? 'From L' + blockedAt + ' the max total lots limit (' + Number(c.maxLots).toFixed(2) + ') blocks new pairs.' : '');
+  // the facts in words
+  const facts = [];
+  if (!last) {
+    facts.push('The max total lots (' + Number(c.maxLots).toFixed(2) + ') is lower than the first pair, so the bot opens no trades.');
+  } else {
+    const why = last.n < c.maxLevels ? 'the max total lots of ' + Number(c.maxLots).toFixed(2) + ' allows no more' : 'the max grid levels is ' + c.maxLevels;
+    facts.push('After <b>L' + last.n + '</b> no new pair opens (' + why + '). If gold keeps going the same way, the loss keeps growing: <b class="bad">' +
+      money0(last.hold * pv) + '</b> for every 1.00$ it moves on, with no limit.');
+    if (bal) {
+      let used = null;                              // the price distance at which the open loss equals the balance
+      for (let k = 1; k <= open.length && !used; k++) {
+        const from = open[k - 1].at, to = k < open.length ? open[k].at : Infinity, start = lossAt(k, from), rate = open[k - 1].hold * pv;
+        if (start + rate * (to - from) >= bal) used = { k, d: from + (bal - start) / rate };
+      }
+      facts.push('Your balance of <b>' + money0(bal) + '</b> would be used up if gold moves <b class="bad">' + used.d.toFixed(2) +
+        '$</b> from the first pair without coming back (at L' + used.k + '). Your broker usually closes the trades before that (stop out).');
+    } else {
+      facts.push('The bot has not sent your balance yet, so the % column is empty.');
+    }
+  }
+  $('calcSum').innerHTML = facts.map(f => '<p>' + f + '</p>').join('');
+  $('calcNote').textContent = 'Move is the price distance from the first pair, in $. Take profits collected on the way are not counted, so the real drop is a little smaller.' +
+    (smart ? ' Smart mode: this table uses the grid distance of the session now (' + grid + ' points).' : '');
 }
 // Report: closed profit by range. This week and Last week: a bar a day, Monday to Sunday; Month: a bar a week for the
 // last 5 weeks; All time: a bar a week since the first trade, a bar a month after half a year. From the bot's "rep"
@@ -1486,7 +1789,7 @@ function render() {
   }
   if (tab === 'tools') {
     if (tool === 'settings' && S && !settingsFilled) { fillSettings(s.cfg); settingsFilled = true; }
-    if (tool === 'settings') { renderTp(s); renderSmartGrid(s); renderBasket(s); }
+    if (tool === 'settings') { renderTp(s); renderSmartGrid(s); renderBasket(s); syncSettings(s.cfg); }
     if (tool === 'calc') renderCalc(s);
     if (tool === 'report') renderReport(s);
     if (tool === 'account') {
@@ -1673,12 +1976,53 @@ syncHistBtn();
 $('shCancel').addEventListener('click', () => { closeSheet(); toast('Canceled.'); });
 $('shOk').addEventListener('click', () => { const c = pending && pending.cmd; closeSheet(); if (c) send(c); });
 $('t-settings').addEventListener('submit', e => e.preventDefault());
-$('sgGrid').addEventListener('input', e => { sgMoved = Date.now(); slPaint(e.target, e.target.value); });
-$('sgGrid').addEventListener('change', e => { sgMoved = Date.now(); if (sgSes >= 0) send('sgrid', sgSes + '.' + e.target.value); });      // 0 Asia, 1 London, 2 New York
-$('bkProfit').addEventListener('input', e => { bkMoved = Date.now(); slPaint(e.target, Number(e.target.value).toFixed(2) + '$'); });
-$('bkProfit').addEventListener('change', e => { bkMoved = Date.now(); send('basket', Number(e.target.value).toFixed(2)); });
-$('tpUsd').addEventListener('input', e => { tpMoved = Date.now(); tpPaint(e.target.value, view().cfg); });
-$('tpUsd').addEventListener('change', e => { tpMoved = Date.now(); send('tp', Number(e.target.value).toFixed(2)); });
+// Settings sliders: closed until the value is tapped. Moving one only shows the new value, with Cancel and
+// Confirm under it; Confirm sends it to the bot. One slider is open at a time.
+const money2 = (v) => Number(v).toFixed(2) + '$';
+const SLIDERS = {
+  tpUsd: { fmt: money2, paint: (v) => tpPaint(v, view().cfg), send: (v) => { tpMoved = Date.now(); send('tp', Number(v).toFixed(2)); } },
+  bkProfit: { fmt: money2, paint: (v) => slPaint($('bkProfit'), money2(v)), send: (v) => { bkMoved = Date.now(); send('basket', Number(v).toFixed(2)); } },
+  sgGrid: { fmt: String, paint: (v) => slPaint($('sgGrid'), v), send: (v) => { sgMoved = Date.now(); if (sgSes >= 0) send('sgrid', sgSes + '.' + v); } },      // 0 Asia, 1 London, 2 New York
+};
+let slEdit = null;                                  // the open slider: { id, from }
+const editing = (el) => !!slEdit && slEdit.id === el.id;
+function slClose(keep) {
+  if (!slEdit) return;
+  const { id, from } = slEdit, el = $(id), box = el.closest('.sg');
+  slEdit = null;
+  if (!keep) { el.value = from; SLIDERS[id].paint(from); }      // Cancel: back to the bot's value
+  box.classList.remove('is-open');
+  box.querySelector('[data-sl-open]').setAttribute('aria-expanded', 'false');
+  $(id + 'Ok').hidden = true;
+}
+function slOpen(id) {
+  const again = !!slEdit && slEdit.id === id;
+  slClose(false);
+  if (again) return;                                // a second tap on the value closes it
+  const el = $(id), box = el.closest('.sg');
+  slEdit = { id, from: el.value };
+  box.classList.add('is-open');
+  box.querySelector('[data-sl-open]').setAttribute('aria-expanded', 'true');
+}
+for (const id of Object.keys(SLIDERS)) {
+  const el = $(id), cfg = SLIDERS[id];
+  el.addEventListener('input', () => {
+    cfg.paint(el.value);
+    const changed = !!slEdit && slEdit.id === id && Number(el.value) !== Number(slEdit.from);
+    $(id + 'Ok').hidden = !changed;
+    if (changed) $(id + 'Chg').innerHTML = '<b>' + cfg.fmt(slEdit.from) + '</b><i>to</i><b>' + cfg.fmt(el.value) + '</b>';
+  });
+}
+document.addEventListener('click', (e) => {
+  const open = e.target.closest('[data-sl-open]'), cancel = e.target.closest('[data-sl-cancel]'), ok = e.target.closest('[data-sl-ok]');
+  if (open) slOpen(open.dataset.slOpen);
+  else if (cancel) slClose(false);
+  else if (ok && slEdit && slEdit.id === ok.dataset.slOk) {
+    const id = slEdit.id;
+    SLIDERS[id].send($(id).value);
+    slClose(true);
+  }
+});
 for (const [id, k] of [['alTp', 'tp'], ['alBasket', 'basket'], ['alRisk', 'risk']]) {
   $(id).checked = show[k];
   $(id).addEventListener('change', () => { show[k] = $(id).checked; store.set('rz_show', JSON.stringify(show)); });
@@ -1738,7 +2082,7 @@ $('pwProceed').addEventListener('click', async () => {
 document.addEventListener('visibilitychange', () => { if (!document.hidden) poll(); });
 
 /* ---------- start ---------- */
-// settings come from the MT5 inputs: shown here, changed there (only the Smart mode sliders can be moved)
+// settings come from the MT5 inputs; with a bot that sends cfg.setApp most of them can be changed here (syncSettings)
 document.querySelectorAll('#t-settings .panel:not(:last-of-type) input:not([type=range])').forEach(i => { i.disabled = true; });
 $('acc').value = account;
 if (window.Telegram && Telegram.WebApp) { try { Telegram.WebApp.ready(); Telegram.WebApp.expand(); } catch (e) {} }
