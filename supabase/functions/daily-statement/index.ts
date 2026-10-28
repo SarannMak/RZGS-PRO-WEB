@@ -1,9 +1,10 @@
-// Daily statement: reads rz_statement_data(), draws it as a PNG and sends it to the owner's Telegram chat.
+// Daily statement: reads rz_statement_data(), draws it as a PNG and as an Excel statement,
+// and sends both to the owner's Telegram chat.
 // Called every morning by the pg_cron job "rz-daily-activity-report" with the x-report-key header.
 import { createClient } from 'npm:@supabase/supabase-js@2.45.4';
 import { initWasm, Resvg } from 'npm:@resvg/resvg-wasm@2.6.2';
-import { encodeBase64 } from 'jsr:@std/encoding@1.0.5/base64';
 import { renderStatement } from './render.js';
+import { buildStatement } from './statement-xlsx.js';
 
 const FONTS = 'https://unpkg.com/@expo-google-fonts/';
 const FONT_FILES = [
@@ -18,6 +19,12 @@ const LOGO = 'https://rzgspro.com/assets/logo-192.png';
 
 const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 let ready: Promise<unknown> | null = null;
+
+function base64(b: Uint8Array) {
+  let s = '';
+  for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode(...b.subarray(i, i + 0x8000));
+  return btoa(s);
+}
 
 async function bytes(url: string) {
   const res = await fetch(url);
@@ -36,15 +43,25 @@ Deno.serve(async (req) => {
   const [, fonts, logo] = await Promise.all([
     ready,
     Promise.all(FONT_FILES.map((f) => bytes(FONTS + f))),
-    bytes(LOGO).then((b) => 'data:image/png;base64,' + encodeBase64(b)).catch(() => null),
+    bytes(LOGO).then((b) => 'data:image/png;base64,' + base64(b)).catch(() => null),
   ]);
   const svg = renderStatement(data, logo);
   const png = new Resvg(svg, { font: { fontBuffers: fonts, defaultFontFamily: 'Inter', loadSystemFonts: false } }).render().asPng();
 
-  const form = new FormData();
-  form.append('chat_id', target.report_tg_chat);
-  form.append('caption', `RZGS-PRO daily statement ${data.date}`);
-  form.append('photo', new Blob([png], { type: 'image/png' }), `statement-${data.date}.png`);
-  const sent = await fetch(`https://api.telegram.org/bot${target.report_tg_token}/sendPhoto`, { method: 'POST', body: form });
-  return new Response(await sent.text(), { status: sent.ok ? 200 : 502, headers: { 'Content-Type': 'application/json' } });
+  const { data: stmtNo, error: noError } = await db.rpc('rz_next_statement_no');
+  if (noError) return new Response(noError.message, { status: 500 });
+  const xlsx = await buildStatement(data, stmtNo);
+
+  const send = (method: string, field: string, file: Uint8Array, type: string, name: string, caption: string) => {
+    const form = new FormData();
+    form.append('chat_id', target.report_tg_chat);
+    form.append('caption', caption);
+    form.append(field, new Blob([file], { type }), name);
+    return fetch(`https://api.telegram.org/bot${target.report_tg_token}/${method}`, { method: 'POST', body: form });
+  };
+  const photo = await send('sendPhoto', 'photo', png, 'image/png', `statement-${data.date}.png`, `RZGS-PRO daily statement ${data.date}`);
+  const doc = await send('sendDocument', 'document', xlsx, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    `RZGS-PRO-Statement-${stmtNo}.xlsx`, `Statement No ${stmtNo} (Excel)`);
+  const ok = photo.ok && doc.ok;
+  return new Response(JSON.stringify({ photo: await photo.json(), document: await doc.json() }), { status: ok ? 200 : 502, headers: { 'Content-Type': 'application/json' } });
 });
