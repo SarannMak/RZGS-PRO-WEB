@@ -1,11 +1,6 @@
-// Live partner figures from the three brokers. Each function returns null when its broker can't be reached,
-// so the statement still goes out.
-
-// Exness: the official partner API (my.exness.partners), signed in with the partner login kept in the vault
-// (exness_login / exness_password).
-const API = 'https://my.exness.partners/api';
-
-const iso = (d) => d.toISOString().slice(0, 10);
+// Live partner figures from the three brokers for one statement period (from / to are dates, both included).
+// Each returns { clients, active, inactive, trades, commission }; a figure the broker doesn't report is null,
+// and the whole result is null when the broker can't be reached, so the statement still goes out.
 
 // Brokers' servers sometimes drop a connection; try a request once more before giving up.
 async function fetch(url, options) {
@@ -17,10 +12,16 @@ async function fetch(url, options) {
   }
 }
 
-export async function exnessFigures(login, password, today) {
+const withInactive = (f) => ({ ...f, inactive: f.active == null ? null : Math.max(0, f.clients - f.active) });
+
+// Exness: the official partner API (my.exness.partners), signed in with the partner login kept in the vault
+// (exness_login / exness_password).
+const EXNESS = 'https://my.exness.partners/api';
+
+export async function exnessFigures(login, password, from, to) {
   if (!login || !password) return null;
   try {
-    const auth = await fetch(`${API}/v2/auth/`, {
+    const auth = await fetch(`${EXNESS}/v2/auth/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify({ login: login.trim(), password }),
@@ -28,41 +29,35 @@ export async function exnessFigures(login, password, today) {
     if (!auth.ok) throw new Error(`auth ${auth.status}`);
     const { token } = await auth.json();
     const get = async (path) => {
-      const res = await fetch(API + path, { headers: { Authorization: `JWT ${token}`, Accept: 'application/json' } });
+      const res = await fetch(EXNESS + path, { headers: { Authorization: `JWT ${token}`, Accept: 'application/json' } });
       if (!res.ok) throw new Error(`${path} ${res.status}`);
       return res.json();
     };
 
-    const end = new Date(`${today}T00:00:00Z`);
-    const dayAgo = iso(new Date(end.getTime() - 86400000));
-    const monthAgo = iso(new Date(end.getTime() - 30 * 86400000));
-    const [accounts, rewardDay, rewardMonth] = await Promise.all([
+    const [accounts, rewards] = await Promise.all([
       get('/reports/clients/accounts/?limit=1000'),
-      get(`/reports/rewards/?reward_date_from=${dayAgo}&reward_date_to=${today}`),
-      get(`/reports/rewards/?reward_date_from=${monthAgo}&reward_date_to=${today}`),
+      get(`/reports/rewards/?reward_date_from=${from}&reward_date_to=${to}`),
     ]);
     const rows = accounts.data || [];
-    return {
+    const traded = new Set(rows.filter((a) => (a.client_account_last_trade || '').slice(0, 10) >= from).map((a) => a.client_uid));
+    return withInactive({
       clients: Number(accounts.totals?.clients_count ?? new Set(rows.map((a) => a.client_uid)).size),
-      accounts: Number(accounts.totals?.count ?? rows.length),
-      new_accounts: rows.filter((a) => (a.client_account_created || '') >= dayAgo).length,
-      traded_accounts: rows.filter((a) => a.client_account_last_trade).length,
-      volume_lots_30d: Number(rewardMonth.totals?.volume_lots ?? 0),
-      reward_day: Number(rewardDay.totals?.reward_usd ?? 0),
-      reward_30d: Number(rewardMonth.totals?.reward_usd ?? 0),
-    };
+      active: traded.size,
+      trades: Number(rewards.totals?.orders_count ?? 0),
+      commission: Number(rewards.totals?.reward_usd ?? 0),
+    });
   } catch (error) {
     console.error('exness', error);
     return null;
   }
 }
 
-// Live figures from the Lirunex partner portal (client.lirunex.com). The portal runs on the RocksAcademy fxCRM,
+// Lirunex partner portal (client.lirunex.com). The portal runs on the RocksAcademy fxCRM,
 // so this signs in the way the portal does (vault: lirunex_login / lirunex_password).
 const LIRUNEX = 'https://crmapi3.rocksacademy.com/';
 const LIRUNEX_HEADERS = { Accept: 'application/json', Origin: 'https://client.lirunex.com', Referer: 'https://client.lirunex.com/' };
 
-export async function lirunexFigures(login, password, today) {
+export async function lirunexFigures(login, password, from, to) {
   if (!login || !password) return null;
   try {
     const auth = await fetch(LIRUNEX + 'api/Token', {
@@ -82,33 +77,34 @@ export async function lirunexFigures(login, password, today) {
 
     const ib = (await get('api/referrer/GetIntroducingBrokerList'))?.[0]?.id;
     if (!ib) throw new Error('no IB account');
-    const monthStart = `${today.slice(0, 8)}01T00:00:00.000Z`;
-    const end = new Date(new Date(`${today}T00:00:00Z`).getTime() + 86400000).toISOString();
-    const range = `start=0&length=100&startDate=${monthStart}&endDate=${end}&introducingBrokerId=${ib}`;
-    const [turnover, rebate] = await Promise.all([
-      get(`api/contact/GetClientsMonthlyTurnoverReport?${range}`),
-      get(`api/referrer/GetMonthlyRebateEarningReport?${range}`),
+    const end = new Date(new Date(`${to}T00:00:00Z`).getTime() + 86400000).toISOString();
+    const monthStart = `${to.slice(0, 8)}01T00:00:00.000Z`;
+    const [turnover, rebates] = await Promise.all([
+      get(`api/contact/GetClientsMonthlyTurnoverReport?start=0&length=100&startDate=${monthStart}&endDate=${end}&introducingBrokerId=${ib}`),
+      get(`api/referrer/GetRebateEarningReport?start=0&length=1000&startDate=${from}T00:00:00.000Z&endDate=${end}&introducingBrokerId=${ib}`),
     ]);
-    const month = turnover?.data?.[0] || {};
-    return {
-      clients: Number(month.totalClient ?? rebate?.data?.[0]?.totalClient ?? 0),
-      sub_partners: Number(rebate?.data?.[0]?.totalSubPartner ?? 0),
-      deposit_month: Number(month.deposit ?? 0),
-      net_deposit_month: Number(month.nettDeposit ?? 0),
-      earnings_month: Number(month.totalEarnings ?? rebate?.data?.[0]?.totalEarning ?? 0),
-    };
+    // Rebate lines for the period; the amount field is the first numeric one named like rebate/earning/amount.
+    const lines = rebates?.data || [];
+    const amountKey = lines.length ? Object.keys(lines[0]).find((k) => /rebate|earning|amount|commission/i.test(k) && typeof lines[0][k] === 'number') : null;
+    const commission = lines.length ? (amountKey ? lines.reduce((sum, l) => sum + Number(l[amountKey] || 0), 0) : null) : 0;
+    return withInactive({
+      clients: Number(turnover?.data?.[0]?.totalClient ?? 0),
+      active: null,
+      trades: null,
+      commission,
+    });
   } catch (error) {
     console.error('lirunex', error);
     return null;
   }
 }
 
-// Live figures from the Investizo partner area (investizo-ib.com), signed in the way the site does
+// Investizo partner area (investizo-ib.com), signed in the way the site does
 // (vault: investizo_login / investizo_password); the site sends its token in an x-api-key header.
 const INVESTIZO = 'https://invest-api.com/v3';
 const INVESTIZO_HEADERS = { Accept: 'application/json', Origin: 'https://investizo-ib.com', Referer: 'https://investizo-ib.com/' };
 
-export async function investizoFigures(login, password) {
+export async function investizoFigures(login, password, from, to) {
   if (!login || !password) return null;
   try {
     const auth = await fetch(`${INVESTIZO}/login`, {
@@ -125,24 +121,19 @@ export async function investizoFigures(login, password) {
       return body.data;
     };
 
-    const [analytics, totals, init] = await Promise.all([
-      get('/affiliate-commission/get-analytics'),
+    const range = `dateFrom=${from}&dateTo=${to}`;
+    const [allTime, period, levels] = await Promise.all([
       get('/affiliate-dashboard/get-total?chart=1'),
-      get('/affiliate/get-init'),
+      get(`/affiliate-dashboard/get-total?chart=1&${range}`),
+      get(`/affiliate-commission/get-levels?${range}`),
     ]);
-    const dyn = analytics?.dynamic || {};
-    return {
-      registrations: Number(totals?.registrations?.current ?? 0),
-      active_clients: Number(totals?.active?.current ?? 0),
-      trades: Number(totals?.trading?.trades ?? 0),
-      volume_lots: Number(totals?.trading?.current ?? 0),
-      commission_today: Number(dyn.today ?? 0),
-      commission_yesterday: Number(dyn.yesterday ?? 0),
-      commission_7d: Number(dyn.day_7 ?? 0),
-      commission_30d: Number(dyn.day_30 ?? 0),
-      commission_total: (analytics?.levels || []).reduce((sum, l) => sum + Number(l.commission || 0), 0),
-      balance: Number(init?.balance ?? 0),
-    };
+    const lv = Array.isArray(levels) ? levels : [];
+    return withInactive({
+      clients: Number(allTime?.registrations?.current ?? 0),
+      active: Number(period?.active?.current ?? 0),
+      trades: lv.reduce((sum, l) => sum + Number(l.trades || 0), 0),
+      commission: lv.reduce((sum, l) => sum + Number(l.commission || 0), 0),
+    });
   } catch (error) {
     console.error('investizo', error);
     return null;
