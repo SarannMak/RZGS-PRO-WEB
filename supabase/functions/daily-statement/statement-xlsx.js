@@ -9,7 +9,8 @@ const LINE = { style: 'thin', color: { argb: 'FFBFD8D3' } };
 const BOX = { top: LINE, bottom: LINE, left: LINE, right: LINE };
 const MONEY = '$#,##0.00;($#,##0.00);"-"';
 
-export async function buildStatement(d, stmtNo) {
+// Returns the ExcelJS workbook; write it with wb.xlsx.writeBuffer(), print it with statement-pdf.js.
+export function buildStatement(d, stmtNo) {
   const [y, m, day] = d.date.split('-');
   const date = `${day}/${m}/${y}`;
   const wb = new ExcelJS.Workbook();
@@ -127,19 +128,10 @@ export async function buildStatement(d, stmtNo) {
     row([[i + 1, 1, 1], [label, 2, 2], [v[0], 3, 3], [v[1], 4, 4], [v[2], 5, 6]]);
   });
 
-  // 6. income from broker (before website, so website commission can sum it)
+  // 6. income from broker
   title('INCOME FROM BROKER (last 30 days)');
   head([['No.', 1, 1, 'center'], ['Broker', 2, 2], ['Users', 3, 4, 'right'], ['Net Commission', 5, 6, 'right']]);
-  const firstBroker = r;
   ['Lirunex', 'Exness', 'Investizo'].forEach((n, i) => row([[i + 1, 1, 1], [n, 2, 2], [b[n]?.users ?? 0, 3, 4], [b[n]?.commission ?? 0, 5, 6, { money: true }]]));
-  const lastBroker = r - 1;
-
-  // 7. income from website
-  title('INCOME FROM WEBSITE (last 30 days)');
-  head([['No.', 1, 1, 'center'], ['Source', 2, 2], ['Amount', 3, 6, 'right']]);
-  row([[1, 1, 1], ['Signup (new accounts)', 2, 2], [d.signup_30d, 3, 6]]);
-  row([[2, 1, 1], ['Payment (plan income)', 2, 2], [f(`E${net}`, d.done_value), 3, 6, { money: true }]]);
-  row([[3, 1, 1], ['Commission (all brokers)', 2, 2], [f(`SUM(E${firstBroker}:E${lastBroker})`, d.commission_30d ?? 0), 3, 6, { money: true }]]);
 
   // notes
   r += 1;
@@ -155,5 +147,5 @@ export async function buildStatement(d, stmtNo) {
   }
 
   ws.pageSetup.printArea = `A1:F${r - 1}`;
-  return new Uint8Array(await wb.xlsx.writeBuffer());
+  return wb;
 }
