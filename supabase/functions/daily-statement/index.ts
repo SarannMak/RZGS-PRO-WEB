@@ -16,8 +16,12 @@ Deno.serve(async (req) => {
   const { data, error } = await db.rpc('rz_statement_data');
   if (error) return new Response(error.message, { status: 500 });
   data.exness = await exnessFigures(target.exness_login, target.exness_password, data.date);
-  // {"dry": true} checks the figures without numbering or sending a statement
-  if ((await req.json().catch(() => ({}))).dry) return new Response(JSON.stringify(data), { headers: { 'Content-Type': 'application/json' } });
+  // {"dry": true} returns the figures without numbering or sending a statement;
+  // {"chat_id", "thread_id"} sends it to that chat instead of the report topic (the report bot's /report).
+  const body = await req.json().catch(() => ({}));
+  if (body.dry) return new Response(JSON.stringify(data), { headers: { 'Content-Type': 'application/json' } });
+  const chat = body.chat_id ?? target.report_tg_chat;
+  const thread = body.chat_id ? body.thread_id : target.report_tg_thread;
 
   const { data: stmtNo, error: noError } = await db.rpc('rz_next_statement_no');
   if (noError) return new Response(noError.message, { status: 500 });
@@ -28,8 +32,8 @@ Deno.serve(async (req) => {
   const [y, m, d] = data.date.split('-');
   const send = (file: Uint8Array, type: string, name: string, caption: string) => {
     const form = new FormData();
-    form.append('chat_id', target.report_tg_chat);
-    if (target.report_tg_thread) form.append('message_thread_id', target.report_tg_thread);
+    form.append('chat_id', String(chat));
+    if (thread) form.append('message_thread_id', String(thread));
     form.append('caption', caption);
     form.append('document', new Blob([file], { type }), name);
     return fetch(`https://api.telegram.org/bot${target.report_tg_token}/sendDocument`, { method: 'POST', body: form });
