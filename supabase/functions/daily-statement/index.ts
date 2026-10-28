@@ -4,6 +4,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.45.4';
 import { buildStatement } from './statement-xlsx.js';
 import { printStatement } from './statement-pdf.js';
+import { exnessFigures } from './exness.js';
 
 const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 const XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
@@ -14,9 +15,12 @@ Deno.serve(async (req) => {
 
   const { data, error } = await db.rpc('rz_statement_data');
   if (error) return new Response(error.message, { status: 500 });
+  data.exness = await exnessFigures(target.exness_login, target.exness_password, data.date);
+  // {"dry": true} checks the figures without numbering or sending a statement
+  if ((await req.json().catch(() => ({}))).dry) return new Response(JSON.stringify(data), { headers: { 'Content-Type': 'application/json' } });
+
   const { data: stmtNo, error: noError } = await db.rpc('rz_next_statement_no');
   if (noError) return new Response(noError.message, { status: 500 });
-
   const wb = buildStatement(data, stmtNo);
   const xlsx = new Uint8Array(await wb.xlsx.writeBuffer());
   const pdf = await printStatement(wb.getWorksheet('Statement'));
