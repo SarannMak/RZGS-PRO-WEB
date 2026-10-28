@@ -128,33 +128,44 @@ export function buildStatement(d, stmtNo) {
     row([[i + 1, 1, 1], [label, 2, 2], [v[0], 3, 3], [v[1], 4, 4], [v[2], 5, 6]]);
   });
 
-  // 6. exness partner account, live from my.exness.partners
-  const ex = d.exness;
-  title('EXNESS PARTNER (live from my.exness.partners)');
-  head([['No.', 1, 1, 'center'], ['Description', 2, 2], ['Value', 3, 6, 'right']]);
-  if (ex) {
-    [['Clients', ex.clients], ['Trading accounts', ex.accounts], ['New accounts (last 24 h)', ex.new_accounts],
-      ['Accounts that have traded', ex.traded_accounts], ['Volume, last 30 days (lots)', ex.volume_lots_30d],
-      ['Reward, last 24 h', ex.reward_day, true], ['Reward, last 30 days', ex.reward_30d, true]]
-      .forEach(([label, v, money], i) => row([[i + 1, 1, 1], [label, 2, 2], [v, 3, 6, { money }]]));
-  } else {
-    row([[1, 1, 1], ['Exness could not be reached this morning', 2, 2], ['-', 3, 6]]);
-  }
+  // 6. broker partner accounts, read live from each broker's partner area every morning
+  const ex = d.exness, li = d.lirunex, iz = d.investizo;
+  const live = (heading, figures, rows) => {
+    title(heading);
+    head([['No.', 1, 1, 'center'], ['Description', 2, 2], ['Value', 3, 6, 'right']]);
+    if (!figures) return row([[1, 1, 1], ['Could not be reached this morning', 2, 2], ['-', 3, 6]]);
+    rows.forEach(([label, v, money], i) => row([[i + 1, 1, 1], [label, 2, 2], [v, 3, 6, { money }]]));
+  };
+  live('EXNESS PARTNER (live from my.exness.partners)', ex, ex && [
+    ['Clients', ex.clients], ['Trading accounts', ex.accounts], ['New accounts (last 24 h)', ex.new_accounts],
+    ['Accounts that have traded', ex.traded_accounts], ['Volume, last 30 days (lots)', ex.volume_lots_30d],
+    ['Reward, last 24 h', ex.reward_day, true], ['Reward, last 30 days', ex.reward_30d, true]]);
+  live('LIRUNEX PARTNER (live from client.lirunex.com)', li, li && [
+    ['Clients', li.clients], ['Sub-partners', li.sub_partners], ['Client deposits, this month', li.deposit_month, true],
+    ['Net deposits, this month', li.net_deposit_month, true], ['Earnings, this month', li.earnings_month, true]]);
+  live('INVESTIZO PARTNER (live from investizo-ib.com)', iz, iz && [
+    ['Registrations', iz.registrations], ['Active clients', iz.active_clients], ['Trades', iz.trades],
+    ['Volume (lots)', iz.volume_lots], ['Commission, today', iz.commission_today, true],
+    ['Commission, last 30 days', iz.commission_30d, true], ['Commission, all time', iz.commission_total, true],
+    ['Balance not yet paid out', iz.balance, true]]);
 
   // 7. income from broker
-  title('INCOME FROM BROKER (last 30 days)');
-  head([['No.', 1, 1, 'center'], ['Broker (source)', 2, 2], ['Users', 3, 4, 'right'], ['Net Commission', 5, 6, 'right']]);
-  row([[1, 1, 1], ['Exness (live from Exness)', 2, 2], [ex ? ex.clients : '-', 3, 4], [ex ? ex.reward_30d : '-', 5, 6, { money: true }]]);
-  [['Lirunex', 2], ['Investizo', 3]].forEach(([n, i]) =>
-    row([[i, 1, 1], [`${n} (entered manually)`, 2, 2], [b[n]?.users ?? 0, 3, 4], [b[n]?.commission ?? 0, 5, 6, { money: true }]]));
+  title('INCOME FROM BROKER');
+  head([['No.', 1, 1, 'center'], ['Broker (period)', 2, 2], ['Clients', 3, 4, 'right'], ['Net Commission', 5, 6, 'right']]);
+  const firstBroker = r;
+  row([[1, 1, 1], ['Exness (last 30 days)', 2, 2], [ex ? ex.clients : '-', 3, 4], [ex ? ex.reward_30d : '-', 5, 6, { money: true }]]);
+  row([[2, 1, 1], ['Lirunex (this month)', 2, 2], [li ? li.clients : '-', 3, 4], [li ? li.earnings_month : '-', 5, 6, { money: true }]]);
+  row([[3, 1, 1], ['Investizo (last 30 days)', 2, 2], [iz ? iz.registrations : '-', 3, 4], [iz ? iz.commission_30d : '-', 5, 6, { money: true }]]);
+  const totalBroker = [ex?.reward_30d, li?.earnings_month, iz?.commission_30d].reduce((sum, v) => sum + (Number(v) || 0), 0);
+  row([[4, 1, 1], ['Total broker commission', 2, 2], ['', 3, 4], [f(`SUM(E${firstBroker}:E${r - 1})`, totalBroker), 5, 6, { money: true }]], { strong: true });
 
   // notes
   r += 1;
   for (const note of [
     'Notes:',
     'Income statement amounts are worked out from plan prices: Trial $0, Elite $5, Diamond $49 per month.',
-    'Exness figures come live from the Exness partner API. Lirunex and Investizo commission is typed into the rz_commission table.',
-    'Registration and Users per broker (Lirunex, Investizo) come from the RZGS-PRO Telegram bot.',
+    'Broker figures are read live each morning from the Exness, Lirunex and Investizo partner areas.',
+    'User Registration (brokers) counts RZGS-PRO customers by the broker they chose in the Telegram bot.',
   ]) {
     ws.mergeCells(r, 1, r, 6);
     cell(r, 1).value = note;
