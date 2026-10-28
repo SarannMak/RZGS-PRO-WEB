@@ -1,5 +1,5 @@
 // Daily statement: reads rz_statement_data(), builds the statement as an Excel file and a matching PDF,
-// and sends both to the report group in Telegram (chat id in the vault secret report_tg_chat).
+// and sends both to the report group in Telegram (vault secrets report_tg_chat, and report_tg_thread for the topic).
 // Called every morning by the pg_cron job "rz-daily-activity-report" with the x-report-key header.
 import { createClient } from 'npm:@supabase/supabase-js@2.45.4';
 import { buildStatement } from './statement-xlsx.js';
@@ -25,6 +25,7 @@ Deno.serve(async (req) => {
   const send = (file: Uint8Array, type: string, name: string, caption: string) => {
     const form = new FormData();
     form.append('chat_id', target.report_tg_chat);
+    if (target.report_tg_thread) form.append('message_thread_id', target.report_tg_thread);
     form.append('caption', caption);
     form.append('document', new Blob([file], { type }), name);
     return fetch(`https://api.telegram.org/bot${target.report_tg_token}/sendDocument`, { method: 'POST', body: form });
