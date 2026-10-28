@@ -19,7 +19,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="style.css?v=11">
+  <link rel="stylesheet" href="style.css?v=35">
   <link rel="stylesheet" href="process-3d.css?v=2">
 
   <script>document.documentElement.classList.add('js');</script>
@@ -123,6 +123,61 @@
       </div>
     </section>
 
+    <!-- How buying works: four steps in a row (one under the other on a phone), then "Ready to go?" -->
+    <section class="section section--tight" id="steps" aria-labelledby="steps-title">
+      <div class="container">
+        <header class="section-head reveal">
+          <p class="kicker">How buying works</p>
+          <h2 class="section-title" id="steps-title">Your bot in <span class="text-gradient">4 simple steps</span></h2>
+          <p class="section-lead">Sign up on our website, choose a plan, and our Telegram bot does the rest.</p>
+        </header>
+
+        <ol class="buy-steps">
+          <li class="buy-step reveal">
+            <span class="buy-tag">Step 1</span>
+            <span class="buy-icon" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg></span>
+            <h3>Create an account</h3>
+            <p>Sign up on rzgspro.com with your email. It's free and takes a minute.</p>
+            <a class="text-link" href="signup">Sign up <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+          </li>
+          <li class="buy-step reveal" style="--d: 80ms">
+            <span class="buy-tag">Step 2</span>
+            <span class="buy-icon" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><path d="M12.6 2.6A2 2 0 0 0 11.2 2H4a2 2 0 0 0-2 2v7.2a2 2 0 0 0 .6 1.4l8.7 8.7a2.4 2.4 0 0 0 3.4 0l6.6-6.6a2.4 2.4 0 0 0 0-3.4z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg></span>
+            <h3>Choose a plan</h3>
+            <p>Pick Free for 7 days, Elite at $5 a month or Diamond at $49 a month, right in your dashboard.</p>
+            <a class="text-link" href="#compare">Compare plans <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+          </li>
+          <li class="buy-step reveal" style="--d: 160ms">
+            <span class="buy-tag">Step 3</span>
+            <span class="buy-icon" aria-hidden="true"><svg class="icon"><use href="#i-send"/></svg></span>
+            <h3>Get it in Telegram</h3>
+            <p>Our Telegram bot checks your broker account, takes your payment by KHQR and sends your bot file. The free trial needs no payment.</p>
+          </li>
+          <li class="buy-step reveal" style="--d: 240ms">
+            <span class="buy-tag">Step 4</span>
+            <span class="buy-icon" aria-hidden="true"><svg class="icon"><use href="#i-bot"/></svg></span>
+            <h3>Set up your bot</h3>
+            <p>The bot shows you how to add the file to MT5 on your computer or VPS. Then tap Activate in the phone app.</p>
+          </li>
+        </ol>
+
+        <div class="buy-go reveal">
+          <h3 class="buy-go-title">Ready to <span class="text-gradient">go?</span></h3>
+          <p>Jump right in with a free 7-day trial, or explore the bot first.</p>
+          <div class="page-actions">
+            <a class="btn btn-primary btn-lg" href="signup">
+              Try it free
+              <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg>
+            </a>
+            <a class="btn btn-ghost btn-lg" href="bot">
+              Explore the bot
+              <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- The whole path, as one small machine in 3D (process-3d.js). The four cards are the same steps in words. -->
     <section class="section section--tight" id="path" aria-labelledby="path-title">
       <div class="container">
@@ -205,62 +260,6 @@
             <p>Our Telegram bot handles your plan, your payment and your bot file. Setup help and support are there too.</p>
           </article>
         </div>
-      </div>
-    </section>
-
-    <!-- Steps -->
-    <section class="section" id="steps" aria-labelledby="steps-title">
-      <div class="container">
-        <header class="section-head reveal">
-          <p class="kicker">Step by step</p>
-          <h2 class="section-title" id="steps-title">How buying <span class="text-gradient">works</span></h2>
-        </header>
-
-        <ol class="timeline">
-          <li class="card timeline-item reveal">
-            <span class="timeline-num" aria-hidden="true">1</span>
-            <div>
-              <h3>Choose your plan</h3>
-              <p>Start with the free 7-day trial, or pick Elite or Diamond.</p>
-              <a class="text-link" href="./#pricing">See plans <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
-            </div>
-          </li>
-          <li class="card timeline-item reveal">
-            <span class="timeline-num" aria-hidden="true">2</span>
-            <div>
-              <h3>Tap the plan button</h3>
-              <p>Our Telegram bot opens with your plan already chosen. It takes you through the next steps one at a time.</p>
-            </div>
-          </li>
-          <li class="card timeline-item reveal">
-            <span class="timeline-num" aria-hidden="true">3</span>
-            <div>
-              <h3>Open your broker account</h3>
-              <p>For the free trial and Elite, open your MT5 account with one of our partner broker links, then send the bot the email you registered with and your MT5 account number. The bot checks both. On Diamond you keep your own broker, so this step is skipped.</p>
-            </div>
-          </li>
-          <li class="card timeline-item reveal">
-            <span class="timeline-num" aria-hidden="true">4</span>
-            <div>
-              <h3>Make your payment</h3>
-              <p>For Elite and Diamond the bot shows a KHQR code. Pay with ABA Mobile or any Bakong app, then send the bot a screenshot of your receipt. The free trial needs no payment.</p>
-            </div>
-          </li>
-          <li class="card timeline-item reveal">
-            <span class="timeline-num" aria-hidden="true">5</span>
-            <div>
-              <h3>Get your bot file</h3>
-              <p>On Diamond, send your MT5 account number now. The bot file is made for your account and arrives in the chat, with your Bot Password, your App Password and the install steps. We help set up your VPS if you're on Diamond.</p>
-            </div>
-          </li>
-          <li class="card timeline-item reveal">
-            <span class="timeline-num" aria-hidden="true">6</span>
-            <div>
-              <h3>Start the bot</h3>
-              <p>Copy the file into MT5, attach it to a gold (XAUUSD) chart and type your Bot Password. Then open the control app and tap Activate. That's it.</p>
-            </div>
-          </li>
-        </ol>
       </div>
     </section>
 

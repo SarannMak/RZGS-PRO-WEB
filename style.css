@@ -4727,3 +4727,143 @@ body:has(.tg-float) .site-footer {
 .price-card .btn-ghost:hover {
   border-image-source: var(--hud-btn-hot);
 }
+
+/* ==========================================================================
+   How to Buy, "How buying works" (26 Oct 2026, from the user's sketch):
+   four step cards joined by arrows, then a "Ready to go?" box.
+   4 in a row on a computer, 2 + 2 on a tablet, one under the other on a phone.
+   ========================================================================== */
+.buy-steps {
+  --arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2319d3ff' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14M13 6l6 6-6 6'/%3E%3C/svg%3E");
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 40px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: none;
+}
+.buy-step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 24px 22px 22px;
+  border: 1px solid transparent;
+  border-image: var(--hud-panel) 16 fill / 16px;
+}
+.buy-tag {
+  position: absolute;
+  top: -12px;
+  left: 18px;
+  padding: 6px 12px;
+  background: var(--neon);
+  color: var(--on-accent);
+  font: 700 11px/1 var(--font-mono);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  clip-path: polygon(7px 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%, 0 7px);
+}
+.buy-icon {
+  display: grid;
+  place-items: center;
+  align-self: center; /* in the middle at the top of the card, as in the sketch */
+  width: 56px;
+  height: 56px;
+  margin: 6px 0 4px;
+  border: 1px solid transparent;
+  border-image: var(--hud-tile) 12 fill / 12px;
+  color: var(--cyan);
+  filter: drop-shadow(0 0 12px rgba(25, 211, 255, 0.25));
+}
+.buy-icon .icon {
+  width: 26px;
+  height: 26px;
+}
+.buy-step h3 {
+  margin: 0;
+  font: 600 19px/1.3 var(--font-display);
+  letter-spacing: 0.01em;
+}
+.buy-step p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+.buy-step .text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  margin-top: auto;
+}
+/* the arrow from one step to the next: below the card on a phone */
+.buy-step:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -36px;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--frame);
+  border-radius: 50%;
+  background: var(--bg) var(--arrow) center / 16px no-repeat;
+  box-shadow: 0 0 14px rgba(25, 211, 255, 0.3);
+  translate: -50% 0;
+  rotate: 90deg;
+}
+@media (min-width: 640px) {
+  .buy-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 40px 44px;
+  }
+  /* beside the card: from 1 to 2 and from 3 to 4 */
+  .buy-step:not(:last-child)::after {
+    top: 50%;
+    left: auto;
+    right: -39px;
+    bottom: auto;
+    translate: 0 -50%;
+    rotate: none;
+  }
+  .buy-step:nth-child(2)::after {
+    display: none;
+  }
+}
+@media (min-width: 1024px) {
+  .buy-steps {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .buy-step:nth-child(2)::after {
+    display: block;
+  }
+}
+
+/* Ready to go? */
+.buy-go {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: clamp(40px, 5vw, 56px);
+  padding: clamp(32px, 5vw, 48px) clamp(20px, 4vw, 40px);
+  border: 1px solid transparent;
+  border-image: var(--hud-frame) 24 fill / 24px;
+  text-align: center;
+}
+.buy-go-title {
+  margin: 0;
+  font: 700 clamp(28px, 4vw, 40px)/1.15 var(--font-display);
+}
+.buy-go p {
+  max-width: 520px;
+  margin: 0 0 12px;
+  color: var(--text-muted);
+  font-size: 16px;
+  line-height: 1.6;
+}
+.buy-go .page-actions {
+  justify-content: center;
+}
