@@ -5,9 +5,11 @@
 //   {"kind": "daily" | "weekly" | "monthly"}   which statement (daily when left out)
 //   {"dry": true}                              return the figures without numbering or sending a statement
 //   {"chat_id", "thread_id"}                   send to that chat instead of the report topic (the report bot's commands)
+//   {"list": "users", "range": "today" | "week" | "month" | "all"}   the customer list instead of a statement
 import { createClient } from 'npm:@supabase/supabase-js@2.45.4';
 import { buildStatement } from './statement-xlsx.js';
 import { printStatement } from './statement-pdf.js';
+import { buildUserList } from './users-xlsx.js';
 import { exnessFigures, investizoFigures, lirunexFigures } from './brokers.js';
 
 const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
@@ -19,6 +21,35 @@ Deno.serve(async (req) => {
   if (!target || req.headers.get('x-report-key') !== target.report_fn_key) return new Response('forbidden', { status: 403 });
 
   const body = await req.json().catch(() => ({}));
+  const chat = body.chat_id ?? target.report_tg_chat;
+  const thread = body.chat_id ? body.thread_id : target.report_tg_thread;
+  const dmy = (iso: string) => iso.split('-').reverse().join('/');
+  const send = (file: Uint8Array, type: string, name: string, caption: string) => {
+    const form = new FormData();
+    form.append('chat_id', String(chat));
+    if (thread) form.append('message_thread_id', String(thread));
+    form.append('caption', caption);
+    form.append('document', new Blob([file], { type }), name);
+    return fetch(`https://api.telegram.org/bot${target.report_tg_token}/sendDocument`, { method: 'POST', body: form });
+  };
+  const sendBoth = async (wb: any, sheet: string, name: string, caption: string) => {
+    const xlsx = new Uint8Array(await wb.xlsx.writeBuffer());
+    const pdf = await printStatement(wb.getWorksheet(sheet));
+    const sentXlsx = await send(xlsx, XLSX, `${name}.xlsx`, caption);
+    const sentPdf = await send(pdf, 'application/pdf', `${name}.pdf`, `PDF · ${caption}`);
+    const ok = sentXlsx.ok && sentPdf.ok;
+    return new Response(JSON.stringify({ xlsx: await sentXlsx.json(), pdf: await sentPdf.json() }), { status: ok ? 200 : 502, headers: { 'Content-Type': 'application/json' } });
+  };
+
+  if (body.list === 'users') {
+    const { data: list, error: listError } = await db.rpc('rz_customer_list', { p_range: body.range || 'today' });
+    if (listError) return new Response(listError.message, { status: 500 });
+    const label = { today: 'New users today', week: 'New users this week', month: 'New users this month', all: 'All users' }[list.range as string];
+    const n = list.rows.length;
+    return sendBoth(buildUserList(list), 'Customers', `RZGS-PRO-Customers-${list.range}-${list.date}`,
+      `Customer List · ${label} · ${dmy(list.date)} · ${n} customer${n === 1 ? '' : 's'}`);
+  }
+
   const kind = NAMES[body.kind] ? body.kind : 'daily';
   const { data, error } = await db.rpc('rz_period_data', { p_kind: kind });
   if (error) return new Response(error.message, { status: 500 });
@@ -28,28 +59,11 @@ Deno.serve(async (req) => {
     investizoFigures(target.investizo_login, target.investizo_password, data.from, data.to),
   ]);
   if (body.dry) return new Response(JSON.stringify(data), { headers: { 'Content-Type': 'application/json' } });
-  const chat = body.chat_id ?? target.report_tg_chat;
-  const thread = body.chat_id ? body.thread_id : target.report_tg_thread;
 
   const { data: stmtNo, error: noError } = await db.rpc('rz_statement_no', { p_kind: kind });
   if (noError) return new Response(noError.message, { status: 500 });
-  const wb = buildStatement(data, stmtNo);
-  const xlsx = new Uint8Array(await wb.xlsx.writeBuffer());
-  const pdf = await printStatement(wb.getWorksheet('Statement'));
-
-  const dmy = (iso: string) => iso.split('-').reverse().join('/');
   const period = data.from === data.to ? dmy(data.from) : `${dmy(data.from)} - ${dmy(data.to)}`;
-  const send = (file: Uint8Array, type: string, name: string, caption: string) => {
-    const form = new FormData();
-    form.append('chat_id', String(chat));
-    if (thread) form.append('message_thread_id', String(thread));
-    form.append('caption', caption);
-    form.append('document', new Blob([file], { type }), name);
-    return fetch(`https://api.telegram.org/bot${target.report_tg_token}/sendDocument`, { method: 'POST', body: form });
-  };
-  const name = `RZGS-PRO-${NAMES[kind]}-Statement-${stmtNo}`;
-  const sentXlsx = await send(xlsx, XLSX, `${name}.xlsx`, `${NAMES[kind]} Statement Report · ${period} · STMT No ${stmtNo}`);
-  const sentPdf = await send(pdf, 'application/pdf', `${name}.pdf`, `PDF · STMT No ${stmtNo}`);
-  const ok = sentXlsx.ok && sentPdf.ok;
-  return new Response(JSON.stringify({ xlsx: await sentXlsx.json(), pdf: await sentPdf.json() }), { status: ok ? 200 : 502, headers: { 'Content-Type': 'application/json' } });
+  const net = Number(data.plan_income || 0) + [data.exness, data.lirunex, data.investizo].reduce((sum, b) => sum + (Number(b?.commission) || 0), 0);
+  return sendBoth(buildStatement(data, stmtNo), 'Statement', `RZGS-PRO-${NAMES[kind]}-Statement-${stmtNo}`,
+    `${NAMES[kind]} Statement Report · ${period} · STMT No ${stmtNo} · Net income $${net.toFixed(2)}`);
 });

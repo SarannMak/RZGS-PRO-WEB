@@ -2,6 +2,7 @@
 //   /report /weekly /monthly   the statement for today, this week or this month (Excel + PDF), sent to the chat that asked
 //   /today                     today's figures as a short message
 //   /brokers                   today's live figures from the Exness, Lirunex and Investizo partner accounts
+//   /users [today|week|month|all]   customer list (Excel + PDF): new users in the period, or everyone (owner only)
 // Telegram signs each call with the secret_token set in setWebhook (vault secret report_bot_secret).
 import { createClient } from 'npm:@supabase/supabase-js@2.45.4';
 
@@ -19,6 +20,7 @@ const HELP = [
   '/monthly - this month\'s statement',
   '/today - today\'s figures',
   '/brokers - today\'s live broker figures',
+  '/users - new users today (Excel + PDF); add week, month or all, e.g. /users all',
   '',
   'Statements are also sent here automatically at 20:00: daily, weekly on Sunday, monthly on the last day of the month.',
 ].join('\n');
@@ -70,32 +72,44 @@ Deno.serve(async (req) => {
 
   const chatId = msg.chat.id;
   const thread = msg.is_topic_message ? msg.message_thread_id : undefined;
-  const allowed = String(msg.from?.id) === target.report_owner_id || String(chatId) === target.report_tg_chat;
-  if (!allowed) return new Response('ok');
+  const isOwner = String(msg.from?.id) === target.report_owner_id;
+  if (!isOwner && String(chatId) !== target.report_tg_chat) return new Response('ok');
 
-  const reply = (html: string) =>
-    fetch(`https://api.telegram.org/bot${target.report_tg_token}/sendMessage`, {
+  const telegram = (method: string, payload: Record<string, unknown>) =>
+    fetch(`https://api.telegram.org/bot${target.report_tg_token}/${method}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: chatId, message_thread_id: thread, text: html, parse_mode: 'HTML', reply_to_message_id: msg.message_id }),
-    });
+      body: JSON.stringify(payload),
+    }).then((res) => res.json()).catch(() => null);
+  const reply = (html: string) =>
+    telegram('sendMessage', { chat_id: chatId, message_thread_id: thread, text: html, parse_mode: 'HTML', reply_to_message_id: msg.message_id });
   const statement = (body: Record<string, unknown>) =>
     fetch(`${SUPABASE_URL}/functions/v1/daily-statement`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-report-key': target.report_fn_key },
       body: JSON.stringify(body),
     });
+  // Shows "Making …" while the files are built, then deletes it so only the files (with their details) stay;
+  // on failure the note turns into the error.
+  const withFiles = async (note: string, body: Record<string, unknown>) => {
+    const sent = await reply(note);
+    const id = sent?.result?.message_id;
+    const res = await statement({ ...body, chat_id: chatId, thread_id: thread });
+    if (res.ok) return id && telegram('deleteMessage', { chat_id: chatId, message_id: id });
+    const sorry = 'Sorry, the files could not be made just now. Try again in a minute.';
+    return id ? telegram('editMessageText', { chat_id: chatId, message_id: id, text: sorry }) : reply(sorry);
+  };
 
-  const cmd = text.trim().split(/\s+/)[0].split('@')[0].toLowerCase();
+  const [command, arg] = text.trim().split(/\s+/);
+  const cmd = command.split('@')[0].toLowerCase();
 
   const work = (async () => {
     if (cmd === '/start' || cmd === '/help') return reply(HELP);
-    if (STATEMENTS[cmd]) {
-      const kind = STATEMENTS[cmd];
-      await reply(`Making the ${kind} statement…`);
-      const res = await statement({ kind, chat_id: chatId, thread_id: thread });
-      if (!res.ok) return reply('Sorry, the statement could not be made just now. Try again in a minute.');
-      return;
+    if (STATEMENTS[cmd]) return withFiles(`Making the ${STATEMENTS[cmd]} statement…`, { kind: STATEMENTS[cmd] });
+    if (cmd === '/users') {
+      if (!isOwner) return reply('Only the owner can get the customer list.');
+      const range = ['today', 'week', 'month', 'all'].includes((arg || '').toLowerCase()) ? arg.toLowerCase() : 'today';
+      return withFiles('Making the customer list…', { list: 'users', range });
     }
     if (cmd === '/today' || cmd === '/brokers') {
       const res = await statement({ kind: 'daily', dry: true });
