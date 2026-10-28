@@ -7,6 +7,16 @@ const API = 'https://my.exness.partners/api';
 
 const iso = (d) => d.toISOString().slice(0, 10);
 
+// Brokers' servers sometimes drop a connection; try a request once more before giving up.
+async function fetch(url, options) {
+  try {
+    return await globalThis.fetch(url, options);
+  } catch {
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    return globalThis.fetch(url, options);
+  }
+}
+
 export async function exnessFigures(login, password, today) {
   if (!login || !password) return null;
   try {
