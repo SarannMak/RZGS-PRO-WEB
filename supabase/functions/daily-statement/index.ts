@@ -1,6 +1,6 @@
 // Statements: reads rz_period_data() for the day, the week or the month, adds live broker figures, builds the
 // statement as an Excel file and a matching PDF, and sends both to the report group in Telegram
-// (vault secrets report_tg_chat, and report_tg_thread for the topic).
+// (vault secret report_tg_chat; topics: report_tg_thread for daily, report_tg_thread_periodic for weekly and monthly).
 // Called at 20:00 Phnom Penh time by the pg_cron jobs rz-statement-daily / -weekly / -monthly with the x-report-key header.
 //   {"kind": "daily" | "weekly" | "monthly"}   which statement (daily when left out)
 //   {"dry": true}                              return the figures without numbering or sending a statement
@@ -21,8 +21,10 @@ Deno.serve(async (req) => {
   if (!target || req.headers.get('x-report-key') !== target.report_fn_key) return new Response('forbidden', { status: 403 });
 
   const body = await req.json().catch(() => ({}));
+  const kind = NAMES[body.kind] ? body.kind : 'daily';
   const chat = body.chat_id ?? target.report_tg_chat;
-  const thread = body.chat_id ? body.thread_id : target.report_tg_thread;
+  const topic = kind === 'daily' ? target.report_tg_thread : target.report_tg_thread_periodic || target.report_tg_thread;
+  const thread = body.chat_id ? body.thread_id : topic;
   const dmy = (iso: string) => iso.split('-').reverse().join('/');
   const send = (file: Uint8Array, type: string, name: string, caption: string) => {
     const form = new FormData();
@@ -50,7 +52,6 @@ Deno.serve(async (req) => {
       `Customer List · ${label} · ${dmy(list.date)} · ${n} customer${n === 1 ? '' : 's'}`);
   }
 
-  const kind = NAMES[body.kind] ? body.kind : 'daily';
   const { data, error } = await db.rpc('rz_period_data', { p_kind: kind });
   if (error) return new Response(error.message, { status: 500 });
   [data.exness, data.lirunex, data.investizo] = await Promise.all([
