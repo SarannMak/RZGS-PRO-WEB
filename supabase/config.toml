@@ -1,4 +1,0 @@
-# Telegram cannot send a Supabase JWT. The function authenticates callers itself
-# (webhook secret + owner chat id), so the gateway JWT check is off for it only.
-[functions.telegram-guardian]
-verify_jwt = false
