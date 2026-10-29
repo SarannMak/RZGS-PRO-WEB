@@ -1,0 +1,22 @@
+name = "rzgs-guardian-bot"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+
+[vars]
+SITE_URL = "https://rzgspro.com"
+GITHUB_REPO = "sarannmak/rzgs-pro-web"
+SUPABASE_REF = "zaziizzsbytkdlatoutv"
+# Claude model for /ask (optional; needs ANTHROPIC_API_KEY secret)
+CLAUDE_MODEL = "claude-sonnet-5-5"
+
+# Proactive watch: runs every 15 minutes, alerts you only when something is wrong.
+[triggers]
+crons = ["*/15 * * * *"]
+
+[[kv_namespaces]]
+binding = "STATE"
+id = "REPLACE_WITH_KV_ID"
+
+# Secrets (set with `wrangler secret put NAME`, never commit them):
+#   TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET, OWNER_CHAT_ID,
+#   GITHUB_TOKEN (read-only), SUPABASE_ACCESS_TOKEN (read-only), ANTHROPIC_API_KEY (optional)
