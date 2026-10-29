@@ -1,0 +1,12 @@
+name = "rzgs-security-agent"
+main = "worker.js"
+compatibility_date = "2026-10-01"
+
+[triggers]
+crons = ["0 */6 * * *"]   # sweep every 6 hours; silent unless something is wrong
+
+[vars]
+SITE_URL = "https://rzgspro.com"
+GITHUB_REPO = "sarannmak/rzgs-pro-web"
+SUPABASE_PROJECT_REF = "zaziizzsbytkdlatoutv"
+ALLOWED_CHAT_IDS = ""   # your Telegram chat id(s), comma separated

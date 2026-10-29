@@ -1,0 +1,3 @@
+# Keep the serverless security agent (server-side code) out of the published site.
+exclude:
+  - agent
