@@ -537,3 +537,46 @@ resizeCanvas();
 startChart();
 // redraw once the mono font is ready so the price tag uses it
 if (document.fonts && reducedMotion.matches) document.fonts.ready.then(() => render(0));
+
+/* ==========================================================================
+   Activity log: page visits and clicks on bot, broker referral and other outside links.
+   Rows go to web_activity in Supabase (insert-only for the public key); the daily report reads them.
+   ========================================================================== */
+(function trackActivity() {
+  const URL = 'https://zaziizzsbytkdlatoutv.supabase.co/rest/v1/web_activity';
+  const KEY = 'sb_publishable_ojfdWkyt22zlG0Uz_CUd4w_IufedKpK';
+  let visitor = '';
+  try {
+    visitor = localStorage.getItem('rz_visitor') || '';
+    if (visitor.length < 8) {
+      visitor = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2)).slice(0, 36);
+      localStorage.setItem('rz_visitor', visitor);
+    }
+  } catch { visitor = 'anon-' + Math.random().toString(16).slice(2, 12); }
+
+  const send = (kind, target) => {
+    try {
+      fetch(URL, {
+        method: 'POST', keepalive: true,
+        headers: { 'Content-Type': 'application/json', apikey: KEY, Authorization: `Bearer ${KEY}`, Prefer: 'return=minimal' },
+        body: JSON.stringify({ kind, visitor, page: location.pathname.slice(0, 200), target: (target || '').slice(0, 300) || null, t: new Date().toISOString() }),
+      }).catch(() => {});
+    } catch { /* tracking must never break the page */ }
+  };
+
+  const kindOf = (a) => {
+    const href = a.getAttribute('href') || '';
+    if (/exnessonelink|investizo|lirunextrd/i.test(href)) return 'referral';
+    if (/t\.me\/\+/.test(href)) return 'other';
+    if (/t\.me\/rzgsprobot/.test(href)) return 'interested';
+    if (/^#partners$|^signup$/.test(href) && a.matches('.btn')) return 'interested';
+    return /^https?:\/\//.test(href) && a.hostname !== location.hostname ? 'other' : '';
+  };
+
+  send('visit', document.referrer);
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest && e.target.closest('a[href]');
+    const kind = a && kindOf(a);
+    if (kind) send(kind, a.getAttribute('href'));
+  }, true);
+})();
