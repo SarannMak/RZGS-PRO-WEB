@@ -14,6 +14,13 @@ const num = (n: unknown) => (n == null ? '-' : String(n));
 const BROKERS = [['Exness', 'exness'], ['Lirunex', 'lirunex'], ['Investizo', 'investizo']];
 const BOT_USERNAME = 'rzgs_trading_bot';
 const STATEMENTS: Record<string, string> = { '/report': 'daily', '/weekly': 'weekly', '/monthly': 'monthly' };
+// Words accepted after /users and /payments for the period.
+const RANGES: Record<string, string> = {
+  today: 'today', daily: 'today', day: 'today',
+  week: 'week', weekly: 'week',
+  month: 'month', monthly: 'month',
+  all: 'all',
+};
 
 const HELP = [
   '<b>RZGS-PRO report bot</b>',
@@ -115,15 +122,12 @@ Deno.serve(async (req) => {
   const work = (async () => {
     if (cmd === '/start' || cmd === '/help') return reply(HELP);
     if (STATEMENTS[cmd]) return withFiles(`Making the ${STATEMENTS[cmd]} statement…`, { kind: STATEMENTS[cmd] });
-    if (cmd === '/users') {
-      if (!isOwner) return reply('Only the owner can get the customer list.');
-      const range = ['today', 'week', 'month', 'all'].includes((arg || '').toLowerCase()) ? arg.toLowerCase() : 'today';
-      return withFiles('Making the customer list…', { list: 'users', range });
-    }
-    if (cmd === '/payments') {
-      if (!isOwner) return reply('Only the owner can get the payment statement.');
-      const range = ['today', 'week', 'month', 'all'].includes((arg || '').toLowerCase()) ? arg.toLowerCase() : 'month';
-      return withFiles('Making the payment statement…', { list: 'payments', range });
+    if (cmd === '/users' || cmd === '/payments') {
+      const users = cmd === '/users';
+      if (!isOwner) return reply(`Only the owner can get the ${users ? 'customer list' : 'payment statement'}.`);
+      const range = arg ? RANGES[arg.toLowerCase()] : users ? 'today' : 'month';
+      if (!range) return reply(`Write it like this: <code>${cmd} today</code>, <code>${cmd} week</code>, <code>${cmd} month</code> or <code>${cmd} all</code>.`);
+      return withFiles(`Making the ${users ? 'customer list' : 'payment statement'}…`, { list: cmd.slice(1), range });
     }
     if (cmd === '/today' || cmd === '/brokers') {
       const res = await statement({ kind: 'daily', dry: true });
