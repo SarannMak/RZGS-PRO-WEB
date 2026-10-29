@@ -11,6 +11,7 @@ const db = createClient(SUPABASE_URL, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const usd = (n: unknown) => (n == null ? '-' : '$' + Number(n).toFixed(2));
 const num = (n: unknown) => (n == null ? '-' : String(n));
 const BROKERS = [['Exness', 'exness'], ['Lirunex', 'lirunex'], ['Investizo', 'investizo']];
+const BOT_USERNAME = 'rzgs_trading_bot';
 const STATEMENTS: Record<string, string> = { '/report': 'daily', '/weekly': 'weekly', '/monthly': 'monthly' };
 
 const HELP = [
@@ -104,7 +105,10 @@ Deno.serve(async (req) => {
   };
 
   const [command, arg] = text.trim().split(/\s+/);
-  const cmd = command.split('@')[0].toLowerCase();
+  const [name, botName] = command.split('@');
+  // In a group, /start@rzgsprobot is meant for another bot; answer only bare commands and ones addressed to this bot.
+  if (botName && botName.toLowerCase() !== BOT_USERNAME) return new Response('ok');
+  const cmd = name.toLowerCase();
 
   const work = (async () => {
     if (cmd === '/start' || cmd === '/help') return reply(HELP);
