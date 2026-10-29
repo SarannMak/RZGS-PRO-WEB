@@ -72,7 +72,10 @@ Deno.serve(async (req) => {
 
   const chatId = msg.chat.id;
   const thread = msg.is_topic_message ? msg.message_thread_id : undefined;
-  const isOwner = String(msg.from?.id) === target.report_owner_id;
+  // The owner, or a group admin posting anonymously as the report group itself (Telegram then hides who it is,
+  // and only admins can post as the group).
+  const isOwner = String(msg.from?.id) === target.report_owner_id
+    || (String(chatId) === target.report_tg_chat && String(msg.sender_chat?.id) === target.report_tg_chat);
   if (!isOwner && String(chatId) !== target.report_tg_chat) return new Response('ok');
 
   const telegram = (method: string, payload: Record<string, unknown>) =>
