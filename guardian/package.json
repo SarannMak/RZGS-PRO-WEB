@@ -1,0 +1,15 @@
+{
+  "name": "rzgs-guardian",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Telegram security/ops agent for rzgspro.com (Cloudflare Worker)",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "node --test test/guard.test.js"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}
