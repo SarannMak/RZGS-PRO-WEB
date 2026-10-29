@@ -6,10 +6,12 @@
 //   {"dry": true}                              return the figures without numbering or sending a statement
 //   {"chat_id", "thread_id"}                   send to that chat instead of the report topic (the report bot's commands)
 //   {"list": "users", "range": "today" | "week" | "month" | "all"}   the customer list instead of a statement
+//   {"list": "payments", "range": "today" | "week" | "month" | "all"}   the payment statement
 import { createClient } from 'npm:@supabase/supabase-js@2.45.4';
 import { buildStatement } from './statement-xlsx.js';
 import { printStatement } from './statement-pdf.js';
 import { buildUserList } from './users-xlsx.js';
+import { buildPaymentList } from './payments-xlsx.js';
 import { exnessFigures, investizoFigures, lirunexFigures } from './brokers.js';
 
 const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
@@ -50,6 +52,15 @@ Deno.serve(async (req) => {
     const n = list.rows.length;
     return sendBoth(buildUserList(list), 'Customers', `RZGS-PRO-Customers-${list.range}-${list.date}`,
       `Customer List · ${label} · ${dmy(list.date)} · ${n} customer${n === 1 ? '' : 's'}`);
+  }
+
+  if (body.list === 'payments') {
+    const { data: list, error: listError } = await db.rpc('rz_payment_list', { p_range: body.range || 'month' });
+    if (listError) return new Response(listError.message, { status: 500 });
+    const label = { today: 'Today', week: 'This week', month: 'This month', all: 'All time' }[list.range as string];
+    const count = (s: string) => list.rows.filter((u: any) => u.status === s).length;
+    return sendBoth(buildPaymentList(list), 'Payments', `RZGS-PRO-Payments-${list.range}-${list.date}`,
+      `Payment Statement · ${label} · ${dmy(list.date)} · Paid ${count('paid')} · Needs your confirmation ${count('confirm')} · Waiting ${count('waiting')}`);
   }
 
   const { data, error } = await db.rpc('rz_period_data', { p_kind: kind });

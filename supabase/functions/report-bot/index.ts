@@ -3,6 +3,7 @@
 //   /today                     today's figures as a short message
 //   /brokers                   today's live figures from the Exness, Lirunex and Investizo partner accounts
 //   /users [today|week|month|all]   customer list (Excel + PDF): new users in the period, or everyone (owner only)
+//   /payments [today|week|month|all]   payment statement (Excel + PDF): paid, needs confirmation, waiting (owner only)
 // Telegram signs each call with the secret_token set in setWebhook (vault secret report_bot_secret).
 import { createClient } from 'npm:@supabase/supabase-js@2.45.4';
 
@@ -22,6 +23,7 @@ const HELP = [
   '/today - today\'s figures',
   '/brokers - today\'s live broker figures',
   '/users - new users today (Excel + PDF); add week, month or all, e.g. /users all',
+  '/payments - payment statement for this month (Excel + PDF); add today, week or all',
   '',
   'Statements are also sent here automatically at 20:00: daily, weekly on Sunday, monthly on the last day of the month.',
 ].join('\n');
@@ -117,6 +119,11 @@ Deno.serve(async (req) => {
       if (!isOwner) return reply('Only the owner can get the customer list.');
       const range = ['today', 'week', 'month', 'all'].includes((arg || '').toLowerCase()) ? arg.toLowerCase() : 'today';
       return withFiles('Making the customer list…', { list: 'users', range });
+    }
+    if (cmd === '/payments') {
+      if (!isOwner) return reply('Only the owner can get the payment statement.');
+      const range = ['today', 'week', 'month', 'all'].includes((arg || '').toLowerCase()) ? arg.toLowerCase() : 'month';
+      return withFiles('Making the payment statement…', { list: 'payments', range });
     }
     if (cmd === '/today' || cmd === '/brokers') {
       const res = await statement({ kind: 'daily', dry: true });
