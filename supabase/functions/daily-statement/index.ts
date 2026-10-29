@@ -58,9 +58,12 @@ Deno.serve(async (req) => {
     const { data: list, error: listError } = await db.rpc('rz_payment_list', { p_range: body.range || 'month' });
     if (listError) return new Response(listError.message, { status: 500 });
     const label = { today: 'Today', week: 'This week', month: 'This month', all: 'All time' }[list.range as string];
-    const count = (s: string) => list.rows.filter((u: any) => u.status === s).length;
+    const total = (statuses: string[]) => list.rows.filter((u: any) => statuses.includes(u.status))
+      .reduce((sum: number, u: any) => sum + Number(u.amount || 0), 0).toFixed(2);
+    const confirm = list.rows.filter((u: any) => u.status === 'confirm').length;
     return sendBoth(buildPaymentList(list), 'Payments', `RZGS-PRO-Payments-${list.range}-${list.date}`,
-      `Payment Statement · ${label} · ${dmy(list.date)} · Paid ${count('paid')} · Needs your confirmation ${count('confirm')} · Waiting ${count('waiting')}`);
+      `Payment Statement · ${label} · ${dmy(list.date)} · Received $${total(['paid', 'expired'])} · `
+      + `Not received yet $${total(['confirm', 'waiting'])}${confirm ? ` · ${confirm} need${confirm === 1 ? 's' : ''} your confirmation` : ''}`);
   }
 
   const { data, error } = await db.rpc('rz_period_data', { p_kind: kind });

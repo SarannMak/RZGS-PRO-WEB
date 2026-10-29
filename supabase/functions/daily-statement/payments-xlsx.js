@@ -56,34 +56,44 @@ export function buildPaymentList(d) {
   cell(2, 1).value = `Period: ${period}   ·   Customers on a paid plan (Elite $5, Diamond $49) who reached the payment step   ·   Amounts are plan prices`;
   cell(2, 1).font = { name: FONT, size: 9, color: { argb: 'FF666666' } };
 
-  // summary by status: rows 4-9
+  // summary by status
   let r = 4;
   [['Status', 1, 3], ['Customers', 4, 4], ['Amount', 5, 6]].forEach(([label, a, b]) => {
     ws.mergeCells(r, a, r, b);
     cell(r, a).value = label;
     style(cell(r, a), { bold: true, size: 9, color: 'FFFFFFFF', fill: TEAL, align: a === 1 ? 'left' : 'right' });
   });
-  const first = r + 1;
-  for (const [key, [label, color]] of Object.entries(STATUS)) {
+  // money received (paid, and expired: they paid, the plan has since ended) and money not received yet,
+  // each with its own total; the two are never added together
+  const GROUPS = [
+    ['Total received', ['paid', 'expired']],
+    ['Total not received yet', ['confirm', 'waiting']],
+  ];
+  for (const [totalLabel, keys] of GROUPS) {
+    const first = r + 1;
+    for (const key of keys) {
+      const [label, color] = STATUS[key];
+      r += 1;
+      const list = rows.filter((u) => u.status === key);
+      ws.mergeCells(r, 1, r, 3);
+      ws.mergeCells(r, 5, r, 6);
+      cell(r, 1).value = label;
+      cell(r, 4).value = list.length;
+      cell(r, 5).value = list.reduce((sum, u) => sum + Number(u.amount || 0), 0);
+      // merged cells share one style, so style each block once (columns 1-3, 4, 5-6)
+      for (const c of [1, 4, 5]) style(cell(r, c), { bold: c === 1, color: c === 1 ? color : undefined, align: c === 1 ? 'left' : 'right' });
+      cell(r, 5).numFmt = MONEY;
+    }
     r += 1;
-    const list = rows.filter((u) => u.status === key);
+    const group = rows.filter((u) => keys.includes(u.status));
     ws.mergeCells(r, 1, r, 3);
     ws.mergeCells(r, 5, r, 6);
-    cell(r, 1).value = label;
-    cell(r, 4).value = list.length;
-    cell(r, 5).value = list.reduce((sum, u) => sum + Number(u.amount || 0), 0);
-    // merged cells share one style, so style each block once (columns 1-3, 4, 5-6)
-    for (const c of [1, 4, 5]) style(cell(r, c), { bold: c === 1, color: c === 1 ? color : undefined, align: c === 1 ? 'left' : 'right' });
+    cell(r, 1).value = totalLabel;
+    cell(r, 4).value = { formula: `SUM(D${first}:D${r - 1})`, result: group.length };
+    cell(r, 5).value = { formula: `SUM(E${first}:E${r - 1})`, result: group.reduce((sum, u) => sum + Number(u.amount || 0), 0) };
+    for (const c of [1, 4, 5]) style(cell(r, c), { bold: true, fill: 'FFD8EFEA', align: c === 1 ? 'left' : 'right' });
     cell(r, 5).numFmt = MONEY;
   }
-  r += 1;
-  ws.mergeCells(r, 1, r, 3);
-  ws.mergeCells(r, 5, r, 6);
-  cell(r, 1).value = 'Total';
-  cell(r, 4).value = { formula: `SUM(D${first}:D${r - 1})`, result: rows.length };
-  cell(r, 5).value = { formula: `SUM(E${first}:E${r - 1})`, result: rows.reduce((sum, u) => sum + Number(u.amount || 0), 0) };
-  for (const c of [1, 4, 5]) style(cell(r, c), { bold: true, fill: 'FFD8EFEA', align: c === 1 ? 'left' : 'right' });
-  cell(r, 5).numFmt = MONEY;
   for (let k = 4; k <= r; k++) ws.getRow(k).height = 17;
 
   // customer rows
