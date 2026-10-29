@@ -4,6 +4,7 @@
 //   /brokers                   today's live figures from the Exness, Lirunex and Investizo partner accounts
 //   /users [today|week|month|all]   customer list (Excel + PDF): new users in the period, or everyone (owner only)
 //   /payments [today|week|month|all]   payment statement (Excel + PDF): paid, needs confirmation, waiting (owner only)
+//   /users or /payments alone asks for the period with buttons.
 // Telegram signs each call with the secret_token set in setWebhook (vault secret report_bot_secret).
 import { createClient } from 'npm:@supabase/supabase-js@2.45.4';
 
@@ -21,6 +22,8 @@ const RANGES: Record<string, string> = {
   month: 'month', monthly: 'month',
   all: 'all',
 };
+const PERIOD_BUTTONS = [['today', 'Today'], ['week', 'This week'], ['month', 'This month'], ['all', 'All time']];
+const LISTS: Record<string, string> = { users: 'customer list', payments: 'payment statement' };
 
 const HELP = [
   '<b>RZGS-PRO report bot</b>',
@@ -71,11 +74,52 @@ function brokersText(d: any) {
   ].join('\n');
 }
 
+// A period button under "Which customer list?" / "Which payment statement?" was pressed: check the presser may see
+// customer data (the owner or a group admin), turn the question into "Making …", send the files, then remove it.
+async function periodPicked(target: Record<string, string>, q: any) {
+  const telegram = (method: string, payload: Record<string, unknown>) =>
+    fetch(`https://api.telegram.org/bot${target.report_tg_token}/${method}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    }).then((res) => res.json()).catch(() => null);
+  const [list, range] = String(q.data || '').split(':');
+  const message = q.message;
+  if (!LISTS[list] || !RANGES[range] || !message) return new Response('ok');
+  const chatId = message.chat.id;
+
+  let allowed = String(q.from?.id) === target.report_owner_id;
+  if (!allowed && String(chatId) === target.report_tg_chat) {
+    const member = await telegram('getChatMember', { chat_id: chatId, user_id: q.from?.id });
+    allowed = ['creator', 'administrator'].includes(member?.result?.status);
+  }
+  if (!allowed) {
+    await telegram('answerCallbackQuery', { callback_query_id: q.id, text: `Only the owner can get the ${LISTS[list]}.`, show_alert: true });
+    return new Response('ok');
+  }
+
+  const work = (async () => {
+    await telegram('answerCallbackQuery', { callback_query_id: q.id });
+    await telegram('editMessageText', { chat_id: chatId, message_id: message.message_id, text: `Making the ${LISTS[list]}…` });
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/daily-statement`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-report-key': target.report_fn_key },
+      body: JSON.stringify({ list, range, chat_id: chatId, thread_id: message.is_topic_message ? message.message_thread_id : undefined }),
+    });
+    if (res.ok) return telegram('deleteMessage', { chat_id: chatId, message_id: message.message_id });
+    return telegram('editMessageText', { chat_id: chatId, message_id: message.message_id, text: 'Sorry, the files could not be made just now. Try again in a minute.' });
+  })();
+  // @ts-ignore EdgeRuntime is provided by Supabase Edge Functions
+  EdgeRuntime.waitUntil(work.catch((e) => console.error('report-bot', e)));
+  return new Response('ok');
+}
+
 Deno.serve(async (req) => {
   const target = (await db.rpc('rz_report_target')).data as Record<string, string> | null;
   if (!target || req.headers.get('x-telegram-bot-api-secret-token') !== target.report_bot_secret) return new Response('forbidden', { status: 403 });
 
   const update = await req.json().catch(() => null);
+  if (update?.callback_query) return periodPicked(target, update.callback_query);
   const msg = update?.message;
   const text: string = msg?.text || '';
   if (!msg || !text.startsWith('/')) return new Response('ok');
@@ -125,7 +169,14 @@ Deno.serve(async (req) => {
     if (cmd === '/users' || cmd === '/payments') {
       const users = cmd === '/users';
       if (!isOwner) return reply(`Only the owner can get the ${users ? 'customer list' : 'payment statement'}.`);
-      const range = arg ? RANGES[arg.toLowerCase()] : users ? 'today' : 'month';
+      if (!arg) {
+        return telegram('sendMessage', {
+          chat_id: chatId, message_thread_id: thread, reply_to_message_id: msg.message_id,
+          text: `Which ${users ? 'customer list' : 'payment statement'}?`,
+          reply_markup: { inline_keyboard: [PERIOD_BUTTONS.map(([range, label]) => ({ text: label, callback_data: `${cmd.slice(1)}:${range}` }))] },
+        });
+      }
+      const range = RANGES[arg.toLowerCase()];
       if (!range) return reply(`Write it like this: <code>${cmd} today</code>, <code>${cmd} week</code>, <code>${cmd} month</code> or <code>${cmd} all</code>.`);
       return withFiles(`Making the ${users ? 'customer list' : 'payment statement'}…`, { list: cmd.slice(1), range });
     }
