@@ -1,0 +1,4 @@
+# Telegram calls the webhook without a Supabase JWT; auth is done in code
+# via the Telegram secret-token header and the owner-id allowlist.
+[functions.guardian]
+verify_jwt = false
