@@ -1,0 +1,3 @@
+# Telegram calls this without a Supabase JWT; the function checks Telegram's secret token itself.
+[functions.telegram-agent]
+verify_jwt = false
