@@ -1,0 +1,22 @@
+name = "rzgs-guardian-bot"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+
+# Scheduled security sweep (alerts only when something is wrong).
+[triggers]
+crons = ["*/15 * * * *"]
+
+# Create with:  npx wrangler kv namespace create STATE   then paste the id below.
+[[kv_namespaces]]
+binding = "STATE"
+id = "REPLACE_WITH_KV_ID"
+
+[vars]
+SITE_URL = "https://rzgspro.com"
+SUPABASE_PROJECT_REF = "zaziizzsbytkdlatoutv"
+GITHUB_REPO = "sarannmak/rzgs-pro-web"
+CLAUDE_MODEL = "claude-sonnet-5-5"
+
+# Secrets (never put these in this file) — set with `npx wrangler secret put NAME`:
+#   TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET, OWNER_CHAT_ID,
+#   ANTHROPIC_API_KEY, SUPABASE_ACCESS_TOKEN, GITHUB_TOKEN
