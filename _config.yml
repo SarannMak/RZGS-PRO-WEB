@@ -1,0 +1,4 @@
+# Keep backend code and docs out of the published website.
+exclude:
+  - supabase
+  - telegram-agent.md
