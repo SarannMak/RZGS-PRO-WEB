@@ -14,6 +14,7 @@ const BOT_TOKEN = env("TELEGRAM_BOT_TOKEN");
 const WEBHOOK_SECRET = env("TELEGRAM_WEBHOOK_SECRET");
 const CRON_SECRET = env("CRON_SECRET");
 const OWNERS = env("TELEGRAM_OWNER_IDS").split(",").map((s) => s.trim()).filter(Boolean);
+const ALERT_CHAT_ID = env("ALERT_CHAT_ID"); // group/channel for scheduled alerts (defaults to owners)
 const SITE_URL = env("SITE_URL", "https://rzgspro.com").replace(/\/$/, "");
 const GH_REPO = env("GITHUB_REPO", "sarannmak/rzgs-pro-web");
 const GH_TOKEN = env("GITHUB_TOKEN");
@@ -237,7 +238,7 @@ async function scheduledScan() {
     worst(d) !== "ok" ? problems("🗄 Database", d) : "",
     worst(r) !== "ok" ? problems("🔐 Repo", r) : "",
   ].filter(Boolean).join("\n\n");
-  for (const o of OWNERS) await send(o, msg);
+  for (const o of ALERT_CHAT_ID ? [ALERT_CHAT_ID] : OWNERS) await send(o, msg);
 }
 
 // ---------- entry ----------

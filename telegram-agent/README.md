@@ -46,4 +46,4 @@ The `/cron` route runs the full scan on a schedule and messages you **only when 
    $$);
    ```
 
-Optional env: `SITE_URL`, `GITHUB_REPO`, `SUPABASE_PROJECT_REF`.
+Optional env: `ALERT_CHAT_ID` (group id like `-100…` for scheduled alerts; add the bot to the group), `SITE_URL`, `GITHUB_REPO`, `SUPABASE_PROJECT_REF`.
