@@ -1,0 +1,6 @@
+name = "rzgs-guardian"
+main = "src/index.js"
+compatibility_date = "2026-01-01"
+
+[triggers]
+crons = ["*/15 * * * *"]   # health check every 15 minutes
