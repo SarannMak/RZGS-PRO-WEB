@@ -20,12 +20,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
   <link rel="stylesheet" href="style.css?v=11">
-  <link rel="stylesheet" href="auth.css?v=15">
+  <link rel="stylesheet" href="plans.css?v=1">
+  <link rel="stylesheet" href="auth.css?v=16">
 
-  <script>document.documentElement.classList.add('js');</script>
+  <script>document.documentElement.classList.add('js');try{if(localStorage.getItem('sb-zaziizzsbytkdlatoutv-auth-token'))document.documentElement.classList.add('signed-in')}catch(e){}</script>
   <script src="script.js?v=8" defer></script>
+  <script src="plans.js?v=2" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-  <script src="auth.js?v=17" defer></script>
+  <script src="auth.js?v=20" defer></script>
 </head>
 <body data-auth-page="dashboard">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -83,17 +85,24 @@
       <nav class="primary-nav" id="primary-nav" aria-label="Main">
         <ul class="nav-list">
           <li><a class="nav-link" href="bot">The Bot</a></li>
-          <li><a class="nav-link" href="./#pricing">Pricing</a></li>
           <li><a class="nav-link" href="how-to-buy">How to Buy</a></li>
           <li><a class="nav-link" href="license">License</a></li>
           <li><a class="nav-link" href="contact">Contact</a></li>
-          <li><a class="nav-link" href="dashboard" aria-current="page">Dashboard</a></li>
         </ul>
-        <a class="btn btn-primary btn-block nav-menu-cta" href="./#partners">Start now for $0</a>
+        <div class="nav-menu-cta nav-account guest-only">
+          <a class="btn btn-ghost" href="login">Log in</a>
+          <a class="btn btn-primary" href="signup">Sign up</a>
+        </div>
+        <a class="btn btn-ghost btn-block nav-menu-cta signed-only" href="dashboard">My dashboard</a>
       </nav>
 
       <div class="header-actions">
-        <a class="btn btn-primary btn-sm header-cta" href="./#partners">Start for $0</a>
+        <a class="btn btn-ghost btn-sm header-login guest-only" href="login">Log in</a>
+        <a class="btn btn-primary btn-sm header-signup guest-only" href="signup">Sign up</a>
+        <a class="btn btn-ghost btn-sm nav-profile signed-only" href="dashboard" data-profile aria-label="Your profile">
+          <span class="nav-profile-pic" data-profile-pic aria-hidden="true"></span>
+          <span class="nav-profile-name" data-profile-name>My account</span>
+        </a>
         <button class="icon-btn" type="button" data-sign-out aria-label="Sign out" title="Sign out">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M12 3v9"/><path d="M6.3 7.2a8 8 0 1 0 11.4 0"/></svg>
         </button>
@@ -116,15 +125,38 @@
       <div class="container dash-shell" data-dash aria-busy="true"
            data-bot="https://t.me/rzgsprobot">
 
-        <!-- header strip -->
-        <header class="dash-head">
-          <span class="avatar-lg" data-dash-avatar aria-hidden="true"></span>
-          <div class="dash-head-text">
-            <p class="cap">Client dashboard</p>
-            <h1 class="dash-title" id="page-title">Welcome, <span data-dash-name>there</span></h1>
-            <p class="dash-sub" data-dash-email>loading</p>
+        <!-- the client's profile: who they are, their numbers, and where to add what is missing -->
+        <section class="dash-panel dash-profile" aria-labelledby="page-title">
+          <div class="dp-id">
+            <span class="avatar-xl" data-dash-avatar aria-hidden="true"></span>
+            <div class="dp-name">
+              <h1 class="dash-title" id="page-title" data-dash-name>Your profile</h1>
+              <p class="dash-sub" data-dash-handle></p>
+              <span class="dp-plan" data-dp-plan data-tone="off">No plan</span>
+            </div>
           </div>
-        </header>
+          <dl class="dp-stats">
+            <div><dt class="cap">Days left</dt><dd data-stat="days">0</dd></div>
+            <div><dt class="cap">TP hits today</dt><dd data-stat="tp">0</dd></div>
+            <div><dt class="cap">Baskets today</dt><dd data-stat="baskets">0</dd></div>
+            <div><dt class="cap">Cycles today</dt><dd data-stat="cycles">0</dd></div>
+          </dl>
+          <div class="dp-actions">
+            <button class="btn btn-ghost" type="button" data-edit="full_name">Edit profile</button>
+            <a class="btn btn-chip" href="./#plans" data-plans data-dp-plans>Get your bot</a>
+          </div>
+          <button class="dp-about" type="button" data-edit="about" data-dp-about>Tell about yourself</button>
+          <ul class="dp-meta">
+            <li><button type="button" data-edit="country"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg><span data-dp-location>Add your location</span></button></li>
+            <li><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span data-dp-since>Member since -</span></li>
+            <li><a href="https://t.me/rzgsprobot" data-bot-link><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11zM21.854 2.147l-10.94 10.939"/></svg><span data-dp-telegram>Connect Telegram</span></a></li>
+            <li><a href="#awards"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></svg><span>Your achievements</span> <b data-dp-awards>0 of 8</b></a></li>
+          </ul>
+          <div class="dp-socials">
+            <span class="dp-social-list" data-dp-socials></span>
+            <button class="dp-add" type="button" data-edit="social_facebook"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Add social links</span></button>
+          </div>
+        </section>
 
         <p class="auth-msg" data-auth-msg role="alert" hidden>
           <svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>
@@ -139,6 +171,7 @@
             <button type="button" role="tab" id="tab-core" data-tab="core" aria-controls="v-core" aria-selected="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7.8 4.5v9L12 21l-7.8-4.5v-9z"/><circle cx="12" cy="12" r="2.6"/></svg>Core</button>
             <button type="button" role="tab" id="tab-plan" data-tab="plan" aria-controls="v-plan" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6M2 9h20"/></svg>Plan</button>
             <button type="button" role="tab" id="tab-profile" data-tab="profile" aria-controls="v-profile" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile</button>
+            <button type="button" role="tab" id="tab-awards" data-tab="awards" aria-controls="v-awards" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></svg>Awards</button>
             <button type="button" role="tab" id="tab-tools" data-tab="tools" aria-controls="v-tools" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>Tools</button>
             <button type="button" role="tab" id="tab-log" data-tab="log" aria-controls="v-log" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7h12M8 12h12M8 17h12M4 7h.01M4 12h.01M4 17h.01"/></svg>Log</button>
             </nav>
@@ -170,6 +203,16 @@
                 <h2>Your order</h2>
                 <ol class="dash-steps" data-order-steps></ol>
                 <p class="dash-hint" data-order-note></p>
+              </section>
+
+              <section class="dash-panel">
+                <h2>My bot</h2>
+                <div class="dash-pill" data-bot-pill data-tone="off"><span class="led" aria-hidden="true"></span><span data-bot-status>No bot yet</span></div>
+                <p class="dash-hint" data-bot-note>Ready to run your bot? Choose a plan and our Telegram bot sends you the file.</p>
+                <div class="dash-row" data-bot-row>
+                  <a class="btn btn-chip" href="./#plans" data-plans data-bot-see>See plans</a>
+                  <a class="btn btn-chip" href="how-to-buy" data-bot-howto hidden>How to set it up</a>
+                </div>
               </section>
 
               <section class="dash-panel">
@@ -219,7 +262,7 @@
 
               <section class="dash-panel">
                 <h2>Good to know</h2>
-                <a class="dash-link" href="./#pricing"><span>Compare plans and prices</span><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+                <a class="dash-link" href="./#plans" data-plans><span>Compare plans and prices</span><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
                 <a class="dash-link" href="how-to-buy"><span>How buying works</span><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
                 <a class="dash-link" href="license"><span>License rules</span><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
               </section>
@@ -291,8 +334,56 @@
                     <p class="field-error" id="dash-telegram-error" hidden></p>
                   </div>
                   </div>
+                  <div class="field">
+                    <label for="dash-about">About you <span class="opt">(optional)</span></label>
+                    <textarea class="input" id="dash-about" name="about" rows="3" maxlength="160" placeholder="Describe your trading journey in a few words"></textarea>
+                  </div>
                   <div class="form-actions">
                     <button class="btn btn-chip" type="submit" data-submit>Save changes</button>
+                    <p class="form-msg" data-form-msg role="status" hidden></p>
+                  </div>
+                </form>
+              </section>
+
+              <section class="dash-panel">
+                <h2>Telegram</h2>
+                <div class="dash-kv"><span class="cap">Connected account</span><b data-info="bot">-</b></div>
+                <p class="dash-hint" data-tg-note>Connect once. After that our Telegram bot knows who you are and which plan you chose, every time you come from this website.</p>
+                <div class="dash-row">
+                  <a class="btn btn-chip" href="https://t.me/rzgsprobot" data-bot-link data-tg-connect>Connect Telegram</a>
+                  <button class="btn btn-ghost" type="button" data-tg-change hidden>Use another Telegram</button>
+                </div>
+                <p class="form-msg" data-tg-msg role="status" hidden></p>
+              </section>
+
+              <section class="dash-panel">
+                <h2>Social links</h2>
+                <p class="dash-hint">Type your name there, or paste the link to your page.</p>
+                <form data-social-form novalidate>
+                  <div class="field-grid">
+                  <div class="field">
+                    <label for="dash-facebook">Facebook <span class="opt">(optional)</span></label>
+                    <input class="input" id="dash-facebook" name="social_facebook" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="dash-facebook-error">
+                    <p class="field-error" id="dash-facebook-error" hidden></p>
+                  </div>
+                  <div class="field">
+                    <label for="dash-tiktok">TikTok <span class="opt">(optional)</span></label>
+                    <input class="input" id="dash-tiktok" name="social_tiktok" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="dash-tiktok-error">
+                    <p class="field-error" id="dash-tiktok-error" hidden></p>
+                  </div>
+                  <div class="field">
+                    <label for="dash-youtube">YouTube <span class="opt">(optional)</span></label>
+                    <input class="input" id="dash-youtube" name="social_youtube" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="dash-youtube-error">
+                    <p class="field-error" id="dash-youtube-error" hidden></p>
+                  </div>
+                  <div class="field">
+                    <label for="dash-instagram">Instagram <span class="opt">(optional)</span></label>
+                    <input class="input" id="dash-instagram" name="social_instagram" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="dash-instagram-error">
+                    <p class="field-error" id="dash-instagram-error" hidden></p>
+                  </div>
+                  </div>
+                  <div class="form-actions">
+                    <button class="btn btn-chip" type="submit" data-submit>Save links</button>
                     <p class="form-msg" data-form-msg role="status" hidden></p>
                   </div>
                 </form>
@@ -323,6 +414,15 @@
             </div>
 
             <!-- TOOLS -->
+            <!-- AWARDS -->
+            <div class="dash-view" id="v-awards" role="tabpanel" aria-labelledby="tab-awards" hidden>
+              <section class="dash-panel">
+                <h2>Your achievements</h2>
+                <p class="dash-hint"><b data-awards-count>0 of 8</b> reached. Each one is a step to a running bot.</p>
+                <ul class="dp-awards" data-awards></ul>
+              </section>
+            </div>
+
             <div class="dash-view" id="v-tools" role="tabpanel" aria-labelledby="tab-tools" hidden>
               <div class="dash-seg" role="tablist" aria-label="Tools">
                 <button type="button" role="tab" id="tool-security" aria-controls="t-security" aria-selected="true">Security</button>
@@ -499,7 +599,7 @@
           <h2 class="footer-title" id="footer-product">Product</h2>
           <ul class="footer-links">
             <li><a href="bot">The Bot</a></li>
-            <li><a href="./#pricing">Pricing</a></li>
+            <li><a href="./#plans" data-plans>Plans</a></li>
             <li><a href="how-to-buy">How to Buy</a></li>
             <li><a href="./#faq">FAQ</a></li>
           </ul>

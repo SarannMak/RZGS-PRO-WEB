@@ -1547,3 +1547,252 @@ a.trial-banner:hover {
 .dash-steps li[data-state="now"] small {
   color: var(--cyan);
 }
+
+
+/* ----- the profile card at the top of the dashboard ----- */
+.dash-profile {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+}
+.dp-id {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+.dp-name {
+  min-width: 0;
+}
+.dp-name .dash-title {
+  margin: 0;
+}
+.dp-plan {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 4px 9px;
+  background: var(--chip);
+  color: var(--cyan);
+  font: 600 10px/1.3 var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px);
+}
+.dp-plan[data-tone="off"] {
+  color: var(--text-subtle);
+}
+.dp-plan[data-tone="trial"] {
+  color: var(--neon);
+}
+.dp-plan[data-tone="diamond"] {
+  color: #c58bff;
+}
+.dp-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+.dp-stats dd {
+  margin: 6px 0 0;
+  color: var(--text);
+  font: 700 26px/1 var(--font-display);
+}
+.dp-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.dp-actions .btn {
+  min-width: 0;
+  padding-inline: 8px;
+}
+.dp-about {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font: 400 14px/1.5 var(--font-body);
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+.dp-about:hover {
+  color: var(--text);
+}
+.dp-about.is-empty {
+  color: var(--text-subtle);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.dp-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dp-meta li,
+.dp-meta button,
+.dp-meta a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--text-subtle);
+  font: 400 13px/1.3 var(--font-body);
+}
+.dp-meta button,
+.dp-meta a {
+  min-height: 24px;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-decoration: none;
+  cursor: pointer;
+}
+.dp-meta button:hover,
+.dp-meta a:hover {
+  color: var(--cyan);
+}
+.dp-meta b {
+  color: var(--cyan);
+  font-weight: 600;
+}
+.dp-meta .icon,
+.dp-add .icon {
+  width: 15px;
+  height: 15px;
+}
+.dp-socials,
+.dp-social-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.dp-social-list:empty {
+  display: none;
+}
+.dp-social,
+.dp-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 0 11px;
+  border: 1px solid var(--border-strong);
+  background: none;
+  color: var(--text-muted);
+  font: 500 12px/1 var(--font-body);
+  text-decoration: none;
+  cursor: pointer;
+}
+.dp-social:hover,
+.dp-add:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+textarea.input {
+  min-height: 84px;
+  padding-block: 12px;
+  line-height: 1.5;
+  resize: vertical;
+}
+/* the achievements */
+.dp-awards {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.dp-awards li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px;
+  border: 1px solid var(--border);
+}
+.dp-awards li.is-done {
+  border-color: rgba(166, 255, 26, 0.35);
+}
+.dp-awards li > div {
+  flex: 1;
+  min-width: 0;
+}
+.dp-awards strong {
+  display: block;
+  color: var(--text-muted);
+  font: 600 14px/1.3 var(--font-body);
+}
+.dp-awards li.is-done strong {
+  color: var(--text);
+}
+.dp-awards li > div span {
+  color: var(--text-subtle);
+  font-size: 13px;
+  line-height: 1.4;
+}
+.dp-award-mark {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--border-strong);
+  color: var(--neon);
+  font: 700 14px/1 var(--font-body);
+}
+.dp-awards li.is-done .dp-award-mark {
+  border-color: var(--neon);
+  background: rgba(166, 255, 26, 0.12);
+}
+.dp-awards .btn {
+  flex: none;
+}
+@media (max-width: 1023.98px) {
+  .dash-dock {
+    grid-template-columns: repeat(6, 1fr);
+  }
+  .dash-dock button {
+    letter-spacing: 0.04em;
+  }
+  /* a phone shows the card on the first tab only; the other tabs start with what they are for */
+  [data-dash]:not([data-view="core"]) .dash-profile {
+    display: none;
+  }
+}
+@media (max-width: 479.98px) {
+  .dp-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 14px;
+  }
+  .dp-awards li {
+    flex-wrap: wrap;
+  }
+  .dp-awards .btn {
+    width: 100%;
+  }
+}
+@media (min-width: 1024px) {
+  .dash-profile {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.25fr) 150px;
+    align-items: center;
+    padding: 20px 22px;
+  }
+  .dp-actions {
+    grid-template-columns: 1fr;
+  }
+  .dp-about,
+  .dp-meta,
+  .dp-socials {
+    grid-column: 1 / -1;
+  }
+}
+/* .btn and .dash-row set their own display, which would otherwise win over "hidden" */
+.dash-panel .dash-row[hidden],
+.dash-panel .dash-row > [hidden] {
+  display: none;
+}

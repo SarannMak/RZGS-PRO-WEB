@@ -33,6 +33,17 @@
   // with the login provider, and the page tidies its own address when it opens (see script.js).
   const pageUrl = (name) => new URL(name, location.href).href.split(/[?#]/)[0];
 
+  // Someone who tapped a "claim" or "see the plans" button before they were signed in goes back to that page,
+  // where the plans open (plans.js wrote down which page). Everyone else goes to their dashboard.
+  function afterSignIn() {
+    try {
+      const wish = JSON.parse(localStorage.getItem('rzgs_after_login') || 'null');
+      localStorage.removeItem('rzgs_after_login');
+      if (wish && Date.now() - wish.at < 86400000 && /^\/(?!\/)/.test(wish.to)) return `${wish.to}#plans`;
+    } catch (e) { /* no storage: the dashboard */ }
+    return 'dashboard';
+  }
+
   /* ---------------------------------------------------------------- messages */
   const msgBox = $('[data-auth-msg]');
   function showMessage(text, tone = 'error') {
@@ -88,7 +99,32 @@
   const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   // One rule per field name. Each returns an error sentence, or '' when the value is fine.
+  // A social link: the person's name there, or a link to their page at that site. Only that site's address is kept.
+  // '' when empty, null when it is neither.
+  const SOCIALS = {
+    facebook: { name: 'Facebook', base: 'https://www.facebook.com/', host: /(^|\.)(facebook\.com|fb\.com)$/i },
+    tiktok: { name: 'TikTok', base: 'https://www.tiktok.com/@', host: /(^|\.)tiktok\.com$/i },
+    youtube: { name: 'YouTube', base: 'https://www.youtube.com/@', host: /(^|\.)(youtube\.com|youtu\.be)$/i },
+    instagram: { name: 'Instagram', base: 'https://www.instagram.com/', host: /(^|\.)instagram\.com$/i },
+  };
+  function socialUrl(kind, raw) {
+    const text = String(raw || '').trim();
+    if (!text) return '';
+    const name = text.replace(/^@/, '');
+    if (/^[\w.-]{1,64}$/.test(name) && !SOCIALS[kind].host.test(name)) return SOCIALS[kind].base + name;
+    try {
+      const url = new URL(/^https?:\/\//i.test(text) ? text : `https://${text}`);
+      if (SOCIALS[kind].host.test(url.hostname)) { url.protocol = 'https:'; return url.href; }
+    } catch (e) { /* not an address */ }
+    return null;
+  }
+  const socialRule = (kind) => (v) => (socialUrl(kind, v) === null ? `Type your ${SOCIALS[kind].name} name, or paste the link to your page.` : '');
+
   const rules = {
+    social_facebook: socialRule('facebook'),
+    social_tiktok: socialRule('tiktok'),
+    social_youtube: socialRule('youtube'),
+    social_instagram: socialRule('instagram'),
     full_name: (v) => (v.trim().length < 2 ? 'Enter your full name.' : v.trim().length > 100 ? 'Use 100 characters or fewer.' : ''),
     email: (v) => (!v.trim() ? 'Enter your email address.' : !EMAIL_RE.test(v.trim()) ? 'Enter a valid email, like name@gmail.com.' : ''),
     password: (v) => (!v ? 'Enter your password.' : ''),
@@ -214,6 +250,8 @@
     auth: { flowType: 'implicit', persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
   });
 
+  window.rzgsDb = db; // plans.js uses this same connection
+
   wirePasswordToggles();
 
   /* ---------------------------------------------------------------- login page */
@@ -228,7 +266,7 @@
 
     const { data: { session } } = await db.auth.getSession();
     if (session) {
-      location.replace('dashboard');
+      location.replace(afterSignIn());
       return;
     }
 
@@ -256,7 +294,7 @@
         if (error.code === 'email_not_confirmed') resendButton.hidden = false;
         return;
       }
-      location.replace('dashboard');
+      location.replace(afterSignIn());
     });
   }
 
@@ -293,7 +331,7 @@
 
     const { data: { session } } = await db.auth.getSession();
     if (session) {
-      location.replace('dashboard');
+      location.replace(afterSignIn());
       return;
     }
 
@@ -393,7 +431,7 @@
 
       if (data.session) {
         // email confirmation is switched off in Supabase: the person is already signed in
-        location.replace('dashboard');
+        location.replace(afterSignIn());
         return;
       }
 
@@ -548,6 +586,11 @@
       location.replace('login' + (urlError ? '?error=link' : firstOfTwo ? '?confirm=other' : ''));
       return;
     }
+    const wanted = afterSignIn();
+    if (wanted !== 'dashboard') {
+      location.replace(wanted);
+      return;
+    }
     if (arrivedFrom === 'signup') showMessage('Your email is confirmed. Welcome to RZGS-PRO!', 'success');
     else if (arrivedFrom === 'email_change') showMessage('Your email address is changed. Log in with the new one from now on.', 'success');
     else if (firstOfTwo) showMessage(FIRST_OF_TWO, 'success');
@@ -580,6 +623,7 @@
     const tabFor = (name) => tabs.find((tab) => tab.dataset.tab === name);
     let settled = false;
     const selectTab = setupTabs(tabs, (tab) => {
+      root.dataset.view = tab.dataset.tab;
       if (!settled) return;
       history.replaceState(null, '', `#${tab.dataset.tab}`);
       window.scrollTo({ top: 0, behavior: 'instant' }); // every view starts at its top, like a new screen
@@ -739,10 +783,122 @@
     /* ----- header + core ----- */
     function renderHeader() {
       const name = stored('full_name') || stored('username') || 'RZGS-PRO member';
-      const email = profile.email || user.email || '';
-      $('[data-dash-name]').textContent = name.trim().split(/\s+/)[0];
+      $('[data-dash-name]').textContent = name.trim();
       renderAvatar(name);
-      setAll('[data-dash-email]', email);
+      const handle = stored('username');
+      const email = profile.email || user.email || '';
+      setAll('[data-dash-email]', email); // Tools and the sign-out box
+      setAll('[data-dash-handle]', handle ? `@${handle}` : email);
+
+      const about = stored('about');
+      const aboutBox = $('[data-dp-about]', root);
+      aboutBox.textContent = about || 'Tell about yourself';
+      aboutBox.classList.toggle('is-empty', !about);
+      setAll('[data-dp-location]', stored('country') || 'Add your location');
+      const joined = profile.created_at || user.created_at;
+      setAll('[data-dp-since]', joined ? `Member since ${new Date(joined).toLocaleDateString(undefined, { year: 'numeric', month: 'long' })}` : 'Member');
+
+      const socials = stored('socials') || {};
+      const links = Object.keys(SOCIALS).filter((kind) => socials[kind]).map((kind) => [SOCIALS[kind].name, socialUrl(kind, socials[kind])]);
+      const telegram = stored('telegram_username');
+      if (/^\w{1,32}$/.test(telegram)) links.unshift(['Telegram', `https://t.me/${telegram}`]);
+      $('[data-dp-socials]', root).replaceChildren(...links.filter(([, url]) => url).map(([label, url]) => {
+        const link = document.createElement('a');
+        link.className = 'dp-social';
+        link.href = url;
+        link.target = '_blank';
+        link.rel = 'noopener nofollow';
+        link.textContent = label;
+        return link;
+      }));
+      renderBot();
+    }
+
+    /* ----- my bot: today's numbers from the client's own bot, and what to do next ----- */
+    let bot = { bot: false };
+    function renderBot() {
+      const plan = PLAN_NAMES[profile.plan] ? profile.plan : null;
+      const ends = profile.plan_expires_at ? new Date(profile.plan_expires_at) : null;
+      const ended = Boolean(ends) && ends < new Date();
+      const badge = $('[data-dp-plan]', root);
+      badge.textContent = plan ? `${PLAN_NAMES[plan]}${ended ? ' ended' : ''}` : 'No plan';
+      badge.dataset.tone = !plan || ended ? 'off' : plan;
+      setAll('[data-dp-plans]', plan ? 'See plans' : 'Get your bot');
+      setAll('[data-stat="days"]', ends && !ended ? Math.ceil((ends - new Date()) / 86400000) : 0);
+      // until the server has answered, nothing is said about the bot: a "0" or "not reporting" could be untrue
+      const known = bot.ok === true;
+      setAll('[data-stat="tp"]', known ? bot.tp_today || 0 : '-');
+      setAll('[data-stat="baskets"]', known ? bot.baskets_today || 0 : '-');
+      setAll('[data-stat="cycles"]', known ? bot.cycles_today || 0 : '-');
+
+      const words = bot.bot
+        ? bot.online
+          ? ['good', 'Online', `Your bot is reporting${profile.bot_mt5_account ? ` from MT5 account ${profile.bot_mt5_account}` : ''}. Open the control app to watch it.`]
+          : ['bad', 'Offline', `Last report: ${bot.seen_at ? shortDateTime(bot.seen_at) : 'not known'}. The bot only runs while MT5 is open and online.`]
+        : !plan
+          ? ['off', 'No bot yet', 'Ready to run your bot? Choose a plan and our Telegram bot sends you the file.']
+          : known
+            ? ['warn', 'Waiting for your bot', 'Your bot has not reported yet. Add the file to MT5, type your passwords and turn on Algo Trading.']
+            : ['off', 'Your bot', 'Open the control app to see your bot.'];
+      $('[data-bot-pill]', root).dataset.tone = words[0];
+      setAll('[data-bot-status]', words[1]);
+      setAll('[data-bot-note]', words[2]);
+      $('[data-bot-see]', root).hidden = Boolean(plan);
+      $('[data-bot-howto]', root).hidden = !plan || !known || bot.bot;
+      $('[data-bot-row]', root).hidden = bot.bot || (Boolean(plan) && !known);
+      renderAwards();
+    }
+
+    /* ----- achievements: only what really happened, never anything about profit ----- */
+    function renderAwards() {
+      const plan = PLAN_NAMES[profile.plan] ? profile.plan : null;
+      const list = [
+        { title: 'Account created', did: 'You joined RZGS-PRO.', done: true },
+        { title: 'Email confirmed', text: 'Open the link we sent to your email.', did: 'Your email address is confirmed.', done: Boolean(profile.email_confirmed_at || user.email_confirmed_at) },
+        { title: 'Profile complete', text: 'Add a photo, a few words about you and your location.', did: 'Your photo, your words and your location are in.', done: Boolean(avatarAddress() && stored('about') && stored('country')), edit: 'about', action: 'Edit profile' },
+        { title: 'Telegram connected', text: 'Connect our Telegram bot to this account.', did: 'Our Telegram bot knows this account.', done: Boolean(profile.bot_tg_id), href: botLink(), bot: true, action: 'Connect Telegram' },
+        { title: 'First bot delivered', text: 'Choose a plan and get your bot file.', did: 'You have your bot file.', done: Boolean(plan), plans: true, action: 'See plans' },
+        { title: 'Bot connected', text: 'Add the file to MT5, and your bot reports to your control app.', did: 'Your bot reports to your control app.', done: Boolean(bot.bot) },
+        { title: 'First closed trade', text: 'Reached when your bot closes a trade.', did: 'Your bot has closed a trade.', done: Boolean(bot.traded) },
+        { title: 'Elite or Diamond', text: 'Move up to a paid plan.', did: 'You are on a paid plan.', done: plan === 'elite' || plan === 'diamond', plans: true, action: 'See plans' },
+      ];
+      const count = `${list.filter((award) => award.done).length} of ${list.length}`;
+      setAll('[data-dp-awards]', count);
+      setAll('[data-awards-count]', count);
+      $('[data-awards]', root).replaceChildren(...list.map((award) => {
+        const row = document.createElement('li');
+        row.className = award.done ? 'is-done' : '';
+        const mark = document.createElement('span');
+        mark.className = 'dp-award-mark';
+        mark.setAttribute('aria-hidden', 'true');
+        mark.textContent = award.done ? '\u2713' : '';
+        const text = document.createElement('div');
+        const title = document.createElement('strong');
+        title.textContent = award.title;
+        const line = document.createElement('span');
+        line.textContent = award.done ? award.did : award.text;
+        text.append(title, line);
+        row.append(mark, text);
+        if (!award.done && award.action) {
+          const go = document.createElement(award.edit ? 'button' : 'a');
+          go.className = 'btn btn-chip btn-sm';
+          go.textContent = award.action;
+          if (award.edit) { go.type = 'button'; go.dataset.edit = award.edit; }
+          if (award.href) go.href = award.href;
+          if (award.bot) go.dataset.botLink = '';
+          if (award.plans) { go.href = './#plans'; go.dataset.plans = ''; }
+          row.append(go);
+        }
+        return row;
+      }));
+    }
+
+    async function refreshBot() {
+      if (document.hidden) return;
+      try {
+        const { data } = await db.rpc('web_my_bot');
+        if (data && data.ok) { bot = data; renderBot(); }
+      } catch (e) { /* the last numbers stay */ }
     }
 
     function renderInfo() {
@@ -754,8 +910,15 @@
       setAll('[data-info="mt5"]', profile.bot_mt5_account || stored('mt5_account') || 'Not set');
       setAll('[data-info="broker"]', profile.bot_broker || stored('broker') || 'Not set');
       const linked = Boolean(profile.bot_tg_id);
-      setAll('[data-info="bot"]', linked ? (profile.bot_tg_username ? `@${profile.bot_tg_username}` : 'Connected') : 'Not connected');
+      const telegramName = profile.bot_tg_username ? `@${profile.bot_tg_username}` : 'Connected';
+      setAll('[data-info="bot"]', linked ? telegramName : 'Not connected');
       $$('[data-bot-connect]', root).forEach((box) => { box.hidden = linked; });
+      setAll('[data-dp-telegram]', linked ? `Telegram: ${telegramName}` : 'Connect Telegram');
+      setAll('[data-tg-connect]', linked ? 'Open our Telegram bot' : 'Connect Telegram');
+      setAll('[data-tg-note]', linked
+        ? 'Our Telegram bot knows this account. Every click from this website tells it who you are and which plan you chose.'
+        : 'Connect once. After that our Telegram bot knows who you are and which plan you chose, every time you come from this website.');
+      $('[data-tg-change]', root).hidden = !linked;
     }
 
     function renderPlan() {
@@ -918,6 +1081,7 @@
     const profileForm = $('[data-profile-form]');
     const tradingForm = $('[data-trading-form]');
     const passwordForm = $('[data-password-form]');
+    const socialForm = $('[data-social-form]');
 
     // fill the forms with what is on file
     const country = profileForm.elements.country;
@@ -931,6 +1095,8 @@
     profileForm.elements.username.value = stored('username');
     profileForm.elements.phone.value = stored('phone');
     profileForm.elements.telegram_username.value = stored('telegram_username');
+    profileForm.elements.about.value = stored('about');
+    Object.keys(SOCIALS).forEach((kind) => { socialForm.elements[`social_${kind}`].value = (stored('socials') || {})[kind] || ''; });
     tradingForm.elements.mt5_account.value = stored('mt5_account');
     tradingForm.elements.broker.value = stored('broker');
 
@@ -979,7 +1145,58 @@
       country: country.value,
       phone: profileForm.elements.phone.value.trim(),
       telegram_username: profileForm.elements.telegram_username.value.trim().replace(/^@/, ''),
+      about: profileForm.elements.about.value.trim().slice(0, 160),
     }), 'Profile saved.');
+    wireSaveForm(socialForm, () => ({
+      socials: Object.fromEntries(Object.keys(SOCIALS).map((kind) => [kind, socialUrl(kind, socialForm.elements[`social_${kind}`].value) || ''])),
+    }), 'Links saved.');
+    // "Use another Telegram": asks once more, then lets go of the Telegram account. The plan and the bot are not touched.
+    const tgChange = $('[data-tg-change]', root);
+    const tgSay = (text, tone) => {
+      const line = $('[data-tg-msg]', root);
+      line.textContent = text;
+      line.dataset.tone = tone;
+      line.hidden = false;
+    };
+    tgChange.addEventListener('click', async () => {
+      if (!tgChange.dataset.sure) {
+        tgChange.dataset.sure = '1';
+        tgChange.textContent = 'Yes, disconnect this one';
+        tgSay('This Telegram account will no longer be connected to your website account. Your plan and your bot keep running.', 'success');
+        return;
+      }
+      setBusy(tgChange, true);
+      let failed = true;
+      try {
+        const { data, error } = await db.rpc('web_unlink_telegram');
+        failed = Boolean(error) || !data || !data.ok;
+      } catch (e) { /* said below */ }
+      setBusy(tgChange, false);
+      delete tgChange.dataset.sure;
+      tgChange.textContent = 'Use another Telegram';
+      if (failed) {
+        tgSay('That did not work just now. Please try again, or contact us.', 'error');
+        return;
+      }
+      profile.bot_tg_id = null;
+      profile.bot_tg_username = null;
+      renderInfo();
+      renderBot();
+      await refreshLinkCode();
+      tgSay('Disconnected. Log in to the Telegram account you want, then tap Connect Telegram here.', 'success');
+    });
+
+    // "Edit profile", "Add your location" and the like: the Profile tab, with the cursor in that field
+    root.addEventListener('click', (event) => {
+      const asked = event.target.closest('[data-edit]');
+      if (!asked) return;
+      selectTab(tabFor('profile'));
+      const field = document.getElementsByName(asked.dataset.edit)[0];
+      if (field) { field.focus({ preventScroll: true }); field.scrollIntoView({ block: 'center' }); }
+    });
+    refreshBot();
+    setInterval(refreshBot, 60000);
+    document.addEventListener('visibilitychange', refreshBot);
 
     wireSaveForm(tradingForm, () => ({
       mt5_account: tradingForm.elements.mt5_account.value.replace(/\D/g, ''),

@@ -20,9 +20,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
   <link rel="stylesheet" href="style.css?v=11">
+  <link rel="stylesheet" href="plans.css?v=1">
 
-  <script>document.documentElement.classList.add('js');</script>
+  <script>document.documentElement.classList.add('js');try{if(localStorage.getItem('sb-zaziizzsbytkdlatoutv-auth-token'))document.documentElement.classList.add('signed-in')}catch(e){}</script>
   <script src="script.js?v=8" defer></script>
+  <script src="plans.js?v=2" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -80,17 +82,24 @@
       <nav class="primary-nav" id="primary-nav" aria-label="Main">
         <ul class="nav-list">
           <li><a class="nav-link" href="bot">The Bot</a></li>
-          <li><a class="nav-link" href="./#pricing">Pricing</a></li>
           <li><a class="nav-link" href="how-to-buy">How to Buy</a></li>
           <li><a class="nav-link" href="license">License</a></li>
           <li><a class="nav-link" href="contact">Contact</a></li>
-          <li><a class="nav-link" href="login">Sign up / Login</a></li>
         </ul>
-        <a class="btn btn-primary btn-block nav-menu-cta" href="./#partners">Start now for $0</a>
+        <div class="nav-menu-cta nav-account guest-only">
+          <a class="btn btn-ghost" href="login">Log in</a>
+          <a class="btn btn-primary" href="signup">Sign up</a>
+        </div>
+        <a class="btn btn-ghost btn-block nav-menu-cta signed-only" href="dashboard">My dashboard</a>
       </nav>
 
       <div class="header-actions">
-        <a class="btn btn-primary btn-sm header-cta" href="./#partners">Start for $0</a>
+        <a class="btn btn-ghost btn-sm header-login guest-only" href="login">Log in</a>
+        <a class="btn btn-primary btn-sm header-signup guest-only" href="signup">Sign up</a>
+        <a class="btn btn-ghost btn-sm nav-profile signed-only" href="dashboard" data-profile aria-label="Your profile">
+          <span class="nav-profile-pic" data-profile-pic aria-hidden="true"></span>
+          <span class="nav-profile-name" data-profile-name>My account</span>
+        </a>
         <button class="icon-btn menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
           <svg class="icon icon-open" aria-hidden="true"><use href="#i-menu"/></svg>
           <svg class="icon icon-close" aria-hidden="true"><use href="#i-x"/></svg>
@@ -111,7 +120,7 @@
         <p class="kicker">Legal</p>
         <h1 class="page-title" id="page-title">Privacy Policy</h1>
         <p class="page-lead">What information we collect, why we need it, and how we look after it.</p>
-        <p class="page-meta">Last updated: 20 October 2026</p>
+        <p class="page-meta">Last updated: 31 October 2026</p>
       </div>
     </section>
 
@@ -144,7 +153,7 @@
           <section class="legal-section" id="p-collect">
             <h2>2. Information we collect</h2>
             <ul>
-              <li><strong>Website account:</strong> your email address, name, username and country when you sign up, and your phone number or Telegram username if you add them. Your password is stored only in a protected (hashed) form. We cannot read it.</li>
+              <li><strong>Website account:</strong> your email address, name, username and country when you sign up, and your phone number, Telegram username, a few words about you and links to your social pages if you add them. Your password is stored only in a protected (hashed) form. We cannot read it.</li>
               <li><strong>Profile picture:</strong> a photo, if you upload one. It is saved as a small file at an address that is not listed anywhere, but anyone who has that exact address can open it. You can remove it in your dashboard.</li>
               <li><strong>Control app data:</strong> when your bot is linked to the control app, it sends us your MT5 account number and its live status: balance, equity, open trades, profit, settings and alerts. We also keep the commands you send from the app. The app has its own App Password, also stored in a protected form.</li>
               <li><strong>Telegram details:</strong> your Telegram username and the messages you send us. Pictures you send our Telegram bot, such as a payment receipt or a screenshot of your broker profile, are read automatically by OCR.space and Google Gemini to find the payment code or your MT5 login number. We keep only the details we need from them. Please cover any password before you send a screenshot.</li>
@@ -160,6 +169,7 @@
             <ul>
               <li>To let you log in, show your dashboard and run the control app.</li>
               <li>To activate and manage your license.</li>
+          <li>To connect your website account with our Telegram bot once you choose to, so the bot knows who you are, which plan you chose and the details on your dashboard, and your dashboard shows your plan and your bot's status.</li>
               <li>To give you setup help and support.</li>
               <li>To send you renewal reminders and important notices.</li>
               <li>To prevent misuse, such as repeated free trials or shared licenses.</li>
@@ -235,7 +245,7 @@
           <h2 class="footer-title" id="footer-product">Product</h2>
           <ul class="footer-links">
             <li><a href="bot">The Bot</a></li>
-            <li><a href="./#pricing">Pricing</a></li>
+            <li><a href="./#plans" data-plans>Plans</a></li>
             <li><a href="how-to-buy">How to Buy</a></li>
             <li><a href="./#faq">FAQ</a></li>
           </ul>

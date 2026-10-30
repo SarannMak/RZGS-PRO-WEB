@@ -20,9 +20,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
   <link rel="stylesheet" href="style.css?v=26">
+  <link rel="stylesheet" href="plans.css?v=1">
 
-  <script>document.documentElement.classList.add('js');</script>
+  <script>document.documentElement.classList.add('js');try{if(localStorage.getItem('sb-zaziizzsbytkdlatoutv-auth-token'))document.documentElement.classList.add('signed-in')}catch(e){}</script>
   <script src="script.js?v=8" defer></script>
+  <script src="plans.js?v=2" defer></script>
   <!-- the 3D library the robot needs: asked for at once, so the robot can come up sooner -->
   <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js">
   <script src="robot-3d.js?v=8" defer></script>
@@ -88,17 +90,24 @@
       <nav class="primary-nav" id="primary-nav" aria-label="Main">
         <ul class="nav-list">
           <li><a class="nav-link" href="bot" aria-current="page">The Bot</a></li>
-          <li><a class="nav-link" href="./#pricing">Pricing</a></li>
           <li><a class="nav-link" href="how-to-buy">How to Buy</a></li>
           <li><a class="nav-link" href="license">License</a></li>
           <li><a class="nav-link" href="contact">Contact</a></li>
-          <li><a class="nav-link" href="login">Sign up / Login</a></li>
         </ul>
-        <a class="btn btn-primary btn-block nav-menu-cta" href="./#partners">Start now for $0</a>
+        <div class="nav-menu-cta nav-account guest-only">
+          <a class="btn btn-ghost" href="login">Log in</a>
+          <a class="btn btn-primary" href="signup">Sign up</a>
+        </div>
+        <a class="btn btn-ghost btn-block nav-menu-cta signed-only" href="dashboard">My dashboard</a>
       </nav>
 
       <div class="header-actions">
-        <a class="btn btn-primary btn-sm header-cta" href="./#partners">Start for $0</a>
+        <a class="btn btn-ghost btn-sm header-login guest-only" href="login">Log in</a>
+        <a class="btn btn-primary btn-sm header-signup guest-only" href="signup">Sign up</a>
+        <a class="btn btn-ghost btn-sm nav-profile signed-only" href="dashboard" data-profile aria-label="Your profile">
+          <span class="nav-profile-pic" data-profile-pic aria-hidden="true"></span>
+          <span class="nav-profile-name" data-profile-name>My account</span>
+        </a>
         <button class="icon-btn menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
           <svg class="icon icon-open" aria-hidden="true"><use href="#i-menu"/></svg>
           <svg class="icon icon-close" aria-hidden="true"><use href="#i-x"/></svg>
@@ -121,7 +130,7 @@
           <h1 class="page-title" id="page-title">An automated trading bot built for <span class="text-gradient">gold</span></h1>
           <p class="page-lead">RZGS-PRO is an Expert Advisor (EA) for MetaTrader 5. It trades gold (XAUUSD) with fixed rules: it opens a buy and a sell together, takes profit on one side, and manages the other side with a grid and a basket close.</p>
           <div class="page-actions">
-            <a class="btn btn-primary btn-lg" href="./#pricing">
+            <a class="btn btn-primary btn-lg" href="./#plans" data-plans>
               See plans
               <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg>
             </a>
@@ -290,7 +299,7 @@
                 <svg class="icon" aria-hidden="true"><use href="#i-send"/></svg>
                 Request your free trial
               </a>
-              <a class="btn btn-ghost btn-lg" href="./#pricing">See plans</a>
+              <a class="btn btn-ghost btn-lg" href="./#plans" data-plans>See plans</a>
             </div>
           </div>
         </div>
@@ -317,7 +326,7 @@
           <h2 class="footer-title" id="footer-product">Product</h2>
           <ul class="footer-links">
             <li><a href="bot">The Bot</a></li>
-            <li><a href="./#pricing">Pricing</a></li>
+            <li><a href="./#plans" data-plans>Plans</a></li>
             <li><a href="how-to-buy">How to Buy</a></li>
             <li><a href="./#faq">FAQ</a></li>
           </ul>
