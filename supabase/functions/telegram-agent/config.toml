@@ -1,0 +1,4 @@
+# Telegram and the cron caller send no Supabase JWT; the function authenticates requests itself
+# (webhook secret + owner chat id, or CRON_SECRET).
+[functions.telegram-agent]
+verify_jwt = false
