@@ -260,6 +260,7 @@ Deno.serve(async (req) => {
   const update = await req.json().catch(() => null);
   const msg = update?.message;
   if (!msg?.text) return new Response("ok");
+  if (msg.chat?.type !== "private") return new Response("ok"); // group is alert-output only
   const from = String(msg.from?.id ?? "");
   if (msg.text.trim().toLowerCase().startsWith("/whoami") && msg.chat?.type === "private") {
     return send(msg.chat.id, `Your id: <code>${esc(from)}</code>`).then(() => new Response("ok")); // id only, no data
