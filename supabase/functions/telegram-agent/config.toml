@@ -1,0 +1,2 @@
+# Telegram can't send a Supabase JWT; the function authenticates via secrets itself.
+verify_jwt = false
