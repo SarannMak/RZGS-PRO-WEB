@@ -1,0 +1,21 @@
+name = "rzgs-guardian"
+main = "worker.js"
+compatibility_date = "2026-10-01"
+
+# Scheduled digest + alert sweep (UTC). Hourly watch, the daily digest is sent at 01:00 UTC.
+[triggers]
+crons = ["0 * * * *"]
+
+[vars]
+SITE_URL = "https://rzgspro.com"
+GITHUB_REPO = "sarannmak/rzgs-pro-web"
+SUPABASE_REF = "zaziizzsbytkdlatoutv"
+CLAUDE_MODEL = "claude-sonnet-5-5"
+
+[[kv_namespaces]]
+binding = "STATE"
+id = "REPLACE_WITH_KV_ID"   # wrangler kv namespace create STATE
+
+# Secrets (never put these in this file) -- set with `wrangler secret put <NAME>`:
+#   TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET, OWNER_CHAT_ID,
+#   ANTHROPIC_API_KEY, GITHUB_TOKEN (read-only), SUPABASE_ACCESS_TOKEN
