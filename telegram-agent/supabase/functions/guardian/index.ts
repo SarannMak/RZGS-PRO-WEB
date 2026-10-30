@@ -260,6 +260,9 @@ Deno.serve(async (req) => {
   const msg = update?.message;
   if (!msg?.text) return new Response("ok");
   const from = String(msg.from?.id ?? "");
+  if (msg.text.trim().toLowerCase().startsWith("/whoami") && msg.chat?.type === "private") {
+    return send(msg.chat.id, `Your id: <code>${esc(from)}</code>`).then(() => new Response("ok")); // id only, no data
+  }
   if (!OWNERS.includes(from) || msg.chat?.type !== "private") {
     // Never reveal anything to strangers; just tell the owner someone probed the bot.
     for (const o of OWNERS) await send(o, `🚨 Unauthorized bot access attempt from id <code>${esc(from)}</code> (@${esc(msg.from?.username ?? "?")})`);

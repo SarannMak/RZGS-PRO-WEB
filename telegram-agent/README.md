@@ -30,7 +30,7 @@ The `/cron` route runs the full scan on a schedule and messages you **only when 
      CRON_SECRET=$(openssl rand -hex 24) TELEGRAM_OWNER_IDS=<your id> \
      GITHUB_TOKEN=... SUPABASE_ACCESS_TOKEN=...
    ```
-   (For the first `/whoami`, temporarily set `TELEGRAM_OWNER_IDS` to `0`; the bot will alert you the id in the unauthorized message — you can then set the real one.)
+   (Don't know your id yet? Deploy with `TELEGRAM_OWNER_IDS=0`, message the bot `/whoami` — it answers anyone with their own id only — then re-set the secret.)
 3. Register the webhook:
    ```
    curl "https://api.telegram.org/bot<TOKEN>/setWebhook" \
