@@ -122,6 +122,11 @@ body {
   text-rendering: optimizeLegibility;
   overflow-x: clip;
 }
+/* On the body alone that clip is handed to the browser window, and a phone then lets the page be pinched out to whatever
+   sticks out. With it here too, the body really clips: the page is as wide as the screen, whatever is inside it. */
+html {
+  overflow-x: clip;
+}
 
 img,
 svg {
@@ -3711,6 +3716,20 @@ a {
 .partner-foot .pricing-note {
   margin-top: 24px;
 }
+/* A big button with a long name fits a small phone instead of pushing the page wider: less padding, and the words wrap
+   as a last resort. Without the little gift, "Claim your free 7-day trial" stays on one line down to 360 px. */
+@media (max-width: 420px) {
+  .btn-lg {
+    max-width: 100%;
+    padding: 8px 18px;
+    line-height: 1.25;
+    text-align: center;
+    white-space: normal;
+  }
+  .btn-lg .icon-gift {
+    display: none;
+  }
+}
 
 /* ==========================================================================
    Floating "Join community" button (Telegram), bottom right on the public pages.
@@ -4921,29 +4940,26 @@ h3 {
   }
 }
 
-/* Join community. Phones and tablets: only the round icon, so it never covers words or a button.
-   Its name stays for screen readers. */
+/* Join community. Phones and tablets show the icon and the words all the time (the owner, 2026-10-31): with no pointer
+   there, words that folded away could never come back. */
+.tg-float-text {
+  overflow: hidden;
+  max-width: 170px;
+  white-space: nowrap;
+}
+/* The one exception: while a main button passes under the words they fold (script.js), so it never covers one. */
 @media (max-width: 1023.98px) {
-  .tg-float {
+  .tg-float.is-folded {
     gap: 0;
     padding: 8px;
   }
-  .tg-float-text {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
+  .tg-float.is-folded .tg-float-text {
+    max-width: 0;
+    opacity: 0;
   }
 }
 /* Computers: the words fold away once the visitor has scrolled, and come back under the pointer. */
 @media (min-width: 1024px) {
-  .tg-float-text {
-    overflow: hidden;
-    max-width: 170px;
-    white-space: nowrap;
-  }
   .past-fold .tg-float:not(:hover, :focus-visible) {
     gap: 0;
     padding-right: 10px;
@@ -4953,7 +4969,7 @@ h3 {
     opacity: 0;
   }
 }
-@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+@media (prefers-reduced-motion: no-preference) {
   .tg-float {
     transition: transform 0.25s var(--ease-out), filter 0.25s, padding 0.3s var(--ease-out), gap 0.3s var(--ease-out);
   }

@@ -27,6 +27,47 @@ function onScroll() {
 window.addEventListener('scroll', onScroll, { passive: true });
 onScroll();
 
+/* Join community on phones and tablets: the icon and its words, but the words fold while a main button passes under
+   them, so it never covers one. */
+const community = document.querySelector('.tg-float');
+if (community) {
+  const smallScreen = window.matchMedia('(max-width: 1023.98px)');
+  const mainButtons = [...document.querySelectorAll('main .btn-primary, main .btn-lg')];
+  let fullWidth = 0;
+  let looking = false;
+  const foldWords = () => {
+    looking = false;
+    if (!smallScreen.matches) {
+      community.classList.remove('is-folded');
+      return;
+    }
+    const box = community.getBoundingClientRect();
+    fullWidth = Math.max(fullWidth, box.width);
+    const left = box.right - fullWidth; // how far it reaches with its words out
+    community.classList.toggle('is-folded', mainButtons.some((button) => {
+      const r = button.getBoundingClientRect();
+      return r.width > 0 && r.bottom > box.top && r.top < box.bottom && r.right > left && r.left < box.right;
+    }));
+  };
+  const lookSoon = () => {
+    if (looking) return;
+    looking = true;
+    requestAnimationFrame(foldWords);
+  };
+  window.addEventListener('scroll', lookSoon, { passive: true });
+  window.addEventListener('resize', () => {
+    fullWidth = 0;
+    community.classList.remove('is-folded');
+    lookSoon();
+  });
+  window.addEventListener('load', lookSoon);
+  if (document.fonts) document.fonts.ready.then(lookSoon);
+  // the page can still move with nobody scrolling: the free-trial bar arrives, the first sections slide in
+  new ResizeObserver(lookSoon).observe(document.body);
+  setTimeout(lookSoon, 1500);
+  lookSoon();
+}
+
 function setMenu(open) {
   menuToggle.setAttribute('aria-expanded', String(open));
   menuToggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
