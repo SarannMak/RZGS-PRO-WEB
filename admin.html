@@ -29,6 +29,10 @@
     .adm-scroll { overflow-x: auto; }
     .adm-empty { margin: 8px 0 0; color: var(--text-subtle); font-size: 14px; }
     .adm-top { display: flex; margin: 14px 0 20px; }
+    .adm-give { margin-top: 12px; }
+    .adm-give .btn { width: 100%; }
+    .adm-why[hidden] { display: none; }
+    .adm-why code { font: 600 14px/1.6 var(--font-mono); user-select: all; }
     .adm .dash-panel + .dash-panel { margin-top: 16px; }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0" defer></script>
@@ -43,6 +47,17 @@
     <section class="dash-panel" data-adm-area hidden>
       <h2>Waiting for you</h2>
       <div data-adm-waiting></div>
+    </section>
+
+    <section class="dash-panel" data-adm-area hidden>
+      <h2>Give a Diamond plan</h2>
+      <p class="dash-hint">Diamond is sold on Telegram. When the client has paid you, type their website email and their MT5 number. Their bot, passwords and file appear on their dashboard, for 30 days from now.</p>
+      <form class="adm-give" data-adm-give novalidate>
+        <input class="adm-note" name="email" type="email" inputmode="email" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="The client's website email" aria-label="The client's website email">
+        <input class="adm-note" name="account" type="text" inputmode="numeric" autocomplete="off" placeholder="Their MT5 number" aria-label="Their MT5 number">
+        <p class="adm-why" data-adm-give-msg role="status" hidden></p>
+        <button class="btn btn-primary btn-sm" type="submit" data-adm-give-go>Give Diamond</button>
+      </form>
     </section>
 
     <section class="dash-panel" data-adm-area hidden>

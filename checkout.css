@@ -204,39 +204,94 @@ dialog.plan-confirm.co {
   color: var(--on-accent);
 }
 
-/* the payment */
+/* the payment: the owner's poster, 1254 square, with the code, the name and the amount in the places the bot's poster has them */
+dialog.plan-confirm.co.co--pay {
+  --poster: min(650px, calc(100dvh - 84px));
+  width: min(calc(var(--poster) + 380px), calc(100vw - 32px));
+}
 .co-pay {
   display: grid;
-  grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
-  gap: 16px;
-  align-items: center;
-  margin: 4px 0 14px;
+  grid-template-columns: minmax(0, var(--poster)) minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+  grid-template-areas: "poster head" "poster side";
+  column-gap: 20px;
 }
-.co-qr {
-  padding: 2px;
+.co-pay-head {
+  grid-area: head;
+}
+.co-pay-side {
+  grid-area: side;
+  display: flex;
+  flex-direction: column;
+}
+.co--pay .co-rail {
+  flex-wrap: nowrap;
+  gap: 4px;
+  font-size: 10px;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+.co--pay .co-rail li {
+  gap: 4px;
+}
+.co--pay .co-rail li + li::before {
+  width: 6px;
+}
+.co-poster {
+  grid-area: poster;
+  position: relative;
+  align-self: start;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: #06141c;
+  container-type: inline-size;
+}
+.co-poster img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.co-poster-card {
+  position: absolute;
+  left: 59.09%;
+  top: 32.75%;
+  width: 32.77%;
+  color: #16191c;
+  font-family: var(--font-body);
+}
+.co-poster-card p {
+  margin: 0 0 1.25cqw;
+  overflow: hidden;
+  color: #3a3f44;
+  font-size: 2.15cqw;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.co-poster-card b {
+  display: block;
+  font-size: 4.15cqw;
+  font-weight: 700;
+  line-height: 1;
+}
+.co-poster-qr {
+  position: absolute;
+  left: 57.26%;
+  top: 42.74%;
+  display: grid;
+  place-items: center;
+  width: 35.41%;
+  aspect-ratio: 1;
   background: #fff;
 }
-.co-qr svg {
+.co-poster-qr svg {
   display: block;
   width: 100%;
   height: auto;
 }
-.co-qr path {
+.co-poster-qr path {
   fill: #000;
-}
-.co-amount {
-  margin: 0 0 6px;
-  font: 800 32px/1 var(--font-display);
-}
-.co-to {
-  margin: 0 0 6px;
-  color: var(--text-muted);
-  font-size: 14px;
-  overflow-wrap: anywhere;
-}
-.co-to b {
-  color: var(--text);
-  font-weight: 600;
 }
 .co-left {
   margin: 0 0 12px;
@@ -258,6 +313,9 @@ dialog.plan-confirm.co {
 }
 .co-how li + li {
   margin-top: 4px;
+}
+.co-save {
+  margin-top: 10px;
 }
 
 /* the passwords and the file */
@@ -370,12 +428,16 @@ dialog.plan-confirm.co {
   .co-rail li + li::before {
     width: 6px;
   }
+}
+
+/* a phone or a small tablet: the title, then the poster, then the buttons */
+@media (max-width: 760px) {
   .co-pay {
-    grid-template-columns: 1fr;
-    justify-items: center;
-    text-align: center;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    grid-template-areas: "head" "poster" "side";
   }
-  .co-qr {
-    width: min(240px, 100%);
+  .co-poster {
+    margin-bottom: 14px;
   }
 }

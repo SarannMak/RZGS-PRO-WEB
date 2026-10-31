@@ -95,6 +95,53 @@
     setTimeout(load, result.ok ? 0 : 1800);
   });
 
+  /* ----- a Diamond plan sold on Telegram ----- */
+  const GIVE_WORDS = {
+    email_bad: 'Please type the email of the client\'s website account.',
+    mt5_bad: 'That is not an MT5 number. It has 5 to 12 digits and no letters.',
+    no_account: 'No website account has this email. Ask the client to sign up on rzgspro.com first, then try again.',
+    mt5_taken: 'This MT5 number is already used on another account.',
+    not_admin: 'This page is for the owner of the site.',
+  };
+  const giveForm = document.querySelector('[data-adm-give]');
+  const giveLine = document.querySelector('[data-adm-give-msg]');
+  const giveGo = document.querySelector('[data-adm-give-go]');
+  const giveSay = (html) => { giveLine.innerHTML = html; giveLine.hidden = false; };
+  const giveReset = () => { delete giveForm.dataset.sure; giveGo.textContent = 'Give Diamond'; };
+  giveForm.addEventListener('input', () => { giveReset(); giveLine.hidden = true; });
+  giveForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const email = giveForm.elements.email.value.trim();
+    const account = giveForm.elements.account.value.replace(/\s+/g, '');
+    // asked once more: this starts a plan for a real client
+    if (!giveForm.dataset.sure) {
+      giveForm.dataset.sure = '1';
+      giveGo.textContent = 'Yes, give it';
+      giveSay(`Give Diamond for 30 days to <b>${esc(email)}</b>, MT5 <b>${esc(account)}</b>?`);
+      return;
+    }
+    giveGo.disabled = true;
+    let result;
+    try {
+      result = await call('admin_give', { email, account });
+    } catch (e) {
+      result = { ok: false, code: 'net' };
+    }
+    giveGo.disabled = false;
+    giveReset();
+    if (result.ok && result.licence) {
+      giveSay(`Done. It is on their dashboard, until ${when(result.licence.expires_at)}.<br>Bot Password: <code>${esc(result.licence.bot_password)}</code><br>App Password: <code>${esc(result.licence.app_password)}</code>`);
+      giveForm.reset();
+    } else if (result.ok) {
+      giveSay('It could not be finished by itself. Look under Waiting for you.');
+    } else if (result.code === 'paid_running') {
+      giveSay(`This client has a paid plan running${result.until ? ` until ${when(result.until)}` : ''}. It has to end first, or they can cancel it on their dashboard.`);
+    } else {
+      giveSay(esc(GIVE_WORDS[result.code] || 'That did not work. Is the newest "checkout" function deployed?'));
+    }
+    load();
+  });
+
   load();
   setInterval(() => { if (!document.hidden && !document.querySelector('.adm-note:focus')) load(); }, 30000);
 })();

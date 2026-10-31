@@ -46,6 +46,8 @@
   let countdown = null;
   let lookAgain = null;
   let autoLooks = 0;
+  let shownQr = null;
+  let qrWatch = null;
 
   /* ---------------------------------------------------------------- the server */
   async function session() {
@@ -108,12 +110,15 @@
   function stopTimers() {
     clearInterval(countdown);
     clearTimeout(lookAgain);
+    if (qrWatch) qrWatch.disconnect();
     countdown = null;
     lookAgain = null;
+    qrWatch = null;
   }
 
   function paint(html) {
     stopTimers();
+    box.classList.remove('co--pay');
     inner.innerHTML = `<button class="plans-x plans-x--in" type="button" data-co-close aria-label="Close">${X}</button>${html}`;
     inner.scrollTop = 0;
     const first = inner.querySelector('input:not([type="radio"]), [data-co-first]');
@@ -218,29 +223,42 @@
       </form>`);
   }
 
+  // The owner's Scan to Pay poster, with this order's own QR, name and amount where the bot's poster has them.
   function paintPay(qr) {
     const money = `$${Number(qr.amount).toFixed(2)}`;
-    paint(`${rail(order.plan, 'pay')}${planLine(order.plan)}
-      <h2 id="co-title">Pay ${money} by KHQR</h2>
-      <div class="co-pay">
-        <div class="co-qr"><svg viewBox="0 0 ${qr.size} ${qr.size}" role="img" aria-label="KHQR code for ${money}" shape-rendering="crispEdges"><path d="${qr.path}"/></svg></div>
-        <div class="co-pay-side">
-          <p class="co-amount">${money}</p>
-          <p class="co-to">To <b>${esc(qr.name)}</b></p>
-          <p class="co-left" data-co-left></p>
-          <button class="btn btn-ghost btn-sm" type="button" data-co-save>Save the code</button>
+    paint(`<div class="co-pay">
+        <div class="co-pay-head">
+          ${rail(order.plan, 'pay')}${planLine(order.plan)}
+          <h2 id="co-title">Pay ${money} by KHQR</h2>
         </div>
-      </div>
-      <ol class="co-how">
-        <li>Open your bank app and scan the code. Paying on this phone? Save the code, then scan it from your photos.</li>
-        <li>Pay the amount it shows, then tap the button below.</li>
-      </ol>
-      ${message(order.note)}
-      ${mainButton('I have paid', 'type="button" data-co-paid data-co-first')}
-      <button class="co-back" type="button" data-co-back>Back</button>`);
-    inner.querySelector('[data-co-save]').dataset.path = qr.path;
-    inner.querySelector('[data-co-save]').dataset.size = qr.size;
+        <div class="co-poster">
+          <img src="${pageUrl(`assets/pay-${order.plan}.webp`)}" width="1254" height="1254" alt="Scan to pay ${money}" data-co-art>
+          <div class="co-poster-card"><p>${esc(qr.name)}</p><b>$ ${Number(qr.amount).toFixed(2)}</b></div>
+          <div class="co-poster-qr" data-co-qr><svg viewBox="0 0 ${qr.size} ${qr.size}" role="img" aria-label="KHQR code for ${money}" shape-rendering="crispEdges"><path d="${qr.path}"/></svg></div>
+        </div>
+        <div class="co-pay-side">
+          <p class="co-left" data-co-left></p>
+          <ol class="co-how">
+            <li>Open your bank app and scan the code. Paying on this phone? Save the poster, then scan it from your photos.</li>
+            <li>Pay the amount it shows, then tap the button below.</li>
+          </ol>
+          ${message(order.note)}
+          ${mainButton('I have paid', 'type="button" data-co-paid data-co-first')}
+          <button class="btn btn-ghost btn-sm co-save" type="button" data-co-save>Save the poster</button>
+          <button class="co-back" type="button" data-co-back>Back</button>
+        </div>
+      </div>`);
+    box.classList.add('co--pay');
+    shownQr = qr;
     autoLooks = 0;
+    const place = inner.querySelector('[data-co-qr]');
+    // Whole device pixels for every square of the code, so a phone reads it easily off any screen.
+    qrWatch = new ResizeObserver(() => {
+      const device = window.devicePixelRatio || 1;
+      const each = Math.max(1, Math.floor((place.clientWidth * device) / qr.size));
+      place.firstElementChild.style.width = `${(qr.size * each) / device}px`;
+    });
+    qrWatch.observe(place);
     const left = inner.querySelector('[data-co-left]');
     const until = new Date(qr.until).getTime();
     const tick = () => {
@@ -352,6 +370,9 @@
     } else if (result.code === 'paid_running') {
       paintNotice('Your plan is still running', 'A new plan can start when this one ends. To change now, cancel your plan on your dashboard first.',
         `<a class="btn btn-primary" href="${pageUrl('dashboard#plan')}">Go to my dashboard</a>`);
+    } else if (result.code === 'sold_in_person') {
+      paintNotice('Diamond is sold by our team', 'Our sales team helps you with Diamond on Telegram.',
+        '<a class="btn btn-primary" href="https://t.me/sarannsadboi" target="_blank" rel="noopener">Contact Sales</a>');
     } else if (result.code === 'in_review') {
       show(result);
     } else if (result.code === 'pay_off') {
@@ -421,21 +442,34 @@
     afterAction(result);
   }
 
-  async function saveCode(button) {
-    const size = Number(button.dataset.size);
+  // The poster as one picture, drawn the way the bot draws it: 1254 square, the code in whole pixels, nothing on top of it.
+  async function savePoster() {
+    const qr = shownQr;
+    const art = inner.querySelector('[data-co-art]');
+    await art.decode().catch(() => {});
     const canvas = document.createElement('canvas');
-    canvas.width = 800;
-    canvas.height = 800;
+    canvas.width = 1254;
+    canvas.height = 1254;
     const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(0, 0, 800, 800);
-    ctx.scale(800 / size, 800 / size);
+    ctx.drawImage(art, 0, 0, 1254, 1254);
+    ctx.fillStyle = '#3a3f44';
+    ctx.font = '500 27px "IBM Plex Sans", Arial, sans-serif';
+    ctx.fillText(qr.name, 741, 430, 411);
+    ctx.fillStyle = '#16191c';
+    ctx.font = '700 52px "IBM Plex Sans", Arial, sans-serif';
+    ctx.fillText(`$ ${Number(qr.amount).toFixed(2)}`, 741, 493, 411);
+    const each = Math.floor(444 / qr.size);
+    const side = qr.size * each;
+    ctx.translate(718 + Math.floor((444 - side) / 2), 536 + Math.floor((444 - side) / 2));
+    ctx.scale(each, each);
     ctx.fillStyle = '#000';
-    ctx.fill(new Path2D(button.dataset.path));
+    ctx.fill(new Path2D(qr.path));
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
     const link = document.createElement('a');
-    link.href = canvas.toDataURL('image/png');
-    link.download = 'RZGS-PRO-KHQR.png';
+    link.href = URL.createObjectURL(blob);
+    link.download = `RZGS-PRO-${(PLANS[order.plan] || {}).name || 'Plan'}-KHQR.png`;
     link.click();
+    setTimeout(() => URL.revokeObjectURL(link.href), 10000);
   }
 
   async function onClick(event) {
@@ -443,8 +477,7 @@
     if (event.target.closest('a[data-plans]')) { box.close(); return; }
     const paid = event.target.closest('[data-co-paid]');
     if (paid) { lookForPayment(paid, false); return; }
-    const save = event.target.closest('[data-co-save]');
-    if (save) { saveCode(save); return; }
+    if (event.target.closest('[data-co-save]')) { savePoster(); return; }
     if (event.target.closest('[data-co-new]')) { paintLoading(); afterAction(await call('pay')); return; }
     if (event.target.closest('[data-co-back]')) { paintLoading(); afterAction(await call('back')); return; }
     const ask = event.target.closest('[data-co-ask]');

@@ -995,7 +995,7 @@
       $('[data-plan-cancel-note]', root).hidden = !paidRunning;
       setAll('[data-plan-choice-note]', paidRunning
         ? `Your ${state.name} plan runs until ${state.until}. You can renew it or start another plan when it ends, or cancel it above first.`
-        : 'Each button starts that plan right here. We only ask for what we need.');
+        : 'Trial and Elite start right here. Diamond opens a chat with our sales team on Telegram.');
       $$('[data-plan-link]', root).forEach((button) => {
         const on = button.dataset.planLink === state.plan;
         const freeUsed = button.dataset.planLink === 'trial' && checkout.trial_used;

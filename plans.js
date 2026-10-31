@@ -20,6 +20,7 @@
   const PROFILE_KEY = 'rzgs_profile'; // name, picture and plan, so the header is right at once
   const BUSY_MS = 900; // how long "Processing..." stays at least
   const COMMUNITY_URL = 'https://t.me/+NvCIdtTmMIViMjg9';
+  const SALES_URL = `https://t.me/sarannsadboi?text=${encodeURIComponent('Hi, I want the Diamond plan.')}`; // Diamond is sold in person
   const JUST_IN_KEY = 'rzgs_just_in'; // auth.js leaves this for the next page, right after logging in
 
   // This file sits in the site's top folder, so other pages are found from here on any page.
@@ -83,7 +84,7 @@
       id: 'diamond', name: 'Diamond', tone: 'diamond', icon: 'gem', chip: 'Any broker',
       lead: 'Keep your own broker. Hosting included.',
       box: ['Monthly on 1 MT5 account', 'Works at any broker', '1 basic VPS included while paid'],
-      amount: '$49', per: '/ month', button: 'Get Diamond', under: 'You pay by KHQR on this website',
+      amount: '$49', per: '/ month', button: 'Contact Sales', under: 'We continue with you on Telegram',
       get: ['Everything in Elite', 'No partner broker needed: keep your own', '1 basic VPS, so the bot can run 24/7', 'The bot file made for every broker'],
       needs: ['An MT5 hedging account at any broker, one that can trade gold'],
       note: ['When the plan ends the VPS is removed, so keep a copy of anything you need from it.'],
@@ -478,9 +479,20 @@
     checkout.askCancel(current.plan, current.endsAt);
   }
 
-  // Every plan goes on in the checkout box, on this same page. With no account, signing up comes first.
+  // A chat with our sales team, in a new tab: this page stays where it is.
+  function toSales() {
+    const link = document.createElement('a');
+    link.href = SALES_URL;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.click();
+  }
+
+  // Diamond goes to our sales team. Free and Elite go on in the checkout box, on this same page; with no account,
+  // signing up comes first.
   async function choose(plan, button) {
     if (button.disabled) return;
+    if (plan.id === 'diamond') { toSales(); return; }
     setBusy(button, true);
     const session = await activeSession();
     if (session === null) { toSignUp(); return; }
@@ -558,6 +570,7 @@
     const go = event.target.closest('[data-checkout]');
     if (!go || go.disabled || event.metaKey || event.ctrlKey || event.shiftKey) return;
     event.preventDefault();
+    if (go.dataset.checkout === 'diamond') { toSales(); return; }
     if (!signedIn()) { toSignUp(); return; }
     (await loadCheckout()).open(go.dataset.checkout);
   });
