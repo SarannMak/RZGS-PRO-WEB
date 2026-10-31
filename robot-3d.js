@@ -26,7 +26,7 @@
    Used on every element with data-robot-3d (the box .robot-3d of style.css):
    the model is drawn on a canvas inside that box and fades in when it is
    ready. The box keeps the robot's place until then. Without WebGL, or when
-   the library cannot be loaded, the box stays empty.
+   the library cannot be loaded, the logo holds that place (.robot-failed in style.css).
    ========================================================================== */
 
 // This is a plain script, not a module: a page opened straight from a folder (file://) may not
@@ -43,6 +43,7 @@ const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
 // get "is-in"). Where there will be no 3D scene, they are let in at once.
 const cardsBeside = (box) => (box.parentElement ? [...box.parentElement.querySelectorAll('.float-card')] : []);
 const letCardsIn = (box) => cardsBeside(box).forEach((card) => card.classList.add('is-in'));
+const noRobot = (box) => { box.classList.add('robot-failed'); letCardsIn(box); };
 if (boxes.length) {
   (async () => {
     try {
@@ -51,12 +52,12 @@ if (boxes.length) {
         try {
           build(THREE, box);
         } catch (error) {
-          letCardsIn(box);
+          noRobot(box);
           console.warn('robot-3d: the robot could not be drawn', error);
         }
       }
     } catch (error) {
-      boxes.forEach(letCardsIn);
+      boxes.forEach((box) => noRobot(box));
       console.warn('robot-3d: the 3D library did not load', error);
     }
   })();
@@ -185,8 +186,8 @@ function build(THREE, box) {
   try {
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
   } catch (error) {
-    letCardsIn(box);
-    return; // no WebGL: the box stays empty
+    noRobot(box);
+    return; // no WebGL
   }
   renderer.setClearColor(0x000000, 0);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -218,7 +219,7 @@ function build(THREE, box) {
     wall(CYAN, 3, 8, 2.5, 0, 4, -8);
     wall(0xffffff, 0.4, 10, 3, 0, -6, 4);
     const pmrem = new THREE.PMREMGenerator(renderer);
-    scene.environment = pmrem.fromScene(room, 0.06).texture;
+    scene.environment = pmrem.fromScene(room, 0.04).texture;
     pmrem.dispose();
   }
   const key = new THREE.DirectionalLight(0xffffff, 1.6);

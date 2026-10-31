@@ -1301,7 +1301,8 @@ function startStage(el) {
   try {
     renderer = new THREE.WebGLRenderer({ canvas: gl, antialias: true, alpha: true, powerPreference: 'high-performance' });
   } catch (e) {
-    return;                                                       // no WebGL: the box keeps its dark panel
+    document.documentElement.classList.add('no-fx3d');            // no WebGL: the empty boxes go, the words stay
+    return;
   }
   el.prepend(gl, ov);
   renderer.setClearColor(0x000000, 0);
@@ -1370,7 +1371,7 @@ const near = new IntersectionObserver((entries) => {
   if (asked || !entries.some((e) => e.isIntersecting)) return;
   asked = true;
   near.disconnect();
-  import(THREE_URL).then((m) => { THREE = m; stages.forEach(startStage); }).catch(() => {});
+  import(THREE_URL).then((m) => { THREE = m; stages.forEach(startStage); }).catch(() => document.documentElement.classList.add('no-fx3d'));
 }, { rootMargin: '600px 0px' });
 stages.forEach((el) => near.observe(el));
 })();

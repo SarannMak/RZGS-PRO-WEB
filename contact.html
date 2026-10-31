@@ -12,6 +12,11 @@
   <meta property="og:type" content="website">
   <meta property="og:title" content="Contact — RZGS-PRO">
   <meta property="og:description" content="Contact RZGS-PRO on Telegram or by email for free trials, purchases, setup help and support.">
+  <meta property="og:site_name" content="RZGS-PRO">
+  <meta property="og:image" content="https://rzgspro.com/assets/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
 
   <link rel="icon" type="image/png" href="assets/logo-192.png">
   <link rel="apple-touch-icon" href="assets/logo-192.png">
@@ -19,12 +24,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="style.css?v=11">
-  <link rel="stylesheet" href="plans.css?v=1">
+  <link rel="stylesheet" href="style.css?v=36">
+  <link rel="stylesheet" href="plans.css?v=3">
+  <link rel="stylesheet" href="motion.css?v=2">
 
   <script>document.documentElement.classList.add('js');try{if(localStorage.getItem('sb-zaziizzsbytkdlatoutv-auth-token'))document.documentElement.classList.add('signed-in')}catch(e){}</script>
-  <script src="script.js?v=8" defer></script>
-  <script src="plans.js?v=2" defer></script>
+  <script src="script.js?v=9" defer></script>
+  <script src="motion.js?v=1" defer></script>
+  <script src="plans.js?v=7" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -129,14 +136,13 @@
           <article class="card contact-card contact-card--primary reveal">
             <span class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-send"/></svg></span>
             <h2>Telegram</h2>
-            <p>Best for free trials, buying a plan, setup help and support, in your language.</p>
+            <p>Best for questions about a plan, setup help and support, in your language.</p>
             <div class="page-actions">
-              <!-- TODO: replace "#" with your main Telegram chat link, e.g. https://t.me/your_username -->
               <a class="btn btn-primary" href="https://t.me/sarannsadboi">
                 <svg class="icon" aria-hidden="true"><use href="#i-message"/></svg>
                 Message us on Telegram
               </a>
-              <a class="btn btn-ghost" href="https://t.me/rzgsprobot?start=free">Request free trial</a>
+              <a class="btn btn-ghost" href="signup" data-plans>Claim free trial</a>
             </div>
           </article>
 
@@ -144,8 +150,7 @@
             <span class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-mail"/></svg></span>
             <h2>Email</h2>
             <p>For billing and business questions.</p>
-            <!-- FILL IN: your support email, and turn it into a link: <a href="mailto:you@domain.com">you@domain.com</a> -->
-            <p class="contact-value"><span class="fill">info@rzgspro.com</span></p>
+            <p class="contact-value"><a class="contact-email" href="mailto:info@rzgspro.com">info@rzgspro.com</a></p>
           </article>
 
           <article class="card contact-card contact-card--wide reveal">
@@ -180,8 +185,8 @@
             <span class="brand-name">RZGS<span class="brand-accent">-PRO</span></span>
           </a>
           <p>Automated gold trading bot for MetaTrader 5, with setup help and support on Telegram.</p>
-          <a class="btn btn-ghost btn-sm" href="https://t.me/rzgsprobot?start=free">
-            <svg class="icon" aria-hidden="true"><use href="#i-send"/></svg>
+          <a class="btn btn-ghost btn-sm" href="signup" data-plans>
+            <svg class="icon" aria-hidden="true"><use href="#i-zap"/></svg>
             Free 7-day trial
           </a>
         </div>
@@ -210,7 +215,7 @@
           <h2 class="footer-title" id="footer-support">Support</h2>
           <ul class="footer-links">
             <li><a href="contact">Contact us</a></li>
-            <li><a href="https://t.me/rzgsprobot?start=free">Free trial</a></li>
+            <li><a href="signup" data-plans>Free trial</a></li>
           </ul>
         </nav>
       </div>

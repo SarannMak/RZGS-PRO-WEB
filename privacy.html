@@ -12,6 +12,11 @@
   <meta property="og:type" content="website">
   <meta property="og:title" content="Privacy Policy — RZGS-PRO">
   <meta property="og:description" content="How RZGS-PRO collects, uses and protects your information.">
+  <meta property="og:site_name" content="RZGS-PRO">
+  <meta property="og:image" content="https://rzgspro.com/assets/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
 
   <link rel="icon" type="image/png" href="assets/logo-192.png">
   <link rel="apple-touch-icon" href="assets/logo-192.png">
@@ -19,12 +24,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="style.css?v=11">
-  <link rel="stylesheet" href="plans.css?v=1">
+  <link rel="stylesheet" href="style.css?v=36">
+  <link rel="stylesheet" href="plans.css?v=3">
+  <link rel="stylesheet" href="motion.css?v=2">
 
   <script>document.documentElement.classList.add('js');try{if(localStorage.getItem('sb-zaziizzsbytkdlatoutv-auth-token'))document.documentElement.classList.add('signed-in')}catch(e){}</script>
-  <script src="script.js?v=8" defer></script>
-  <script src="plans.js?v=2" defer></script>
+  <script src="script.js?v=9" defer></script>
+  <script src="motion.js?v=1" defer></script>
+  <script src="plans.js?v=7" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -156,9 +163,9 @@
               <li><strong>Website account:</strong> your email address, name, username and country when you sign up, and your phone number, Telegram username, a few words about you and links to your social pages if you add them. Your password is stored only in a protected (hashed) form. We cannot read it.</li>
               <li><strong>Profile picture:</strong> a photo, if you upload one. It is saved as a small file at an address that is not listed anywhere, but anyone who has that exact address can open it. You can remove it in your dashboard.</li>
               <li><strong>Control app data:</strong> when your bot is linked to the control app, it sends us your MT5 account number and its live status: balance, equity, open trades, profit, settings and alerts. We also keep the commands you send from the app. The app has its own App Password, also stored in a protected form.</li>
-              <li><strong>Telegram details:</strong> your Telegram username and the messages you send us. Pictures you send our Telegram bot, such as a payment receipt or a screenshot of your broker profile, are read automatically by OCR.space and Google Gemini to find the payment code or your MT5 login number. We keep only the details we need from them. Please cover any password before you send a screenshot.</li>
-              <li><strong>Trading account details:</strong> your MT5 account number and broker name, so we can link your license to your account.</li>
-              <li><strong>Payment details:</strong> the information we need to confirm your payment, such as a transaction reference.</li>
+              <li><strong>Telegram details:</strong> your Telegram username and the messages you send us when you ask for help.</li>
+              <li><strong>Trading account details:</strong> your MT5 account number, your broker name and the email you used at the broker. When you choose a plan that needs a partner broker, we ask that broker whether this email and account were opened with our link.</li>
+              <li><strong>Payment details:</strong> the information we need to confirm your payment, such as a transaction reference. We ask the National Bank of Cambodia's Bakong service whether your KHQR code was paid.</li>
               <li><strong>Email:</strong> your email address, if you contact us by email.</li>
               <li><strong>Technical details:</strong> like most websites, the services that run our site record technical details of each visit, such as your IP address, your browser and the time.</li>
             </ul>
@@ -169,7 +176,7 @@
             <ul>
               <li>To let you log in, show your dashboard and run the control app.</li>
               <li>To activate and manage your license.</li>
-          <li>To connect your website account with our Telegram bot once you choose to, so the bot knows who you are, which plan you chose and the details on your dashboard, and your dashboard shows your plan and your bot's status.</li>
+          <li>To check your broker account and your payment when you choose a plan, and to show your plan and your bot's status on your dashboard.</li>
               <li>To give you setup help and support.</li>
               <li>To send you renewal reminders and important notices.</li>
               <li>To prevent misuse, such as repeated free trials or shared licenses.</li>
@@ -235,8 +242,8 @@
             <span class="brand-name">RZGS<span class="brand-accent">-PRO</span></span>
           </a>
           <p>Automated gold trading bot for MetaTrader 5, with setup help and support on Telegram.</p>
-          <a class="btn btn-ghost btn-sm" href="https://t.me/rzgsprobot?start=free">
-            <svg class="icon" aria-hidden="true"><use href="#i-send"/></svg>
+          <a class="btn btn-ghost btn-sm" href="signup" data-plans>
+            <svg class="icon" aria-hidden="true"><use href="#i-zap"/></svg>
             Free 7-day trial
           </a>
         </div>
@@ -265,7 +272,7 @@
           <h2 class="footer-title" id="footer-support">Support</h2>
           <ul class="footer-links">
             <li><a href="contact">Contact us</a></li>
-            <li><a href="https://t.me/rzgsprobot?start=free">Free trial</a></li>
+            <li><a href="signup" data-plans>Free trial</a></li>
           </ul>
         </nav>
       </div>

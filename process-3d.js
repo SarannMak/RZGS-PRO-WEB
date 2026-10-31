@@ -5,11 +5,11 @@
      1  Log in on the website
      2  Choose one offer: FREE (a broker account opened with our link)
                           or PAID (the payment)
-     3  The Telegram bot checks the account and the payment, and hands out the
+     3  The website checks the account and the payment, and hands out the
         bot file (.ex5)
      4  MetaTrader 5: the file goes in, the bot runs
    Two cards travel the track, one down the Free lane and one down the Paid
-   lane. Each changes face at every station and leaves the Telegram bot as an
+   lane. Each changes face at every station and leaves the check as an
    .ex5 file.
 
    Used by how-to-buy.html: it looks for [data-path3d]. Everything is drawn in
@@ -573,36 +573,21 @@ function build(THREE, root) {
     glow(offer.group, HEX.gold, 3.4, 2.1, 1.5, 0.22);
   }
 
-  // 3. TELEGRAM: a tower with a paper plane on it. It checks, then hands out the .ex5 file.
-  const telegram = station(2, 'Verify in Telegram', 2.9, 0, { target: [2.95, 1.5, 0.3], distance: 7.9, side: 0.34 }, { target: [3.22, 1.42, 0.3], span: 2.15, rise: 3.5, side: 0.3, stop: TOWER });
+  // 3. THE CHECK: a tower with a tick on it. It checks, then hands out the .ex5 file.
+  const telegram = station(2, 'Verify on the website', 2.9, 0, { target: [2.95, 1.5, 0.3], distance: 7.9, side: 0.34 }, { target: [3.22, 1.42, 0.3], span: 2.15, rise: 3.5, side: 0.3, stop: TOWER });
   const planeBadge = painted(256, 256, (ctx, w) => {
     ctx.fillStyle = INK.cyan;
     ctx.beginPath();
     ctx.arc(w / 2, w / 2, 120, 0, TAU);
     ctx.fill();
-    // a plain paper plane, pointing up and to the right
-    ctx.fillStyle = '#f3fbff';
-    ctx.beginPath();
-    ctx.moveTo(198, 62);
-    ctx.lineTo(52, 122);
-    ctx.lineTo(104, 142);
-    ctx.closePath();
-    ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(198, 62);
-    ctx.lineTo(104, 142);
-    ctx.lineTo(122, 200);
-    ctx.lineTo(146, 160);
-    ctx.lineTo(176, 178);
-    ctx.closePath();
-    ctx.fill();
+    tick(ctx, w / 2, w / 2, 118, '#f3fbff');
   });
   const CHECKS = ['ACCOUNT', 'PAYMENT', 'MT5 LOGIN'];
   const chatScreen = painted(416, 448, (ctx, w, h, done = 4) => {
     fillFrame(ctx, 2, 2, w - 4, h - 4, INK.panel, INK.line, 22);
     ctx.fillStyle = INK.panelHi;
     ctx.fillRect(4, 4, w - 8, 66);
-    ctx.drawImage(planeBadge.texture.image, 16, 13, 48, 48); // the Telegram mark
+    ctx.drawImage(planeBadge.texture.image, 16, 13, 48, 48); // the tick from the tower
     write(ctx, 'RZGS-PRO BOT', 76, 49, 33, INK.text, 800);
     CHECKS.forEach((label, i) => {
       const y = 82 + i * 86, ok = done > i;
@@ -791,7 +776,7 @@ function build(THREE, root) {
       card.add(mesh);
       front[name] = mesh;
     }
-    // after the Telegram bot the card is the bot file: a chunkier block
+    // after the check the card is the bot file: a chunkier block
     const file = new THREE.Group();
     group.add(file);
     const fileBody = new THREE.Mesh(blockGeo(0.56, 0.38, 0.12, 0.05), MAT.hi);
@@ -846,7 +831,7 @@ function build(THREE, root) {
       face = traveller.name === 'free' ? 'opened' : 'paidok';
       step = 2;
     } else if (phase < T.enter) {
-      // into the Telegram bot
+      // into the check
       const x = ease(part(phase, T.tower, T.enter));
       group.position.copy(TOWER);
       push = -0.34 * x;
@@ -930,7 +915,7 @@ function build(THREE, root) {
     const rise = printing ? ease(part(printing.phase, T.stop, T.settle)) : 0;
     offer.receipt.position.y = mix(0.3, 1.0, rise);
     offer.receipt.visible = rise > 0.02;
-    // the Telegram bot ticks its checks one by one, then shows the file
+    // the check ticks off one by one, then shows the file
     const inside = travellers.find((traveller) => within(traveller, T.enter, T.out));
     const done = inside ? Math.min(3, Math.floor(part(inside.phase, T.enter, T.checks) * 3.6)) + (inside.phase > T.checks ? 1 : 0) : 4;
     if (done !== telegram.chat.done) {
@@ -953,7 +938,7 @@ function build(THREE, root) {
     { words: 'Choose offer', number: '02', at: new THREE.Vector3(-1.95, 2.95, -0.1), step: 1 },
     { words: 'Broker account', lane: 'free', at: new THREE.Vector3(0.1, 2.75, -2.24), step: 1 },
     { words: 'Payment', lane: 'paid', at: new THREE.Vector3(0.65, 2.05, 1.2), step: 1 },
-    { words: 'Telegram bot', number: '03', at: new THREE.Vector3(2.9, 3.25, 0.0), step: 2 },
+    { words: 'Verify', number: '03', at: new THREE.Vector3(2.9, 3.25, 0.0), step: 2 },
     { words: 'MT5', number: '04', at: new THREE.Vector3(5.35, 2.75, -0.1), step: 3 },
   ];
   for (const tag of tags) {
@@ -1104,12 +1089,12 @@ function build(THREE, root) {
   }
 
   /* ------------------------------------------------------------ what the page shows */
-  const STEP_TITLES = ['Log in on the website', 'Choose one offer', 'Verify in Telegram and get your bot file', 'Set up MT5 and the bot'];
+  const STEP_TITLES = ['Log in on the website', 'Choose one offer', 'Verify and get your bot file', 'Set up MT5 and the bot'];
   // One plain line under the title: what happens here. At step 2 the Free and the Paid journey differ.
   const STEP_NOTES = [
     { all: 'Create your account, or log in.' },
-    { all: 'Free with our broker link, or Paid by KHQR.', free: 'Free: open a broker account with our link.', paid: 'Paid: pay by KHQR, then send your receipt.' },
-    { all: 'The bot checks you, then sends your bot file.' },
+    { all: 'Free with our broker link, or Paid by KHQR.', free: 'Free: open a broker account with our link.', paid: 'Paid: pay by KHQR on the page.' },
+    { all: 'We check you, then your bot file is ready.' },
     { all: 'Put the file into MT5 and start the bot.' },
   ];
   let captionKey = '';

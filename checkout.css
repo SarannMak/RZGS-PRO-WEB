@@ -1,0 +1,381 @@
+/* ==========================================================================
+   RZGS-PRO: the box that sells a plan (checkout.js). It is a dialog.plan-confirm
+   (plans.css), so it opens and looks like the other boxes on the site. This file
+   is the steps inside it, and the bot's passwords on the dashboard.
+   ========================================================================== */
+dialog.plan-confirm.co {
+  width: min(500px, calc(100vw - 32px));
+}
+.co-in h2 {
+  margin-top: 4px;
+}
+.co-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 180px;
+  color: var(--text-muted);
+  font-size: 15px;
+}
+
+/* the steps */
+.co-rail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0 48px 14px 0;
+  padding: 0;
+  color: var(--text-subtle);
+  font: 500 11px/1 var(--font-mono);
+  letter-spacing: 0.06em;
+  list-style: none;
+  text-transform: uppercase;
+}
+.co-rail li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.co-rail li + li::before {
+  content: "";
+  width: 12px;
+  height: 1px;
+  background: var(--border-strong);
+}
+.co-rail i {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  background: var(--surface-2);
+  font-style: normal;
+  clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px);
+}
+.co-rail li[data-state="now"] {
+  color: var(--text);
+}
+.co-rail li[data-state="now"] i {
+  background: var(--cyan);
+  color: var(--on-accent);
+}
+.co-rail li[data-state="done"] i {
+  background: rgba(43, 243, 145, 0.16);
+  color: var(--good);
+}
+.co-plan {
+  margin: 0 0 12px;
+  color: var(--text-subtle);
+  font: 500 12px/1.4 var(--font-mono);
+}
+.co-plan b {
+  color: var(--cyan);
+  font-weight: 600;
+}
+
+/* the fields (the login pages' .field and .input are not loaded on every page) */
+.co-brokers {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 10px;
+  padding: 0;
+  border: 0;
+}
+.co-brokers legend,
+.co-field label {
+  display: block;
+  margin-bottom: 8px;
+  padding: 0;
+  color: var(--text-subtle);
+  font: 500 11px/1.3 var(--font-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.co-broker {
+  position: relative;
+  cursor: pointer;
+}
+.co-broker input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.co-broker span {
+  display: grid;
+  place-items: center;
+  min-height: 48px;
+  padding: 0 6px;
+  border: 1px solid var(--border-strong);
+  background: var(--bg);
+  color: var(--text-muted);
+  font: 600 14px/1 var(--font-body);
+  clip-path: var(--cut-10);
+  transition: background-color var(--dur) var(--ease-out), color var(--dur) var(--ease-out);
+}
+.co-broker:hover span {
+  background: var(--surface-2);
+}
+.co-broker input:checked + span {
+  background: var(--cyan);
+  color: var(--on-accent);
+}
+.co-broker input:focus-visible + span {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
+.co-open {
+  margin: 0 0 16px;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.co-open a,
+.co-msg a {
+  color: var(--cyan);
+}
+.co-field {
+  margin-bottom: 14px;
+}
+.co-input {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: 2px;
+  background: var(--bg);
+  color: var(--text);
+  font: 500 16px/1.4 var(--font-mono);
+}
+.co-input:hover {
+  border-color: var(--frame);
+}
+.co-input:focus-visible {
+  outline: none;
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(25, 211, 255, 0.22);
+}
+.co-msg {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border-left: 2px solid var(--bad);
+  background: rgba(255, 90, 106, 0.08);
+  color: #ffc2c8;
+  font-size: 14px;
+  line-height: 1.45;
+}
+.co-msg[hidden],
+.co-open[hidden],
+.co-ask[hidden] {
+  display: none;
+}
+.co-ask {
+  margin-bottom: 12px;
+}
+.co-back {
+  display: block;
+  margin: 12px auto 0;
+  padding: 6px 10px;
+  border: 0;
+  background: none;
+  color: var(--text-subtle);
+  font: 500 14px/1.3 var(--font-body);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.co-back:hover {
+  color: var(--text);
+}
+.co-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+.co-row > * {
+  flex: 1 1 150px;
+}
+.co-danger .plan-btn {
+  background: var(--bad);
+  color: var(--on-accent);
+}
+
+/* the payment */
+.co-pay {
+  display: grid;
+  grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: center;
+  margin: 4px 0 14px;
+}
+.co-qr {
+  padding: 2px;
+  background: #fff;
+}
+.co-qr svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.co-qr path {
+  fill: #000;
+}
+.co-amount {
+  margin: 0 0 6px;
+  font: 800 32px/1 var(--font-display);
+}
+.co-to {
+  margin: 0 0 6px;
+  color: var(--text-muted);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.co-to b {
+  color: var(--text);
+  font-weight: 600;
+}
+.co-left {
+  margin: 0 0 12px;
+  color: var(--text-subtle);
+  font: 500 13px/1.4 var(--font-mono);
+}
+.co-left .co-back {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  color: var(--cyan);
+}
+.co-how {
+  margin: 0 0 14px;
+  padding-left: 20px;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.co-how li + li {
+  margin-top: 4px;
+}
+
+/* the passwords and the file */
+.co-keys {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.co-key {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 12px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid var(--border-strong);
+  background: var(--bg);
+}
+.co-key span {
+  grid-column: 1;
+  color: var(--text-subtle);
+  font: 500 11px/1.3 var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.co-key code {
+  grid-column: 1;
+  color: var(--text);
+  font: 600 15px/1.4 var(--font-mono);
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+.co-key .co-copy {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+}
+.co-copy {
+  min-width: 64px;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--frame);
+  background: var(--chip);
+  color: var(--text);
+  font: 500 13px/1 var(--font-body);
+  cursor: pointer;
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}
+.co-copy:hover {
+  background: var(--surface-3);
+}
+.co-small {
+  margin: 0 0 14px;
+  color: var(--text-subtle);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.co-steps {
+  margin-top: 14px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.02);
+}
+.co-steps summary {
+  padding: 12px 14px;
+  color: var(--text);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+.co-steps ol {
+  margin: 0;
+  padding: 0 14px 4px 34px;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.co-steps li + li {
+  margin-top: 6px;
+}
+.co-steps .co-small {
+  margin: 10px 14px 14px;
+}
+.co-url {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+.co-url code {
+  font: 500 12px/1.4 var(--font-mono);
+  overflow-wrap: anywhere;
+}
+.dash-licence {
+  margin-top: 14px;
+}
+.dash-licence[hidden] {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .co-rail {
+    flex-wrap: nowrap;
+    gap: 4px;
+    font-size: 10px;
+    letter-spacing: 0;
+    white-space: nowrap;
+  }
+  .co-rail li {
+    gap: 4px;
+  }
+  .co-rail li + li::before {
+    width: 6px;
+  }
+  .co-pay {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+  .co-qr {
+    width: min(240px, 100%);
+  }
+}

@@ -12,6 +12,11 @@
   <meta property="og:type" content="website">
   <meta property="og:title" content="RZGS-PRO — Automated Gold Trading Bot">
   <meta property="og:description" content="Automated gold trading on MT5: buy and sell pairs, a price grid and a basket close, controlled from your phone. Runs 24/7 while MT5 is online.">
+  <meta property="og:site_name" content="RZGS-PRO">
+  <meta property="og:image" content="https://rzgspro.com/assets/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
 
   <link rel="icon" type="image/png" href="assets/logo-192.png">
   <link rel="apple-touch-icon" href="assets/logo-192.png">
@@ -19,17 +24,19 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="style.css?v=33">
-  <link rel="stylesheet" href="plans.css?v=1">
+  <link rel="stylesheet" href="style.css?v=36">
+  <link rel="stylesheet" href="plans.css?v=3">
+  <link rel="stylesheet" href="motion.css?v=2">
 
   <script>document.documentElement.classList.add('js');try{if(localStorage.getItem('sb-zaziizzsbytkdlatoutv-auth-token'))document.documentElement.classList.add('signed-in')}catch(e){}</script>
-  <script src="script.js?v=8" defer></script>
-  <script src="plans.js?v=2" defer></script>
+  <script src="script.js?v=9" defer></script>
+  <script src="motion.js?v=1" defer></script>
+  <script src="plans.js?v=7" defer></script>
   <!-- the 3D library the robot needs: asked for at once, so the robot can come up sooner -->
   <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js">
-  <script src="robot-3d.js?v=8" defer></script>
+  <script src="robot-3d.js?v=9" defer></script>
   <!-- the Features section in 3D: the scenes of the video "How RZGS-PRO works" -->
-  <script src="features-3d.js?v=13" defer></script>
+  <script src="features-3d.js?v=14" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -190,7 +197,7 @@
               <li>With Diamond you keep your own broker.</li>
               <li>One plan covers one MT5 account.</li>
               <li>I need an MT5 hedging account that can trade gold.</li>
-              <li>Our Telegram bot sets me up with you, step by step.</li>
+              <li>Your dashboard sets me up with you, step by step.</li>
               <li>Trading has risk. Only use money you can afford to lose.</li>
             </ul>
           </div>
@@ -282,7 +289,7 @@
         <header class="section-head reveal">
           <p class="kicker">How to use</p>
           <h2 class="section-title" id="steps-title">From zero to a running bot in <span class="text-gradient">5 steps</span></h2>
-          <p class="section-lead">Follow the pictures from top to bottom. Our Telegram bot guides you through every step.</p>
+          <p class="section-lead">Follow the pictures from top to bottom. Every step happens on this website.</p>
         </header>
 
         <ol class="guide">
@@ -291,7 +298,7 @@
             <div class="guide-card">
               <div class="guide-text">
                 <h3>Pick a plan</h3>
-                <p>Free for 7 days, Elite or Diamond. Tap the plan&rsquo;s button: our Telegram bot opens with that plan already chosen.</p>
+                <p>Free for 7 days, Elite or Diamond. Tap the plan&rsquo;s button and its steps open right here.</p>
                 <a class="text-link" href="#plans" data-plans>See the plans <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
               </div>
               <div class="guide-pic" aria-hidden="true">
@@ -324,15 +331,14 @@
             <span class="guide-num" aria-hidden="true">3</span>
             <div class="guide-card">
               <div class="guide-text">
-                <h3>Chat with our Telegram bot</h3>
-                <p>Send it the email you registered with and your MT5 account number. For Elite and Diamond, pay with the KHQR code and send the receipt.</p>
-                <a class="text-link" href="https://t.me/rzgsprobot">Open the Telegram bot <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+                <h3>Check and pay on the website</h3>
+                <p>Type the email you registered with and your MT5 account number. For Elite and Diamond, pay with the KHQR code on the page.</p>
               </div>
               <div class="guide-pic" aria-hidden="true">
                 <div class="gp-chat">
                   <p class="gp-msg gp-me">you@email.com</p>
                   <p class="gp-msg gp-bot"><span class="gp-ok"></span>Account verified</p>
-                  <p class="gp-msg gp-bot gp-pay"><svg class="gp-qrcode" viewBox="0 0 21 21" aria-hidden="true"><path d="M0 0h7v7H0zM2 2v3h3V2zM14 0h7v7h-7zM16 2v3h3V2zM0 14h7v7H0zM2 16v3h3v-3zM9 0h2v2H9zM12 2h1v3h-1zM9 4h2v2H9zM8 8h3v1H8zM13 8h2v2h-2zM17 8h4v1h-4zM9 10h1v3H9zM11 11h3v1h-3zM15 11h2v3h-2zM18 10h1v2h-1zM8 14h2v2H8zM11 14h3v1h-3zM12 16h2v2h-2zM15 15h1v3h-1zM17 15h4v1h-4zM19 17h2v4h-2zM9 18h2v3H9zM12 19h3v2h-3zM16 19h1v2h-1zM0 8h2v2H0zM3 9h3v1H3zM1 11h4v1H1z"/></svg><span>Pay with KHQR<em>then send the receipt</em></span></p>
+                  <p class="gp-msg gp-bot gp-pay"><svg class="gp-qrcode" viewBox="0 0 21 21" aria-hidden="true"><path d="M0 0h7v7H0zM2 2v3h3V2zM14 0h7v7h-7zM16 2v3h3V2zM0 14h7v7H0zM2 16v3h3v-3zM9 0h2v2H9zM12 2h1v3h-1zM9 4h2v2H9zM8 8h3v1H8zM13 8h2v2h-2zM17 8h4v1h-4zM9 10h1v3H9zM11 11h3v1h-3zM15 11h2v3h-2zM18 10h1v2h-1zM8 14h2v2H8zM11 14h3v1h-3zM12 16h2v2h-2zM15 15h1v3h-1zM17 15h4v1h-4zM19 17h2v4h-2zM9 18h2v3H9zM12 19h3v2h-3zM16 19h1v2h-1zM0 8h2v2H0zM3 9h3v1H3zM1 11h4v1H1z"/></svg><span>Pay with KHQR<em>right on the page</em></span></p>
                 </div>
               </div>
             </div>
@@ -342,7 +348,7 @@
             <div class="guide-card">
               <div class="guide-text">
                 <h3>Get your bot file</h3>
-                <p>The bot sends your bot file (.ex5) with your Bot Password, your App Password and the install steps, right in the chat.</p>
+                <p>Your bot file (.ex5) is ready to download, with your Bot Password, your App Password and the install steps, right on your dashboard.</p>
               </div>
               <div class="guide-pic" aria-hidden="true">
                 <div class="gp-chat">
@@ -378,7 +384,7 @@
         <header class="section-head reveal">
           <p class="kicker">Partner brokers</p>
           <h2 class="section-title" id="partners-title">Open a partner account. <span class="text-gradient">Start with 7 days free.</span></h2>
-          <p class="section-lead">The free trial and Elite ($5/month) are for traders who open their MT5 account with one of our partner brokers. Open yours with a link below, then claim your trial in our Telegram bot.</p>
+          <p class="section-lead">The free trial and Elite ($5/month) are for traders who open their MT5 account with one of our partner brokers. Open yours with a link below, then claim your trial on this website.</p>
         </header>
       </div>
 
@@ -431,23 +437,23 @@
         <div class="faq reveal">
           <details class="faq-item" name="faq">
             <summary>What do I need to get started?<svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg></summary>
-            <div class="faq-answer"><p>A MetaTrader 5 (MT5) hedging account that can trade gold (XAUUSD). Every plan covers one MT5 account. Request your trial and we'll help you get set up on Telegram.</p></div>
+            <div class="faq-answer"><p>A MetaTrader 5 (MT5) hedging account that can trade gold (XAUUSD). Every plan covers one MT5 account. Claim your trial and we'll help you get set up on Telegram.</p></div>
           </details>
           <details class="faq-item" name="faq">
             <summary>How do I buy a plan?<svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg></summary>
-            <div class="faq-answer"><p>Tap the button on the plan you want. Our Telegram bot opens with that plan already chosen and guides you step by step: broker account, payment, MT5 account number, then your bot file. See every step on our <a href="how-to-buy">How to Buy</a> page.</p></div>
+            <div class="faq-answer"><p>Tap the button on the plan you want. Its steps open right on this website: broker account, MT5 account number, payment, then your bot file. See every step on our <a href="how-to-buy">How to Buy</a> page.</p></div>
           </details>
           <details class="faq-item" name="faq">
             <summary>Do I need a website account?<svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg></summary>
-            <div class="faq-answer"><p>No. You can get and buy the bot with Telegram alone. A free website account gives you a dashboard that shows your plan and its end date. Connect it with one tap on the dashboard.</p></div>
+            <div class="faq-answer"><p>Yes. Your free website account is where you choose your plan, pay and download your bot file. Your dashboard also shows your plan and its end date.</p></div>
           </details>
           <details class="faq-item" name="faq">
             <summary>How does the free trial work?<svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg></summary>
-            <div class="faq-answer"><p>Open your MT5 account with one of our partner brokers, then claim the trial in our Telegram bot. Once it is approved you get a 7-day EA license for that account. It's a way to get familiar with the strategy before you choose a plan.</p></div>
+            <div class="faq-answer"><p>Open your MT5 account with one of our partner brokers, then claim the trial on this website. Once your account is checked you get a 7-day license for that account. It's a way to get familiar with the strategy before you choose a plan.</p></div>
           </details>
           <details class="faq-item" name="faq">
             <summary>What's the difference between Elite and Diamond?<svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg></summary>
-            <div class="faq-answer"><p>Elite ($5/month) is for traders who open their broker account through our referral, and includes the phone control app. Diamond ($49/month) has no referral requirement, so you can keep your own broker, and includes one basic VPS while your plan is paid.</p></div>
+            <div class="faq-answer"><p>Elite ($5/month) is for traders who open their broker account with one of our partner brokers, and includes the phone control app. Diamond ($49/month) has no such requirement, so you can keep your own broker, and includes one basic VPS while your plan is paid.</p></div>
           </details>
           <details class="faq-item" name="faq">
             <summary>How are trades closed?<svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg></summary>
@@ -469,11 +475,10 @@
           <div class="cta-copy">
             <p class="kicker">Your next move</p>
             <h2 class="section-title" id="cta-title">Ready to explore <span class="text-gradient">a different approach?</span></h2>
-            <p class="section-lead">Request your seven-day trial and get setup help on Telegram.</p>
-            <!-- TODO: replace "#" with your Telegram link, e.g. https://t.me/your_handle -->
-            <a class="btn btn-primary btn-lg" href="https://t.me/rzgsprobot?start=free">
-              <svg class="icon" aria-hidden="true"><use href="#i-send"/></svg>
-              Request your free trial
+            <p class="section-lead">Claim your 7-day trial and get setup help on Telegram.</p>
+            <a class="btn btn-primary btn-lg" href="signup" data-plans>
+              <svg class="icon" aria-hidden="true"><use href="#i-zap"/></svg>
+              Claim your free trial
             </a>
           </div>
         </div>
@@ -490,8 +495,8 @@
             <span class="brand-name">RZGS<span class="brand-accent">-PRO</span></span>
           </a>
           <p>Automated gold trading bot for MetaTrader 5, with setup help and support on Telegram.</p>
-          <a class="btn btn-ghost btn-sm" href="https://t.me/rzgsprobot?start=free">
-            <svg class="icon" aria-hidden="true"><use href="#i-send"/></svg>
+          <a class="btn btn-ghost btn-sm" href="signup" data-plans>
+            <svg class="icon" aria-hidden="true"><use href="#i-zap"/></svg>
             Free 7-day trial
           </a>
         </div>
@@ -520,7 +525,7 @@
           <h2 class="footer-title" id="footer-support">Support</h2>
           <ul class="footer-links">
             <li><a href="contact">Contact us</a></li>
-            <li><a href="https://t.me/rzgsprobot?start=free">Free trial</a></li>
+            <li><a href="signup" data-plans>Free trial</a></li>
           </ul>
         </nav>
       </div>

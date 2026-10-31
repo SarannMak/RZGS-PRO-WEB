@@ -128,6 +128,8 @@
   gap: 12px;
 }
 .field-row a {
+  display: inline-block;
+  padding: 4px 0;
   color: var(--text-muted);
   font-size: 14px;
 }
@@ -497,7 +499,7 @@ body[data-auth-page="dashboard"] {
 /* small capital label, like the app's .cap */
 .cap {
   color: var(--text-subtle);
-  font: 500 10px/1.3 var(--font-mono);
+  font: 500 11px/1.3 var(--font-mono);
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -710,7 +712,7 @@ body[data-auth-page="dashboard"] {
 .dash-panel > h2 {
   margin: 0 0 12px;
   color: var(--text-subtle);
-  font: 500 10px/1.2 var(--font-mono);
+  font: 500 11px/1.2 var(--font-mono);
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
@@ -1052,7 +1054,7 @@ body[data-auth-page="dashboard"] {
 .dash-ev .k {
   grid-area: 1 / 2;
   color: var(--text-subtle);
-  font: 500 9.5px/1.2 var(--font-mono);
+  font: 500 11px/1.2 var(--font-mono);
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
@@ -1522,7 +1524,7 @@ a.trial-banner:hover {
 }
 .dash-steps small {
   margin-left: auto;
-  font: 500 10px/1 var(--font-mono);
+  font: 500 11px/1 var(--font-mono);
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -1753,9 +1755,6 @@ textarea.input {
   flex: none;
 }
 @media (max-width: 1023.98px) {
-  .dash-dock {
-    grid-template-columns: repeat(6, 1fr);
-  }
   .dash-dock button {
     letter-spacing: 0.04em;
   }
@@ -1776,23 +1775,300 @@ textarea.input {
     width: 100%;
   }
 }
-@media (min-width: 1024px) {
-  .dash-profile {
-    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.25fr) 150px;
-    align-items: center;
-    padding: 20px 22px;
-  }
-  .dp-actions {
-    grid-template-columns: 1fr;
-  }
-  .dp-about,
-  .dp-meta,
-  .dp-socials {
-    grid-column: 1 / -1;
-  }
-}
 /* .btn and .dash-row set their own display, which would otherwise win over "hidden" */
 .dash-panel .dash-row[hidden],
 .dash-panel .dash-row > [hidden] {
   display: none;
+}
+
+/* ==========================================================================
+   Dashboard (31 Oct 2026): the profile card stands upright on the left, the menu is a row
+   above the content, and Edit profile is a box of its own.
+   ========================================================================== */
+/* the card: the number above its label */
+.dp-stats {
+  grid-template-columns: repeat(4, auto);
+  justify-content: space-between;
+  gap: 8px;
+}
+.dp-stats > div {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 6px;
+}
+.dp-stats dd {
+  margin: 0;
+}
+.dp-stats .cap {
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.dp-today {
+  margin: -8px 0 0;
+  color: var(--text-subtle);
+  font-size: 12px;
+}
+.dp-about {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+.dp-about:hover {
+  border-color: var(--cyan);
+}
+.dp-about.is-empty {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+.dp-about.is-empty::after {
+  content: "Describe your trading journey in a few words";
+  display: block;
+  margin-top: 4px;
+  color: var(--text-subtle);
+  font-size: 13px;
+}
+
+@media (min-width: 1024px) {
+  .dash-shell {
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr);
+    column-gap: 24px;
+    align-items: start;
+    max-width: none;
+  }
+  .dash-profile {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    padding: 22px;
+  }
+  .dash-shell > .auth-msg {
+    grid-column: 2;
+    margin: 0 0 12px;
+  }
+  .dash-layout {
+    display: block;
+    grid-column: 2;
+    margin-top: 0;
+  }
+  .dp-id {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .dash-profile .avatar-xl {
+    width: 112px;
+    height: 112px;
+    font-size: 44px;
+  }
+  .dp-actions {
+    grid-template-columns: 1fr;
+  }
+  .dp-meta {
+    flex-direction: column;
+    gap: 6px;
+  }
+  /* the row: the tabs, and on the right the control app */
+  .dash-side {
+    position: static;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .dash-dock {
+    flex: 1;
+    grid-template-columns: repeat(5, 1fr);
+    min-width: 0;
+  }
+  .dash-dock button,
+  .dash-dock button:first-child {
+    justify-content: center;
+    gap: 8px;
+    min-height: 50px;
+    padding: 0 6px;
+    border-top: 0;
+    letter-spacing: 0.08em;
+  }
+  .dash-dock svg {
+    width: 18px;
+    height: 18px;
+  }
+  .dash-actbar {
+    flex: none;
+  }
+  .dash-actbar .btn {
+    width: auto;
+    height: 100%;
+    padding-inline: 22px;
+    white-space: nowrap;
+  }
+}
+/* tall enough for the whole card: it stays in view while the content scrolls */
+@media (min-width: 1024px) and (min-height: 800px) {
+  .dash-profile {
+    position: sticky;
+    top: calc(var(--header-h) + 12px);
+  }
+}
+
+/* the Plan tab: plans that can't start yet */
+.btn.is-locked {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* the Edit profile box */
+html:has(dialog.dash-edit[open]) {
+  overflow: hidden;
+}
+dialog.dash-edit {
+  width: min(600px, calc(100vw - 24px));
+  max-width: none;
+  max-height: calc(100dvh - 24px);
+  margin: auto;
+  padding: 1px;
+  overflow: hidden;
+  border: 0;
+  background: linear-gradient(180deg, rgba(25, 211, 255, 0.8), rgba(25, 211, 255, 0.18));
+  color: var(--text-muted);
+  clip-path: var(--cut-14);
+}
+dialog.dash-edit::backdrop {
+  background: rgba(1, 6, 10, 0.84);
+}
+.dash-edit-in {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - 26px);
+  background: #06141c;
+  clip-path: var(--cut-14);
+}
+.de-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: none;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.de-head h2 {
+  margin: 0;
+  color: var(--text);
+  font: 700 18px/1.2 var(--font-display);
+}
+.de-x {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.de-x:hover {
+  color: var(--cyan);
+}
+.de-scroll {
+  flex: 1;
+  min-height: 0;
+  padding: 18px 20px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.de-label {
+  margin: 0 0 10px;
+  color: var(--text);
+  font: 600 14px/1.3 var(--font-body);
+}
+.de-label--group {
+  margin: 24px 0 4px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+.de-block--line {
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+.de-pic {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+.de-pic .dash-hint {
+  margin: 0 0 0 10px;
+}
+.de-pic-box {
+  position: relative;
+  flex: none;
+}
+.de-pic-add,
+.de-pic-del {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border: 1px solid var(--border-strong);
+  background: #0b2430;
+  color: var(--text);
+  cursor: pointer;
+}
+.de-pic-add {
+  position: absolute;
+  right: -8px;
+  bottom: -8px;
+}
+.de-pic-add:hover,
+.de-pic-del:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+.de-pic-del[hidden] {
+  display: none;
+}
+.de-pic-add .icon,
+.de-pic-del .icon {
+  width: 17px;
+  height: 17px;
+}
+.de-count {
+  justify-self: end;
+  color: var(--text-subtle);
+  font-size: 12px;
+}
+.de-foot {
+  display: flex;
+  align-items: center;
+  flex: none;
+  gap: 10px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--border);
+}
+.de-foot .form-msg {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+.de-out {
+  margin-right: auto;
+  padding: 8px 0;
+  border: 0;
+  background: none;
+  color: #ff8a8a;
+  font: 500 14px/1 var(--font-body);
+  cursor: pointer;
+}
+.de-out:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+@media (max-width: 479.98px) {
+  .de-scroll,
+  .de-foot {
+    padding-inline: 14px;
+  }
 }

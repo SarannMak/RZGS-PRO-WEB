@@ -12,14 +12,15 @@
   const SUPABASE_URL = 'https://zaziizzsbytkdlatoutv.supabase.co';
   // Publishable key: made to be used in the browser. Row-level security protects the data.
   const SUPABASE_KEY = 'sb_publishable_ojfdWkyt22zlG0Uz_CUd4w_IufedKpK';
-  const SUPABASE_LIB = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+  const SUPABASE_LIB = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0';
   const AUTH_KEY = 'sb-zaziizzsbytkdlatoutv-auth-token'; // where supabase-js keeps the sign-in
-  const BOT_URL = 'https://t.me/rzgsprobot';
 
   const AFTER_KEY = 'rzgs_after_login'; // the page to come back to after signing in
   const BAR_KEY = 'rzgs_trial_bar_closed';
   const PROFILE_KEY = 'rzgs_profile'; // name, picture and plan, so the header is right at once
   const BUSY_MS = 900; // how long "Processing..." stays at least
+  const COMMUNITY_URL = 'https://t.me/+NvCIdtTmMIViMjg9';
+  const JUST_IN_KEY = 'rzgs_just_in'; // auth.js leaves this for the next page, right after logging in
 
   // This file sits in the site's top folder, so other pages are found from here on any page.
   const SITE = new URL('./', document.currentScript.src);
@@ -45,39 +46,44 @@
     phone: icon('<rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/>'),
     pulse: icon('<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>'),
     shield: icon('<path d="M12 22s8-3.5 8-10V5l-8-3-8 3v7c0 6.500 8 10 8 10z"/>'),
+    user: icon('<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'),
+    gear: icon('<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/>'),
+    group: icon('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>'),
+    logout: icon('<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>'),
+    right: icon('<path d="m9 18 6-6-6-6"/>'),
+    crown: icon('<path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294zM5 21h14"/>'),
     calc: icon('<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 19h.01M12 19h.01M16 19h.01"/>'),
   };
   const SPINNER = '<span class="plan-spin" aria-hidden="true"></span>';
 
   /* ---------------------------------------------------------------- the plans */
-  // Only what the License Rules and the sales bot really give. `id` is the plan's name on the
-  // website (web_users.plan), `bot` is its name in the Telegram bot's start link.
+  // Only what the License Rules really give. `id` is the plan's name on the website (web_users.plan).
   const NEEDS_PARTNER = 'An MT5 hedging account opened with a partner broker: Exness, Investizo or Lirunex';
   const NEEDS_PC = 'A computer or VPS that keeps MT5 open';
   const PLANS = [
     {
-      id: 'trial', bot: 'free', name: 'Free', tone: 'free', icon: 'zap', chip: '7 days',
+      id: 'trial', name: 'Free', tone: 'free', icon: 'zap', chip: '7 days',
       lead: 'Get familiar with the strategy.',
       box: ['7 days on 1 MT5 account', 'Starts when your trial is approved', 'One free trial per person'],
       amount: '$0', per: '/ 7 days', button: 'Claim Free Trial', under: 'No payment needed',
-      get: ['The same RZGS-PRO gold bot as Elite', 'Bot file and Bot Password from our Telegram bot', 'Phone control app', 'Setup help on Telegram'],
+      get: ['The same RZGS-PRO gold bot as Elite', 'Bot file and Bot Password on your dashboard', 'Phone control app', 'Setup help on Telegram'],
       needs: [NEEDS_PARTNER, NEEDS_PC],
       not: ['Any broker of your choice', 'Basic VPS'],
     },
     {
-      id: 'elite', bot: 'elite', name: 'Elite', tone: 'elite', icon: 'hexagon', chip: 'Most popular',
+      id: 'elite', name: 'Elite', tone: 'elite', icon: 'hexagon', chip: 'Most popular',
       lead: 'For traders with a partner broker account.',
-      box: ['30 days on 1 MT5 account', 'Starts when your bot is delivered', 'Renew early: new days are added on top'],
-      amount: '$5', per: '/ month', button: 'Upgrade Plan', under: 'You pay in Telegram by KHQR',
-      get: ['The RZGS-PRO gold bot for 30 days', 'Bot file and Bot Password from our Telegram bot', 'Phone control app', 'Setup help on Telegram'],
+      box: ['30 days on 1 MT5 account', 'Starts when your bot is delivered', 'You can renew once it has ended'],
+      amount: '$5', per: '/ month', button: 'Upgrade Plan', under: 'You pay by KHQR on this website',
+      get: ['The RZGS-PRO gold bot for 30 days', 'Bot file and Bot Password on your dashboard', 'Phone control app', 'Setup help on Telegram'],
       needs: [NEEDS_PARTNER, NEEDS_PC],
       not: ['Any broker of your choice', 'Basic VPS'],
     },
     {
-      id: 'diamond', bot: 'diamond', name: 'Diamond', tone: 'diamond', icon: 'gem', chip: 'Any broker',
+      id: 'diamond', name: 'Diamond', tone: 'diamond', icon: 'gem', chip: 'Any broker',
       lead: 'Keep your own broker. Hosting included.',
       box: ['Monthly on 1 MT5 account', 'Works at any broker', '1 basic VPS included while paid'],
-      amount: '$49', per: '/ month', button: 'Contact Sales', under: 'We continue with you in Telegram',
+      amount: '$49', per: '/ month', button: 'Get Diamond', under: 'You pay by KHQR on this website',
       get: ['Everything in Elite', 'No partner broker needed: keep your own', '1 basic VPS, so the bot can run 24/7', 'The bot file made for every broker'],
       needs: ['An MT5 hedging account at any broker, one that can trade gold'],
       note: ['When the plan ends the VPS is removed, so keep a copy of anything you need from it.'],
@@ -150,17 +156,24 @@
     }
   }
 
-  // The bot learns which website account this is from a one-time code, and acts on the plan at once (free, elite,
-  // diamond, or none). Without a code it still opens at the plan.
-  async function telegramLink(botPlan) {
-    let code = '';
-    try {
-      const db = await getDb();
-      const { data } = await db.rpc('web_link_code');
-      if (data && data.ok) code = data.code;
-    } catch (e) { /* no code: the plain link */ }
-    const payload = [code && `l_${code}`, botPlan].filter(Boolean).join('_');
-    return payload ? `${BOT_URL}?start=${payload}` : BOT_URL;
+  // The checkout box (checkout.js) is only loaded when someone is buying.
+  let checkoutPromise = null;
+  function loadCheckout() {
+    if (window.rzgsCheckout) return Promise.resolve(window.rzgsCheckout);
+    if (checkoutPromise) return checkoutPromise;
+    checkoutPromise = new Promise((resolve, reject) => {
+      const style = document.createElement('link');
+      style.rel = 'stylesheet';
+      style.href = pageUrl('checkout.css?v=1');
+      document.head.append(style);
+      const script = document.createElement('script');
+      script.src = pageUrl('checkout.js?v=1');
+      script.onload = () => resolve(window.rzgsCheckout);
+      script.onerror = () => reject(new Error('The checkout did not load'));
+      document.head.append(script);
+    });
+    checkoutPromise.catch(() => { checkoutPromise = null; }); // the next click tries again
+    return checkoutPromise;
   }
 
   // Back to this page after signing up or logging in, where the plans then open.
@@ -174,6 +187,7 @@
   const storedProfile = () => parse(read(PROFILE_KEY)) || {};
 
   function paintProfile(profile) {
+    paintMenu(profile);
     const name = String(profile.full_name || profile.username || profile.email || '').trim();
     const first = name.split(/[\s@]/)[0] || 'My account';
     document.querySelectorAll('[data-profile]').forEach((link) => {
@@ -193,28 +207,93 @@
     });
   }
 
+  /* ---------------------------------------------------------------- the box under the profile button (computers) */
+  const PLAN_DAYS = { trial: 7, elite: 30, diamond: 30 };
+  const METER_PARTS = 24;
+  let menu = null;
+
+  function buildMenu(chip) {
+    const wrap = document.createElement('div');
+    wrap.className = 'nav-profile-wrap';
+    chip.before(wrap);
+    wrap.append(chip);
+    menu = document.createElement('div');
+    menu.className = 'pm';
+    menu.innerHTML = `<div class="pm-in">
+      <a class="pm-head" href="${pageUrl('dashboard#core')}" data-profile>
+        <span class="nav-profile-pic pm-pic" data-profile-pic aria-hidden="true"></span>
+        <span class="pm-who"><b data-pm-name></b><small data-pm-plan></small></span>
+        ${ICONS.right}
+      </a>
+      <div class="pm-box" data-pm-box>
+        <div class="pm-box-top"><span>Plan</span><b data-pm-left></b></div>
+        <div class="pm-meter" data-pm-meter aria-hidden="true">${'<i></i>'.repeat(METER_PARTS)}</div>
+        <p class="pm-until" data-pm-until></p>
+        <div class="pm-go">
+          <span>${ICONS.crown}<span data-pm-go></span></span>
+          <a class="btn btn-primary btn-sm" href="${pageUrl('./#plans')}" data-plans data-pm-cta></a>
+        </div>
+      </div>
+      <nav class="pm-links" aria-label="Your account">
+        <a href="${pageUrl('dashboard#core')}">${ICONS.user}View profile</a>
+        <a href="${pageUrl('dashboard#tools')}">${ICONS.gear}Manage account</a>
+        <a href="${COMMUNITY_URL}" target="_blank" rel="noopener">${ICONS.group}Community<small>Telegram group</small></a>
+      </nav>
+      <button class="pm-out" type="button" data-sign-out>${ICONS.logout}Log out</button>
+    </div>`;
+    wrap.append(menu);
+  }
+
+  function paintMenu(profile) {
+    const chip = document.querySelector('.header-actions [data-profile]');
+    if (!chip) return;
+    if (!menu) buildMenu(chip);
+    const say = (selector, text) => { menu.querySelector(selector).textContent = text; };
+    const plan = planById(profile.plan);
+    const ends = profile.plan_expires_at ? new Date(profile.plan_expires_at) : null;
+    const left = ends ? Math.ceil((ends - Date.now()) / 86400000) : 0;
+    const running = Boolean(plan) && (!ends || left > 0);
+    say('[data-pm-name]', String(profile.full_name || profile.username || profile.email || 'My account').trim());
+    say('[data-pm-plan]', !plan ? 'No plan yet' : running ? `${plan.name} plan` : `${plan.name} plan ended`);
+    say('[data-pm-left]', running && ends ? `${left} ${left === 1 ? 'day' : 'days'} left` : '');
+    say('[data-pm-until]', !plan ? 'Start with 7 free days' : ends ? `${running ? 'Until' : 'Ended'} ${dateText(ends)}` : 'No end date');
+    const lit = !running ? 0 : !ends ? METER_PARTS : Math.max(1, Math.min(METER_PARTS, Math.ceil((left / PLAN_DAYS[plan.id]) * METER_PARTS)));
+    menu.querySelectorAll('[data-pm-meter] i').forEach((part, index) => part.classList.toggle('on', index < lit));
+    menu.querySelector('[data-pm-box]').dataset.tone = running && ends && left <= 3 ? 'warn' : '';
+    const [go, cta] = !plan ? ['Start free', 'Get your bot']
+      : !running ? [plan.id === 'trial' ? 'Choose a plan' : 'Renew your plan', 'See plans']
+        : plan.id === 'trial' ? ['Go Elite', 'Upgrade']
+          : plan.id === 'elite' ? ['Go Diamond', 'Upgrade']
+            : ['Your plan is the top one', 'See plans'];
+    say('[data-pm-go]', go);
+    say('[data-pm-cta]', cta);
+  }
+
   // Name, picture and plan. Asked for with the sign-in supabase-js saved, as long as it is still good: these pages
   // don't load the library for this. Only a picture from the person's own folder is ever shown (as on the dashboard).
+  // Gives back what the server said, or nothing when it could not be asked.
   async function loadProfile() {
-    if (!signedIn()) { forget(PROFILE_KEY); return; }
+    if (!signedIn()) { forget(PROFILE_KEY); return null; }
     const session = parse(read(AUTH_KEY)) || {};
     const user = session.user || {};
     let profile = { ...(user.user_metadata || {}), email: user.email, ...storedProfile() };
     paintProfile(profile);
-    if (!user.id || !session.access_token || (session.expires_at || 0) * 1000 < Date.now()) return;
+    if (!user.id || !session.access_token || (session.expires_at || 0) * 1000 < Date.now()) return null;
     try {
       const response = await fetch(`${SUPABASE_URL}/rest/v1/web_users?select=full_name,username,avatar_url,plan,plan_expires_at&id=eq.${encodeURIComponent(user.id)}`, {
         headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${session.access_token}` },
       });
-      if (!response.ok) return;
+      if (!response.ok) return null;
       const [row] = await response.json();
-      if (!row) return;
+      if (!row) return null;
       const folder = `${SUPABASE_URL}/storage/v1/object/public/avatars/${user.id}/`;
       profile = { ...profile, ...row, avatar_url: String(row.avatar_url || '').startsWith(folder) ? row.avatar_url : '' };
       write(PROFILE_KEY, JSON.stringify(profile));
       paintProfile(profile);
       hideBarForClients(profile);
+      return profile;
     } catch (e) { /* the name from the sign-in stays */ }
+    return null;
   }
 
   /* ---------------------------------------------------------------- the bar at the top */
@@ -256,7 +335,6 @@
 
   /* ---------------------------------------------------------------- the plans pop-up */
   let dialog = null;
-  let confirmBox = null;
   let current = { plan: null, name: 'No plan yet', detail: '', price: '$0' };
 
   const dateText = (date) => date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -272,6 +350,8 @@
       name: plan.name,
       ended,
       detail: ends ? `${ended ? 'ended' : 'until'} ${dateText(ends)}` : '',
+      endsText: ends ? dateText(ends) : '',
+      endsAt: profile.plan_expires_at,
       price: plan.amount,
     };
   }
@@ -300,6 +380,9 @@
     const now = dialog.querySelector('[data-plans-now]');
     now.hidden = !current.plan;
     now.textContent = current.plan ? `Your plan: ${current.name}${current.detail ? ` · ${current.detail}` : ''}` : '';
+    // a paid plan that is running: nothing else starts until it ends or is cancelled
+    const paidRunning = Boolean(current.plan) && current.plan !== 'trial' && !current.ended;
+    dialog.querySelector('[data-plans-rule]').hidden = !paidRunning;
     PLANS.forEach((plan) => {
       const card = dialog.querySelector(`[data-plan="${plan.id}"]`);
       const mine = current.plan === plan.id;
@@ -308,14 +391,24 @@
       const button = card.querySelector('[data-plan-go]');
       if (button.classList.contains('is-busy')) return;
       const label = button.querySelector('[data-plan-label]');
+      const running = mine && !current.ended;
       if (plan.id === 'trial' && mine) {
         // one free trial per person
         label.textContent = current.ended ? 'Trial used' : 'Trial running';
         button.disabled = true;
+      } else if (running) {
+        // a plan can be renewed once it has ended, not before
+        label.textContent = 'Plan running';
+        button.disabled = true;
+      } else if (paidRunning) {
+        label.textContent = 'After your plan ends';
+        button.disabled = true;
       } else {
-        label.textContent = plan.id === 'elite' && mine ? 'Renew Plan' : plan.button;
+        label.textContent = mine ? 'Renew Plan' : plan.button;
         button.disabled = false;
       }
+      card.querySelector('.pc-under').textContent = paidRunning && current.endsText
+        ? `You can ${running ? 'renew' : 'start this'} after ${current.endsText}` : plan.under;
     });
   }
 
@@ -347,6 +440,7 @@
           <h2 id="plans-title">Choose your <span class="text-gradient">plan</span></h2>
           <p>Start free for 7 days, then pick the plan that fits how you trade.</p>
           <p class="plans-now" data-plans-now hidden></p>
+          <p class="plans-rule" data-plans-rule hidden>A new plan can start when this one ends. Don't want to wait? <button class="plans-cancel" type="button" data-plans-cancel>Cancel plan</button></p>
         </header>
         <div class="plans-grid">${PLANS.map(cardHtml).join('')}</div>
         <section class="plans-every" aria-labelledby="plans-every-title">
@@ -359,6 +453,7 @@
     dialog.addEventListener('click', (event) => {
       const button = event.target.closest('[data-plan-go]');
       if (button) choose(planById(button.dataset.planGo), button);
+      else if (event.target.closest('[data-plans-cancel]')) goCancel();
       // the X, or the empty space around the plans
       else if (event.target.closest('[data-plans-close]') || event.target === dialog || event.target.classList.contains('plans-wrap')) dialog.close();
     });
@@ -371,75 +466,85 @@
     current = describeCurrent(storedProfile());
     renderCurrent();
     lockPage(true);
+    if (window.rzgsMotion) window.rzgsMotion.fromTap(dialog);
     dialog.showModal();
     dialog.scrollTop = 0;
     freshCurrent();
   }
 
-  // Free and Diamond go to the Telegram bot at their plan. Elite is confirmed first.
+  async function goCancel() {
+    const checkout = await loadCheckout();
+    dialog.close();
+    checkout.askCancel(current.plan, current.endsAt);
+  }
+
+  // Every plan goes on in the checkout box, on this same page. With no account, signing up comes first.
   async function choose(plan, button) {
     if (button.disabled) return;
     setBusy(button, true);
     const session = await activeSession();
     if (session === null) { toSignUp(); return; }
-    if (plan.id === 'elite') {
-      await Promise.all([freshCurrent(), wait(BUSY_MS)]);
+    try {
+      const [checkout] = await Promise.all([loadCheckout(), wait(BUSY_MS / 3)]);
       setBusy(button, false);
-      renderCurrent();
-      openConfirm(plan);
-      return;
+      dialog.close();
+      checkout.open(plan.id);
+    } catch (e) {
+      setBusy(button, false);
+      button.querySelector('[data-plan-label]').textContent = 'Try again';
     }
-    const [link] = await Promise.all([telegramLink(plan.bot), wait(BUSY_MS)]);
-    location.href = link;
   }
 
-  function buildConfirm() {
-    confirmBox = document.createElement('dialog');
-    confirmBox.className = 'plan-confirm';
-    confirmBox.setAttribute('aria-labelledby', 'plan-confirm-title');
-    document.body.append(confirmBox);
-    confirmBox.addEventListener('click', async (event) => {
-      if (event.target === confirmBox || event.target.closest('[data-confirm-close]')) { confirmBox.close(); return; }
-      const yes = event.target.closest('[data-confirm-yes]');
-      if (!yes) return;
-      setBusy(yes, true);
-      const session = await activeSession();
-      if (session === null) { toSignUp(); return; }
-      const [link] = await Promise.all([telegramLink(planById('elite').bot), wait(BUSY_MS)]);
-      location.href = link;
-    });
+  /* ---------------------------------------------------------------- log out, on the pages with no box of their own */
+  let logoutBox = null;
+  async function logOut(yes) {
+    setBusy(yes, true);
+    const line = logoutBox.querySelector('[data-logout-msg]');
+    line.hidden = true;
+    try {
+      const db = await getDb();
+      const { error } = await db.auth.signOut();
+      const { data } = await db.auth.getSession();
+      if (error && data.session) throw error; // still logged in: say so instead of pretending
+      forget(PROFILE_KEY);
+      location.replace(SITE.href);
+    } catch (e) {
+      setBusy(yes, false);
+      line.textContent = "That didn't work just now. Check your connection and try again.";
+      line.hidden = false;
+    }
   }
-
-  function openConfirm(plan) {
-    if (!confirmBox) buildConfirm();
-    const running = current.plan && !current.ended;
-    const kind = !running || current.plan === 'trial' ? 'upgrade' : current.plan === plan.id ? 'renew' : 'change';
-    const words = {
-      upgrade: ['Upgrading plan', 'Your new plan starts when your bot is delivered in Telegram.', 'Confirm Upgrade'],
-      renew: ['Renewing plan', 'The new 30 days are added to the time you have left.', 'Confirm Renewal'],
-      change: ['Changing plan', 'Your new plan starts when your bot is delivered in Telegram.', 'Confirm Change'],
-    }[kind];
-    confirmBox.innerHTML = `<div class="plan-confirm-in" tabindex="-1" autofocus>
-      <button class="plans-x plans-x--in" type="button" data-confirm-close aria-label="Close">${ICONS.x}</button>
-      <h2 id="plan-confirm-title">${words[0]}</h2>
-      <p class="plan-confirm-lead">${words[1]}</p>
-      <div class="plan-confirm-group">
-        <h3>Current plan</h3>
-        <div class="plan-confirm-row"><span><b>${current.name}</b>${current.detail ? ` · ${current.detail}` : ''}</span><b>${current.price}</b></div>
-      </div>
-      <div class="plan-confirm-group plan-confirm-group--new">
-        <h3>New plan</h3>
-        <div class="plan-confirm-row"><span><b>${plan.name}</b> · 30 days</span><b>${plan.amount}</b></div>
-        <small>1 MT5 account · partner broker · phone control app</small>
-      </div>
-      <div class="plan-confirm-row plan-confirm-due"><span>Amount due</span><b>${plan.amount}</b></div>
-      <p class="plan-confirm-note">By confirming you agree to our <a href="${pageUrl('license')}">License Rules</a> and <a href="${pageUrl('terms')}">Terms &amp; Conditions</a>. Next, our Telegram bot checks your broker account and MT5 number, then you pay by KHQR. Your plan does not renew by itself.</p>
-      <span class="plan-btn-glow plan-confirm-go"><button class="plan-btn" type="button" data-confirm-yes><span data-plan-label>${words[2]}</span></button></span>
-    </div>`;
-    confirmBox.showModal();
+  function openLogout() {
+    if (!logoutBox) {
+      logoutBox = document.createElement('dialog');
+      logoutBox.className = 'plan-confirm';
+      logoutBox.setAttribute('aria-labelledby', 'logout-title');
+      logoutBox.innerHTML = `<div class="plan-confirm-in">
+        <h2 id="logout-title">Do you want to log out?</h2>
+        <p class="plan-confirm-lead">This device will be logged out. Your bot keeps running in MT5.</p>
+        <p class="plan-confirm-lead pm-logout-msg" data-logout-msg role="alert" hidden></p>
+        <div class="pm-logout-row">
+          <button class="btn btn-ghost" type="button" data-logout-no>No</button>
+          <button class="plan-btn pm-yes" type="button" data-logout-yes><span data-plan-label>Yes</span></button>
+        </div>
+      </div>`;
+      document.body.append(logoutBox);
+      logoutBox.addEventListener('click', (event) => {
+        if (event.target === logoutBox || event.target.closest('[data-logout-no]')) logoutBox.close();
+        const yes = event.target.closest('[data-logout-yes]');
+        if (yes) logOut(yes);
+      });
+    }
+    if (window.rzgsMotion) window.rzgsMotion.fromTap(logoutBox);
+    logoutBox.showModal();
   }
 
   /* ---------------------------------------------------------------- wiring */
+  document.addEventListener('click', (event) => {
+    // the dashboard has its own question to ask (auth.js)
+    if (event.target.closest('[data-sign-out]') && !document.querySelector('[data-sign-out-dialog]')) openLogout();
+  });
+
   document.addEventListener('click', (event) => {
     const link = event.target.closest('a[data-plans]');
     if (!link || event.metaKey || event.ctrlKey || event.shiftKey) return;
@@ -448,29 +553,55 @@
     else toSignUp();
   });
 
-  // Any other link to the bot on any page: for a signed-in client the click carries their account as well, so the bot
-  // knows who came and for which plan. Someone with no account just follows the link, which already names the plan.
+  // A button that names its plan goes straight to the checkout box.
   document.addEventListener('click', async (event) => {
-    const link = event.target.closest('a[href*="t.me/rzgsprobot"]');
-    if (!link || !signedIn() || event.metaKey || event.ctrlKey || event.shiftKey) return;
-    const start = new URL(link.href).searchParams.get('start') || '';
-    if (start.startsWith('l_')) return; // the dashboard's own buttons carry it already
+    const go = event.target.closest('[data-checkout]');
+    if (!go || go.disabled || event.metaKey || event.ctrlKey || event.shiftKey) return;
     event.preventDefault();
-    link.setAttribute('aria-busy', 'true');
-    location.href = await telegramLink(/^(free|elite|diamond)$/.test(start) ? start : '');
+    if (!signedIn()) { toSignUp(); return; }
+    (await loadCheckout()).open(go.dataset.checkout);
   });
 
-  // Back from Telegram: this page may come back as it was left, so nothing stays on "Processing..."
-  window.addEventListener('pageshow', (event) => {
-    if (!event.persisted) return;
-    document.querySelectorAll('.plan-btn.is-busy').forEach((button) => setBusy(button, false));
-    renderCurrent();
-  });
-
-  loadProfile();
+  const profileLoaded = loadProfile();
   showBar();
 
-  // Sent here to see the plans: after signing in, or by a link from before the plans became a pop-up.
+  // The plans come up by themselves only for someone with no plan running: no plan yet, or the plan or the free days
+  // have ended (the owner, 2026-10-31). Anyone can open them at any time with a plans button.
+  const needsPlan = (profile) => {
+    const plan = planById(profile.plan);
+    return !plan || (Boolean(profile.plan_expires_at) && new Date(profile.plan_expires_at) < new Date());
+  };
+  const whenPageIsReady = (run) => {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run, { once: true });
+    else run();
+  };
+  // Just logged in: auth.js left a note for this page.
+  let justIn = null;
+  try {
+    justIn = sessionStorage.getItem(JUST_IN_KEY);
+    sessionStorage.removeItem(JUST_IN_KEY);
+  } catch (e) { /* private window */ }
+  if (justIn) {
+    profileLoaded.then((profile) => {
+      if (profile && needsPlan(profile)) whenPageIsReady(openPlans);
+    });
+  }
+  window.rzgsPlans = {
+    db: getDb,
+    checkout: loadCheckout,
+    // the dashboard, right after the email was confirmed
+    offer(profile) {
+      if (needsPlan(profile)) openPlans();
+    },
+    // the Edit profile box saved something: the header follows at once
+    repaint(fields) {
+      const profile = { ...storedProfile(), ...fields };
+      write(PROFILE_KEY, JSON.stringify(profile));
+      paintProfile(profile);
+    },
+  };
+
+  // Sent here to see the plans: they asked, by a link from another page or from before the plans became a pop-up.
   if (/^#(plans|pricing)$/.test(location.hash)) {
     history.replaceState(null, '', location.pathname + location.search);
     if (signedIn()) openPlans();

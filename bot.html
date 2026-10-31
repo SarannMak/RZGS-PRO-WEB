@@ -12,6 +12,11 @@
   <meta property="og:type" content="website">
   <meta property="og:title" content="The Bot — RZGS-PRO Automated Gold Trading Bot">
   <meta property="og:description" content="Meet RZGS-PRO: an Expert Advisor for MetaTrader 5 that trades gold (XAUUSD) with buy and sell pairs, a grid and a basket close. See how it works, its features and specifications.">
+  <meta property="og:site_name" content="RZGS-PRO">
+  <meta property="og:image" content="https://rzgspro.com/assets/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
 
   <link rel="icon" type="image/png" href="assets/logo-192.png">
   <link rel="apple-touch-icon" href="assets/logo-192.png">
@@ -19,15 +24,17 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="style.css?v=26">
-  <link rel="stylesheet" href="plans.css?v=1">
+  <link rel="stylesheet" href="style.css?v=36">
+  <link rel="stylesheet" href="plans.css?v=3">
+  <link rel="stylesheet" href="motion.css?v=2">
 
   <script>document.documentElement.classList.add('js');try{if(localStorage.getItem('sb-zaziizzsbytkdlatoutv-auth-token'))document.documentElement.classList.add('signed-in')}catch(e){}</script>
-  <script src="script.js?v=8" defer></script>
-  <script src="plans.js?v=2" defer></script>
+  <script src="script.js?v=9" defer></script>
+  <script src="motion.js?v=1" defer></script>
+  <script src="plans.js?v=7" defer></script>
   <!-- the 3D library the robot needs: asked for at once, so the robot can come up sooner -->
   <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js">
-  <script src="robot-3d.js?v=8" defer></script>
+  <script src="robot-3d.js?v=9" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -215,7 +222,7 @@
         <div class="feature-grid">
           <article class="card mini-feature reveal">
             <span class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-app-core"/></svg></span>
-            <h3>Core: live status</h3>
+            <h3>Home: live status</h3>
             <p>See if the bot is active, paused or in cooldown, which grid level it is on, the risk level and the next entry price. Balance, equity, today's profit, floating P/L and drawdown update live.</p>
           </article>
           <article class="card mini-feature reveal" style="--d: 60ms">
@@ -231,7 +238,7 @@
           <article class="card mini-feature reveal">
             <span class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-app-tools"/></svg></span>
             <h3>Tools: settings, risk and report</h3>
-            <p>See the settings your bot runs with, and adjust take profit, basket profit and the Smart mode grid distance. The risk calculator shows the floating result at each grid level if price keeps moving one way. The report shows today's closed profit, TP hits, baskets and the last 7 days.</p>
+            <p>See the settings your bot runs with and change them: take profit, basket profit, the Smart mode grid distance, max grid levels, cooldown and more. The risk calculator shows the most each grid level can lose before the next one opens. The report shows your closed profit this week, last week, by month or for all time.</p>
           </article>
           <article class="card mini-feature reveal" style="--d: 60ms">
             <span class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-app-log"/></svg></span>
@@ -295,9 +302,9 @@
             <h2 class="section-title" id="cta-title">Try it free <span class="text-gradient">for 7 days</span></h2>
             <p class="section-lead">See how the bot trades on your own MT5 account before you pay. Setup help included on Telegram.</p>
             <div class="page-actions">
-              <a class="btn btn-primary btn-lg" href="https://t.me/rzgsprobot?start=free">
-                <svg class="icon" aria-hidden="true"><use href="#i-send"/></svg>
-                Request your free trial
+              <a class="btn btn-primary btn-lg" href="signup" data-plans>
+                <svg class="icon" aria-hidden="true"><use href="#i-zap"/></svg>
+                Claim your free trial
               </a>
               <a class="btn btn-ghost btn-lg" href="./#plans" data-plans>See plans</a>
             </div>
@@ -316,8 +323,8 @@
             <span class="brand-name">RZGS<span class="brand-accent">-PRO</span></span>
           </a>
           <p>Automated gold trading bot for MetaTrader 5, with setup help and support on Telegram.</p>
-          <a class="btn btn-ghost btn-sm" href="https://t.me/rzgsprobot?start=free">
-            <svg class="icon" aria-hidden="true"><use href="#i-send"/></svg>
+          <a class="btn btn-ghost btn-sm" href="signup" data-plans>
+            <svg class="icon" aria-hidden="true"><use href="#i-zap"/></svg>
             Free 7-day trial
           </a>
         </div>
@@ -346,7 +353,7 @@
           <h2 class="footer-title" id="footer-support">Support</h2>
           <ul class="footer-links">
             <li><a href="contact">Contact us</a></li>
-            <li><a href="https://t.me/rzgsprobot?start=free">Free trial</a></li>
+            <li><a href="signup" data-plans>Free trial</a></li>
           </ul>
         </nav>
       </div>

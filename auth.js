@@ -14,6 +14,13 @@
   const RESEND_WAIT = 60; // seconds between "resend email" clicks
 
   const page = document.body.dataset.authPage; // login | signup | reset | dashboard
+  // The moves of motion.js. Without that file everything still works, it just doesn't move.
+  const motion = window.rzgsMotion || {
+    shake() {},
+    fromTap() {},
+    reveal(element) { element.hidden = false; },
+    conceal(element, done) { element.hidden = true; if (done) done(); },
+  };
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 
@@ -33,15 +40,20 @@
   // with the login provider, and the page tidies its own address when it opens (see script.js).
   const pageUrl = (name) => new URL(name, location.href).href.split(/[?#]/)[0];
 
-  // Someone who tapped a "claim" or "see the plans" button before they were signed in goes back to that page,
-  // where the plans open (plans.js wrote down which page). Everyone else goes to their dashboard.
+  // Someone who tapped a "claim" or "see the plans" button before they were signed in goes back to that page
+  // (plans.js wrote down which page). Everyone else goes to their dashboard. Whether the plans then come up by
+  // themselves is for plans.js to say: only for someone with no plan running.
   function afterSignIn() {
     try {
       const wish = JSON.parse(localStorage.getItem('rzgs_after_login') || 'null');
       localStorage.removeItem('rzgs_after_login');
-      if (wish && Date.now() - wish.at < 86400000 && /^\/(?!\/)/.test(wish.to)) return `${wish.to}#plans`;
+      if (wish && Date.now() - wish.at < 86400000 && /^\/(?!\/)/.test(wish.to)) return wish.to;
     } catch (e) { /* no storage: the dashboard */ }
     return 'dashboard';
+  }
+  // Just logged in or just signed up: plans.js looks at this on the next page.
+  function markJustIn() {
+    try { sessionStorage.setItem('rzgs_just_in', '1'); } catch (e) { /* private window: no offer, nothing lost */ }
   }
 
   /* ---------------------------------------------------------------- messages */
@@ -51,10 +63,10 @@
     $('[data-auth-msg-text]', msgBox).textContent = text;
     msgBox.dataset.tone = tone;
     $('use', msgBox).setAttribute('href', tone === 'success' ? '#i-check' : '#i-alert');
-    msgBox.hidden = false;
+    motion.reveal(msgBox);
   }
   function clearMessage() {
-    if (msgBox) msgBox.hidden = true;
+    if (msgBox) motion.conceal(msgBox);
   }
 
   // Turn a Supabase error into a sentence a customer can act on.
@@ -162,11 +174,16 @@
   function setFieldError(input, message) {
     const error = document.getElementById(`${input.id}-error`);
     input.setAttribute('aria-invalid', message ? 'true' : 'false');
-    if (error) {
+    if (!error) return;
+    if (message) {
       error.textContent = message;
-      error.hidden = !message;
+      motion.reveal(error);
+    } else {
+      motion.conceal(error, () => { error.textContent = ''; });
     }
   }
+  // The field shakes "no" before a word is read.
+  const shakeField = (input) => motion.shake(input.closest('.input-wrap, .check-field') || input);
   function validateField(input) {
     const rule = rules[input.name];
     const message = rule ? rule(input.value, input.form, input) : '';
@@ -176,6 +193,7 @@
   // Checks every field inside "root" and moves the cursor to the first problem.
   function validateAll(root) {
     const invalid = $$('input, select', root).filter((input) => !validateField(input));
+    invalid.forEach(shakeField);
     if (invalid.length) invalid[0].focus();
     return invalid.length === 0;
   }
@@ -260,7 +278,7 @@
     const submit = $('[data-submit]', form);
     const resendButton = $('[data-resend]');
 
-    if (urlQuery.get('signedout')) showMessage("You've signed out.", 'success');
+    if (urlQuery.get('signedout')) showMessage("You've logged out.", 'success');
     else if (urlQuery.get('confirm') === 'other') showMessage(FIRST_OF_TWO, 'success');
     else if (urlError) showMessage('That link is no longer valid. Please log in, or request a new link.');
 
@@ -291,9 +309,16 @@
       if (error) {
         setBusy(submit, false);
         showMessage(friendlyError(error));
+        if (error.code === 'invalid_credentials') {
+          const password = form.elements.password;
+          password.setAttribute('aria-invalid', 'true');
+          shakeField(password);
+          password.focus();
+        }
         if (error.code === 'email_not_confirmed') resendButton.hidden = false;
         return;
       }
+      markJustIn();
       location.replace(afterSignIn());
     });
   }
@@ -417,6 +442,7 @@
       if (alreadyRegistered || (error && (error.code === 'user_already_exists' || error.code === 'email_exists'))) {
         showStep(0, false);
         setFieldError(form.elements.email, 'This email already has an account. Log in instead.');
+        shakeField(form.elements.email);
         form.elements.email.focus();
         return;
       }
@@ -513,8 +539,8 @@
     clearTimeout(line.hideTimer);
     line.textContent = text;
     line.dataset.tone = tone;
-    line.hidden = false;
-    if (tone === 'success') line.hideTimer = setTimeout(() => { line.hidden = true; }, 4000);
+    motion.reveal(line);
+    if (tone === 'success') line.hideTimer = setTimeout(() => motion.conceal(line), 4000);
   }
 
   // A row of tabs showing one panel at a time. Arrow keys move between tabs, Home/End jump.
@@ -545,15 +571,15 @@
     return select;
   }
 
-  // The plan and its end date are written to the web_users table by the Telegram sales bot when it
-  // delivers a licence (the site owner can also type them there).
+  // The plan and its end date are written to the web_users table when a bot is delivered
+  // (the site owner can also type them there).
   // This turns them into everything the dashboard shows about the plan.
   function planState(profile) {
     const plan = PLAN_NAMES[profile.plan] ? profile.plan : null;
     if (!plan) {
       return {
         plan: null, name: 'Not started', status: 'No plan', tone: 'off', until: '-', big: '--', sub: 'NO PLAN', arc: 0,
-        note: 'Request your free 7-day Pro trial, or choose a plan. The button opens our Telegram bot, and your plan shows here when your bot is delivered.',
+        note: 'Claim your free 7-day trial, or choose a plan. It takes a few minutes, right on this page, and your bot file is here at the end.',
       };
     }
     const ends = profile.plan_expires_at ? new Date(profile.plan_expires_at) : null;
@@ -574,7 +600,9 @@
       big: String(daysLeft),
       sub: daysLeft === 1 ? 'DAY LEFT' : 'DAYS LEFT',
       arc: Math.max(4, Math.min(100, (daysLeft / PLAN_DAYS[plan]) * 100)),
-      note: soon ? `Your ${what} ends on ${longDate(ends)}. ${todo} now to avoid a break.` : `Your ${what} is valid until ${longDate(ends)}.`,
+      note: soon
+        ? `Your ${what} ends on ${longDate(ends)}. ${plan === 'trial' ? 'Choose a plan now to avoid a break.' : 'You can renew it once it has ended.'}`
+        : `Your ${what} is valid until ${longDate(ends)}.`,
     };
   }
 
@@ -588,13 +616,14 @@
     }
     const wanted = afterSignIn();
     if (wanted !== 'dashboard') {
+      if (arrivedFrom === 'signup') markJustIn();
       location.replace(wanted);
       return;
     }
     if (arrivedFrom === 'signup') showMessage('Your email is confirmed. Welcome to RZGS-PRO!', 'success');
     else if (arrivedFrom === 'email_change') showMessage('Your email address is changed. Log in with the new one from now on.', 'success');
     else if (firstOfTwo) showMessage(FIRST_OF_TWO, 'success');
-    else if (urlError) showMessage('That link has expired or was already used. If you were changing your email, send the request again in Tools, under Security.');
+    else if (urlError) showMessage('That link has expired or was already used. If you were changing your email, send the request again in Settings, under Security.');
 
     let user = session.user;
     // A change of email that was waiting may have been finished on another device since this one last looked.
@@ -603,8 +632,8 @@
       if (data && data.user) user = data.user;
     }
     // Our own copy of the profile (plus the plan), kept in the web_users table.
-    // The bot_* columns are written by the Telegram sales bot once the account is connected to it.
-    const PROFILE_COLUMNS = 'full_name, username, avatar_url, email, country, phone, telegram_username, mt5_account, broker, plan, plan_expires_at, created_at, email_confirmed_at, last_sign_in_at, accepted_terms_at, bot_tg_id, bot_tg_username, bot_mt5_account, bot_broker, bot_stage, bot_plan';
+    // The bot_* columns are written when a bot is delivered.
+    const PROFILE_COLUMNS = 'full_name, username, avatar_url, email, country, phone, telegram_username, mt5_account, broker, plan, plan_expires_at, created_at, email_confirmed_at, last_sign_in_at, accepted_terms_at, bot_mt5_account, bot_broker';
     async function fetchProfile() {
       try {
         const { data } = await db.from('web_users').select(PROFILE_COLUMNS).eq('id', user.id).maybeSingle();
@@ -630,6 +659,18 @@
     });
     selectTab(tabFor(location.hash.slice(1)) || tabs[0]);
     settled = true;
+    // the X: back to the page they came from on this site, or else the home page. They stay logged in.
+    try {
+      const from = new URL(document.referrer);
+      if (from.origin === location.origin && !/(login|signup|reset-password|dashboard|account)(\.html)?$/.test(from.pathname)) {
+        $('[data-dash-close]').href = from.href;
+      }
+    } catch (e) { /* came from elsewhere: the home page */ }
+    // the profile button on this page goes to the first view, with no reload
+    $$('.header-actions [data-profile]').forEach((link) => link.addEventListener('click', (event) => {
+      event.preventDefault();
+      selectTab(tabs[0]);
+    }));
     // links inside the page, like "See plans", switch tab through the address
     window.addEventListener('hashchange', () => {
       const tab = tabFor(location.hash.slice(1));
@@ -637,25 +678,26 @@
     });
     setupTabs($$('.dash-seg [role="tab"]', root))($('.dash-seg [role="tab"]', root));
 
-    /* ----- Telegram sales bot ----- */
-    // Plans are bought in the Telegram bot. The dashboard's Telegram buttons carry a one-time code, so the bot
-    // knows which website account the person owns without any typing ("l_<code>" or "l_<code>_<plan>").
-    // The code is renewed while the page stays open. Without one, the buttons still open the bot at the plan.
-    const BOT_URL = root.dataset.bot;
-    const BOT_PLAN = { trial: 'free', elite: 'elite', diamond: 'diamond' };
-    let linkCode = '';
-    const botLink = (plan) => {
-      const payload = [linkCode && `l_${linkCode}`, plan && BOT_PLAN[plan]].filter(Boolean).join('_');
-      return payload ? `${BOT_URL}?start=${payload}` : BOT_URL;
+    /* ----- the checkout: what was bought on this website (checkout.js and the "checkout" server function) ----- */
+    let checkout = { order: null, licence: null, trial_used: false };
+    let seenCheckout = '';
+    const withCheckout = async (use) => {
+      if (window.rzgsPlans) use(await window.rzgsPlans.checkout());
     };
-    async function refreshLinkCode() {
+    async function refreshCheckout() {
+      if (document.hidden) return;
       try {
-        const { data } = await db.rpc('web_link_code');
-        linkCode = data && data.ok ? data.code : '';
-      } catch (e) {
-        linkCode = '';
-      }
-      renderPlan(); // puts the fresh links on the buttons
+        const { data } = await db.rpc('web_my_checkout');
+        if (!data || !data.ok || JSON.stringify(data) === seenCheckout) return;
+        seenCheckout = JSON.stringify(data);
+        checkout = data;
+        renderOrder();
+        renderPlan();
+        renderBot();
+        const place = $('[data-licence]', root);
+        place.hidden = !checkout.licence;
+        if (checkout.licence) withCheckout((checkoutBox) => checkoutBox.renderLicence(place, checkout.licence));
+      } catch (e) { /* the last state stays */ }
     }
 
     /* ----- profile picture ----- */
@@ -672,7 +714,7 @@
       return url.startsWith(avatarFolder) ? url : '';
     };
 
-    // the photo, or the first letter of the name: at the top of the dashboard and on the Profile tab
+    // the photo, or the first letter of the name: on the profile card and in the Edit profile box
     function renderAvatar(name) {
       const letter = name.trim().charAt(0).toUpperCase() || 'R';
       const url = avatarAddress();
@@ -730,6 +772,7 @@
       if (data && data.user) user = data.user;
       profile.avatar_url = url;
       renderHeader();
+      if (window.rzgsPlans) window.rzgsPlans.repaint({ avatar_url: url });
       return null;
     }
 
@@ -836,7 +879,7 @@
           ? ['good', 'Online', `Your bot is reporting${profile.bot_mt5_account ? ` from MT5 account ${profile.bot_mt5_account}` : ''}. Open the control app to watch it.`]
           : ['bad', 'Offline', `Last report: ${bot.seen_at ? shortDateTime(bot.seen_at) : 'not known'}. The bot only runs while MT5 is open and online.`]
         : !plan
-          ? ['off', 'No bot yet', 'Ready to run your bot? Choose a plan and our Telegram bot sends you the file.']
+          ? ['off', 'No bot yet', 'Ready to run your bot? Choose a plan and get your bot file right here.']
           : known
             ? ['warn', 'Waiting for your bot', 'Your bot has not reported yet. Add the file to MT5, type your passwords and turn on Algo Trading.']
             : ['off', 'Your bot', 'Open the control app to see your bot.'];
@@ -844,8 +887,9 @@
       setAll('[data-bot-status]', words[1]);
       setAll('[data-bot-note]', words[2]);
       $('[data-bot-see]', root).hidden = Boolean(plan);
-      $('[data-bot-howto]', root).hidden = !plan || !known || bot.bot;
-      $('[data-bot-row]', root).hidden = bot.bot || (Boolean(plan) && !known);
+      // the setup steps are with the passwords when those are here
+      $('[data-bot-howto]', root).hidden = !plan || !known || bot.bot || Boolean(checkout.licence);
+      $('[data-bot-row]', root).hidden = bot.bot || (Boolean(plan) && (!known || Boolean(checkout.licence)));
       renderAwards();
     }
 
@@ -856,7 +900,6 @@
         { title: 'Account created', did: 'You joined RZGS-PRO.', done: true },
         { title: 'Email confirmed', text: 'Open the link we sent to your email.', did: 'Your email address is confirmed.', done: Boolean(profile.email_confirmed_at || user.email_confirmed_at) },
         { title: 'Profile complete', text: 'Add a photo, a few words about you and your location.', did: 'Your photo, your words and your location are in.', done: Boolean(avatarAddress() && stored('about') && stored('country')), edit: 'about', action: 'Edit profile' },
-        { title: 'Telegram connected', text: 'Connect our Telegram bot to this account.', did: 'Our Telegram bot knows this account.', done: Boolean(profile.bot_tg_id), href: botLink(), bot: true, action: 'Connect Telegram' },
         { title: 'First bot delivered', text: 'Choose a plan and get your bot file.', did: 'You have your bot file.', done: Boolean(plan), plans: true, action: 'See plans' },
         { title: 'Bot connected', text: 'Add the file to MT5, and your bot reports to your control app.', did: 'Your bot reports to your control app.', done: Boolean(bot.bot) },
         { title: 'First closed trade', text: 'Reached when your bot closes a trade.', did: 'Your bot has closed a trade.', done: Boolean(bot.traded) },
@@ -884,8 +927,6 @@
           go.className = 'btn btn-chip btn-sm';
           go.textContent = award.action;
           if (award.edit) { go.type = 'button'; go.dataset.edit = award.edit; }
-          if (award.href) go.href = award.href;
-          if (award.bot) go.dataset.botLink = '';
           if (award.plans) { go.href = './#plans'; go.dataset.plans = ''; }
           row.append(go);
         }
@@ -906,19 +947,9 @@
       const confirmed = profile.email_confirmed_at || user.email_confirmed_at;
       setAll('[data-info="joined"]', joined ? longDate(joined) : '-');
       setAll('[data-info="email-status"]', confirmed ? 'Confirmed' : 'Not confirmed');
-      // the account the licence was made for (written by the Telegram bot) comes before the one typed in the profile
+      // the account the bot was made for comes before the one typed in the profile
       setAll('[data-info="mt5"]', profile.bot_mt5_account || stored('mt5_account') || 'Not set');
       setAll('[data-info="broker"]', profile.bot_broker || stored('broker') || 'Not set');
-      const linked = Boolean(profile.bot_tg_id);
-      const telegramName = profile.bot_tg_username ? `@${profile.bot_tg_username}` : 'Connected';
-      setAll('[data-info="bot"]', linked ? telegramName : 'Not connected');
-      $$('[data-bot-connect]', root).forEach((box) => { box.hidden = linked; });
-      setAll('[data-dp-telegram]', linked ? `Telegram: ${telegramName}` : 'Connect Telegram');
-      setAll('[data-tg-connect]', linked ? 'Open our Telegram bot' : 'Connect Telegram');
-      setAll('[data-tg-note]', linked
-        ? 'Our Telegram bot knows this account. Every click from this website tells it who you are and which plan you chose.'
-        : 'Connect once. After that our Telegram bot knows who you are and which plan you chose, every time you come from this website.');
-      $('[data-tg-change]', root).hidden = !linked;
     }
 
     function renderPlan() {
@@ -943,71 +974,64 @@
         button.classList.toggle('btn-primary', main);
         button.classList.toggle('btn-ghost', !main);
       });
+      action.href = '#plan';
+      delete action.dataset.checkout;
       if (!state.plan) {
-        action.textContent = 'Request your free trial';
-        action.href = botLink('trial');
+        action.textContent = 'Claim your free trial';
+        action.dataset.checkout = 'trial';
       } else if (state.plan === 'trial') {
         action.textContent = 'Choose a plan';
-        action.href = '#plan';
-      } else {
+      } else if (state.status === 'Expired') {
         action.textContent = 'Renew plan';
-        action.href = botLink(state.plan);
+        action.dataset.checkout = state.plan;
+      } else {
+        action.textContent = 'See plans'; // a plan that is running can't be renewed yet
       }
-      $$('[data-bot-link]', root).forEach((button) => { button.href = botLink(); });
+      $('[data-plan-also]', root).hidden = Boolean(state.plan) && state.plan !== 'trial' && state.status !== 'Expired';
       // on the Plan view, the current plan's button is shown "on"
+      // a paid plan that is running: nothing else starts until it ends or is cancelled
+      const paidRunning = Boolean(state.plan) && state.plan !== 'trial' && state.status !== 'Expired';
+      $('[data-plan-cancel-row]', root).hidden = !paidRunning;
+      $('[data-plan-cancel-note]', root).hidden = !paidRunning;
+      setAll('[data-plan-choice-note]', paidRunning
+        ? `Your ${state.name} plan runs until ${state.until}. You can renew it or start another plan when it ends, or cancel it above first.`
+        : 'Each button starts that plan right here. We only ask for what we need.');
       $$('[data-plan-link]', root).forEach((button) => {
-        button.href = botLink(button.dataset.planLink);
         const on = button.dataset.planLink === state.plan;
+        const freeUsed = button.dataset.planLink === 'trial' && checkout.trial_used;
+        const locked = paidRunning || freeUsed || (on && (state.plan === 'trial' || state.status !== 'Expired')); // the free days only once
+        button.disabled = locked;
+        button.classList.toggle('is-locked', locked && !on);
         button.classList.toggle('is-on', on);
         if (on) button.setAttribute('aria-current', 'true');
         else button.removeAttribute('aria-current');
       });
     }
 
-    /* ----- order: the buying steps, as the Telegram bot reports them ----- */
-    // Which steps a plan has, which step each bot stage belongs to, and what the person has to do there.
-    const ORDER_NEEDS = { trial: { broker: true, pay: false }, elite: { broker: true, pay: true }, diamond: { broker: false, pay: true } };
-    const ORDER_STEP = {
-      plan: 'plan', ask_broker: 'broker', ask_broker_email: 'broker', review_referral: 'broker', pay: 'pay', review_payment: 'pay',
-      ask_mt5: 'mt5', review_mt5: 'mt5', build: 'bot', active: 'done',
-    };
+    /* ----- order: the buying steps of an order that is under way ----- */
+    const ORDER_STEPS = { trial: ['broker', 'mt5', 'bot'], elite: ['broker', 'mt5', 'pay', 'bot'], diamond: ['mt5', 'pay', 'bot'] };
+    const ORDER_LABEL = { broker: 'Broker account', mt5: 'MT5 account', pay: 'Payment', bot: 'Bot delivered' };
     const ORDER_NOTE = {
-      plan: 'Choose your plan in the Telegram bot.',
-      ask_broker: 'Open your MT5 account with one of our partner brokers, then tell the bot.',
-      ask_broker_email: 'Send the bot the email you used at the broker.',
-      review_referral: 'Our team is checking your broker registration.',
-      pay: 'Pay with the KHQR code in the Telegram bot, then send a screenshot of your receipt there.',
-      review_payment: 'Our team is confirming your payment.',
-      ask_mt5: 'Send your MT5 account number (the login number) to the Telegram bot.',
-      review_mt5: 'Our team is checking your MT5 account.',
-      build: 'Your bot file is being prepared. It arrives in the Telegram chat.',
-      active: 'Your bot was delivered in the Telegram chat.',
+      broker: 'Tell us your broker and the email you used there.',
+      mt5: 'Tell us your MT5 account number.',
+      pay: 'Pay with your KHQR code.',
     };
     function renderOrder() {
       const box = $('[data-order]', root);
-      const at = ORDER_STEP[profile.bot_stage];
-      if (!profile.bot_tg_id || !at) {
+      const { order } = checkout;
+      if (!order || !ORDER_STEPS[order.plan]) {
         box.hidden = true;
         return;
       }
-      const plan = PLAN_NAMES[profile.bot_plan] ? profile.bot_plan : null;
-      const needs = ORDER_NEEDS[plan] || { broker: true, pay: true };
-      const steps = [
-        ['plan', plan && at !== 'plan' ? `Plan: ${PLAN_NAMES[plan]}` : 'Choose a plan'],
-        // with our broker link the account is settled before anything is paid; with any broker the payment is first
-        needs.broker && ['broker', 'Broker account'],
-        needs.broker && ['mt5', 'MT5 account'],
-        needs.pay && ['pay', 'Payment'],
-        !needs.broker && ['mt5', 'MT5 account'],
-        ['bot', 'Bot delivered'],
-      ].filter(Boolean);
-      const now = at === 'done' ? steps.length : steps.findIndex(([key]) => key === at);
-      const waiting = /^review_/.test(profile.bot_stage); // our team is checking: nothing for the person to do
-      $('[data-order-steps]', box).replaceChildren(...steps.map(([, label], index) => {
+      const waiting = order.stage === 'review'; // our team is checking: nothing for the person to do
+      const at = waiting ? order.review_from : order.stage;
+      const steps = ORDER_STEPS[order.plan];
+      const now = steps.indexOf(at);
+      $('[data-order-steps]', box).replaceChildren(...steps.map((key, index) => {
         const item = document.createElement('li');
         const state = index < now ? 'done' : index === now ? 'now' : 'todo';
         item.dataset.state = state;
-        item.textContent = label;
+        item.textContent = ORDER_LABEL[key];
         if (state !== 'todo') {
           const tag = document.createElement('small');
           tag.textContent = state === 'done' ? 'Done' : waiting ? 'Checking' : 'Now';
@@ -1016,7 +1040,11 @@
         }
         return item;
       }));
-      $('[data-order-note]', box).textContent = ORDER_NOTE[profile.bot_stage];
+      $('[data-order-plan]', box).textContent = PLAN_NAMES[order.plan];
+      $('[data-order-note]', box).textContent = waiting
+        ? (at === 'pay' ? 'Our team is confirming your payment. Your bot appears here as soon as it is done.' : 'Our team is checking your broker account. The next step appears here as soon as it is done.')
+        : order.note || ORDER_NOTE[at];
+      $('[data-order-row]', box).hidden = waiting;
       box.hidden = false;
     }
 
@@ -1079,26 +1107,37 @@
     }
 
     const profileForm = $('[data-profile-form]');
-    const tradingForm = $('[data-trading-form]');
     const passwordForm = $('[data-password-form]');
-    const socialForm = $('[data-social-form]');
-
-    // fill the forms with what is on file
+    const editBox = $('[data-edit-dialog]', root);
     const country = profileForm.elements.country;
     fillCountries(country);
-    const savedCountry = stored('country');
-    if (savedCountry && ![...country.options].some((option) => option.value === savedCountry)) {
-      country.add(new Option(savedCountry, savedCountry));
+
+    // The Edit profile box: it always opens with what is on file, so Cancel simply leaves everything as it was.
+    function fillEdit() {
+      const savedCountry = stored('country');
+      if (savedCountry && ![...country.options].some((option) => option.value === savedCountry)) {
+        country.add(new Option(savedCountry, savedCountry));
+      }
+      country.value = savedCountry;
+      ['full_name', 'username', 'phone', 'telegram_username', 'about', 'mt5_account', 'broker'].forEach((name) => {
+        profileForm.elements[name].value = stored(name);
+      });
+      Object.keys(SOCIALS).forEach((kind) => { profileForm.elements[`social_${kind}`].value = (stored('socials') || {})[kind] || ''; });
+      $$('input, select', profileForm).forEach((input) => setFieldError(input, ''));
+      countAbout();
     }
-    country.value = savedCountry;
-    profileForm.elements.full_name.value = stored('full_name');
-    profileForm.elements.username.value = stored('username');
-    profileForm.elements.phone.value = stored('phone');
-    profileForm.elements.telegram_username.value = stored('telegram_username');
-    profileForm.elements.about.value = stored('about');
-    Object.keys(SOCIALS).forEach((kind) => { socialForm.elements[`social_${kind}`].value = (stored('socials') || {})[kind] || ''; });
-    tradingForm.elements.mt5_account.value = stored('mt5_account');
-    tradingForm.elements.broker.value = stored('broker');
+    const aboutCount = $('[data-about-count]', editBox);
+    const countAbout = () => { aboutCount.textContent = `${profileForm.elements.about.value.length} / 160`; };
+    profileForm.elements.about.addEventListener('input', countAbout);
+
+    // "Edit profile", "Add your location" and the like: the box, with the cursor in that field
+    function openEdit(fieldName) {
+      fillEdit();
+      motion.fromTap(editBox);
+      editBox.showModal();
+      const wanted = fieldName && profileForm.elements[fieldName];
+      if (wanted) wanted.focus();
+    }
 
     renderHeader();
     renderInfo();
@@ -1107,19 +1146,13 @@
     renderLog();
     root.setAttribute('aria-busy', 'false');
 
-    // Right after sign-up (the email was just confirmed) the next step is the Telegram bot: offer it once.
-    // The button carries the one-time code, so the bot connects this account by itself.
-    const welcome = $('[data-welcome-dialog]', root);
-    $('[data-welcome-later]', welcome).addEventListener('click', () => welcome.close());
-    $('[data-welcome-go]', welcome).addEventListener('click', () => welcome.close());
-    refreshLinkCode().then(() => {
-      if (arrivedFrom === 'signup' && !profile.bot_tg_id) welcome.showModal();
-    });
-    setInterval(refreshLinkCode, 45 * 60 * 1000); // a code is good for 2 hours
+    refreshCheckout();
+    // Right after sign-up (the email was just confirmed) the next step is choosing a plan.
+    if (arrivedFrom === 'signup' && window.rzgsPlans) window.rzgsPlans.offer(profile);
 
-    // The Telegram bot writes each step here as it happens (account connected, broker confirmed, payment
-    // received, bot delivered). The dashboard looks again every 20 seconds while it is on screen, and at once
-    // when the person comes back to this tab, and redraws only when something changed.
+    // The checkout writes each step as it happens (broker confirmed, payment received, bot delivered, and what
+    // the owner decides). The dashboard looks again every 20 seconds while it is on screen, and at once when the
+    // person comes back to this tab, and redraws only when something changed.
     let seen = JSON.stringify(profile);
     let looking = false;
     async function refreshProfile() {
@@ -1136,72 +1169,65 @@
       renderOrder();
       renderLog();
     }
-    setInterval(refreshProfile, 20000);
-    document.addEventListener('visibilitychange', refreshProfile);
+    const refreshAll = () => { refreshProfile(); refreshCheckout(); };
+    setInterval(refreshAll, 20000);
+    document.addEventListener('visibilitychange', refreshAll);
+    document.addEventListener('rzgs:checkout', refreshAll);
 
-    wireSaveForm(profileForm, () => ({
-      full_name: profileForm.elements.full_name.value.trim(),
-      username: profileForm.elements.username.value.trim(),
-      country: country.value,
-      phone: profileForm.elements.phone.value.trim(),
-      telegram_username: profileForm.elements.telegram_username.value.trim().replace(/^@/, ''),
-      about: profileForm.elements.about.value.trim().slice(0, 160),
-    }), 'Profile saved.');
-    wireSaveForm(socialForm, () => ({
-      socials: Object.fromEntries(Object.keys(SOCIALS).map((kind) => [kind, socialUrl(kind, socialForm.elements[`social_${kind}`].value) || ''])),
-    }), 'Links saved.');
-    // "Use another Telegram": asks once more, then lets go of the Telegram account. The plan and the bot are not touched.
-    const tgChange = $('[data-tg-change]', root);
-    const tgSay = (text, tone) => {
-      const line = $('[data-tg-msg]', root);
-      line.textContent = text;
-      line.dataset.tone = tone;
-      line.hidden = false;
-    };
-    tgChange.addEventListener('click', async () => {
-      if (!tgChange.dataset.sure) {
-        tgChange.dataset.sure = '1';
-        tgChange.textContent = 'Yes, disconnect this one';
-        tgSay('This Telegram account will no longer be connected to your website account. Your plan and your bot keep running.', 'success');
+    wireValidation(profileForm);
+    profileForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (!validateAll(profileForm)) return;
+      const save = $('[data-edit-save]', editBox);
+      const fields = {
+        full_name: profileForm.elements.full_name.value.trim(),
+        username: profileForm.elements.username.value.trim(),
+        country: country.value,
+        phone: profileForm.elements.phone.value.trim(),
+        telegram_username: profileForm.elements.telegram_username.value.trim().replace(/^@/, ''),
+        about: profileForm.elements.about.value.trim().slice(0, 160),
+        socials: Object.fromEntries(Object.keys(SOCIALS).map((kind) => [kind, socialUrl(kind, profileForm.elements[`social_${kind}`].value) || ''])),
+        mt5_account: profileForm.elements.mt5_account.value.replace(/\D/g, ''),
+        broker: profileForm.elements.broker.value.trim(),
+      };
+      setBusy(save, true);
+      const { data, error } = await db.auth.updateUser({ data: fields });
+      setBusy(save, false);
+      if (error) {
+        formMessage($('.de-foot', editBox), friendlyError(error), 'error');
         return;
       }
-      setBusy(tgChange, true);
-      let failed = true;
-      try {
-        const { data, error } = await db.rpc('web_unlink_telegram');
-        failed = Boolean(error) || !data || !data.ok;
-      } catch (e) { /* said below */ }
-      setBusy(tgChange, false);
-      delete tgChange.dataset.sure;
-      tgChange.textContent = 'Use another Telegram';
-      if (failed) {
-        tgSay('That did not work just now. Please try again, or contact us.', 'error');
-        return;
-      }
-      profile.bot_tg_id = null;
-      profile.bot_tg_username = null;
+      if (data && data.user) user = data.user;
+      Object.assign(profile, fields);
+      renderHeader();
       renderInfo();
-      renderBot();
-      await refreshLinkCode();
-      tgSay('Disconnected. Log in to the Telegram account you want, then tap Connect Telegram here.', 'success');
+      if (window.rzgsPlans) window.rzgsPlans.repaint({ full_name: fields.full_name, username: fields.username });
+      editBox.close();
+      showMessage('Profile saved.', 'success');
+      setTimeout(clearMessage, 4000);
     });
-
-    // "Edit profile", "Add your location" and the like: the Profile tab, with the cursor in that field
+    // Cancel, the X, or a tap on the dark area around the box
+    editBox.addEventListener('click', (event) => {
+      if (event.target === editBox || event.target.closest('[data-edit-close]')) editBox.close();
+    });
     root.addEventListener('click', (event) => {
       const asked = event.target.closest('[data-edit]');
-      if (!asked) return;
-      selectTab(tabFor('profile'));
-      const field = document.getElementsByName(asked.dataset.edit)[0];
-      if (field) { field.focus({ preventScroll: true }); field.scrollIntoView({ block: 'center' }); }
+      if (asked) openEdit(asked.dataset.edit);
+      if (event.target.closest('[data-plan-cancel]')) withCheckout((checkoutBox) => checkoutBox.askCancel(profile.plan, profile.plan_expires_at));
+      if (event.target.closest('[data-order-go]')) withCheckout((checkoutBox) => checkoutBox.resume());
+      if (event.target.closest('[data-order-drop]')) withCheckout((checkoutBox) => checkoutBox.drop());
     });
+    // an older link to the Profile tab
+    const editFromAddress = () => {
+      if (location.hash !== '#profile') return;
+      history.replaceState(null, '', location.pathname + location.search);
+      openEdit();
+    };
+    editFromAddress();
+    window.addEventListener('hashchange', editFromAddress);
     refreshBot();
     setInterval(refreshBot, 60000);
     document.addEventListener('visibilitychange', refreshBot);
-
-    wireSaveForm(tradingForm, () => ({
-      mt5_account: tradingForm.elements.mt5_account.value.replace(/\D/g, ''),
-      broker: tradingForm.elements.broker.value.trim(),
-    }), 'Trading account saved.');
 
     wireSaveForm(passwordForm, () => ({ password: passwordForm.elements.new_password.value }), 'Password updated.');
 
@@ -1225,6 +1251,7 @@
       const next = address.value.trim().toLowerCase();
       if (next === (user.email || '').toLowerCase()) {
         setFieldError(address, 'This is already your email address.');
+        shakeField(address);
         address.focus();
         return;
       }
@@ -1235,6 +1262,7 @@
         setBusy(submit, false);
         if (check.error.code === 'invalid_credentials') {
           setFieldError(password, 'Wrong password.');
+          shakeField(password);
           password.focus();
         } else {
           formMessage(emailForm, friendlyError(check.error), 'error');
@@ -1246,6 +1274,7 @@
       if (error) {
         if (error.code === 'email_exists' || error.code === 'user_already_exists') {
           setFieldError(address, 'This email is already used by another account.');
+          shakeField(address);
           address.focus();
         } else {
           formMessage(emailForm, friendlyError(error), 'error');
@@ -1262,13 +1291,16 @@
     });
 
     /* ----- session ----- */
-    // Signing out asks first, like the power button of the control app: "Do you want to sign out?"  No / Yes
+    // Logging out asks first, like the power button of the control app: "Do you want to log out?"  No / Yes.
+    // Every Log out button on this page comes here: in Settings, in the Edit profile box and in the box under the profile button.
     const confirmBox = $('[data-sign-out-dialog]');
     const confirmMsg = $('[data-sign-out-msg]', confirmBox);
-    $$('[data-sign-out]').forEach((button) => button.addEventListener('click', () => {
+    document.addEventListener('click', (event) => {
+      if (!event.target.closest('[data-sign-out]')) return;
       confirmMsg.hidden = true;
+      motion.fromTap(confirmBox);
       confirmBox.showModal(); // the browser puts the cursor on "No" and gives it back when the box closes
-    }));
+    });
     $('[data-sign-out-no]', confirmBox).addEventListener('click', () => confirmBox.close());
     // a tap on the dark area around the card also means "No"
     confirmBox.addEventListener('click', (event) => { if (event.target === confirmBox) confirmBox.close(); });
@@ -1294,7 +1326,7 @@
       const { error } = await db.auth.signOut({ scope: 'others' });
       setBusy(others, false);
       const line = $('[data-session-msg]');
-      line.textContent = error ? friendlyError(error) : 'Your other devices are signed out.';
+      line.textContent = error ? friendlyError(error) : 'Your other devices are logged out.';
       line.dataset.tone = error ? 'error' : 'success';
       line.hidden = false;
     });

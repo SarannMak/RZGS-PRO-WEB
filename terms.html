@@ -12,6 +12,11 @@
   <meta property="og:type" content="website">
   <meta property="og:title" content="Terms & Conditions — RZGS-PRO">
   <meta property="og:description" content="The Terms & Conditions for using the RZGS-PRO website, free trial and paid plans.">
+  <meta property="og:site_name" content="RZGS-PRO">
+  <meta property="og:image" content="https://rzgspro.com/assets/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
 
   <link rel="icon" type="image/png" href="assets/logo-192.png">
   <link rel="apple-touch-icon" href="assets/logo-192.png">
@@ -19,12 +24,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="style.css?v=11">
-  <link rel="stylesheet" href="plans.css?v=1">
+  <link rel="stylesheet" href="style.css?v=36">
+  <link rel="stylesheet" href="plans.css?v=3">
+  <link rel="stylesheet" href="motion.css?v=2">
 
   <script>document.documentElement.classList.add('js');try{if(localStorage.getItem('sb-zaziizzsbytkdlatoutv-auth-token'))document.documentElement.classList.add('signed-in')}catch(e){}</script>
-  <script src="script.js?v=8" defer></script>
-  <script src="plans.js?v=2" defer></script>
+  <script src="script.js?v=9" defer></script>
+  <script src="motion.js?v=1" defer></script>
+  <script src="plans.js?v=7" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -120,7 +127,7 @@
         <p class="kicker">Legal</p>
         <h1 class="page-title" id="page-title">Terms &amp; Conditions</h1>
         <p class="page-lead">The agreement between you and RZGS-PRO when you use our website, request a free trial or buy a plan.</p>
-        <p class="page-meta">Last updated: 9 October 2026</p>
+        <p class="page-meta">Last updated: 31 October 2026</p>
       </div>
     </section>
 
@@ -152,9 +159,8 @@
         <article class="card legal">
           <section class="legal-section" id="t-about">
             <h2>1. About these terms</h2>
-            <!-- FILL IN: your legal business name and address -->
             <p>These Terms &amp; Conditions ("Terms") apply when you use the RZGS-PRO website, request a free trial or buy a plan. By doing any of these, you agree to these Terms, our <a href="license">License Rules</a> and our <a href="privacy">Privacy Policy</a>.</p>
-            <p>RZGS-PRO is operated by <span class="fill">[your legal business name]</span>, <span class="fill">[business address]</span> ("we", "us").</p>
+            <p>In these Terms, "RZGS-PRO", "we" and "us" mean the people who run this website, the bot and the control app. You can reach us at any time through our <a href="contact">Contact</a> page.</p>
           </section>
 
           <section class="legal-section" id="t-service">
@@ -179,7 +185,7 @@
 
           <section class="legal-section" id="t-payment">
             <h2>5. Plans, prices and payment</h2>
-            <p>Prices are shown in US dollars on our website. We send payment details to you on Telegram, and your license is activated once your payment is confirmed. We may change our prices in the future, but a change will never affect a period you've already paid for.</p>
+            <p>Prices are shown in US dollars on our website. You pay by KHQR on our website, and your license is activated once your payment is confirmed. We may change our prices in the future, but a change will never affect a period you've already paid for.</p>
           </section>
 
           <section class="legal-section" id="t-refunds">
@@ -225,14 +231,12 @@
 
           <section class="legal-section" id="t-law">
             <h2>14. Governing law</h2>
-            <!-- FILL IN: the country whose laws apply -->
-            <p>These Terms are governed by the laws of <span class="fill">[country]</span>.</p>
+            <p>These Terms are governed by the laws of the country where RZGS-PRO is run.</p>
           </section>
 
           <section class="legal-section" id="t-contact">
             <h2>15. Contact</h2>
-            <!-- FILL IN: your support email -->
-            <p>Questions about these Terms? Message us on Telegram or email <span class="fill">[your email]</span>. See all the ways to reach us on our <a href="contact">Contact</a> page.</p>
+            <p>Questions about these Terms? Message us on Telegram or email <a href="mailto:info@rzgspro.com">info@rzgspro.com</a>. See all the ways to reach us on our <a href="contact">Contact</a> page.</p>
           </section>
         </article>
       </div>
@@ -248,8 +252,8 @@
             <span class="brand-name">RZGS<span class="brand-accent">-PRO</span></span>
           </a>
           <p>Automated gold trading bot for MetaTrader 5, with setup help and support on Telegram.</p>
-          <a class="btn btn-ghost btn-sm" href="https://t.me/rzgsprobot?start=free">
-            <svg class="icon" aria-hidden="true"><use href="#i-send"/></svg>
+          <a class="btn btn-ghost btn-sm" href="signup" data-plans>
+            <svg class="icon" aria-hidden="true"><use href="#i-zap"/></svg>
             Free 7-day trial
           </a>
         </div>
@@ -278,7 +282,7 @@
           <h2 class="footer-title" id="footer-support">Support</h2>
           <ul class="footer-links">
             <li><a href="contact">Contact us</a></li>
-            <li><a href="https://t.me/rzgsprobot?start=free">Free trial</a></li>
+            <li><a href="signup" data-plans>Free trial</a></li>
           </ul>
         </nav>
       </div>

@@ -13,6 +13,8 @@
 if (location.protocol === 'http:' && !/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) location.replace('https://' + location.host + location.pathname + location.search + location.hash);
 </script>
 <title>RZGS-PRO Control</title>
+<link rel="icon" type="image/png" href="assets/logo-192.png">
+<link rel="apple-touch-icon" href="assets/logo-192.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
@@ -489,6 +491,54 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
   header{padding-right:6px}                     /* the LIVE light and the power key end where the panels end */
   .ladder{height:430px}
 }
+/* Motion (31 Oct 2026): a switch stretches, overshoots and settles; the lit box of a menu slides to the new tab. */
+:root{--sp:cubic-bezier(.3,1.3,.5,1);--sp-soft:cubic-bezier(.25,1.1,.5,1)}
+@supports (transition-timing-function:linear(0,1)){:root{
+  --sp:linear(0,.189,.557,.89,1.092,1.162,1.141,1.083,1.026,.989,.974,.976,.985,.994,1.001,1.004,1.004,1.003,1);
+  --sp-soft:linear(0,.189,.512,.775,.935,1.009,1.031,1.028,1.018,1.009,1.003,1,.999,.999,1)}}
+.sw-in::after{right:23px;width:auto}
+.sw-in:checked::after{left:23px;right:3px;transform:none}
+@media (prefers-reduced-motion:no-preference){
+  /* the edge in front runs, the edge behind follows: that is the stretch */
+  .sw-in::after{transition:left .26s var(--sp),right .52s var(--sp),background .18s}
+  .sw-in:checked::after{transition:right .26s var(--sp),left .52s var(--sp),background .18s}
+  .sw-in:not(:checked):not(:disabled):active::after{right:17px}
+  .sw-in:checked:not(:disabled):active::after{left:17px}
+}
+/* a wrong entry on the login page; its message fades in */
+.field input.is-wrong,.field input.is-wrong:focus{border-color:var(--bad);box-shadow:0 0 0 3px rgba(255,90,106,.18)}
+@media (prefers-reduced-motion:no-preference){
+  /* every button: down at once when pressed, back with a small spring */
+  .btn{transition:color .18s,filter .18s,transform .5s var(--sp)}
+  .btn:active{transform:scale(.96);transition-duration:.08s}
+  .icon-btn{transition:transform .5s var(--sp)}
+  .icon-btn:active{transform:scale(.9);transition-duration:.08s}
+  .err:not(:empty){animation:err-in .26s cubic-bezier(.16,1,.3,1)}
+  @keyframes err-in{from{opacity:0;transform:translateY(-4px)}}
+}
+@supports selector(:has(*)){
+  nav,.seg:not(.seg-mode){position:relative;--pos:0}
+  nav{--count:5}
+  .seg:not(.seg-mode){--count:4}
+  nav:has(>:nth-child(2)[aria-selected="true"]),.seg:not(.seg-mode):has(>:nth-child(2)[aria-selected="true"]){--pos:1}
+  nav:has(>:nth-child(3)[aria-selected="true"]),.seg:not(.seg-mode):has(>:nth-child(3)[aria-selected="true"]){--pos:2}
+  nav:has(>:nth-child(4)[aria-selected="true"]),.seg:not(.seg-mode):has(>:nth-child(4)[aria-selected="true"]){--pos:3}
+  nav:has(>:nth-child(5)[aria-selected="true"]){--pos:4}
+  nav>button,.seg:not(.seg-mode)>button{position:relative;z-index:1}
+  nav>button[aria-selected="true"]{border-top-color:transparent}
+  .seg:not(.seg-mode)>button[aria-selected="true"]{background:none;box-shadow:none}
+  nav::before,.seg:not(.seg-mode)::before{content:"";position:absolute;top:0;bottom:0;left:0;width:calc(100% / var(--count));
+    border:1px solid transparent;border-image:var(--hud-callout) 16 fill / 16px;pointer-events:none;
+    transform:translateX(calc(var(--pos) * 100%))}
+  @media (min-width:1024px){
+    nav>button[aria-selected="true"]{background:none;box-shadow:none;border-top-color:var(--line)}
+    nav>button:first-child[aria-selected="true"]{border-top-color:transparent}
+    nav::before{right:0;bottom:auto;width:auto;height:calc(100% / var(--count));transform:translateY(calc(var(--pos) * 100%))}
+  }
+  @media (prefers-reduced-motion:no-preference){
+    nav::before,.seg:not(.seg-mode)::before{transition:transform .42s var(--sp-soft)}
+  }
+}
 </style>
 </head>
 <body>
@@ -496,7 +546,7 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
 
   <!-- ================= LOGIN ================= -->
   <section id="login">
-    <form class="frame login-card" id="loginForm" autocomplete="off">
+    <form class="frame login-card" id="loginForm" autocomplete="off" novalidate>
       <i class="br"></i>
       <a class="btn home-link" href="dashboard">
         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
@@ -534,9 +584,9 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
       <span class="cap" id="whoLine">#10012345 | XAUUSD</span>
     </div>
     <span class="link"><span class="led off" id="linkLed"></span><span class="cap" id="linkTxt">LINK</span></span>
-    <button class="icon-btn" id="logout" aria-label="Disconnect" title="Disconnect">
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 3v9"/><path d="M6.3 7.2a8 8 0 1 0 11.4 0"/></svg>
-    </button>
+    <a class="icon-btn" id="backDash" href="dashboard" aria-label="Back to the dashboard" title="Back to the dashboard">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    </a>
   </header>
 
   <main id="main" hidden>
@@ -811,7 +861,7 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
           <p class="hint">The new password works right away. All other devices are logged out.</p>
         </form>
         <div class="row"><button class="btn" type="button" id="acLogoutOthers">Log out all other devices</button></div>
-        <div class="row"><button class="btn danger" type="button" id="acLogout">Disconnect this phone</button></div>
+        <div class="row"><button class="btn danger" type="button" id="acLogout">Log out</button></div>
       </div>
     </div>
 
@@ -864,8 +914,8 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
 <div id="quit" hidden>
   <div class="frame quit-card" role="dialog" aria-modal="true" aria-labelledby="quitTitle"><i class="br"></i>
     <span class="cap">RZGS-PRO</span>
-    <h3 id="quitTitle">Do you want to quit?</h3>
-    <p>This phone will be disconnected. The bot keeps running in MT5.</p>
+    <h3 id="quitTitle">Do you want to log out?</h3>
+    <p>This device will be logged out of the control app. The bot keeps running in MT5.</p>
     <div class="row">
       <button class="btn" id="quitNo">No</button>
       <button class="btn danger" id="quitYes">Yes</button>
@@ -1836,7 +1886,7 @@ function enter() {
   timer = setInterval(poll, 1000);
   poll();
 }
-// the power button asks first: "Do you want to quit?"  No / Yes
+// Log out asks first: "Do you want to log out?"  No / Yes
 function askQuit() { $('quit').hidden = false; $('quitNo').focus(); }
 function closeQuit() { $('quit').hidden = true; }
 function leave(message) {
@@ -1854,7 +1904,8 @@ function leave(message) {
 $('loginForm').addEventListener('submit', async e => {
   e.preventDefault();
   const acc = $('acc').value.replace(/\D/g, ''), btn = $('loginBtn'), err = $('loginErr');
-  if (!acc) { err.textContent = 'Type your MT5 account number.'; return; }
+  if (!acc) { err.textContent = 'Type your MT5 account number.'; refuse($('acc')); return; }
+  if (!$('pw').value) { err.textContent = 'Type your App Password.'; refuse($('pw')); return; }
   btn.textContent = 'Linking...'; btn.disabled = true; err.textContent = '';
   try {
     const r = await rpc('app_login', { p_account: Number(acc), p_password: $('pw').value });
@@ -1867,15 +1918,30 @@ $('loginForm').addEventListener('submit', async e => {
     err.textContent = r.err === 'unknown' ? 'No bot is connected for this account yet. Turn on App link in the bot inputs in MT5 first.'
                     : r.err === 'locked'  ? 'Too many wrong tries. Wait ' + Math.ceil((r.wait || 600) / 60) + ' minutes.'
                     : 'Wrong password.';
+    btn.textContent = 'Connect to bot'; btn.disabled = false;
+    refuse($(r.err === 'unknown' ? 'acc' : 'pw'));
+    return;
   } catch (x) { err.textContent = 'No connection to the server. Check your internet.'; }
   btn.textContent = 'Connect to bot'; btn.disabled = false;
 });
+// A wrong entry: the field turns red and shakes "no" before a word is read, and the cursor goes back to it.
+function refuse(field) {
+  field.classList.add('is-wrong');
+  field.focus();
+  field.select();
+  if (!field.animate || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  field.animate([0, -9, 8, -6, 4, -2, 0].map(x => ({ transform: 'translateX(' + x + 'px)' })), { duration: 420, easing: 'ease-out' });
+}
+for (const id of ['acc', 'pw']) $(id).addEventListener('input', () => $(id).classList.remove('is-wrong'));
+// Logged out: to the dashboard. The server is told, but a slow answer doesn't keep anyone waiting.
 async function logout() {
   const t = token;
-  leave('');
-  try { await rpc('app_logout', { p_token: t }); } catch (e) {}
+  clearInterval(timer);
+  $('quitYes').disabled = $('quitNo').disabled = true;
+  token = null; store.set('rz_token', null);
+  try { await Promise.race([rpc('app_logout', { p_token: t }), new Promise(done => setTimeout(done, 1500))]); } catch (e) {}
+  location.replace('dashboard');
 }
-$('logout').addEventListener('click', askQuit);
 $('acLogout').addEventListener('click', askQuit);
 $('acLogoutOthers').addEventListener('click', async () => {
   try {

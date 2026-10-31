@@ -1,0 +1,380 @@
+/* ==========================================================================
+   RZGS-PRO motion. Small moves that say what just happened:
+     press and burst   a tap on a button is answered at once
+     grows from there  a menu or a box opens out of the button that was tapped
+     shake             a wrong entry says "no" before a word is read
+     sliding box       the lit box of a menu travels to the new tab
+     nothing jumps     messages and answers open and close smoothly
+   Everything is here and in motion.js. With "reduce motion" on, the moves are left out.
+   ========================================================================== */
+:root {
+  --spring: cubic-bezier(0.3, 1.3, 0.5, 1);
+  --spring-soft: cubic-bezier(0.25, 1.1, 0.5, 1);
+}
+@supports (transition-timing-function: linear(0, 1)) {
+  :root {
+    --spring: linear(0, 0.189, 0.557, 0.89, 1.092, 1.162, 1.141, 1.083, 1.026, 0.989, 0.974, 0.976, 0.985, 0.994, 1.001, 1.004, 1.004, 1.003, 1);
+    --spring-soft: linear(0, 0.189, 0.512, 0.775, 0.935, 1.009, 1.031, 1.028, 1.018, 1.009, 1.003, 1, 0.999, 0.999, 1);
+  }
+}
+
+/* ---------------------------------------------------------------- the lit box that travels */
+@supports selector(:has(*)) {
+  .dash-dock,
+  .dash-seg {
+    position: relative;
+    --pos: 0;
+  }
+  .dash-dock {
+    --count: 5;
+  }
+  .dash-seg {
+    --count: 3;
+  }
+  .dash-dock:has(> :nth-child(2)[aria-selected="true"]),
+  .dash-seg:has(> :nth-child(2)[aria-selected="true"]) {
+    --pos: 1;
+  }
+  .dash-dock:has(> :nth-child(3)[aria-selected="true"]),
+  .dash-seg:has(> :nth-child(3)[aria-selected="true"]) {
+    --pos: 2;
+  }
+  .dash-dock:has(> :nth-child(4)[aria-selected="true"]) {
+    --pos: 3;
+  }
+  .dash-dock:has(> :nth-child(5)[aria-selected="true"]) {
+    --pos: 4;
+  }
+  .dash-dock > button,
+  .dash-seg > button {
+    position: relative;
+    z-index: 1;
+  }
+  .dash-dock > button[aria-selected="true"],
+  .dash-seg > button[aria-selected="true"] {
+    border-top-color: transparent;
+    background: none;
+    box-shadow: none;
+  }
+  .dash-dock::before,
+  .dash-seg::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: calc(100% / var(--count));
+    border: 1px solid transparent;
+    border-image: var(--hud-callout) 16 fill / 16px;
+    pointer-events: none;
+    transform: translateX(calc(var(--pos) * 100%));
+  }
+}
+
+/* ---------------------------------------------------------------- the line under the top menu */
+.nav-glide {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .nav-list.has-glide {
+    position: relative;
+  }
+  .nav-list.has-glide .nav-link::after {
+    display: none;
+  }
+  .nav-list.has-glide .nav-glide {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--grad);
+    list-style: none;
+    pointer-events: none;
+    opacity: 0;
+    transform-origin: left center;
+    transform: translate(var(--x, 0), var(--y, 0)) scaleX(var(--w, 1));
+  }
+  .nav-list.has-glide .nav-glide.is-on {
+    opacity: 1;
+  }
+}
+
+/* ---------------------------------------------------------------- the moves (not with "reduce motion") */
+@media (prefers-reduced-motion: no-preference) {
+  /* press: down at once, back with a small spring */
+  .btn {
+    transition:
+      color var(--dur-fast) var(--ease-out),
+      filter var(--dur) var(--ease-out),
+      transform 0.5s var(--spring);
+  }
+  .btn:active {
+    transform: scale(0.96);
+    transition-duration: 0.08s;
+  }
+  .icon-btn {
+    transition: background-color var(--dur) var(--ease-out), transform 0.5s var(--spring);
+  }
+  .icon-btn:active {
+    transform: scale(0.9);
+    transition-duration: 0.08s;
+  }
+  .trial-bar-go {
+    transition:
+      color var(--dur-fast) var(--ease-out),
+      background-color var(--dur-fast) var(--ease-out),
+      transform 0.5s var(--spring);
+  }
+  .trial-bar-go:active {
+    transform: scale(0.94);
+    transition-duration: 0.08s;
+  }
+  .check-field input {
+    transition: transform 0.5s var(--spring);
+  }
+  .check-field input:active {
+    transform: scale(0.8);
+    transition-duration: 0.08s;
+  }
+
+  /* burst: made by motion.js where a main button was tapped */
+  .tap-burst {
+    position: fixed;
+    z-index: 2147483000;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+  }
+  .tap-burst b {
+    position: absolute;
+    top: -9px;
+    left: -9px;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(25, 211, 255, 0.8);
+    animation: tap-ring 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .tap-burst i {
+    position: absolute;
+    top: -2.5px;
+    left: -2.5px;
+    width: 5px;
+    height: 5px;
+    background: var(--spark);
+    box-shadow: 0 0 8px rgba(25, 211, 255, 0.9);
+    animation: tap-spark 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  @keyframes tap-ring {
+    from {
+      opacity: 0.9;
+      transform: scale(0.4);
+    }
+    to {
+      opacity: 0;
+      transform: scale(4.4);
+    }
+  }
+  @keyframes tap-spark {
+    from {
+      transform: rotate(var(--angle)) translateX(8px);
+    }
+    65% {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+      transform: rotate(var(--angle)) translateX(var(--reach)) scale(0.3);
+    }
+  }
+
+  /* the sliding box and the line */
+  .dash-dock::before,
+  .dash-seg::before {
+    transition: transform 0.42s var(--spring-soft);
+  }
+  .dash-dock > button[aria-selected="true"] svg {
+    animation: tab-pop 0.45s var(--spring);
+  }
+  @keyframes tab-pop {
+    from {
+      transform: scale(0.72);
+    }
+  }
+  .nav-list.has-glide .nav-glide {
+    transition: transform 0.36s var(--spring-soft), opacity var(--dur-fast) linear;
+  }
+  .nav-list.has-glide .nav-glide.is-still {
+    transition: opacity var(--dur-fast) linear;
+  }
+
+  /* a new view comes in softly */
+  .dash-view:not([hidden]),
+  .dash-tool:not([hidden]),
+  .auth-step:not([hidden]) {
+    animation: view-in 0.26s var(--ease-out);
+  }
+  @keyframes view-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+  }
+
+  /* the phone menu grows out of the menu button */
+  @media (max-width: 1023.98px) {
+    .primary-nav {
+      transform: scale(0.45);
+      transform-origin: calc(100% - 22px) -36px;
+      transition:
+        opacity 0.14s ease-in,
+        transform 0.16s ease-in,
+        visibility 0s linear 0.16s;
+    }
+    .primary-nav.is-open {
+      transform: none;
+      transition:
+        opacity 0.12s ease-out,
+        transform 0.48s var(--spring),
+        visibility 0s;
+    }
+    .primary-nav .nav-list > li,
+    .primary-nav .nav-menu-cta {
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.1s linear, transform 0.1s linear;
+    }
+    .primary-nav.is-open .nav-list > li,
+    .primary-nav.is-open .nav-menu-cta {
+      opacity: 1;
+      transform: none;
+      transition: opacity 0.24s ease-out var(--step, 0s), transform 0.36s var(--ease-out) var(--step, 0s);
+    }
+    .primary-nav .nav-list > li:nth-child(1) { --step: 0.05s; }
+    .primary-nav .nav-list > li:nth-child(2) { --step: 0.09s; }
+    .primary-nav .nav-list > li:nth-child(3) { --step: 0.13s; }
+    .primary-nav .nav-list > li:nth-child(4) { --step: 0.17s; }
+    .primary-nav .nav-menu-cta { --step: 0.21s; }
+    .menu-toggle[aria-expanded="true"] .icon-close {
+      animation: icon-turn 0.4s var(--spring);
+    }
+    @keyframes icon-turn {
+      from {
+        transform: rotate(-90deg) scale(0.6);
+      }
+    }
+  }
+
+  /* the box under the profile button grows out of the button */
+  @media (min-width: 1024px) and (hover: hover) {
+    .nav-profile-wrap:hover .pm,
+    .nav-profile-wrap:focus-within .pm {
+      transition: opacity 0.12s ease-out, transform 0.44s var(--spring), visibility 0s;
+    }
+  }
+
+  /* The On this page list on phones opens smoothly, like the questions. (On computers it is simply always open.) */
+  @media (max-width: 1023.98px) {
+    @supports (interpolate-size: allow-keywords) {
+    .toc {
+      interpolate-size: allow-keywords;
+    }
+    .toc::details-content {
+      block-size: 0;
+      overflow: clip;
+      transition:
+        block-size var(--dur) var(--ease-out),
+        content-visibility var(--dur) allow-discrete;
+    }
+    .toc[open]::details-content {
+      block-size: auto;
+    }
+    }
+  }
+
+  /* Boxes grow out of the button that opened them (motion.js writes down where, --from-x and --from-y),
+     and leave faster than they came. */
+  @supports (transition-behavior: allow-discrete) {
+    dialog.plans {
+      clip-path: circle(0 at var(--from-x, 50vw) var(--from-y, 50vh));
+      transition:
+        clip-path 0.22s cubic-bezier(0.5, 0, 0.75, 0),
+        overlay 0.22s allow-discrete,
+        display 0.22s allow-discrete;
+    }
+    dialog.plans[open] {
+      clip-path: circle(var(--from-r, 150vmax) at var(--from-x, 50vw) var(--from-y, 50vh));
+      transition:
+        clip-path 0.55s cubic-bezier(0.32, 0.72, 0, 1),
+        overlay 0.55s allow-discrete,
+        display 0.55s allow-discrete;
+    }
+    @starting-style {
+      dialog.plans[open] {
+        clip-path: circle(0 at var(--from-x, 50vw) var(--from-y, 50vh));
+      }
+    }
+
+    dialog.plan-confirm,
+    dialog.dash-confirm,
+    dialog.dash-edit {
+      opacity: 0;
+      transform: scale(0.92);
+      transition:
+        opacity 0.14s ease-in,
+        transform 0.14s ease-in,
+        overlay 0.14s allow-discrete,
+        display 0.14s allow-discrete;
+    }
+    dialog.plan-confirm[open],
+    dialog.dash-confirm[open],
+    dialog.dash-edit[open] {
+      opacity: 1;
+      transform: none;
+      animation: none;
+      transition:
+        opacity 0.12s ease-out,
+        transform 0.48s var(--spring),
+        overlay 0.48s allow-discrete,
+        display 0.48s allow-discrete;
+    }
+    @starting-style {
+      dialog.plan-confirm[open],
+      dialog.dash-confirm[open],
+      dialog.dash-edit[open] {
+        opacity: 0;
+        transform: translate(calc(var(--from-x, 50vw) - 50vw), calc(var(--from-y, 50vh) - 50vh)) scale(0.2);
+      }
+    }
+
+    dialog.plans::backdrop,
+    dialog.plan-confirm::backdrop,
+    dialog.dash-confirm::backdrop,
+    dialog.dash-edit::backdrop {
+      opacity: 0;
+      transition:
+        opacity 0.14s ease-in,
+        overlay 0.14s allow-discrete,
+        display 0.14s allow-discrete;
+    }
+    dialog.plans[open]::backdrop,
+    dialog.plan-confirm[open]::backdrop,
+    dialog.dash-confirm[open]::backdrop,
+    dialog.dash-edit[open]::backdrop {
+      opacity: 1;
+      transition: opacity 0.26s ease-out, overlay 0.26s allow-discrete, display 0.26s allow-discrete;
+    }
+    @starting-style {
+      dialog.plans[open]::backdrop,
+      dialog.plan-confirm[open]::backdrop,
+      dialog.dash-confirm[open]::backdrop,
+      dialog.dash-edit[open]::backdrop {
+        opacity: 0;
+      }
+    }
+  }
+}

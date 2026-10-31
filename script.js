@@ -22,6 +22,7 @@ const nav = document.getElementById('primary-nav');
 
 function onScroll() {
   header.classList.toggle('is-scrolled', window.scrollY > 8);
+  document.documentElement.classList.toggle('past-fold', window.scrollY > window.innerHeight * 0.5);
 }
 window.addEventListener('scroll', onScroll, { passive: true });
 onScroll();
@@ -186,6 +187,7 @@ let height = 0;
 let layers = [];
 let rafId = null;
 let lastTime = 0;
+let lastDraw = 0;
 
 // Mouse crosshair, like a charting terminal (mouse only, not touch)
 const pointer = { x: null, y: null };
@@ -454,16 +456,17 @@ function buildLayers() {
   const small = width < 700;
   layers = [
     new CandleLayer({ top: 0.08, band: 0.24, spacing: small ? 11 : 14, body: small ? 5 : 6, speed: 9, alpha: 0.13 }),
-    new LineLayer({ top: 0.36, band: 0.26, step: 7, speed: 16, end: small ? 0.72 : 0.84, alpha: 0.4, fill: 0.06 }),
+    new LineLayer({ top: 0.36, band: 0.26, step: 7, speed: 16, end: small ? 0.72 : 0.84, alpha: 0.26, fill: 0.04 }),
     new CandleLayer({ top: 0.66, band: 0.24, spacing: small ? 15 : 20, body: small ? 7 : 9, speed: 14, alpha: 0.2, volume: true }),
   ];
   layers.forEach((layer) => layer.resize());
 }
 
 function resizeCanvas() {
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
   width = document.documentElement.clientWidth;
   height = window.innerHeight;
+  // on a phone the chart is faint and small: a sharper picture would only cost battery
+  const dpr = width < 700 ? 1 : Math.min(window.devicePixelRatio || 1, 2);
   canvas.width = Math.round(width * dpr);
   canvas.height = Math.round(height * dpr);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -508,12 +511,16 @@ function render(now) {
 }
 
 function frame(now) {
+  rafId = requestAnimationFrame(frame);
+  // the chart moves a few pixels a second: 24 pictures a second look the same and save the battery.
+  // The crosshair follows a mouse at full speed.
+  if (pointer.x === null && now - lastDraw < 40) return;
+  lastDraw = now;
   // clamp so returning to a background tab doesn't fast-forward the chart
-  const dt = lastTime ? Math.min(0.05, (now - lastTime) / 1000) : 0;
+  const dt = lastTime ? Math.min(0.1, (now - lastTime) / 1000) : 0;
   lastTime = now;
   layers.forEach((layer) => layer.update(dt));
   render(now);
-  rafId = requestAnimationFrame(frame);
 }
 
 function startChart() {
@@ -525,6 +532,8 @@ function startChart() {
 
 let resizeRaf = null;
 window.addEventListener('resize', () => {
+  // a phone's address bar sliding away changes only the height: the chart carries on as it is
+  if (document.documentElement.clientWidth === width && matchMedia('(pointer: coarse)').matches) return;
   cancelAnimationFrame(resizeRaf);
   resizeRaf = requestAnimationFrame(() => {
     resizeCanvas();
