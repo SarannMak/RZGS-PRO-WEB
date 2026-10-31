@@ -766,6 +766,17 @@ dialog.plan-confirm::backdrop {
     transition: opacity 0.12s ease-out, transform 0.2s var(--ease-out), visibility 0s;
   }
 }
+@media (min-width: 1024px) and (hover: hover) {
+  /* just clicked: closed at once, whatever the pointer is on (plans.js) */
+  .nav-profile-wrap.is-shut .pm,
+  .nav-profile-wrap.is-shut:hover .pm,
+  .nav-profile-wrap.is-shut:focus-within .pm {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px) scale(0.94);
+    transition: none;
+  }
+}
 .pm-in {
   display: grid;
   gap: 8px;

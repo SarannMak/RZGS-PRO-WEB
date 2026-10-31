@@ -666,11 +666,14 @@
         $('[data-dash-close]').href = from.href;
       }
     } catch (e) { /* came from elsewhere: the home page */ }
-    // the profile button on this page goes to the first view, with no reload
-    $$('.header-actions [data-profile]').forEach((link) => link.addEventListener('click', (event) => {
+    // the profile button and the links in its box, on this page: the right view with no reload, from its top, even when
+    // that view is already on screen
+    document.addEventListener('click', (event) => {
+      const link = event.target.closest('.header-actions [data-profile], .pm-links a[href*="dashboard#"]');
+      if (!link || event.metaKey || event.ctrlKey || event.shiftKey) return;
       event.preventDefault();
-      selectTab(tabs[0]);
-    }));
+      selectTab(tabFor(new URL(link.href).hash.slice(1)) || tabs[0]);
+    });
     // links inside the page, like "See plans", switch tab through the address
     window.addEventListener('hashchange', () => {
       const tab = tabFor(location.hash.slice(1));

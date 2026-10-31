@@ -243,6 +243,15 @@
       <button class="pm-out" type="button" data-sign-out>${ICONS.logout}Log out</button>
     </div>`;
     wrap.append(menu);
+    // A click here always answers: the box goes away, even with the pointer still on it. It can open again once the
+    // pointer has left, or when the keyboard comes back to it.
+    wrap.addEventListener('click', () => {
+      wrap.classList.add('is-shut');
+      if (wrap.contains(document.activeElement)) document.activeElement.blur();
+    });
+    wrap.addEventListener('pointerleave', () => wrap.classList.remove('is-shut'));
+    wrap.addEventListener('focusin', () => wrap.classList.remove('is-shut'));
+    window.addEventListener('pageshow', () => wrap.classList.remove('is-shut'));
   }
 
   function paintMenu(profile) {
