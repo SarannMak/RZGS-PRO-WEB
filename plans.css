@@ -174,8 +174,15 @@ html.signed-in .guest-only {
 }
 @media (max-width: 719.98px) {
   .trial-bar-more,
-  .trial-bar-chip {
+  .trial-bar-chip-word {
     display: none;
+  }
+  .trial-bar-chip {
+    padding: 7px;
+  }
+  .trial-bar-chip .icon {
+    width: 16px;
+    height: 16px;
   }
   .trial-bar-in {
     gap: 8px;

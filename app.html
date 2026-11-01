@@ -67,7 +67,7 @@ button{cursor:pointer}
 
 .app{width:100%;max-width:480px;height:100%;display:flex;flex-direction:column;padding-inline:16px}
 
-/* framed card with corner brackets: used for the login and the core panel only */
+/* framed card with corner brackets: used for the core panel only */
 .frame{position:relative;border:1px solid var(--frame);background:var(--panel);
   box-shadow:0 0 0 2px rgba(38,150,178,.16),0 0 26px var(--glow)}
 .frame::before,.frame::after,.frame>.br::before,.frame>.br::after{
@@ -77,18 +77,7 @@ button{cursor:pointer}
 .frame>.br::before{bottom:8px;left:8px;border-right:0;border-top:0}
 .frame>.br::after{bottom:8px;right:8px;border-left:0;border-top:0}
 
-/* ---------- login ---------- */
-#login{flex:1;display:flex;flex-direction:column;justify-content:center;gap:16px;padding-block:24px}
-.login-card{padding:30px 24px 26px;display:flex;flex-direction:column;gap:18px}
-.eye{width:64px;height:64px}
-.eye .sweep{transform-origin:32px 32px;animation:spin 3.2s linear infinite}
-.brand{font:700 26px/1.1 var(--f-display);color:var(--title);letter-spacing:.02em;margin:0}
-.field{display:flex;flex-direction:column;gap:6px}
-.field input{background:var(--bg);border:1px solid var(--line);padding:12px;font:500 16px var(--f-mono);color:var(--title);width:100%;border-radius:2px}
-.field input:focus{border-color:var(--cyan);outline:none}
 .err{color:var(--bad);font-size:13px;min-height:19px;margin:0}
-.note{font-size:12.5px;color:var(--muted);margin:0;text-align:center}
-.note b{color:var(--body);font-family:var(--f-mono);font-weight:500}
 
 /* ---------- buttons ---------- */
 .btn{border:1px solid var(--line);background:var(--panel-2);padding:12px 10px;font:600 13px var(--f-display);
@@ -281,7 +270,7 @@ nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;st
 .demo-flag{font:500 9.5px var(--f-mono);letter-spacing:.14em;color:var(--warn);border:1px solid #6b5a00;padding:3px 6px;white-space:nowrap}
 
 @keyframes spin{to{transform:rotate(360deg)}}
-@media (prefers-reduced-motion:reduce){.ring-dash,.eye .sweep,.btn.flash{animation:none}.ring-arc,.bar i{transition:none}}
+@media (prefers-reduced-motion:reduce){.ring-dash,.btn.flash{animation:none}.ring-arc,.bar i{transition:none}}
 /* phones: the ring and its text stay side by side, just a little smaller */
 @media (max-width:400px){.core{padding:18px 14px;gap:14px}.ring{width:98px;height:98px}.stats .num{font-size:24px}}
 .set input:disabled{-webkit-text-fill-color:var(--body);cursor:default}
@@ -305,7 +294,7 @@ body{
     linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
   background-size:100% 720px,32px 32px,32px 32px;background-repeat:no-repeat,repeat,repeat;
 }
-/* key frame (login, core, dialogs): cyan line, lime corner marks, soft glow. The old corner brackets are not drawn. */
+/* key frame (core, dialogs): cyan line, lime corner marks, soft glow. The old corner brackets are not drawn. */
 .frame{border:1px solid transparent;border-image:var(--hud-frame) 24 fill / 24px;background:none;box-shadow:none;filter:drop-shadow(0 0 12px var(--glow))}
 .frame::before,.frame::after,.frame>.br::before,.frame>.br::after{display:none}
 .sheet-card{border-image-source:var(--hud-frame-danger);box-shadow:none;filter:drop-shadow(0 0 12px rgba(255,90,106,.28))}
@@ -343,12 +332,6 @@ body{
 .btn:disabled::after,.btn:disabled::before,.btn:focus-visible::after{display:none}
 @media (prefers-reduced-motion:reduce){.btn.primary::after,.btn.on::after{background:rgba(25, 211, 255, 0.3);animation:none}.btn.primary::before,.btn.on::before{display:none}}
 .icon-btn{border:1px solid transparent;border-image:var(--hud-btn) 18 fill / 18px;background:none;color:var(--body)}
-/* login box: link to the client dashboard, in the top right corner */
-.home-link{position:absolute;top:30px;right:24px;display:inline-flex;align-items:center;gap:8px;padding:0 14px;font-size:12px;text-decoration:none}
-.home-link:hover{color:var(--cyan)}
-/* login box: one line that says which login this is */
-.login-note{margin:0;text-align:center}
-.login-note a{color:var(--cyan)}
 
 /* switches, dock, inputs */
 .seg{border:1px solid transparent;border-image:var(--hud-line) 16 / 16px;clip-path:var(--cut-10)}
@@ -439,16 +422,10 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
 .sw-in:checked::after{background:var(--neon)}
 
 /* accents: gradient brand and counters, lime marks, brighter lights */
-.brand{width:fit-content;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
-  filter:drop-shadow(0 0 14px rgba(25,211,255,.3))}
 .stats .num{align-self:flex-start;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .led{box-shadow:0 0 0 3px rgba(43,243,145,.2)}
 .led.warn{box-shadow:0 0 0 3px rgba(255,210,63,.2)}
 .led.bad{box-shadow:0 0 0 3px rgba(255,90,106,.22)}
-.eye circle:nth-of-type(1){stroke:var(--line-2)}
-.eye circle:nth-of-type(2){stroke:var(--frame)}
-.eye .sweep{fill:var(--cyan)}
-.eye circle:nth-of-type(3){fill:var(--neon)}
 .demo-flag{border-color:rgba(255,210,63,.45)}
 
 /* ==========================================================================
@@ -473,7 +450,6 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
    ========================================================================== */
 @media (min-width:1024px){
   .app{max-width:1200px;padding-inline:32px;display:grid;grid-template-columns:230px minmax(0,1fr);grid-template-rows:auto auto 1fr;column-gap:28px}
-  #login{grid-column:1/-1;width:100%;max-width:480px;margin-inline:auto}
   header{grid-column:1/-1;padding-block:22px 18px}
   header h1{font-size:22px}
   nav{grid-column:1;grid-row:2;align-self:start;display:flex;flex-direction:column;border:1px solid transparent;
@@ -505,8 +481,7 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
   .sw-in:not(:checked):not(:disabled):active::after{right:17px}
   .sw-in:checked:not(:disabled):active::after{left:17px}
 }
-/* a wrong entry on the login page; its message fades in */
-.field input.is-wrong,.field input.is-wrong:focus{border-color:var(--bad);box-shadow:0 0 0 3px rgba(255,90,106,.18)}
+/* a message fades in */
 @media (prefers-reduced-motion:no-preference){
   /* every button: down at once when pressed, back with a small spring */
   .btn{transition:color .18s,filter .18s,transform .5s var(--sp)}
@@ -539,42 +514,136 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
     nav::before,.seg:not(.seg-mode)::before{transition:transform .42s var(--sp-soft)}
   }
 }
+/* ==========================================================================
+   The link screen (2 Nov 2026). Not a sign-in card like the website's: the console with its light off, and a
+   picture of you linking to your bot. #login[data-link] is off, ready, busy, bad or ok; the script sets it and
+   everything below follows.
+   ========================================================================== */
+:root{
+  --hud-slot-bad:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M10.21 0.5H47.5V37.79L37.79 47.5H0.5V10.21Z' fill='%231a0b12' stroke='%23b23a4c'/%3E%3Cpath d='M.5 10.21L10.21 .5M47.5 37.79L37.79 47.5' fill='none' stroke='%23ff5a6a'/%3E%3C/svg%3E");
+}
+#login{--ln:var(--line-2);flex:1;min-height:0;display:flex;flex-direction:column;overflow-y:auto;padding-bottom:20px;scrollbar-width:none}
+#login::-webkit-scrollbar{display:none}
+#login ::selection{background:rgba(25,211,255,.32);color:var(--title)}
+#login[data-link="ready"]{--ln:var(--frame)}
+#login[data-link="busy"]{--ln:var(--cyan)}
+#login[data-link="bad"]{--ln:var(--bad)}
+#login[data-link="ok"]{--ln:var(--neon)}
+#login .link{margin-top:7px}
+.ln-dash{flex:none;display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;font-size:12px;text-decoration:none}
+.ln-dash:hover{color:var(--cyan)}
+
+/* the picture: you, the line, your bot, on a scope */
+.ln-stage{flex:1 1 150px;min-height:140px;position:relative;overflow:clip;display:grid;grid-template-columns:auto minmax(36px,1fr) auto;align-items:center}
+.ln-rings{position:absolute;left:50%;top:calc(50% - 11px);width:min(100%,400px);aspect-ratio:1;transform:translate(-50%,-50%);pointer-events:none}
+.ln-rings circle{fill:none;stroke:var(--ln);stroke-width:1;stroke-dasharray:2 5;vector-effect:non-scaling-stroke;opacity:.6}
+.ln-node{position:relative;display:flex;flex-direction:column;align-items:center;gap:10px}
+.ln-node .cap{white-space:nowrap}
+.ln-tile{display:grid;place-items:center;width:clamp(84px,25vw,104px);aspect-ratio:1;border:1px solid transparent;border-image:var(--hud-panel) 16 fill / 16px;color:var(--muted);transition:color .25s,filter .25s}
+.ln-tile svg{width:48%;height:48%;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;overflow:visible}
+.ln-candle{transform-box:fill-box;transform-origin:50% 100%}
+#login[data-link="ready"] .ln-tile,#login[data-link="busy"] .ln-tile{color:var(--cyan)}
+#login[data-link="busy"] .ln-tile{border-image-source:var(--hud-callout);filter:drop-shadow(0 2px 12px var(--glow))}
+#login[data-link="ok"] .ln-tile{border-image-source:var(--hud-callout);color:var(--neon);filter:drop-shadow(0 2px 14px rgba(166,255,26,.3))}
+#login[data-link="ok"] .ln-candle rect{fill:currentColor}
+#login[data-link="bad"] .ln-node:last-child .ln-tile{border-image-source:var(--hud-slot-bad);color:var(--bad)}
+.ln-link{position:relative;margin-bottom:22px;align-self:center}
+.ln-rail{position:relative;height:2px;container-type:inline-size;background:repeating-linear-gradient(90deg,var(--ln) 0 6px,transparent 6px 12px)}
+.ln-rail i{position:absolute;top:-2px;left:0;width:18px;height:6px;background:var(--cyan);box-shadow:0 2px 10px var(--cyan);opacity:0}
+#login[data-link="ok"] .ln-rail{background:var(--neon);box-shadow:0 2px 12px rgba(166,255,26,.45);transform-origin:left}
+#login[data-link="bad"] .ln-rail{-webkit-mask:linear-gradient(90deg,#000 38%,transparent 38% 62%,#000 62%);mask:linear-gradient(90deg,#000 38%,transparent 38% 62%,#000 62%)}
+.ln-cut{display:none;position:absolute;left:50%;top:50%;width:16px;height:16px;transform:translate(-50%,-50%);fill:none;stroke:var(--bad);stroke-width:2;stroke-linecap:round}
+#login[data-link="bad"] .ln-cut{display:block}
+
+/* the form: one line per thing to type, like the settings rows of the console */
+.ln-form{flex:none;display:flex;flex-direction:column;gap:10px}
+.ln-form h2{margin:0 0 4px;font:700 24px/1.15 var(--f-display);color:var(--title);letter-spacing:.01em}
+.ln-slot{position:relative;display:flex;align-items:center;gap:10px;min-height:56px;padding:0 14px;border:1px solid transparent;border-image:var(--hud-panel) 16 fill / 16px;transition:filter .18s}
+.ln-slot>label{flex:none;cursor:text;font-size:11px}
+.ln-slot input{flex:1;min-width:0;height:54px;padding:0;background:none;border:0;border-radius:0;outline:none;color:var(--title);caret-color:var(--neon);
+  font:500 16px var(--f-mono);font-variant-numeric:tabular-nums;text-align:right}
+.ln-slot input::placeholder{color:var(--muted);opacity:1}
+.ln-slot input:-webkit-autofill{-webkit-text-fill-color:var(--title);transition:background-color 99999s}
+.ln-slot--pw{padding-right:48px}
+.ln-slot .pw-eye{right:6px;width:42px}
+.ln-slot:focus-within{border-image-source:var(--hud-callout);filter:drop-shadow(0 2px 10px var(--glow))}
+.ln-slot.is-wrong,.ln-slot.is-wrong:focus-within{border-image-source:var(--hud-slot-bad);filter:drop-shadow(0 2px 10px rgba(255,90,106,.28))}
+#loginBtn{width:100%;min-height:54px;font-size:14px}
+.ln-help{margin:6px 0 0}
+.ln-help b{color:var(--body);font-weight:600}
+.ln-help a{color:var(--cyan);text-underline-offset:3px}
+@media (min-width:1024px){
+  #login{grid-column:1/-1;grid-row:1/-1;align-self:center;width:100%;max-width:480px;height:min(100%,840px);margin-inline:auto}
+}
+@media (prefers-reduced-motion:no-preference){
+  /* looking for the bot: the signal gives up half way; both typed: it reaches the bot; linking: it runs */
+  #login[data-link="off"] .ln-rail i:first-child{animation:ln-seek 3.6s linear infinite}
+  #login[data-link="ready"] .ln-rail i:first-child{animation:ln-reach 2.4s cubic-bezier(.45,0,.55,1) infinite}
+  #login[data-link="busy"] .ln-rail i{animation:ln-reach .9s linear infinite}
+  #login[data-link="busy"] .ln-rail i:last-child{animation-delay:.45s}
+  #login[data-link="busy"] .ln-rings circle{animation:ln-ping 1.2s ease-out infinite;animation-delay:calc(var(--i)*.16s)}
+  /* the moment of the link: the line fills, the rings lock, the bot's chart comes up */
+  #login[data-link="ok"] .ln-rail{animation:ln-fill .34s cubic-bezier(.16,1,.3,1) both}
+  #login[data-link="ok"] .ln-rings circle{animation:ln-lock .7s ease-out both;animation-delay:calc(var(--i)*.07s)}
+  #login[data-link="ok"] .ln-candle{animation:ln-grow .46s var(--sp) both;animation-delay:calc(.12s + var(--i)*55ms)}
+  #login[data-link="bad"] .ln-link{animation:ln-snap .34s ease-out}
+  @keyframes ln-seek{0%{transform:translateX(0);opacity:0}10%,46%{opacity:.85}60%,100%{transform:translateX(52cqw);opacity:0}}
+  @keyframes ln-reach{0%{transform:translateX(0);opacity:0}12%,88%{opacity:1}100%{transform:translateX(calc(100cqw - 18px));opacity:0}}
+  @keyframes ln-ping{from{opacity:.85}to{opacity:.14}}
+  @keyframes ln-fill{from{transform:scaleX(0)}}
+  @keyframes ln-lock{from{opacity:1}to{opacity:.4}}
+  @keyframes ln-grow{from{transform:scaleY(.15);opacity:.2}}
+  @keyframes ln-snap{from{transform:scaleX(1.1)}}
+}
 </style>
 </head>
 <body>
 <div class="app">
 
   <!-- ================= LOGIN ================= -->
-  <section id="login">
-    <form class="frame login-card" id="loginForm" autocomplete="off" novalidate>
-      <i class="br"></i>
-      <a class="btn home-link" href="dashboard">
+  <section id="login" data-link="off">
+    <header class="ln-head">
+      <div class="who">
+        <h1>RZGS-PRO.BOT</h1>
+        <span class="link"><span class="led off" id="lnLed"></span><span class="cap" id="lnState" role="status">Not linked</span></span>
+      </div>
+      <a class="btn ln-dash" href="dashboard">
         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
         Dashboard
       </a>
-      <svg class="eye" viewBox="0 0 64 64" aria-hidden="true">
-        <circle cx="32" cy="32" r="29" fill="none" stroke="#262a42" stroke-width="2"/>
-        <circle cx="32" cy="32" r="21" fill="none" stroke="#2696b2" stroke-width="1.5" stroke-dasharray="3 5"/>
-        <path class="sweep" d="M32 32 L32 3 A29 29 0 0 1 57 17 Z" fill="#22d3ee" opacity=".22"/>
-        <circle cx="32" cy="32" r="7" fill="#22d3ee"/>
-      </svg>
-      <div>
-        <p class="cap">Remote control link</p>
-        <h1 class="brand">RZGS-PRO.BOT</h1>
+    </header>
+
+    <div class="ln-stage" aria-hidden="true">
+      <svg class="ln-rings" viewBox="0 0 200 200"><circle style="--i:0" cx="100" cy="100" r="42"/><circle style="--i:1" cx="100" cy="100" r="70"/><circle style="--i:2" cx="100" cy="100" r="98"/></svg>
+      <div class="ln-node">
+        <span class="ln-tile"><svg viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="2"/><path d="M10.5 18.5h3"/></svg></span>
+        <span class="cap">You</span>
       </div>
-      <div class="field">
-        <label class="cap" for="acc">MT5 account number</label>
+      <div class="ln-link">
+        <div class="ln-rail"><i></i><i></i></div>
+        <svg class="ln-cut" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </div>
+      <div class="ln-node">
+        <span class="ln-tile"><svg viewBox="0 0 24 24"><g class="ln-candle" style="--i:0"><path d="M4 11v2M4 19v2"/><rect x="2.5" y="13" width="3" height="6"/></g><g class="ln-candle" style="--i:1"><path d="M9.5 8v2M9.5 16v2"/><rect x="8" y="10" width="3" height="6"/></g><g class="ln-candle" style="--i:2"><path d="M15 9.5v2M15 16.5v2"/><rect x="13.5" y="11.5" width="3" height="5"/></g><g class="ln-candle" style="--i:3"><path d="M20.5 3v2M20.5 13v2"/><rect x="19" y="5" width="3" height="8"/></g></svg></span>
+        <span class="cap" id="lnBot">Your bot</span>
+      </div>
+    </div>
+
+    <form class="ln-form" id="loginForm" autocomplete="off" novalidate>
+      <h2>Link your bot</h2>
+      <div class="ln-slot">
+        <label class="cap" for="acc">MT5 account</label>
         <input id="acc" inputmode="numeric" placeholder="12345678" autocomplete="username" required>
       </div>
-      <div class="field">
+      <div class="ln-slot ln-slot--pw">
         <label class="cap" for="pw">App password</label>
         <input id="pw" type="password" autocomplete="current-password" required>
+        <button type="button" class="pw-eye" data-eye="pw" aria-label="Show password" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="slash" d="M3 3l18 18"/></svg></button>
       </div>
       <p class="err" id="loginErr" role="alert"></p>
       <button class="btn primary" id="loginBtn" type="submit">Connect to bot</button>
-      <p class="hint login-note">Use your MT5 account number and the App Password you typed in the bot inputs. This is not your website login: your email and password are for the <a href="dashboard">dashboard</a>.</p>
+      <p class="hint ln-help">In MT5, turn on <b>App link</b> in the bot inputs and set an <b>App Password</b>. It is not your website password: that one is for the <a href="dashboard">dashboard</a>.</p>
     </form>
-    <p class="note">First turn on <b>App link</b> in the bot inputs in MT5 and set an <b>App Password</b>.<br>Then log in here with your account number and that password.</p>
   </section>
 
   <!-- ================= CONSOLE ================= -->
@@ -1900,6 +1969,22 @@ function leave(message) {
   $('loginBtn').textContent = 'Connect to bot'; $('loginBtn').disabled = false;
   $('loginErr').textContent = message || '';
   $('pw').value = '';
+  $('pw').type = 'password';
+  const eye = document.querySelector('#loginForm .pw-eye');
+  eye.setAttribute('aria-pressed', 'false'); eye.setAttribute('aria-label', 'Show password');
+  linkFollow();
+}
+// The picture on the link screen follows the form (see "The link screen" in the styles).
+const LINK_STATE = { off: ['off', 'Not linked'], ready: ['off', 'Ready to link'], busy: ['warn', 'Linking...'], bad: ['bad', 'Not linked'], ok: ['', 'Linked'] };
+function linkShow(state) {
+  $('login').dataset.link = state;
+  $('lnLed').className = 'led ' + LINK_STATE[state][0];
+  $('lnState').textContent = LINK_STATE[state][1];
+}
+function linkFollow() {
+  const acc = $('acc').value.replace(/\D/g, '');
+  $('lnBot').textContent = acc.length > 3 ? 'MT5 \u2026' + acc.slice(-4) : 'Your bot';
+  linkShow(acc && $('pw').value ? 'ready' : 'off');
 }
 $('loginForm').addEventListener('submit', async e => {
   e.preventDefault();
@@ -1907,32 +1992,36 @@ $('loginForm').addEventListener('submit', async e => {
   if (!acc) { err.textContent = 'Type your MT5 account number.'; refuse($('acc')); return; }
   if (!$('pw').value) { err.textContent = 'Type your App Password.'; refuse($('pw')); return; }
   btn.textContent = 'Linking...'; btn.disabled = true; err.textContent = '';
+  linkShow('busy');
   try {
     const r = await rpc('app_login', { p_account: Number(acc), p_password: $('pw').value });
     if (r.ok) {
       token = r.token; account = String(r.account); symbol = r.symbol || '';
       store.set('rz_token', token); store.set('rz_account', account);
-      enter();
+      linkShow('ok'); btn.textContent = 'Linked';
+      setTimeout(enter, matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 640);
       return;
     }
     err.textContent = r.err === 'unknown' ? 'No bot is connected for this account yet. Turn on App link in the bot inputs in MT5 first.'
                     : r.err === 'locked'  ? 'Too many wrong tries. Wait ' + Math.ceil((r.wait || 600) / 60) + ' minutes.'
-                    : 'Wrong password.';
+                    : 'Wrong password. Check the App Password in the bot inputs.';
     btn.textContent = 'Connect to bot'; btn.disabled = false;
+    linkShow('bad');
     refuse($(r.err === 'unknown' ? 'acc' : 'pw'));
     return;
-  } catch (x) { err.textContent = 'No connection to the server. Check your internet.'; }
+  } catch (x) { err.textContent = 'No connection to the server. Check your internet.'; linkShow('bad'); }
   btn.textContent = 'Connect to bot'; btn.disabled = false;
 });
-// A wrong entry: the field turns red and shakes "no" before a word is read, and the cursor goes back to it.
+// A wrong entry: its line turns red and shakes "no" before a word is read, and the cursor goes back to it.
 function refuse(field) {
-  field.classList.add('is-wrong');
+  const slot = field.closest('.ln-slot');
+  slot.classList.add('is-wrong');
   field.focus();
   field.select();
-  if (!field.animate || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  field.animate([0, -9, 8, -6, 4, -2, 0].map(x => ({ transform: 'translateX(' + x + 'px)' })), { duration: 420, easing: 'ease-out' });
+  if (!slot.animate || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  slot.animate([0, -9, 8, -6, 4, -2, 0].map(x => ({ transform: 'translateX(' + x + 'px)' })), { duration: 420, easing: 'ease-out' });
 }
-for (const id of ['acc', 'pw']) $(id).addEventListener('input', () => $(id).classList.remove('is-wrong'));
+for (const id of ['acc', 'pw']) $(id).addEventListener('input', () => { $(id).closest('.ln-slot').classList.remove('is-wrong'); $('loginErr').textContent = ''; linkFollow(); });
 // Logged out: to the dashboard. The server is told, but a slow answer doesn't keep anyone waiting.
 async function logout() {
   const t = token;
@@ -2095,7 +2184,7 @@ for (const [id, k] of [['alTp', 'tp'], ['alBasket', 'basket'], ['alRisk', 'risk'
 }
 function closePwConfirm() { $('pwConfirm').hidden = true; }
 // an eye in each password box shows what is typed, and hides it again
-$('pwForm').addEventListener('click', e => {
+for (const id of ['pwForm', 'loginForm']) $(id).addEventListener('click', e => {
   const b = e.target.closest('.pw-eye'); if (!b) return;
   const show = b.getAttribute('aria-pressed') !== 'true';
   $(b.dataset.eye).type = show ? 'text' : 'password';
@@ -2151,6 +2240,7 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) poll
 // settings come from the MT5 inputs; with a bot that sends cfg.setApp most of them can be changed here (syncSettings)
 document.querySelectorAll('#t-settings .panel:not(:last-of-type) input:not([type=range])').forEach(i => { i.disabled = true; });
 $('acc').value = account;
+linkFollow();
 if (window.Telegram && Telegram.WebApp) { try { Telegram.WebApp.ready(); Telegram.WebApp.expand(); } catch (e) {} }
 if (token) enter();
 })();

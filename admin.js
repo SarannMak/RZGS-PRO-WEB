@@ -135,7 +135,7 @@
     } else if (result.ok) {
       giveSay('It could not be finished by itself. Look under Waiting for you.');
     } else if (result.code === 'paid_running') {
-      giveSay(`This client has a paid plan running${result.until ? ` until ${when(result.until)}` : ''}. It has to end first, or they can cancel it on their dashboard.`);
+      giveSay(`This client has a paid plan running${result.until ? ` until ${when(result.until)}` : ''}. It has to end first, or they can cancel it under See plans.`);
     } else {
       giveSay(esc(GIVE_WORDS[result.code] || 'That did not work. Is the newest "checkout" function deployed?'));
     }

@@ -27,6 +27,10 @@
    the model is drawn on a canvas inside that box and fades in when it is
    ready. The box keeps the robot's place until then. Without WebGL, or when
    the library cannot be loaded, the logo holds that place (.robot-failed in style.css).
+
+   window.rzgsRobot.guide(box) puts a robot in another script's box (the checkout box of
+   checkout.js): no desk and no tablet, and its arms move, so it can point at the form and cheer
+   (box.rzgsRobot.pose('point' | 'cheer' | 'rest')). The script may be loaded just for that.
    ========================================================================== */
 
 // This is a plain script, not a module: a page opened straight from a folder (file://) may not
@@ -36,8 +40,9 @@
 'use strict';
 
 const THREE_URL = 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js';
+let THREE_READY = null;
 
-const boxes = [...document.querySelectorAll('[data-robot-3d]')];
+const boxes = [...document.querySelectorAll('[data-robot-3d]')].filter((box) => !box.querySelector('canvas'));
 const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
 // The cards that float beside the robot wait for the intro (the stylesheet hides them until they
 // get "is-in"). Where there will be no 3D scene, they are let in at once.
@@ -181,7 +186,7 @@ document.addEventListener('mouseleave', () => {
   pointer.mouse = false;
 });
 
-function build(THREE, box) {
+function build(THREE, box, guide = false) {
   let renderer;
   try {
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
@@ -545,7 +550,7 @@ function build(THREE, box) {
   const TABLET = V(0.5, -0.5, 0.9);
   const tablet = new THREE.Group();
   tablet.position.copy(TABLET);
-  body.add(tablet);
+  if (!guide) body.add(tablet);
   {
     const canvas = document.createElement('canvas');
     canvas.width = 384;
@@ -606,7 +611,7 @@ function build(THREE, box) {
   const KNUCKLE = TOUCH.clone().add(V(-0.25, -0.06, 0.0));
   const ELBOW = { left: V(-0.97, -0.93, 0.12), right: V(0.99, -0.95, 0.1) };
   const WRIST = { left: KNUCKLE.clone().add(V(-0.17, -0.05, -0.1)), right: onTablet(-0.43, -0.44, 0.12) };
-  for (const [name, side] of [['left', -1], ['right', 1]]) {
+  if (!guide) for (const [name, side] of [['left', -1], ['right', 1]]) {
     const shoulder = V(side * 0.86, -0.22, 0.02);
     limb(body, shoulder, ELBOW[name], 0.185, armour);
     limb(body, ELBOW[name], WRIST[name], 0.14, armour);
@@ -634,7 +639,7 @@ function build(THREE, box) {
     add(parent, new THREE.SphereGeometry(0.018, 10, 8), LIT.lime).position.copy(from).add(V(0, 0, 0.02));
     if (tip) limb(parent, to, tip, 0.023, plate);
   }
-  {
+  if (!guide) {
     // the hand on the viewer's left points at the chart: one finger out, three curled in
     const palm = add(body, new THREE.SphereGeometry(1, 20, 16), armour);
     palm.position.copy(WRIST.left).lerp(KNUCKLE, 0.6);
@@ -646,7 +651,7 @@ function build(THREE, box) {
       finger(body, from, from.clone().add(V(0.07, -0.025, -0.045)));
     }
   }
-  {
+  if (!guide) {
     // the hand on the viewer's right holds the tablet at its lower corner: the palm is behind the
     // glass, the fingers come round the edge onto the viewer's side
     const palm = add(body, new THREE.SphereGeometry(1, 20, 16), armour);
@@ -655,6 +660,44 @@ function build(THREE, box) {
     for (let i = 0; i < 4; i++) {
       const y = -0.4 + i * 0.066;
       finger(body, onTablet(-0.345, y, -0.035), onTablet(-0.24, y + 0.01, -0.05), onTablet(-0.16, y + 0.012, -0.035));
+    }
+  }
+
+  // The guide's arms hang from the shoulder on two joints, so they can move: see POSES. Each hand has
+  // a set of fingers to point with and a set held open; one of the two shows.
+  const arms = {};
+  if (guide) {
+    const UPPER = 0.72, FORE = 0.64;
+    for (const [name, side] of [['left', -1], ['right', 1]]) {
+      const upper = new THREE.Group(), lower = new THREE.Group(), point = new THREE.Group(), open = new THREE.Group();
+      upper.position.set(side * 0.86, -0.22, 0.02);
+      body.add(upper);
+      limb(upper, V(0, 0, 0), V(0, -UPPER, 0), 0.185, armour);
+      const out = V(side * 0.15, 0, 0.115);
+      glowLine(upper, [V(0, -UPPER * 0.32, 0).add(out), V(0, -UPPER * 0.8, 0).add(out)], 0.012, 'cyan');
+      lower.position.set(0, -UPPER, 0);
+      upper.add(lower);
+      add(lower, new THREE.SphereGeometry(0.19, 24, 18), rubber);
+      const joint = emblem(lower, 0.095);
+      joint.position.set(side * 0.16, 0, 0.08);
+      joint.rotation.y = side * 1.1;
+      limb(lower, V(0, 0, 0), V(0, -FORE, 0), 0.14, armour);
+      glowLine(lower, [V(0, -FORE * 0.3, 0.14), V(0, -FORE * 0.82, 0.14)], 0.011, 'cyan');
+      const cuff = add(lower, new THREE.TorusGeometry(0.135, 0.03, 10, 32), plate, 0, -FORE * 0.93, 0);
+      cuff.rotation.x = Math.PI / 2;
+      add(lower, new THREE.TorusGeometry(0.166, 0.008, 8, 32), LIT.lime, 0, -FORE * 0.93, 0).rotation.x = Math.PI / 2;
+      const palm = add(lower, new THREE.SphereGeometry(1, 20, 16), armour, 0, -FORE - 0.1, 0);
+      palm.scale.set(0.11, 0.13, 0.085);
+      const y = -FORE - 0.19;
+      lower.add(point, open);
+      for (let i = 0; i < 4; i++) {
+        const x = (i - 1.5) * 0.05;
+        finger(open, V(x, y, 0.02), V(x * 1.25, y - 0.09, 0.02), V(x * 1.45, y - 0.17, 0.02));
+        // the first finger points, the other three are curled in
+        if (i === 0) finger(point, V(0, y, 0.05), V(0, y - 0.13, 0.05), V(0, y - 0.3, 0.05));
+        else finger(point, V(x, y, -0.01), V(x, y - 0.05, 0.05), V(x, y + 0.01, 0.08));
+      }
+      arms[name] = { upper, lower, point, open, side, now: [-0.06, 0.16, -0.5, 0.05] };
     }
   }
 
@@ -672,7 +715,7 @@ function build(THREE, box) {
   // turned in toward the viewer. They show what the bot is doing. They stand still while the
   // robot turns. Every screen says little, in large letters: most of it is behind the robot.
   const desk = new THREE.Group();
-  scene.add(desk);
+  if (!guide) scene.add(desk);
   const INK = { cyan: '#19d3ff', lime: '#a6ff1a', mint: '#2bf391', red: '#ff5a6a', gold: '#ffd23f', text: '#f3fbff', muted: '#8fb4c2', dark: '#03151d' };
   const FONT = 'Oxanium, "Segoe UI", system-ui, sans-serif';
   // One monitor: a dark case, a lit screen with a cyan line round it. `draw` paints the screen.
@@ -873,10 +916,11 @@ function build(THREE, box) {
 
   /* ------------------------------------------------------------ the view */
   // The camera sees one upright frame, 2 wide and 3 high, with the whole robot in it.
-  const FRAME = { top: 1.52, bottom: -2.06 };
-  const WHOLE = 2 / 3;
+  // The guide stands in a square frame, with the room for its arm beside it.
+  const FRAME = guide ? { top: 1.78, bottom: -2.92 } : { top: 1.52, bottom: -2.06 };
+  const WHOLE = guide ? 1 : 2 / 3;
   const HEADROOM = 0.08; // a box less tall than the frame shows the upper part: this share of the cut comes off the top
-  const camera = new THREE.PerspectiveCamera(24, 2 / 3, 0.5, 60);
+  const camera = new THREE.PerspectiveCamera(24, WHOLE, 0.5, 60);
   {
     const tall = FRAME.top - FRAME.bottom, middle = (FRAME.top + FRAME.bottom) / 2;
     const far = tall / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
@@ -916,14 +960,15 @@ function build(THREE, box) {
 
   /* ------------------------------------------------------------ looking */
   // Where the pointer is, seen from the head: -1..1 sideways and up or down.
-  const HEAD_AT = [0.5, (FRAME.top - 0.72) / (FRAME.top - FRAME.bottom)]; // the head's place in the whole frame
+  const HEAD_AT = [0.5, (FRAME.top - 0.72) / (FRAME.top - FRAME.bottom)]; // the head's place in the whole frame (the guide can stand aside: robot.position.x)
   function wanted(seconds, now) {
     if (!pointer.mouse && now - pointer.at > 3500) {
-      // nobody is pointing: look around slowly
+      // nobody is pointing: look around slowly (the guide keeps an eye on the form beside it)
+      if (guide) return [0.42 + Math.sin(seconds * 0.5) * 0.14, Math.sin(seconds * 0.37 + 1.3) * 0.12 + 0.08];
       return [Math.sin(seconds * 0.5) * 0.6, Math.sin(seconds * 0.37 + 1.3) * 0.35 + 0.05];
     }
     const rect = box.getBoundingClientRect();
-    const x = rect.left + ((HEAD_AT[0] - crop[0]) / crop[2]) * rect.width;
+    const x = rect.left + ((HEAD_AT[0] + robot.position.x / (FRAME.top - FRAME.bottom) - crop[0]) / crop[2]) * rect.width;
     const y = rect.top + ((HEAD_AT[1] - crop[1]) / crop[3]) * rect.height;
     return [clamp((pointer.x - x) / Math.max(260, innerWidth * 0.36), -1, 1), clamp((pointer.y - y) / Math.max(220, innerHeight * 0.42), -1, 1)];
   }
@@ -941,14 +986,35 @@ function build(THREE, box) {
     const rise = 1 - (1 - clamp(intro / INTRO.robot, 0, 1)) ** 3;
     robot.scale.setScalar(mix(0.88, 1, rise));
     robot.position.y -= (1 - rise) * 0.2;
-    screens.forEach((screen, i) => flicker(screen, (intro - INTRO.monitors - i * INTRO.apart) / INTRO.glitch));
+    if (!guide) screens.forEach((screen, i) => flicker(screen, (intro - INTRO.monitors - i * INTRO.apart) / INTRO.glitch));
     while (cardsIn < cards.length && intro >= INTRO.cards + cardsIn * INTRO.between) cards[cardsIn++].classList.add('is-in');
     settled = intro >= INTRO.over;
+  }
+  // The guide's poses: upper arm forward and sideways, forearm forward and sideways, in radians.
+  // Forward is negative; sideways is away from the body. x: where it stands; to point it steps aside, so the arm has room.
+  const POSES = {
+    rest: { x: 0, left: [-0.06, 0.16, -0.5, 0.05], right: [-0.06, 0.16, -0.5, 0.05] },
+    point: { x: -0.42, left: [-0.06, 0.16, -0.5, 0.05], right: [-0.14, 1.36, -0.02, 0.2], pointing: 'right' },
+    cheer: { x: 0, left: [-0.1, 2.3, -0.1, 0.42], right: [-0.1, 2.3, -0.1, 0.42], wave: true },
+  };
+  let stance = 'rest';
+  function moveArms(dt) {
+    const goal = POSES[stance], near = 1 - Math.exp(-dt * 6);
+    robot.position.x += (goal.x - robot.position.x) * near;
+    for (const name of Object.keys(arms)) {
+      const arm = arms[name];
+      arm.now = arm.now.map((value, i) => value + (goal[name][i] - value) * near);
+      const wave = goal.wave ? Math.sin(clock * 6.5 + arm.side) * 0.16 : 0;
+      arm.upper.rotation.set(arm.now[0], 0, arm.side * arm.now[1]);
+      arm.lower.rotation.set(arm.now[2], 0, arm.side * (arm.now[3] + wave));
+      arm.point.visible = goal.pointing === name;
+      arm.open.visible = !arm.point.visible;
+    }
   }
   function pose() {
     // the head turns far, the body a little; nothing leaves its place
     const dip = Math.sin(nod * Math.PI); // a quick nod after a click on the head
-    neck.rotation.y = look.head[0] * 0.62 - STANCE;
+    neck.rotation.y = look.head[0] * 0.62 - STANCE + Math.sin(headNo * Math.PI * 4) * 0.24 * headNo; // headNo: shaking "no"
     neck.rotation.x = look.head[1] * 0.34 + dip * 0.15;
     neck.rotation.z = -look.head[0] * 0.05;
     body.rotation.y = STANCE + look.body[0] * 0.2;
@@ -1042,6 +1108,7 @@ function build(THREE, box) {
     return ray.intersectObject(headShape, false).length > 0;
   }
   let nod = 0; // 1 right after a click on the head, back to 0 in half a second
+  let headNo = 0; // the guide shaking its head: 1 when it starts
   function poke() {
     if (busy) return false; // one thing at a time: this click is not taken
     busy = true;
@@ -1068,10 +1135,30 @@ function build(THREE, box) {
     });
   }
 
+  if (guide) {
+    moveArms(1e3);
+    box.rzgsRobot = {
+      // a check that passed, a check that did not
+      nod() {
+        if (!still) nod = 1;
+      },
+      no() {
+        if (!still) headNo = 1;
+      },
+      pose(name) {
+        stance = POSES[name] ? name : 'rest';
+        if (still) {
+          moveArms(1e3);
+          if (layout()) draw();
+        }
+      },
+    };
+  }
+
   if (still) {
     // "reduce motion": the robot stands still, its head a little turned
-    look.head = [-0.25, 0.1];
-    look.body = [-0.25, 0.1];
+    look.head = [guide ? 0.4 : -0.25, 0.1];
+    look.body = [guide ? 0.4 : -0.25, 0.1];
     new ResizeObserver(() => {
       if (layout()) draw();
     }).observe(box);
@@ -1084,7 +1171,8 @@ function build(THREE, box) {
     requestAnimationFrame(frame);
     const passed = Math.max(0, (now - last) / 1000), dt = Math.min(0.05, passed);
     last = now;
-    if (held) return;
+    // Behind the checkout box the big robot rests: only the guide in the box moves.
+    if (held || (!guide && document.querySelector('dialog.co[open]'))) return;
     clock += dt;
     intro += Math.min(0.12, passed); // the intro keeps to real time, so a slow phone does not stretch it
     const goal = wanted(clock, now), quick = 1 - Math.exp(-dt * 8), slow = 1 - Math.exp(-dt * 3.5);
@@ -1097,7 +1185,9 @@ function build(THREE, box) {
     if (nextBlink < -0.2) nextBlink = 2.4 + Math.random() * 3;
     blink = nextBlink < 0 ? Math.sin((-nextBlink / 0.2) * Math.PI) : 0;
     nod = Math.max(0, nod - dt / 0.5);
-    runDesk(clock);
+    headNo = Math.max(0, headNo - dt / 0.7);
+    if (guide) moveArms(Math.min(0.25, passed)); // real time, so a slow computer does not stretch the move
+    else runDesk(clock);
     draw();
   }
   function run() {
@@ -1161,4 +1251,16 @@ function build(THREE, box) {
     state: () => ({ head: look.head.slice(), goal: wanted(clock, performance.now()), blink, running, calls: renderer.info.render.calls, triangles: renderer.info.render.triangles }),
   });
 }
+
+window.rzgsRobot = {
+  async guide(target) {
+    try {
+      build(THREE_READY ? await THREE_READY : await (THREE_READY = import(THREE_URL)), target, true);
+    } catch (error) {
+      noRobot(target);
+      console.warn('robot-3d: the guide could not be drawn', error);
+    }
+    return target.rzgsRobot || null;
+  },
+};
 })();

@@ -253,10 +253,6 @@
                 <div class="dash-line"><span class="cap">Status</span><b data-plan-status>No plan</b></div>
                 <div class="dash-line"><span class="cap">Valid until</span><b data-plan-until>-</b></div>
                 <div class="dash-line"><span class="cap">MT5 accounts</span><b>1</b></div>
-                <div class="dash-row" data-plan-cancel-row hidden>
-                  <button class="btn btn-danger" type="button" data-plan-cancel>Cancel plan</button>
-                </div>
-                <p class="dash-hint" data-plan-cancel-note hidden>We ask before anything changes. The days you have left are not refunded and don't move to a new plan.</p>
               </section>
 
               <section class="dash-panel">
@@ -444,13 +440,13 @@
                   <span class="de-pic-box">
                     <span class="avatar-xl" data-avatar-preview aria-hidden="true"></span>
                     <button class="de-pic-add" type="button" data-avatar-pick aria-label="Upload a photo" title="Upload a photo"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+                    <button class="de-pic-del" type="button" data-avatar-remove aria-label="Remove photo" title="Remove photo" hidden><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg></button>
                   </span>
-                  <button class="de-pic-del" type="button" data-avatar-remove aria-label="Remove photo" title="Remove photo" hidden><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg></button>
-                  <p class="dash-hint">JPG, PNG or WebP. Saved as soon as you pick it.</p>
                 </div>
                 <input type="file" accept="image/jpeg,image/png,image/webp" data-avatar-file hidden>
                 <p class="form-msg" data-form-msg role="status" hidden></p>
               </div>
+              <p class="dash-hint de-pic-hint">JPG, PNG or WebP. Saved as soon as you pick it.</p>
 
               <form id="dash-edit-form" data-profile-form novalidate>
                 <div class="field-grid">

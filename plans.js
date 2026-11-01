@@ -309,8 +309,11 @@
   /* ---------------------------------------------------------------- the bar at the top */
   let bar = null;
 
+  // Closed for this visit only: the offer is back the next time (the owner, 2026-11-02).
+  const barClosed = () => { try { return sessionStorage.getItem(BAR_KEY); } catch (e) { return null; } };
+
   function closeBar() {
-    write(BAR_KEY, '1');
+    try { sessionStorage.setItem(BAR_KEY, '1'); } catch (e) { /* private window */ }
     if (!bar) return;
     const closing = bar;
     bar = null;
@@ -328,13 +331,14 @@
 
   function showBar() {
     const header = document.querySelector('.site-header');
-    if (!header || document.body.dataset.authPage || read(BAR_KEY) || storedProfile().plan) return;
+    forget(BAR_KEY); // from when closing it hid the offer for good
+    if (!header || document.body.dataset.authPage || barClosed() || storedProfile().plan) return;
     bar = document.createElement('div');
     bar.className = 'trial-bar';
     bar.setAttribute('role', 'region');
     bar.setAttribute('aria-label', 'Free trial offer');
     bar.innerHTML = `<div class="trial-bar-in">
-      <span class="trial-bar-chip">${ICONS.gift}Free trial</span>
+      <span class="trial-bar-chip">${ICONS.gift}<span class="trial-bar-chip-word">Free trial</span></span>
       <p class="trial-bar-text"><strong>Start your free 7-day trial.</strong><span class="trial-bar-more"> Try the gold bot on your own MT5 account, with no payment.</span></p>
       <a class="trial-bar-go" href="${pageUrl('signup')}" data-plans>Claim now</a>
       <button class="trial-bar-x" type="button" aria-label="Close this offer">${ICONS.x}</button>
@@ -348,6 +352,9 @@
   let current = { plan: null, name: 'No plan yet', detail: '', price: '$0' };
 
   const dateText = (date) => date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+  // On a running Elite plan, Diamond can start now: the plan is cancelled first, after asking.
+  const movingUp = (now) => now.plan === 'elite' && !now.ended;
 
   // What the person has now, for the pop-up and the Elite confirmation.
   function describeCurrent(profile) {
@@ -410,6 +417,9 @@
         // a plan can be renewed once it has ended, not before
         label.textContent = 'Plan running';
         button.disabled = true;
+      } else if (plan.id === 'diamond' && movingUp(current)) {
+        label.textContent = 'Upgrade to Diamond';
+        button.disabled = false;
       } else if (paidRunning) {
         label.textContent = 'After your plan ends';
         button.disabled = true;
@@ -417,8 +427,9 @@
         label.textContent = mine ? 'Renew Plan' : plan.button;
         button.disabled = false;
       }
-      card.querySelector('.pc-under').textContent = paidRunning && current.endsText
-        ? `You can ${running ? 'renew' : 'start this'} after ${current.endsText}` : plan.under;
+      const upgrade = plan.id === 'diamond' && movingUp(current);
+      card.querySelector('.pc-under').textContent = upgrade ? `Your ${current.name} plan is cancelled first. Days left are not refunded.`
+        : paidRunning && current.endsText ? `You can ${running ? 'renew' : 'start this'} after ${current.endsText}` : plan.under;
     });
   }
 
@@ -482,10 +493,10 @@
     freshCurrent();
   }
 
-  async function goCancel() {
+  async function goCancel(next) {
     const checkout = await loadCheckout();
-    dialog.close();
-    checkout.askCancel(current.plan, current.endsAt);
+    if (dialog && dialog.open) dialog.close();
+    checkout.askCancel(current.plan, current.endsAt, next);
   }
 
   // A chat with our sales team, in a new tab: this page stays where it is.
@@ -501,7 +512,11 @@
   // signing up comes first.
   async function choose(plan, button) {
     if (button.disabled) return;
-    if (plan.id === 'diamond') { toSales(); return; }
+    if (plan.id === 'diamond') {
+      if (movingUp(current)) goCancel('diamond');
+      else toSales();
+      return;
+    }
     setBusy(button, true);
     const session = await activeSession();
     if (session === null) { toSignUp(); return; }
@@ -579,7 +594,12 @@
     const go = event.target.closest('[data-checkout]');
     if (!go || go.disabled || event.metaKey || event.ctrlKey || event.shiftKey) return;
     event.preventDefault();
-    if (go.dataset.checkout === 'diamond') { toSales(); return; }
+    if (go.dataset.checkout === 'diamond') {
+      current = describeCurrent(storedProfile());
+      if (movingUp(current)) goCancel('diamond');
+      else toSales();
+      return;
+    }
     if (!signedIn()) { toSignUp(); return; }
     (await loadCheckout()).open(go.dataset.checkout);
   });

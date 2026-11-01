@@ -48,6 +48,13 @@
   let autoLooks = 0;
   let shownQr = null;
   let qrWatch = null;
+  let movingTo = null;   // asked to cancel in order to move up to this plan
+  let pickedBroker = ''; // chosen on the first screen of the broker step, not yet sent to the server
+  // The robot beside the steps, on a computer only (the owner's drawing, 2026-11-02). It is loaded the first time it is needed.
+  const WIDE = '(min-width: 860px)';
+  let robot = null;
+  let robotAsked = false;
+  let robotPose = 'rest';
 
   /* ---------------------------------------------------------------- the server */
   async function session() {
@@ -90,12 +97,21 @@
     box = document.createElement('dialog');
     box.className = 'plan-confirm co';
     box.setAttribute('aria-labelledby', 'co-title');
-    box.innerHTML = '<div class="plan-confirm-in co-in" tabindex="-1"></div>';
-    inner = box.firstElementChild;
+    box.innerHTML = `<div class="co-shell">
+        <aside class="co-side">
+          <p class="co-side-head"><img src="${pageUrl('assets/logo-192.webp')}" width="34" height="34" alt="">RZGS<span>-PRO</span></p>
+          <div class="co-side-words"><p class="co-side-title" data-co-side-title></p><p class="co-side-text" data-co-side-text></p></div>
+          <div class="co-robot" data-co-robot aria-hidden="true"></div>
+          <div data-co-side-pay></div>
+        </aside>
+        <div class="plan-confirm-in co-in" tabindex="-1"></div>
+      </div>`;
+    inner = box.querySelector('.co-in');
     document.body.append(box);
     box.addEventListener('click', onClick);
     box.addEventListener('submit', onSubmit);
     box.addEventListener('change', onChange);
+    box.addEventListener('input', (event) => event.target.classList.remove('is-wrong'));
     box.addEventListener('close', () => { stopTimers(); announce(); });
   }
 
@@ -116,17 +132,45 @@
     qrWatch = null;
   }
 
-  function paint(html) {
+  function wakeRobot(pose) {
+    robotPose = pose;
+    if (robot) { robot.pose(pose); return; }
+    if (robotAsked || !matchMedia(WIDE).matches || (navigator.connection && navigator.connection.saveData)) return;
+    robotAsked = true;
+    const place = box.querySelector('[data-co-robot]');
+    const script = window.rzgsRobot ? Promise.resolve() : new Promise((yes, no) => {
+      const tag = document.createElement('script');
+      tag.src = pageUrl('robot-3d.js?v=10');
+      tag.onload = yes;
+      tag.onerror = no;
+      document.head.append(tag);
+    });
+    script.then(() => window.rzgsRobot.guide(place)).then((made) => {
+      robot = made;
+      if (robot) robot.pose(robotPose);
+    }).catch(() => place.classList.add('robot-failed'));
+  }
+
+  // beside: what stands left of the steps on a computer: { title, text, pose }. Without it the box is the small one.
+  function paint(html, beside = null) {
     stopTimers();
     box.classList.remove('co--pay');
+    box.classList.toggle('co--split', Boolean(beside));
+    box.querySelector('[data-co-side-pay]').replaceChildren();
+    if (beside) {
+      box.querySelector('[data-co-side-title]').textContent = beside.title || '';
+      box.querySelector('[data-co-side-text]').textContent = beside.text || '';
+      if (beside.pose) wakeRobot(beside.pose);
+    }
     inner.innerHTML = `<button class="plans-x plans-x--in" type="button" data-co-close aria-label="Close">${X}</button>${html}`;
     inner.scrollTop = 0;
+    box.querySelector('.co-shell').scrollTop = 0;
     const first = inner.querySelector('input:not([type="radio"]), [data-co-first]');
     if (first) first.focus({ preventScroll: true });
     else inner.focus({ preventScroll: true });
   }
 
-  const paintLoading = () => paint(`<div class="co-loading" role="status">${SPINNER}<span>One moment...</span></div>`);
+  const paintLoading = () => paint(`<div class="co-loading" role="status">${SPINNER}<span>One moment...</span></div>`, { title: 'One moment', pose: 'rest' });
 
   function rail(plan, at) {
     const steps = PLANS[plan].steps;
@@ -140,8 +184,14 @@
   const planLine = (plan) => `<p class="co-plan"><b>${PLANS[plan].name}</b> ${PLANS[plan].amount} · ${PLANS[plan].days} days · 1 MT5 account</p>`;
   const message = (note) => `<p class="co-msg" data-co-msg role="alert"${note ? ' data-tone="error"' : ' hidden'}>${esc(note || '')}</p>`;
   const mainButton = (label, attributes = '') => `<span class="plan-btn-glow"><button class="plan-btn" ${attributes}><span data-plan-label>${label}</span></button></span>`;
+  // Stuck on any step: the words go to our team on Telegram, with the order number already typed.
+  const helpLine = (words = 'Need help?') => {
+    const text = `Hello, I need help with my RZGS-PRO order${order && order.id ? ` #${order.id}` : ''}.`;
+    return `<p class="co-help">${words} <a href="https://t.me/sarannsadboi?text=${encodeURIComponent(text)}" target="_blank" rel="noopener">Contact our team</a></p>`;
+  };
   const agree = `<p class="plan-confirm-note">By continuing you agree to our <a href="${pageUrl('license')}">License Rules</a> and <a href="${pageUrl('terms')}">Terms &amp; Conditions</a>. Your plan does not renew by itself.</p>`;
 
+  // A check that did not pass says "no" like a wrong password: the box turns red and shakes, the cursor goes back to it.
   function say(text, html) {
     const line = inner.querySelector('[data-co-msg]');
     if (!line) return;
@@ -149,7 +199,31 @@
     line.hidden = false;
     if (html) line.innerHTML = text;
     else line.textContent = text;
-    if (window.rzgsMotion) window.rzgsMotion.shake(line);
+    const field = inner.querySelector('.co-input');
+    if (field) {
+      field.classList.add('is-wrong');
+      field.focus({ preventScroll: true });
+      field.select();
+    }
+    if (window.rzgsMotion) {
+      window.rzgsMotion.shake(line);
+      if (field) window.rzgsMotion.shake(field);
+    }
+    if (robot) robot.no();
+  }
+
+  // A check that passed: a tick draws itself and says what was checked, then the next step comes up (the owner, 2026-11-02).
+  async function tick(words) {
+    const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const over = document.createElement('div');
+    over.className = 'co-tick';
+    over.setAttribute('role', 'status');
+    over.innerHTML = `<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="28"/><path d="M19 33l9 9 17-19"/></svg><p>${words}</p>`;
+    // the box on a phone: there the payment scrolls as a whole, and the tick has to be in sight
+    (matchMedia(WIDE).matches ? inner : box).append(over);
+    if (robot) robot.nod();
+    await new Promise((done) => setTimeout(done, calm ? 500 : 950));
+    setTimeout(() => over.remove(), 0);
   }
 
   function setBusy(button, busy, words = 'Checking...') {
@@ -171,37 +245,61 @@
   }
 
   /* ---------------------------------------------------------------- the steps */
+  // The broker step is two screens (the owner, 2026-11-02): choose the broker and open an account, then the email is checked.
   function paintBroker() {
-    const chosen = order.broker || (last && last.broker) || '';
+    pickedBroker = order.broker || (last && last.broker) || '';
+    if (order.broker) paintEmail();
+    else paintBrokerChoice();
+  }
+
+  function paintBrokerChoice() {
+    paint(`${rail(order.plan, 'broker')}${planLine(order.plan)}
+      <h2 id="co-title">Connect Your Broker</h2>
+      <p class="plan-confirm-lead">Your MT5 account has to be opened with our link at one of these brokers.</p>
+      <fieldset class="co-brokers">
+        <legend>Your broker</legend>
+        ${BROKERS.map((broker) => `<label class="co-broker"><input type="radio" name="broker" value="${broker.id}"${broker.id === pickedBroker ? ' checked' : ''}><span>${broker.name}</span></label>`).join('')}
+      </fieldset>
+      ${message(order.note)}
+      <div data-co-broker-go hidden>
+        <p class="co-open" data-co-open></p>
+        <div class="co-stack">
+          <a class="btn btn-ghost" data-co-open-link target="_blank" rel="noopener sponsored">Open An Account</a>
+          ${mainButton('I Have Registered', 'type="button" data-co-registered')}
+        </div>
+      </div>
+      ${helpLine()}`, { title: 'Let\'s set up your bot', text: 'First, choose your broker. Everything happens right here, step by step.', pose: 'point' });
+    paintBrokerGo();
+  }
+
+  // Choosing a broker brings up its two buttons.
+  function paintBrokerGo() {
+    const go = inner.querySelector('[data-co-broker-go]');
+    const broker = brokerById(pickedBroker);
+    if (!go || !broker) return;
+    go.hidden = false;
+    go.querySelector('[data-co-open]').textContent = `Open your ${broker.name} account with our link, then come back here.`;
+    go.querySelector('[data-co-open-link]').href = broker.link;
+  }
+
+  function paintEmail() {
+    const broker = brokerById(pickedBroker);
     const email = order.broker_email || (last && last.broker_email) || accountEmail;
     paint(`${rail(order.plan, 'broker')}${planLine(order.plan)}
-      <h2 id="co-title">Your broker account</h2>
-      <p class="plan-confirm-lead">Your MT5 account has to be opened with our link at one of these brokers.</p>
+      <h2 id="co-title">Connect Your Email</h2>
+      <p class="plan-confirm-lead">Type the email you used to open your ${broker.name} account. We check that it is under our link.</p>
       <form data-co-form="broker" novalidate>
-        <fieldset class="co-brokers">
-          <legend>Your broker</legend>
-          ${BROKERS.map((broker) => `<label class="co-broker"><input type="radio" name="broker" value="${broker.id}"${broker.id === chosen ? ' checked' : ''}><span>${broker.name}</span></label>`).join('')}
-        </fieldset>
-        <p class="co-open" data-co-open${chosen ? '' : ' hidden'}></p>
         <div class="co-field">
-          <label for="co-email">The email you used at the broker</label>
+          <label for="co-email">Your ${broker.name} email</label>
           <input class="co-input" id="co-email" name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="none" spellcheck="false" value="${esc(email)}" required>
         </div>
         ${message(order.note)}
         <button class="btn btn-ghost btn-block co-ask" type="button" data-co-ask hidden>Ask our team to check</button>
-        ${mainButton('Check my account', 'type="submit"')}
+        ${mainButton('Check My Account', 'type="submit"')}
+        <button class="co-back" type="button" data-co-change-broker>Change broker</button>
+        ${helpLine()}
         ${agree}
-      </form>`);
-    paintOpenLink();
-  }
-
-  function paintOpenLink() {
-    const line = inner.querySelector('[data-co-open]');
-    const picked = inner.querySelector('input[name="broker"]:checked');
-    if (!line || !picked) return;
-    const broker = brokerById(picked.value);
-    line.hidden = false;
-    line.innerHTML = `No account yet? <a href="${esc(broker.link)}" target="_blank" rel="noopener sponsored">Open one at ${broker.name} with our link</a>, then come back here.`;
+      </form>`, { title: 'Now your email', text: 'It lets me check that your account is under our link.', pose: 'point' });
   }
 
   function paintMt5() {
@@ -209,7 +307,7 @@
     const typed = order.mt5 || (last && last.mt5) || '';
     const paid = order.amount > 0;
     paint(`${rail(order.plan, 'mt5')}${planLine(order.plan)}
-      <h2 id="co-title">Your MT5 number</h2>
+      <h2 id="co-title">Connect Your MT5</h2>
       <p class="plan-confirm-lead">The login number of the account the bot will run on. It has to be a hedging account${order.plan === 'diamond' ? ' that can trade gold' : ''}.</p>
       <form data-co-form="mt5" novalidate>
         <div class="co-field">
@@ -219,39 +317,40 @@
         ${message(order.note)}
         <button class="btn btn-ghost btn-block co-ask" type="button" data-co-ask hidden>Ask our team to check</button>
         ${mainButton(paid ? 'Continue to payment' : 'Get my bot', 'type="submit"')}
-        ${back ? '<button class="co-back" type="button" data-co-back>Back</button>' : agree}
-      </form>`);
+        ${back ? '<button class="co-back" type="button" data-co-back>Back</button>' : ''}
+        ${helpLine()}
+        ${back ? '' : agree}
+      </form>`, { title: 'Almost there', text: 'Tell me your MT5 number. That is the account I will run on.', pose: 'point' });
   }
 
   // The owner's Scan to Pay poster, with this order's own QR, name and amount where the bot's poster has them.
   function paintPay(qr) {
     const money = `$${Number(qr.amount).toFixed(2)}`;
-    paint(`<div class="co-pay">
-        <div class="co-pay-head">
-          ${rail(order.plan, 'pay')}${planLine(order.plan)}
-          <h2 id="co-title">Pay ${money} by KHQR</h2>
-        </div>
-        <div class="co-poster">
-          <img src="${pageUrl(`assets/pay-${order.plan}.webp`)}" width="1254" height="1254" alt="Scan to pay ${money}" data-co-art>
-          <div class="co-poster-card"><p>${esc(qr.name)}</p><b>$ ${Number(qr.amount).toFixed(2)}</b></div>
-          <div class="co-poster-qr" data-co-qr><svg viewBox="0 0 ${qr.size} ${qr.size}" role="img" aria-label="KHQR code for ${money}" shape-rendering="crispEdges"><path d="${qr.path}"/></svg></div>
-        </div>
-        <div class="co-pay-side">
-          <p class="co-left" data-co-left></p>
-          <ol class="co-how">
-            <li>Open your bank app and scan the code. Paying on this phone? Save the poster, then scan it from your photos.</li>
-            <li>Pay the amount it shows, then tap the button below.</li>
-          </ol>
-          ${message(order.note)}
-          ${mainButton('I have paid', 'type="button" data-co-paid data-co-first')}
-          <button class="btn btn-ghost btn-sm co-save" type="button" data-co-save>Save the poster</button>
-          <button class="co-back" type="button" data-co-back>Back</button>
-        </div>
-      </div>`);
+    paint(`${rail(order.plan, 'pay')}${planLine(order.plan)}
+      <h2 id="co-title">Complete Your Payment</h2>
+      <p class="plan-confirm-lead">Pay ${money} by KHQR.</p>
+      ${message(order.note)}
+      <button class="btn btn-ghost btn-block co-ask" type="button" data-co-ask hidden>Ask our team to check my payment</button>
+      <div class="co-stack">
+        <button class="btn btn-ghost" type="button" data-co-save>Save the QR Code</button>
+        ${mainButton('I Have Paid', 'type="button" data-co-paid data-co-first')}
+      </div>
+      <p class="co-left" data-co-left></p>
+      <ol class="co-how">
+        <li>Open your bank app and scan the code. Paying on this phone? Save the QR code, then scan it from your photos.</li>
+        <li>Pay the amount it shows, then tap I Have Paid.</li>
+      </ol>
+      <button class="co-back" type="button" data-co-back>Back</button>
+      ${helpLine('Problem with your payment?')}`, {});
     box.classList.add('co--pay');
+    box.querySelector('[data-co-side-pay]').innerHTML = `<div class="co-poster">
+        <img src="${pageUrl(`assets/pay-${order.plan}.webp`)}" width="1254" height="1254" alt="Scan to pay ${money}" data-co-art>
+        <div class="co-poster-card"><p>${esc(qr.name)}</p><b>$ ${Number(qr.amount).toFixed(2)}</b></div>
+        <div class="co-poster-qr" data-co-qr><svg viewBox="0 0 ${qr.size} ${qr.size}" role="img" aria-label="KHQR code for ${money}" shape-rendering="crispEdges"><path d="${qr.path}"/></svg></div>
+      </div>`;
     shownQr = qr;
     autoLooks = 0;
-    const place = inner.querySelector('[data-co-qr]');
+    const place = box.querySelector('[data-co-qr]');
     // Whole device pixels for every square of the code, so a phone reads it easily off any screen.
     qrWatch = new ResizeObserver(() => {
       const device = window.devicePixelRatio || 1;
@@ -290,18 +389,19 @@
       <div class="co-row">
         <a class="btn btn-primary" href="${pageUrl('dashboard')}" data-co-first>Go to my dashboard</a>
         <a class="btn btn-ghost" href="${pageUrl('contact')}">Contact us</a>
-      </div>`);
+      </div>
+      ${helpLine('Waiting too long?')}`, { title: 'Give us a moment', text: 'Our team is checking by hand. There is nothing more to do.', pose: 'rest' });
   }
 
   function paintReady(licence) {
     paint(`${rail(licence.plan, 'bot')}
-      <h2 id="co-title">Your bot is ready</h2>
-      <p class="plan-confirm-lead">Keep these two passwords. They stay on your dashboard too.</p>
-      ${licenceHtml(licence)}
+      <h2 id="co-title">Here is Your Bot</h2>
+      <p class="plan-confirm-lead"><span class="co-phone-only">Done, congratulations! </span>Keep these two passwords. They stay on your dashboard too.</p>
+      ${licenceHtml(licence, true)}
       <div class="co-row">
         <a class="btn btn-ghost" href="${pageUrl('app')}">Open control app</a>
         <a class="btn btn-ghost" href="${pageUrl('dashboard')}">Go to my dashboard</a>
-      </div>`);
+      </div>`, { title: 'Done, congratulations!', text: 'Your bot is ready. Put me on your MT5 and we can start.', pose: 'cheer' });
   }
 
   function paintNotice(title, text, buttons = '') {
@@ -309,12 +409,14 @@
   }
 
   // What the bot needs in MT5: on the last step here, and on the dashboard for as long as the plan runs.
-  function licenceHtml(licence) {
+  // fileLast: the download button under the steps, as the last thing in the box.
+  function licenceHtml(licence, fileLast = false) {
     const key = (label, value) => `<div class="co-key"><span>${label}</span><code>${esc(value)}</code><button class="co-copy" type="button" data-co-copy="${esc(value)}">Copy</button></div>`;
     const broker = brokerById(licence.broker && String(licence.broker).toLowerCase());
+    const file = mainButton('Download your bot file', 'type="button" data-co-file');
     return `<div class="co-keys">${key('Bot Password', licence.bot_password)}${key('App Password', licence.app_password)}</div>
       <p class="co-small">Your Bot Password works only on account ${esc(licence.mt5)}${broker ? ` at ${broker.name}` : ''}, until ${dateText(licence.expires_at)}. Already running the bot? Put this file in place of the old one and type the new Bot Password.</p>
-      ${mainButton('Download your bot file', 'type="button" data-co-file')}
+      ${fileLast ? '' : file}
       <details class="co-steps">
         <summary>Set it up in MetaTrader 5</summary>
         <ol>
@@ -325,7 +427,8 @@
           <li>Turn on Algo Trading.</li>
         </ol>
         <p class="co-small">Then open the control app on your phone and log in with your MT5 login number and your App Password.</p>
-      </details>`;
+      </details>
+      ${fileLast ? file : ''}`;
   }
 
   /* ---------------------------------------------------------------- which step to show */
@@ -360,7 +463,11 @@
       const broker = brokerById(result.broker);
       say(`This email is not under our link at ${name}. <a href="${esc(broker.link)}" target="_blank" rel="noopener sponsored">Open your account with our link</a> using this email, then try again.`, true);
     } else if (result.code === 'mt5_not_ours') {
-      say(`This number is not on that ${name} account. Check the number, and that the account was opened with the email you gave us.`);
+      const broker = brokerById(result.broker || (order && order.broker));
+      say(`We can't find this number on your ${esc(name)} account. Check the number, or create a new trading account in your ${broker ? `<a href="${esc(broker.link)}" target="_blank" rel="noopener sponsored">${esc(name)} account</a>` : 'broker account'} and type its number here.`, true);
+    } else if (result.code === 'broker_down' && order && order.stage === 'mt5') {
+      say(`We could not check this number at ${name}. Please try again. If it still fails, create a new trading account in your ${name} account and type its number here.${result.can_ask ? ' Or ask our team to check it for you.' : ''}`);
+      if (ask) ask.hidden = !result.can_ask;
     } else if (result.code === 'broker_down') {
       say(`${name} did not answer just now. Please try again.${result.can_ask ? ' Or ask our team to check it for you.' : ''}`);
       if (ask) ask.hidden = !result.can_ask;
@@ -368,8 +475,8 @@
       paintNotice('You have used your free days', 'The free trial is once per person. Elite and Diamond are open to you any time.',
         `<a class="btn btn-primary" href="${pageUrl('./#plans')}" data-plans>See plans</a>`);
     } else if (result.code === 'paid_running') {
-      paintNotice('Your plan is still running', 'A new plan can start when this one ends. To change now, cancel your plan on your dashboard first.',
-        `<a class="btn btn-primary" href="${pageUrl('dashboard#plan')}">Go to my dashboard</a>`);
+      paintNotice('Your plan is still running', 'A new plan can start when this one ends. To change now, cancel your plan first: you find it under See plans.',
+        `<a class="btn btn-primary" href="${pageUrl('./#plans')}" data-plans>See plans</a>`);
     } else if (result.code === 'sold_in_person') {
       paintNotice('Diamond is sold by our team', 'Our sales team helps you with Diamond on Telegram.',
         '<a class="btn btn-primary" href="https://t.me/sarannsadboi" target="_blank" rel="noopener">Contact Sales</a>');
@@ -396,10 +503,8 @@
     let fields;
     let action;
     if (form.dataset.coForm === 'broker') {
-      const picked = form.querySelector('input[name="broker"]:checked');
-      if (!picked) { say(WORDS.broker_bad); return; }
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.elements.email.value.trim())) { say(WORDS.email_bad); return; }
-      [action, fields] = ['broker', { broker: picked.value, email: form.elements.email.value.trim() }];
+      [action, fields] = ['broker', { broker: pickedBroker, email: form.elements.email.value.trim() }];
     } else {
       const account = form.elements.account.value.replace(/\s+/g, '');
       if (!/^\d{5,12}$/.test(account)) { say(WORDS.mt5_bad); return; }
@@ -408,11 +513,16 @@
     setBusy(button, true);
     const result = await call(action, fields);
     if (!result.ok && button.isConnected) setBusy(button, false);
+    // sent to a person: nothing to tick yet
+    if (result.ok && !(result.order && result.order.stage === 'review')) await tick(action === 'broker' ? 'Account found' : 'MT5 account confirmed');
     afterAction(result);
   }
 
   function onChange(event) {
-    if (event.target.name === 'broker') paintOpenLink();
+    if (event.target.name === 'broker') {
+      pickedBroker = event.target.value;
+      paintBrokerGo();
+    }
   }
 
   async function lookForPayment(button, byItself) {
@@ -422,6 +532,7 @@
     setBusy(button, true);
     const result = await call('check');
     if (!button.isConnected) return;
+    if (result.ok && result.licence) await tick('Payment received');
     setBusy(button, false);
     if (result.ok) { show(result); return; }
     if (result.code === 'too_soon') {
@@ -435,7 +546,9 @@
         say('We can\'t see your payment yet. Banks can take a minute, so we are looking again by ourselves.');
         lookAgain = setTimeout(() => lookForPayment(button, true), autoLooks === 0 ? 20000 : 40000);
       } else {
-        say('Still not there. When your bank app shows the payment is done, tap the button again.');
+        say('Still not there. If your bank app shows the payment is done, tap the button again, or ask our team to check it.');
+        const ask = inner.querySelector('[data-co-ask]');
+        if (ask) ask.hidden = false;
       }
       return;
     }
@@ -445,7 +558,7 @@
   // The poster as one picture, drawn the way the bot draws it: 1254 square, the code in whole pixels, nothing on top of it.
   async function savePoster() {
     const qr = shownQr;
-    const art = inner.querySelector('[data-co-art]');
+    const art = box.querySelector('[data-co-art]');
     await art.decode().catch(() => {});
     const canvas = document.createElement('canvas');
     canvas.width = 1254;
@@ -454,13 +567,13 @@
     ctx.drawImage(art, 0, 0, 1254, 1254);
     ctx.fillStyle = '#3a3f44';
     ctx.font = '500 27px "IBM Plex Sans", Arial, sans-serif';
-    ctx.fillText(qr.name, 741, 430, 411);
+    ctx.fillText(qr.name, 428, 390, 411);
     ctx.fillStyle = '#16191c';
     ctx.font = '700 52px "IBM Plex Sans", Arial, sans-serif';
-    ctx.fillText(`$ ${Number(qr.amount).toFixed(2)}`, 741, 493, 411);
+    ctx.fillText(`$ ${Number(qr.amount).toFixed(2)}`, 428, 453, 411);
     const each = Math.floor(444 / qr.size);
     const side = qr.size * each;
-    ctx.translate(718 + Math.floor((444 - side) / 2), 536 + Math.floor((444 - side) / 2));
+    ctx.translate(405 + Math.floor((444 - side) / 2), 496 + Math.floor((444 - side) / 2));
     ctx.scale(each, each);
     ctx.fillStyle = '#000';
     ctx.fill(new Path2D(qr.path));
@@ -475,6 +588,8 @@
   async function onClick(event) {
     if (event.target === box || event.target.closest('[data-co-close]')) { box.close(); return; }
     if (event.target.closest('a[data-plans]')) { box.close(); return; }
+    if (event.target.closest('[data-co-registered]')) { paintEmail(); return; }
+    if (event.target.closest('[data-co-change-broker]')) { paintBrokerChoice(); return; }
     const paid = event.target.closest('[data-co-paid]');
     if (paid) { lookForPayment(paid, false); return; }
     if (event.target.closest('[data-co-save]')) { savePoster(); return; }
@@ -492,7 +607,10 @@
         return;
       }
       announce(result);
-      paintNotice('Your plan is cancelled', 'You can choose a new plan now. A bot that is running in MT5 does not stop by itself: pause it in the control app or take it off the chart.',
+      const stillRuns = 'A bot that is running in MT5 does not stop by itself: pause it in the control app or take it off the chart.';
+      if (movingTo === 'diamond') paintNotice('Your plan is cancelled', `Now our sales team helps you with Diamond on Telegram. ${stillRuns}`,
+        '<a class="btn btn-primary" href="https://t.me/sarannsadboi" target="_blank" rel="noopener">Contact Sales</a>');
+      else paintNotice('Your plan is cancelled', `You can choose a new plan now. ${stillRuns}`,
         `<a class="btn btn-primary" href="${pageUrl('./#plans')}" data-plans>See plans</a>`);
     }
   }
@@ -559,13 +677,15 @@
       const [result] = await Promise.all([call('state'), loadLast()]);
       afterAction(result);
     },
-    // Asked before anything changes. The days left are gone (the owner, 2026-10-31).
-    askCancel(plan, expiresAt) {
+    // Asked before anything changes. The days left are gone (the owner, 2026-10-31). next: the plan they are moving up to.
+    askCancel(plan, expiresAt, next) {
       openBox();
+      movingTo = next || null;
       const name = (PLANS[plan] || {}).name || 'paid';
       const ends = expiresAt ? new Date(expiresAt) : null;
       const left = ends ? Math.max(0, Math.ceil((ends - Date.now()) / 86400000)) : 0;
-      paint(`<h2 id="co-title">Cancel your ${esc(name)} plan?</h2>
+      paint(`<h2 id="co-title">${next ? `Move from ${esc(name)} to Diamond?` : `Cancel your ${esc(name)} plan?`}</h2>
+        ${next ? `<p class="plan-confirm-lead">To move up, your ${esc(name)} plan is cancelled first. Then our sales team helps you with Diamond on Telegram.</p>` : ''}
         <p class="plan-confirm-lead">${ends ? `It runs until ${dateText(ends)}, ${left} ${left === 1 ? 'day' : 'days'} left. ` : ''}If you cancel, those days are gone: they are not refunded and they do not move to a new plan.</p>
         <p class="plan-confirm-lead">Cancelling does not stop a bot that is running in MT5. To stop it, pause it in the control app or take it off the chart.</p>
         ${message('')}

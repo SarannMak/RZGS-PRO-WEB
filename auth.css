@@ -1993,17 +1993,48 @@ dialog.dash-edit::backdrop {
   padding-top: 18px;
   border-top: 1px solid var(--border);
 }
-.de-pic {
-  display: flex;
-  align-items: flex-end;
-  gap: 12px;
+/* the picture on the left, full name and username beside it, then everything else across the whole width */
+.de-scroll {
+  display: grid;
+  grid-template-columns: 124px minmax(0, 1fr);
+  column-gap: 24px;
+  align-content: start;
 }
-.de-pic .dash-hint {
-  margin: 0 0 0 10px;
+.de-scroll > *,
+.de-scroll > form > * {
+  grid-column: 1 / -1;
+}
+.de-scroll > [data-avatar-edit] {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+}
+.de-scroll > form,
+.de-scroll > form > .field-grid:first-child {
+  display: contents;
+}
+.de-scroll > form > .field-grid:first-child > .field {
+  grid-column: 2;
+  grid-row: 1;
+  align-content: start;
+  margin-top: 0;
+}
+.de-scroll > form > .field-grid:first-child > .field + .field {
+  grid-row: 2;
+  margin-top: 14px;
+}
+.de-pic-hint {
+  grid-row: 3;
+  margin: 18px 0 0;
 }
 .de-pic-box {
   position: relative;
-  flex: none;
+  display: block;
+  width: 124px;
+  height: 124px;
+}
+.de-pic .avatar-xl {
+  width: 100%;
+  height: 100%;
 }
 .de-pic-add,
 .de-pic-del {
@@ -2026,6 +2057,11 @@ dialog.dash-edit::backdrop {
 .de-pic-del:hover {
   border-color: var(--cyan);
   color: var(--cyan);
+}
+.de-pic-del {
+  position: absolute;
+  left: -8px;
+  bottom: -8px;
 }
 .de-pic-del[hidden] {
   display: none;
@@ -2070,5 +2106,27 @@ dialog.dash-edit::backdrop {
   .de-scroll,
   .de-foot {
     padding-inline: 14px;
+  }
+  .de-scroll {
+    grid-template-columns: 96px minmax(0, 1fr);
+    column-gap: 18px;
+  }
+  .de-pic-box {
+    width: 96px;
+    height: 96px;
+  }
+  .de-label {
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  .de-scroll > form > .field-grid:first-child > .field {
+    gap: 6px;
+  }
+  .de-scroll > form > .field-grid:first-child > .field + .field {
+    margin-top: 10px;
+  }
+  .de-scroll > form > .field-grid:first-child .input {
+    min-height: 44px;
+    padding-inline: 12px;
   }
 }

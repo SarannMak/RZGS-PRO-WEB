@@ -994,15 +994,16 @@
       // on the Plan view, the current plan's button is shown "on"
       // a paid plan that is running: nothing else starts until it ends or is cancelled
       const paidRunning = Boolean(state.plan) && state.plan !== 'trial' && state.status !== 'Expired';
-      $('[data-plan-cancel-row]', root).hidden = !paidRunning;
-      $('[data-plan-cancel-note]', root).hidden = !paidRunning;
+      // moving up from Elite to Diamond is the one change that can start now: it asks to cancel first (plans.js)
+      const canMoveUp = paidRunning && state.plan === 'elite';
       setAll('[data-plan-choice-note]', paidRunning
-        ? `Your ${state.name} plan runs until ${state.until}. You can renew it or start another plan when it ends, or cancel it above first.`
+        ? `Your ${state.name} plan runs until ${state.until}. You can renew it or start another plan when it ends.${canMoveUp ? ' To move up now, choose Diamond.' : ''}`
         : 'Trial and Elite start right here. Diamond opens a chat with our sales team on Telegram.');
       $$('[data-plan-link]', root).forEach((button) => {
         const on = button.dataset.planLink === state.plan;
         const freeUsed = button.dataset.planLink === 'trial' && checkout.trial_used;
-        const locked = paidRunning || freeUsed || (on && (state.plan === 'trial' || state.status !== 'Expired')); // the free days only once
+        const moveUp = canMoveUp && button.dataset.planLink === 'diamond';
+        const locked = !moveUp && (paidRunning || freeUsed || (on && (state.plan === 'trial' || state.status !== 'Expired'))); // the free days only once
         button.disabled = locked;
         button.classList.toggle('is-locked', locked && !on);
         button.classList.toggle('is-on', on);
@@ -1216,7 +1217,6 @@
     root.addEventListener('click', (event) => {
       const asked = event.target.closest('[data-edit]');
       if (asked) openEdit(asked.dataset.edit);
-      if (event.target.closest('[data-plan-cancel]')) withCheckout((checkoutBox) => checkoutBox.askCancel(profile.plan, profile.plan_expires_at));
       if (event.target.closest('[data-order-go]')) withCheckout((checkoutBox) => checkoutBox.resume());
       if (event.target.closest('[data-order-drop]')) withCheckout((checkoutBox) => checkoutBox.drop());
     });
