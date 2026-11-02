@@ -4477,144 +4477,182 @@ body:has(.tg-float) .site-footer {
     box-shadow: 0 0 0 14px rgba(166, 255, 26, 0);
   }
 }
-.gp-brokers {
-  display: grid;
-  gap: 6px;
-  width: 100%;
-  max-width: 290px;
-}
-.gp-broker {
-  display: grid;
-  grid-template-columns: 30px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 10px;
-  padding: 7px 10px;
-  border: 1px solid var(--border);
-  background: rgba(7, 25, 34, 0.92);
-  color: var(--text);
-  font: 600 13px/1 var(--font-display);
-}
-.gp-broker i {
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  border: 1px solid var(--frame);
-  border-radius: 50%;
-  background: var(--chip);
-  color: var(--cyan);
-  font: 700 10px/1 var(--font-mono);
-  font-style: normal;
-}
-.gp-broker em {
-  padding: 5px 8px;
-  background: var(--neon);
-  color: var(--on-accent);
-  font: 700 9px/1 var(--font-mono);
-  font-style: normal;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-.gp-broker.is-hot {
-  border-color: var(--frame);
-  box-shadow: 0 0 14px rgba(25, 211, 255, 0.2);
-}
-.gp-chat {
+/* small copies of the checkout's screens (2 Nov 2026): the same names, buttons and ticks a client meets there */
+.gp-box {
   display: grid;
   gap: 8px;
   width: 100%;
-  max-width: 290px;
+  max-width: 330px;
 }
-.gp-msg {
-  max-width: 92%;
-  margin: 0;
-  padding: 8px 12px;
-  border-radius: 12px;
+.gp-title {
   color: var(--text);
-  font: 500 13px/1.35 var(--font-body);
+  font: 700 15px/1.2 var(--font-display);
 }
-.gp-me {
-  justify-self: end;
-  border-bottom-right-radius: 4px;
-  background: #1d5a72;
+.gp-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(66px, 1fr));
+  gap: 6px;
 }
-.gp-bot {
+.gp-tiles span {
+  display: grid;
+  place-items: center;
+  min-height: 34px;
+  padding: 0 4px;
+  border: 1px solid var(--border-strong);
+  background: rgba(3, 12, 19, 0.9);
+  color: var(--text-muted);
+  font: 600 12px/1 var(--font-body);
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}
+.gp-tiles .is-on {
+  border-color: var(--cyan);
+  background: var(--cyan);
+  color: var(--on-accent);
+}
+.gp-btn {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 34px;
+  padding: 4px 8px;
+  border: 1px solid var(--border-strong);
+  background: rgba(10, 35, 48, 0.9);
+  color: var(--text);
+  font: 700 10.5px/1.2 var(--font-display);
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+  clip-path: polygon(7px 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%, 0 7px);
+}
+.gp-btn--main {
+  border: 0;
+  background: linear-gradient(100deg, var(--cyan), #5aa9ff);
+  color: #02131a;
+}
+.gp-field {
   display: flex;
   align-items: center;
-  gap: 10px;
-  justify-self: start;
-  border: 1px solid var(--border-strong);
-  border-bottom-left-radius: 4px;
-  background: #0e2f3e;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 10px;
+  overflow: hidden;
+  border: 1px solid var(--good);
+  background: #030c13;
+  color: var(--text);
+  font: 500 13px/1 var(--font-mono);
 }
-.gp-ok {
-  position: relative;
+.gp-tick {
   flex: none;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.gp-tick circle {
+  stroke: var(--good);
+  stroke-width: 1.6;
+}
+.gp-tick path {
+  stroke: var(--neon);
+  stroke-width: 2.4;
+}
+.gp-word {
+  margin-top: -3px;
+  color: var(--good);
+  font: 600 11px/1.3 var(--font-body);
+}
+.gp-word + .gp-field {
+  margin-top: 5px;
+}
+.gp-word--tick {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 0;
+}
+.gp-word--tick .gp-tick {
   width: 16px;
   height: 16px;
-  border-radius: 50%;
-  background: var(--good);
 }
-.gp-ok::after {
-  content: "";
-  position: absolute;
-  top: 3px;
-  left: 5px;
-  width: 4px;
-  height: 7px;
-  border: solid #04130c;
-  border-width: 0 2px 2px 0;
-  rotate: 45deg;
+.gp-box--pay {
+  grid-template-columns: 112px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
 }
-.gp-qrcode {
-  flex: none;
-  width: 44px;
-  height: 44px;
-  padding: 3px;
-  border-radius: 4px;
+.gp-khqr {
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  padding-bottom: 8px;
+  overflow: hidden;
+  border-radius: 8px;
   background: #fff;
-  fill: #02131a;
+  color: #16191c;
 }
-.gp-msg em {
-  display: block;
-  color: var(--text-subtle);
-  font: 400 11px/1.4 var(--font-mono);
+.gp-khqr b {
+  justify-self: stretch;
+  padding: 5px;
+  background: #e21d1d;
+  color: #fff;
+  font: 700 11px/1 var(--font-display);
+  letter-spacing: 0.14em;
+  text-align: center;
+}
+.gp-khqr em {
+  font: 700 13px/1 var(--font-body);
   font-style: normal;
 }
-.gp-fileicon {
+.gp-side {
   display: grid;
-  flex: none;
-  place-items: center;
-  width: 38px;
-  height: 44px;
+  gap: 7px;
+  min-width: 0;
+}
+.gp-qrcode {
+  width: 76px;
+  height: 76px;
+  fill: #02131a;
+}
+.gp-key {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 0 4px 0 9px;
+  border: 1px solid var(--border-strong);
+  background: #030c13;
+  font: 500 10px/1.2 var(--font-mono);
+}
+.gp-key span {
+  overflow: hidden;
+  color: var(--text-subtle);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.gp-key code {
+  color: var(--neon);
+  letter-spacing: 0.08em;
+}
+.gp-key em {
+  padding: 5px 7px;
   border: 1px solid var(--frame);
   background: var(--chip);
-  color: var(--cyan);
-  font: 700 10px/1 var(--font-mono);
-  clip-path: polygon(0 0, 70% 0, 100% 25%, 100% 100%, 0 100%);
-}
-.gp-keys {
-  display: grid;
-  grid-template-columns: auto auto;
-  gap: 4px 10px;
-  font: 500 11px/1.4 var(--font-mono);
-}
-.gp-keys span {
-  color: var(--text-subtle);
-}
-.gp-keys code {
-  color: var(--neon);
-  letter-spacing: 0.1em;
+  color: var(--text);
+  font: 500 9.5px/1 var(--font-body);
+  font-style: normal;
 }
 .gp-run {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  margin-top: 4px;
 }
 .gp-mt5 {
   display: grid;
   gap: 4px;
-  flex: 0 1 170px;
+  flex: 1 1 170px;
   min-width: 0;
   padding: 6px;
   border: 1px solid var(--border-strong);
@@ -4688,6 +4726,42 @@ body:has(.tg-float) .site-footer {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px);
+}
+/* each tick draws itself when its step comes into view */
+@media (prefers-reduced-motion: no-preference) {
+  .js .guide-step:not(.is-visible) .gp-tick path {
+    stroke-dashoffset: 16;
+  }
+  .gp-tick path {
+    stroke-dasharray: 16;
+    transition: stroke-dashoffset 420ms 380ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+/* a phone: the code above its buttons, and a little less room lost around the picture */
+@media (max-width: 479.98px) {
+  .guide-pic {
+    padding: 12px;
+  }
+  .gp-plans {
+    width: 100%;
+  }
+  .gp-plan {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 12px 2px;
+    font-size: 18px;
+  }
+  .gp-plan b {
+    font-size: 9px;
+    letter-spacing: 0.04em;
+  }
+  .gp-box--pay {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .gp-khqr {
+    justify-self: center;
+    width: 128px;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .gp-tap {

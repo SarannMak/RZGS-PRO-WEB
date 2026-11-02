@@ -2130,3 +2130,269 @@ dialog.dash-edit::backdrop {
     padding-inline: 12px;
   }
 }
+
+/* ---------- The log in and sign up boxes: smaller, so the whole box fits on a laptop screen (the owner, 2026-11-02) ---------- */
+.auth-section {
+  padding: clamp(14px, 2.4vh, 28px) 0 clamp(28px, 5vh, 56px);
+}
+.auth-section .auth-card {
+  padding: 20px 24px;
+}
+.auth-section .auth-card .kicker {
+  display: none;
+}
+.auth-section .auth-switch {
+  margin-bottom: 14px;
+}
+.auth-section .auth-switch a {
+  min-height: 40px;
+  padding: 6px 8px;
+  font-size: 13px;
+}
+.auth-section .auth-title {
+  margin: 0;
+  font-size: clamp(24px, 2.2vw, 28px);
+  line-height: 1.15;
+}
+.auth-section .auth-lead {
+  margin: 4px 0 0;
+  font-size: 14px;
+  line-height: 1.45;
+}
+.auth-section .field {
+  gap: 5px;
+  margin-top: 10px;
+}
+.auth-section .input {
+  min-height: 42px;
+}
+.auth-section .hint {
+  margin-top: 0;
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+.auth-section .form-actions {
+  margin-top: 14px;
+}
+.auth-section .form-actions .btn {
+  --btn-h: 44px;
+  min-height: 44px;
+}
+.auth-section .steps-bar {
+  margin-top: 10px;
+}
+.auth-section .steps-bar li {
+  gap: 5px;
+  font-size: 10px;
+}
+.auth-section .auth-step {
+  margin-top: 10px;
+}
+.auth-section .step-legend {
+  font-size: 15px;
+}
+.auth-section .step-count {
+  display: inline;
+  margin: 0 8px 0 0;
+  font-size: 11px;
+}
+.auth-section .auth-note {
+  margin-top: 12px;
+  padding-top: 10px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.auth-section .auth-alt {
+  margin-top: 10px;
+  font-size: 13px;
+}
+.auth-section a.trial-banner {
+  margin-top: 12px;
+}
+.auth-social {
+  margin-top: 12px;
+}
+.auth-social[hidden],
+.auth-social [hidden] {
+  display: none;
+}
+.auth-or {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 10px;
+  color: var(--text-subtle);
+  font-size: 12px;
+}
+.auth-or::before,
+.auth-or::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.auth-social-row {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+.auth-social-row .btn {
+  --btn-h: 42px;
+  min-height: 42px;
+  padding: 0 10px;
+  font-size: 14px;
+}
+.auth-social-row svg {
+  flex: none;
+}
+.auth-social-note {
+  margin: 8px 0 0;
+  color: var(--text-subtle);
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: center;
+}
+.auth-social-note a {
+  color: var(--text-muted);
+  text-underline-offset: 2px;
+}
+@media (min-width: 900px) {
+  .auth-section .auth-layout--split {
+    grid-template-columns: minmax(0, 440px) minmax(0, 340px);
+    justify-content: center;
+    gap: 24px;
+    max-width: 804px;
+  }
+  .auth-section .trial-panel {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    padding: 20px;
+  }
+  .auth-section .trial-panel .btn {
+    --btn-h: 44px;
+    padding: 10px 12px;
+    font-size: 13px;
+    line-height: 1.25;
+    text-align: center;
+    white-space: normal;
+  }
+  .auth-section .trial-panel .trial-banner {
+    padding: 12px;
+  }
+  .auth-section .trial-panel .check-list li {
+    font-size: 14px;
+  }
+}
+
+/* ---------- The sign-up (2026-11-02): one screen, then the code from the email ---------- */
+.steps-bar--2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+.pw-rules {
+  display: grid;
+  gap: 3px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.pw-rules li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--text-subtle);
+  font-size: 12.5px;
+  line-height: 1.35;
+  transition: color var(--dur) var(--ease-out);
+}
+.pw-rules .icon {
+  flex: none;
+  width: 15px;
+  height: 15px;
+  padding: 2px;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  color: transparent;
+  transition: color var(--dur) var(--ease-out), border-color var(--dur) var(--ease-out), background-color var(--dur) var(--ease-out);
+}
+.pw-rules li.is-met {
+  color: var(--good);
+}
+.pw-rules li.is-met .icon {
+  border-color: var(--good);
+  background: rgba(43, 243, 145, 0.14);
+  color: var(--good);
+}
+.auth-verify .steps-bar {
+  margin: 0 0 18px;
+  text-align: left;
+}
+.auth-verify h2 {
+  margin: 10px 0 6px;
+  font-size: 22px;
+}
+.auth-verify > p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.auth-verify .field {
+  margin-top: 14px;
+  text-align: left;
+}
+.auth-verify .field .field-error {
+  max-width: none;
+  margin: 2px 0 0;
+  color: #ff8a8a;
+  font-size: 13px;
+  text-align: left;
+}
+.code-input {
+  padding-left: 0.4em;
+  font: 600 24px/1 var(--font-mono);
+  letter-spacing: 0.4em;
+  text-align: center;
+}
+.auth-section .code-input {
+  min-height: 52px;
+}
+.auth-verify .auth-verify-help {
+  margin-top: 12px;
+  color: var(--text-subtle);
+  font-size: 13px;
+}
+.auth-verify-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 18px;
+  margin-top: 6px;
+}
+
+/* ---------- Cloudflare's safety check (Turnstile), 2026-11-02 ---------- */
+.captcha {
+  margin-top: 12px;
+}
+.captcha[hidden] {
+  display: none;
+}
+/* the box's own height, kept free so the button does not jump when it appears */
+.captcha-box {
+  min-height: 65px;
+}
+.captcha--quiet {
+  margin-top: 0;
+}
+.captcha--quiet .captcha-box {
+  min-height: 0;
+}
+.captcha--quiet.is-asking {
+  margin-top: 12px;
+}
+.captcha .field-error {
+  margin-top: 6px;
+  text-align: left;
+}
+

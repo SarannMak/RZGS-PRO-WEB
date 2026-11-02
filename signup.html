@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
   <link rel="stylesheet" href="style.css?v=37">
   <link rel="stylesheet" href="plans.css?v=3">
-  <link rel="stylesheet" href="auth.css?v=19">
+  <link rel="stylesheet" href="auth.css?v=20">
   <link rel="stylesheet" href="motion.css?v=2">
 
   <script>document.documentElement.classList.add('js');try{if(localStorage.getItem('sb-zaziizzsbytkdlatoutv-auth-token'))document.documentElement.classList.add('signed-in')}catch(e){}</script>
@@ -34,7 +34,7 @@
   <script src="motion.js?v=1" defer></script>
   <script src="plans.js?v=7" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0" defer></script>
-  <script src="auth.js?v=25" defer></script>
+  <script src="auth.js?v=26" defer></script>
 </head>
 <body data-auth-page="signup">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -136,141 +136,116 @@
               <a href="login">Log in</a>
               <a href="signup" aria-current="page">Sign up</a>
             </nav>
-            <div data-signup-wrap>
-              <p class="kicker">Start free</p>
-              <h1 class="auth-title" id="page-title">Create your account</h1>
+            <p class="auth-msg" data-auth-msg role="alert" hidden>
+              <svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>
+              <span data-auth-msg-text></span>
+            </p>
+            <noscript><p class="auth-msg" data-tone="error">Please turn on JavaScript in your browser to sign up.</p></noscript>
 
-              <ol class="steps-bar" data-steps-bar aria-label="Sign-up progress">
-                <li class="is-current" aria-current="step">About you</li>
-                <li>Password</li>
-                <li>Profile</li>
+            <!-- one screen to fill in, then the code from the email (the owner, 2026-11-02) -->
+            <div data-signup-wrap>
+              <h1 class="auth-title" id="page-title">Create your account</h1>
+              <ol class="steps-bar steps-bar--2" aria-label="Sign-up progress">
+                <li class="is-current" aria-current="step">Your account</li>
+                <li>Verify email</li>
               </ol>
 
-              <p class="auth-msg" data-auth-msg role="alert" hidden>
-            <svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>
-            <span data-auth-msg-text></span>
-          </p>
-              <noscript><p class="auth-msg" data-tone="error">Please turn on JavaScript in your browser to sign up.</p></noscript>
-
               <form data-signup-form novalidate>
-                <fieldset class="auth-step" data-step>
-                  <legend class="step-legend" tabindex="-1"><span class="step-count">Step 1 of 3</span>About you</legend>
-            <div class="field">
-              <label for="signup-name">Full name <span class="req" aria-hidden="true">*</span></label>
-              <input class="input" id="signup-name" name="full_name" type="text" autocomplete="name" required aria-describedby="signup-name-error">
-              <p class="field-error" id="signup-name-error" hidden></p>
-            </div>
-            <div class="field">
-              <label for="signup-email">Email <span class="req" aria-hidden="true">*</span></label>
-              <input class="input" id="signup-email" name="email" type="email" autocomplete="email" required aria-describedby="signup-email-error signup-email-hint" inputmode="email" autocapitalize="none" spellcheck="false">
-              <p class="hint" id="signup-email-hint">We send a confirmation link to this address.</p>
-              <p class="field-error" id="signup-email-error" hidden></p>
-            </div>
-                  <div class="form-actions">
-                    <button class="btn btn-primary btn-lg" type="submit">
-                      Continue
-                      <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg>
+                <div class="field">
+                  <label for="signup-email">Your email address <span class="req" aria-hidden="true">*</span></label>
+                  <input class="input" id="signup-email" name="email" type="email" autocomplete="email" required aria-describedby="signup-email-error" inputmode="email" autocapitalize="none" spellcheck="false">
+                  <p class="field-error" id="signup-email-error" hidden></p>
+                </div>
+                <div class="field">
+                  <label for="signup-password">Create your password <span class="req" aria-hidden="true">*</span></label>
+                  <div class="input-wrap input-wrap--action">
+                    <input class="input" id="signup-password" name="create_password" type="password" autocomplete="new-password" maxlength="15" required aria-describedby="signup-password-rules signup-password-error">
+                    <button class="toggle-pw" type="button" data-toggle-password aria-controls="signup-password" aria-pressed="false" aria-label="Show password">
+                      <svg class="icon icon-show" aria-hidden="true"><use href="#i-eye"/></svg>
+                      <svg class="icon icon-hide" aria-hidden="true"><use href="#i-eye-off"/></svg>
                     </button>
                   </div>
-                </fieldset>
-
-                <fieldset class="auth-step" data-step hidden>
-                  <legend class="step-legend" tabindex="-1"><span class="step-count">Step 2 of 3</span>Choose a password</legend>
-            <div class="field">
-              <label for="signup-password">Password <span class="req" aria-hidden="true">*</span></label>
-              <div class="input-wrap input-wrap--action">
-                <input class="input" id="signup-password" name="new_password" type="password" autocomplete="new-password" required aria-describedby="signup-password-error signup-password-hint">
-                <button class="toggle-pw" type="button" data-toggle-password aria-controls="signup-password" aria-pressed="false" aria-label="Show password">
-                  <svg class="icon icon-show" aria-hidden="true"><use href="#i-eye"/></svg>
-                  <svg class="icon icon-hide" aria-hidden="true"><use href="#i-eye-off"/></svg>
-                </button>
-              </div>
-              <p class="hint" id="signup-password-hint">At least 8 characters.</p>
-              <p class="field-error" id="signup-password-error" hidden></p>
-            </div>
-            <div class="field">
-              <label for="signup-confirm">Confirm password <span class="req" aria-hidden="true">*</span></label>
-              <div class="input-wrap input-wrap--action">
-                <input class="input" id="signup-confirm" name="confirm_password" type="password" autocomplete="new-password" required aria-describedby="signup-confirm-error">
-                <button class="toggle-pw" type="button" data-toggle-password aria-controls="signup-confirm" aria-pressed="false" aria-label="Show password">
-                  <svg class="icon icon-show" aria-hidden="true"><use href="#i-eye"/></svg>
-                  <svg class="icon icon-hide" aria-hidden="true"><use href="#i-eye-off"/></svg>
-                </button>
-              </div>
-              <p class="field-error" id="signup-confirm-error" hidden></p>
-            </div>
-                  <div class="form-actions">
-                    <button class="btn btn-ghost btn-lg btn-back" type="button" data-back>Back</button>
-                    <button class="btn btn-primary btn-lg" type="submit">
-                      Continue
-                      <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg>
-                    </button>
-                  </div>
-                </fieldset>
-
-                <fieldset class="auth-step" data-step hidden>
-                  <legend class="step-legend" tabindex="-1"><span class="step-count">Step 3 of 3</span>Your profile</legend>
-            <div class="field">
-              <label for="signup-username">Username <span class="req" aria-hidden="true">*</span></label>
-              <input class="input" id="signup-username" name="username" type="text" autocomplete="username" required aria-describedby="signup-username-error signup-username-hint" autocapitalize="none" spellcheck="false">
-              <p class="hint" id="signup-username-hint">Letters, numbers and underscores.</p>
-              <p class="field-error" id="signup-username-error" hidden></p>
-            </div>
-            <div class="field">
-              <label for="signup-country">Country <span class="req" aria-hidden="true">*</span></label>
-              <select class="input" id="signup-country" name="country" autocomplete="country-name" required aria-describedby="signup-country-error">
-                <option value="">Choose your country</option>
-                <option>Cambodia</option>
-                <option>Thailand</option>
-                <option>Vietnam</option>
-                <option>Indonesia</option>
-                <option>Malaysia</option>
-                <option>India</option>
-                <option>Türkiye</option>
-                <option>Brazil</option>
-                <option>United Kingdom</option>
-                <option>United States</option>
-                <option>Other</option>
-              </select>
-              <p class="field-error" id="signup-country-error" hidden></p>
-            </div>
-            <div class="field">
-              <label for="signup-phone">Phone number <span class="opt">(optional)</span></label>
-              <input class="input" id="signup-phone" name="phone" type="tel" autocomplete="tel" aria-describedby="signup-phone-error signup-phone-hint" inputmode="tel">
-              <p class="hint" id="signup-phone-hint">With country code, like +855 12 345 678.</p>
-              <p class="field-error" id="signup-phone-error" hidden></p>
-            </div>
-            <div class="field">
-              <label for="signup-telegram">Telegram username <span class="opt">(optional)</span></label>
-              <div class="input-wrap input-wrap--prefix">
-                <span class="input-prefix" aria-hidden="true">@</span>
-                <input class="input" id="signup-telegram" name="telegram_username" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="signup-telegram-error signup-telegram-hint">
-              </div>
-              <p class="hint" id="signup-telegram-hint">We use it for setup help, if you ever need it.</p>
-              <p class="field-error" id="signup-telegram-error" hidden></p>
-            </div>
-                  <div class="check-field">
-                    <input id="signup-terms" name="accepted_terms" type="checkbox" required aria-describedby="signup-terms-error">
-                    <label for="signup-terms">I accept the <a href="terms" target="_blank" rel="noopener">Terms &amp; Conditions</a> and the <a href="privacy" target="_blank" rel="noopener">Privacy Policy</a>. <span class="req" aria-hidden="true">*</span></label>
-                    <p class="field-error" id="signup-terms-error" hidden></p>
-                  </div>
-                  <div class="form-actions">
-                    <button class="btn btn-ghost btn-lg btn-back" type="button" data-back>Back</button>
-                    <button class="btn btn-primary btn-lg" type="submit" data-submit>Create account</button>
-                  </div>
-                </fieldset>
+                  <ul class="pw-rules" id="signup-password-rules">
+                    <li data-rule="length"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>8 to 15 characters</li>
+                    <li data-rule="cases"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>One upper and one lower case letter</li>
+                    <li data-rule="number"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>At least one number</li>
+                    <li data-rule="special"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>At least one special character, like ! @ # $</li>
+                  </ul>
+                  <p class="field-error" id="signup-password-error" hidden></p>
+                </div>
+                <div class="field">
+                  <label for="signup-country">Country <span class="req" aria-hidden="true">*</span></label>
+                  <select class="input" id="signup-country" name="country" autocomplete="country-name" required aria-describedby="signup-country-error">
+                    <option value="">Choose your country</option>
+                    <option>Cambodia</option>
+                    <option>Thailand</option>
+                    <option>Vietnam</option>
+                    <option>Indonesia</option>
+                    <option>Malaysia</option>
+                    <option>India</option>
+                    <option>Türkiye</option>
+                    <option>Brazil</option>
+                    <option>United Kingdom</option>
+                    <option>United States</option>
+                    <option>Other</option>
+                  </select>
+                  <p class="field-error" id="signup-country-error" hidden></p>
+                </div>
+                <div class="check-field">
+                <input id="signup-terms" name="accepted_terms" type="checkbox" required aria-describedby="signup-terms-error">
+                <label for="signup-terms">I accept the <a href="terms" target="_blank" rel="noopener">Terms &amp; Conditions</a> and the <a href="privacy" target="_blank" rel="noopener">Privacy Policy</a>. <span class="req" aria-hidden="true">*</span></label>
+                <p class="field-error" id="signup-terms-error" hidden></p>
+                </div>
+                <!-- Cloudflare's safety check: shows only once its key is set in auth.js -->
+                <div class="captcha" data-captcha hidden>
+                  <div class="captcha-box" data-captcha-box></div>
+                  <p class="field-error" data-captcha-error aria-live="polite" hidden></p>
+                </div>
+                <div class="form-actions">
+                  <button class="btn btn-primary btn-lg" type="submit" data-submit>Create account</button>
+                </div>
+                <!-- each button shows only when its login is switched on at Supabase (auth.js) -->
+                <div class="auth-social" data-social hidden>
+                <p class="auth-or"><span>or continue with</span></p>
+                <div class="auth-social-row">
+                <button class="btn btn-ghost" type="button" data-social-go="google" hidden><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="#4285F4" d="M3.6 20h3.2v-7.8L2 8.6v9.8C2 19.3 2.7 20 3.6 20z"/><path fill="#34A853" d="M17.2 20h3.2c.9 0 1.6-.7 1.6-1.6V8.6l-4.8 3.6z"/><path fill="#FBBC04" d="M17.2 5.2v7l4.8-3.6V6.7c0-2-2.3-3.1-3.8-1.9z"/><path fill="#EA4335" d="M6.8 12.2v-7L12 9.1l5.2-3.9v7L12 16.1z"/><path fill="#C5221F" d="M2 6.7v1.9l4.8 3.6v-7L5.8 4.8C4.3 3.6 2 4.7 2 6.7z"/></svg>Gmail</button>
+                <button class="btn btn-ghost" type="button" data-social-go="custom:telegram" hidden><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#229ED9"/><path fill="#fff" d="M17.2 7.6 6.3 11.8c-.6.2-.6.7 0 .9l2.7.9 1 3.2c.1.4.6.5.9.2l1.5-1.4 2.8 2.1c.4.3.9.1 1-.4l1.9-8.9c.1-.6-.3-.9-.9-.7zM9.6 13.3l6.1-3.8-4.9 4.6-.2 2-1-2.8z"/></svg>Telegram</button>
+                </div>
+                <p class="auth-social-note">By continuing you agree to our <a href="terms">Terms &amp; Conditions</a>.</p>
+                </div>
               </form>
 
               <p class="auth-alt">Already have an account? <a href="login">Log in</a></p>
             </div>
 
-            <div class="auth-done" data-signup-done hidden>
+            <div class="auth-done auth-verify" data-signup-verify hidden>
+              <ol class="steps-bar steps-bar--2" aria-label="Sign-up progress">
+                <li class="is-done">Your account</li>
+                <li class="is-current" aria-current="step">Verify email</li>
+              </ol>
               <span class="auth-done-icon"><svg class="icon" aria-hidden="true"><use href="#i-mail"/></svg></span>
               <h2 tabindex="-1">Check your email</h2>
-              <p>We sent a confirmation link to <strong data-done-email></strong>. Click it to activate your account.</p>
-              <p>Can't find it? Look in your spam folder.</p>
-              <button class="btn btn-ghost btn-block" type="button" data-resend>Resend email</button>
-              <p><button class="auth-link link-button" type="button" data-restart>Use a different email</button></p>
+              <p>We sent a code to <strong data-verify-email></strong>. Type it below, or open the link in that email.</p>
+              <form data-verify-form novalidate>
+                <div class="field">
+                  <label for="signup-code">Code from the email</label>
+                  <input class="input code-input" id="signup-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="10" required aria-describedby="signup-code-error">
+                  <p class="field-error" id="signup-code-error" hidden></p>
+                </div>
+                <div class="form-actions">
+                  <button class="btn btn-primary btn-lg" type="submit" data-verify>Confirm my email</button>
+                </div>
+              </form>
+              <p class="auth-verify-help">Can't find it? Look in your spam folder.</p>
+              <!-- Cloudflare's safety check: shows only once its key is set in auth.js; this one only when Cloudflare needs a tick -->
+              <div class="captcha captcha--quiet" data-captcha data-captcha-quiet hidden>
+                <div class="captcha-box" data-captcha-box></div>
+                <p class="field-error" data-captcha-error aria-live="polite" hidden></p>
+              </div>
+              <div class="auth-verify-links">
+                <button class="auth-link link-button" type="button" data-resend>Send a new code</button>
+                <button class="auth-link link-button" type="button" data-restart>Use a different email</button>
+              </div>
             </div>
           </div>
 

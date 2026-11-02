@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
   <link rel="stylesheet" href="style.css?v=37">
   <link rel="stylesheet" href="plans.css?v=3">
-  <link rel="stylesheet" href="auth.css?v=19">
+  <link rel="stylesheet" href="auth.css?v=20">
   <link rel="stylesheet" href="motion.css?v=2">
 
   <script>document.documentElement.classList.add('js');try{if(localStorage.getItem('sb-zaziizzsbytkdlatoutv-auth-token'))document.documentElement.classList.add('signed-in')}catch(e){}</script>
@@ -34,7 +34,7 @@
   <script src="motion.js?v=1" defer></script>
   <script src="plans.js?v=7" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0" defer></script>
-  <script src="auth.js?v=25" defer></script>
+  <script src="auth.js?v=26" defer></script>
 </head>
 <body data-auth-page="dashboard">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -325,6 +325,11 @@
                         </button>
                       </div>
                       <p class="field-error" id="dash-email-password-error" hidden></p>
+                    </div>
+                    <!-- Cloudflare's safety check: shows only once its key is set in auth.js; this one only when Cloudflare needs a tick -->
+                    <div class="captcha captcha--quiet" data-captcha data-captcha-quiet hidden>
+                      <div class="captcha-box" data-captcha-box></div>
+                      <p class="field-error" data-captcha-error aria-live="polite" hidden></p>
                     </div>
                     <div class="form-actions">
                       <button class="btn btn-chip" type="submit" data-submit>Change email</button>

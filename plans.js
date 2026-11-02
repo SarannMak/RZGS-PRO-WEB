@@ -513,7 +513,7 @@
   async function choose(plan, button) {
     if (button.disabled) return;
     if (plan.id === 'diamond') {
-      if (movingUp(current)) goCancel('diamond');
+      if (current.plan === 'elite') goCancel('diamond'); // days left: asked twice; ended: asked once
       else toSales();
       return;
     }
@@ -596,7 +596,7 @@
     event.preventDefault();
     if (go.dataset.checkout === 'diamond') {
       current = describeCurrent(storedProfile());
-      if (movingUp(current)) goCancel('diamond');
+      if (current.plan === 'elite') goCancel('diamond'); // days left: asked twice; ended: asked once
       else toSales();
       return;
     }

@@ -87,12 +87,13 @@
     }
     const known = {
       invalid_credentials: 'Wrong email or password.',
-      email_not_confirmed: 'Please confirm your email first. We sent you a link when you signed up.',
+      email_not_confirmed: 'Your email is not confirmed yet. Type the code we emailed you when you signed up.',
       user_already_exists: 'This email already has an account. Log in instead.',
       email_exists: 'This email already has an account. Log in instead.',
       weak_password: `Please choose a stronger password with at least ${MIN_PASSWORD} characters.`,
       same_password: 'Your new password must be different from your old one.',
       email_address_invalid: "That email address doesn't look right. Please check it.",
+      captcha_failed: "The safety check didn't pass. Please try again.",
       over_email_send_rate_limit: 'Too many emails were sent. Please wait a few minutes and try again.',
       over_request_rate_limit: 'Too many attempts. Please wait a minute and try again.',
       email_provider_disabled: 'Sign-up is not available right now. Please contact us.',
@@ -109,6 +110,15 @@
 
   /* ------------------------------------------------------------- form helpers */
   const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  // The password a new account gets (the owner, 2026-11-02). The list under the box lights up rule by rule.
+  const PASSWORD_RULES = {
+    length: (v) => v.length >= 8 && v.length <= 15,
+    cases: (v) => /[a-z]/.test(v) && /[A-Z]/.test(v),
+    number: (v) => /\d/.test(v),
+    special: (v) => /[^A-Za-z0-9\s]/.test(v),
+  };
+  // Signed up, code not typed yet: the sign-up page opens on the code step for this email.
+  const VERIFY_KEY = 'rzgs_verify_email';
 
   // One rule per field name. Each returns an error sentence, or '' when the value is fine.
   // A social link: the person's name there, or a link to their page at that site. Only that site's address is kept.
@@ -141,6 +151,8 @@
     email: (v) => (!v.trim() ? 'Enter your email address.' : !EMAIL_RE.test(v.trim()) ? 'Enter a valid email, like name@gmail.com.' : ''),
     password: (v) => (!v ? 'Enter your password.' : ''),
     new_password: (v) => (v.length < MIN_PASSWORD ? `Use at least ${MIN_PASSWORD} characters.` : ''),
+    create_password: (v) => (!v ? 'Create your password.' : Object.values(PASSWORD_RULES).every((ok) => ok(v)) ? '' : 'Your password needs everything in the list above.'),
+    code: (v) => (/^\d{6,10}$/.test(v.replace(/\s/g, '')) ? '' : 'Type the code from the email.'),
     confirm_password: (v, form) => {
       const first = form.elements.new_password.value;
       return !v ? 'Type your password again.' : v !== first ? "The two passwords don't match." : '';
@@ -245,8 +257,10 @@
     };
     button.addEventListener('click', async () => {
       setBusy(button, true);
-      const { error } = await send();
+      const answer = await send();
       setBusy(button, false);
+      if (!answer) return; // nothing was sent: the safety check is not done, and says so itself
+      const { error } = answer;
       if (error) {
         showMessage(friendlyError(error));
         return;
@@ -272,6 +286,121 @@
 
   wirePasswordToggles();
 
+  /* ---------------------------------------------------------------- Cloudflare's safety check */
+  // Cloudflare Turnstile, the "I'm not a robot" box. Once CAPTCHA is switched on in Supabase (Authentication, Bot and
+  // Abuse Protection), sign-up, log-in, a new code and a reset email are refused without its answer.
+  // Empty key: no box, and every form works as before.
+  const TURNSTILE_SITE_KEY = '0x4AAAAAAFwg386OwHI2rRsi';
+  const CAPTCHA_WAIT = 8000; // ms a click waits for a box that is still checking
+  const CAPTCHA_NOT_DONE = 'Please finish the safety check, then try again.';
+  const CAPTCHA_NO_LOAD = "The safety check didn't load. Check your connection, refresh the page and try again.";
+  let turnstileLoad = null;
+  function loadTurnstile() {
+    if (!turnstileLoad) {
+      turnstileLoad = new Promise((resolve, reject) => {
+        window.rzgsTurnstileReady = () => resolve(window.turnstile);
+        const script = document.createElement('script');
+        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=rzgsTurnstileReady';
+        script.onerror = () => reject(new Error('turnstile did not load'));
+        document.head.append(script);
+      });
+    }
+    return turnstileLoad;
+  }
+  // One box per form. take() gives its answer: undefined when the check is off, null when it is on and not done
+  // (the box says so), else the answer. An answer works once, so after every try the box starts again.
+  function wireCaptcha(root, action) {
+    const holder = root && $('[data-captcha]', root);
+    if (!TURNSTILE_SITE_KEY || !holder) return { start() {}, take: async () => undefined, reset() {} };
+    const slot = $('[data-captcha-box]', holder);
+    const note = $('[data-captcha-error]', holder);
+    let widget = null; // null: not started, '': loading, else the widget id
+    let token = '';
+    let broken = false;
+    let waiting = [];
+    const settle = () => { waiting.forEach((done) => done()); waiting = []; };
+    const say = (text) => {
+      if (text) {
+        note.textContent = text;
+        motion.reveal(note);
+      } else if (!note.hidden) {
+        motion.conceal(note);
+      }
+    };
+    const start = () => {
+      if (widget !== null) return;
+      widget = '';
+      holder.hidden = false;
+      loadTurnstile().then((turnstile) => {
+        widget = turnstile.render(slot, {
+          sitekey: TURNSTILE_SITE_KEY,
+          action,
+          theme: 'dark',
+          size: slot.clientWidth && slot.clientWidth < 300 ? 'compact' : 'flexible',
+          appearance: holder.hasAttribute('data-captcha-quiet') ? 'interaction-only' : 'always',
+          callback: (answer) => { token = answer; broken = false; say(''); settle(); },
+          'expired-callback': () => { token = ''; },
+          'error-callback': () => { token = ''; broken = true; settle(); },
+          // a quiet box takes room only while Cloudflare asks for a tick
+          'before-interactive-callback': () => holder.classList.add('is-asking'),
+          'after-interactive-callback': () => holder.classList.remove('is-asking'),
+        });
+      }).catch(() => { broken = true; settle(); say(CAPTCHA_NO_LOAD); });
+    };
+    return {
+      start,
+      async take() {
+        start();
+        if (!token && !broken) await new Promise((done) => { waiting.push(done); setTimeout(done, CAPTCHA_WAIT); });
+        if (token) return token;
+        say(broken && !window.turnstile ? CAPTCHA_NO_LOAD : CAPTCHA_NOT_DONE);
+        motion.shake(holder);
+        return null;
+      },
+      reset() {
+        token = '';
+        if (widget && window.turnstile) window.turnstile.reset(widget);
+      },
+    };
+  }
+
+  /* ---------------------------------------------------------------- Gmail and Telegram */
+  // A button shows only if its login is switched on at Supabase, so a client never meets one that fails. Supabase answers
+  // a switched-on login by sending the browser on to Google or Telegram, and a switched-off one with an error.
+  async function loginIsOn(provider) {
+    try {
+      const probe = new URL(`${SUPABASE_URL}/auth/v1/authorize`);
+      probe.searchParams.set('provider', provider);
+      probe.searchParams.set('redirect_to', pageUrl('dashboard.html'));
+      const answer = await fetch(probe, { redirect: 'manual' });
+      return answer.type === 'opaqueredirect' || (answer.status >= 300 && answer.status < 400);
+    } catch (e) {
+      return false;
+    }
+  }
+  async function wireSocial() {
+    const box = $('[data-social]');
+    if (!box) return;
+    const buttons = $$('[data-social-go]', box);
+    const on = await Promise.all(buttons.map((button) => loginIsOn(button.dataset.socialGo)));
+    buttons.forEach((button, i) => { button.hidden = !on[i]; });
+    box.hidden = !on.some(Boolean);
+    box.addEventListener('click', async (event) => {
+      const button = event.target.closest('[data-social-go]');
+      if (!button) return;
+      clearMessage();
+      button.disabled = true;
+      button.classList.add('is-busy');
+      markJustIn();
+      const { error } = await db.auth.signInWithOAuth({ provider: button.dataset.socialGo, options: { redirectTo: pageUrl('dashboard.html') } });
+      if (error) {
+        button.disabled = false;
+        button.classList.remove('is-busy');
+        showMessage("We couldn't open that login just now. Please try again, or use your email and password.");
+      }
+    });
+  }
+
   /* ---------------------------------------------------------------- login page */
   async function initLogin() {
     const form = $('[data-login-form]');
@@ -288,12 +417,15 @@
       return;
     }
 
+    wireSocial();
     wireValidation(form);
-    wireResend(resendButton, () => db.auth.resend({
-      type: 'signup',
-      email: form.elements.email.value.trim(),
-      options: { emailRedirectTo: pageUrl('dashboard.html') },
-    }));
+    const captcha = wireCaptcha(form, 'login');
+    captcha.start();
+    // Signed up but never typed the code: the code step of the sign-up page takes over, for this email.
+    resendButton.addEventListener('click', () => {
+      try { sessionStorage.setItem(VERIFY_KEY, form.elements.email.value.trim()); } catch (e) { /* they sign up again */ }
+      location.href = 'signup';
+    });
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -302,10 +434,17 @@
       if (!validateAll(form)) return;
 
       setBusy(submit, true);
+      const captchaToken = await captcha.take();
+      if (captchaToken === null) {
+        setBusy(submit, false);
+        return;
+      }
       const { error } = await db.auth.signInWithPassword({
         email: form.elements.email.value.trim(),
         password: form.elements.password.value,
+        options: { captchaToken },
       });
+      captcha.reset();
       if (error) {
         setBusy(submit, false);
         showMessage(friendlyError(error));
@@ -344,15 +483,23 @@
     } catch (e) { /* keep the short list */ }
   }
 
+  // Name and username start as the part of the email before the @; the dashboard changes them, and adds Telegram or a phone.
+  function nameFromEmail(email) {
+    const local = email.split('@')[0];
+    let username = local.replace(/[^A-Za-z0-9_]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 24);
+    if (username.length < 3) username = `${username || 'member'}_rzgs`.slice(0, 24);
+    return { full_name: local.slice(0, 100), username };
+  }
+
   async function initSignup() {
     const form = $('[data-signup-form]');
-    const steps = $$('[data-step]', form);
-    const bar = $$('[data-steps-bar] li');
-    const formWrap = $('[data-signup-wrap]');
-    const done = $('[data-signup-done]');
+    const wrap = $('[data-signup-wrap]');
+    const verify = $('[data-signup-verify]');
+    const codeForm = $('[data-verify-form]', verify);
+    const password = form.elements.create_password;
     const DRAFT_KEY = 'rz_signup_draft';
-    const DRAFT_FIELDS = ['full_name', 'email', 'username', 'country', 'phone', 'telegram_username'];
-    let current = 0;
+    const DRAFT_FIELDS = ['email', 'country'];
+    let email = '';
 
     const { data: { session } } = await db.auth.getSession();
     if (session) {
@@ -361,6 +508,7 @@
     }
 
     fillCountries(form.elements.country);
+    wireSocial();
 
     // Keep what was typed (never the password) if the page is refreshed by accident.
     try {
@@ -376,71 +524,81 @@
     });
 
     wireValidation(form);
+    wireValidation(codeForm);
+    const captcha = wireCaptcha(form, 'signup');
+    const codeCaptcha = wireCaptcha(verify, 'resend');
 
-    function showStep(index, moveFocus = true) {
-      current = index;
-      steps.forEach((step, i) => { step.hidden = i !== index; });
-      bar.forEach((item, i) => {
-        item.classList.toggle('is-done', i < index);
-        item.classList.toggle('is-current', i === index);
-        if (i === index) item.setAttribute('aria-current', 'step');
-        else item.removeAttribute('aria-current');
+    // The rules under the password light up one by one while it is typed.
+    const paintRules = () => $$('[data-rule]', form).forEach((rule) => rule.classList.toggle('is-met', PASSWORD_RULES[rule.dataset.rule](password.value)));
+    password.addEventListener('input', paintRules);
+
+    const resend = wireResend($('[data-resend]', verify), async () => {
+      const captchaToken = await codeCaptcha.take();
+      if (captchaToken === null) return null;
+      const answer = await db.auth.resend({
+        type: 'signup',
+        email,
+        options: { emailRedirectTo: pageUrl('dashboard.html'), captchaToken },
       });
-      clearMessage();
-      if (moveFocus) $('legend', steps[index]).focus();
+      codeCaptcha.reset();
+      return answer;
+    });
+
+    function showCode(address, justSent) {
+      email = address;
+      try { sessionStorage.setItem(VERIFY_KEY, address); } catch (e) { /* a refresh starts again */ }
+      $('[data-verify-email]', verify).textContent = address;
+      wrap.hidden = true;
+      verify.hidden = false;
+      codeCaptcha.start();
+      $('h2', verify).focus();
+      if (justSent) resend.cooldown();
     }
 
-    $$('[data-back]', form).forEach((button) => button.addEventListener('click', () => showStep(current - 1)));
-
-    const resend = wireResend($('[data-resend]', done), () => db.auth.resend({
-      type: 'signup',
-      email: form.elements.email.value.trim(),
-      options: { emailRedirectTo: pageUrl('dashboard.html') },
-    }));
-
-    $('[data-restart]', done).addEventListener('click', () => {
-      done.hidden = true;
-      formWrap.hidden = false;
-      showStep(0, false);
+    $('[data-restart]', verify).addEventListener('click', () => {
+      try { sessionStorage.removeItem(VERIFY_KEY); } catch (e) { /* ignore */ }
+      clearMessage();
+      verify.hidden = true;
+      wrap.hidden = false;
+      captcha.start();
       form.elements.email.focus();
     });
 
-    // One form, three steps: "Continue" and the Enter key both arrive here.
+    // Back on this page before the code was typed, or sent here by the login page.
+    let waiting = null;
+    try { waiting = sessionStorage.getItem(VERIFY_KEY); } catch (e) { /* none */ }
+    if (waiting && EMAIL_RE.test(waiting)) showCode(waiting, false);
+    else captcha.start();
+
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
-      if (!validateAll(steps[current])) return;
-      if (current < steps.length - 1) {
-        showStep(current + 1);
-        return;
-      }
+      clearMessage();
+      if (!validateAll(form)) return;
 
       const submit = $('[data-submit]', form);
-      const email = form.elements.email.value.trim();
+      const address = form.elements.email.value.trim();
       setBusy(submit, true);
-      clearMessage();
-
+      const captchaToken = await captcha.take();
+      if (captchaToken === null) {
+        setBusy(submit, false);
+        return;
+      }
       const { data, error } = await db.auth.signUp({
-        email,
-        password: form.elements.new_password.value,
+        email: address,
+        password: password.value,
         options: {
           emailRedirectTo: pageUrl('dashboard.html'),
-          // These details are copied into the web_users table by the database.
-          data: {
-            full_name: form.elements.full_name.value.trim(),
-            username: form.elements.username.value.trim(),
-            country: form.elements.country.value,
-            phone: form.elements.phone.value.trim(),
-            telegram_username: form.elements.telegram_username.value.trim().replace(/^@/, ''),
-            accepted_terms: true,
-          },
+          // copied into the web_users table by the database
+          data: { ...nameFromEmail(address), country: form.elements.country.value, accepted_terms: true },
+          captchaToken,
         },
       });
+      captcha.reset();
       setBusy(submit, false);
 
       // Supabase answers "ok" with an empty identities list when the email is already registered.
       const alreadyRegistered = !error && data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0;
       if (alreadyRegistered || (error && (error.code === 'user_already_exists' || error.code === 'email_exists'))) {
-        showStep(0, false);
         setFieldError(form.elements.email, 'This email already has an account. Log in instead.');
         shakeField(form.elements.email);
         form.elements.email.focus();
@@ -452,20 +610,43 @@
       }
 
       try { sessionStorage.removeItem(DRAFT_KEY); } catch (e) { /* ignore */ }
-      form.elements.new_password.value = '';
-      form.elements.confirm_password.value = '';
+      password.value = '';
+      paintRules();
 
       if (data.session) {
         // email confirmation is switched off in Supabase: the person is already signed in
+        markJustIn();
         location.replace(afterSignIn());
         return;
       }
+      showCode(address, true);
+    });
 
-      $('[data-done-email]', done).textContent = email;
-      formWrap.hidden = true;
-      done.hidden = false;
-      $('h2', done).focus();
-      resend.cooldown();
+    codeForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      clearMessage();
+      const input = codeForm.elements.code;
+      if (!validateField(input)) {
+        shakeField(input);
+        input.focus();
+        return;
+      }
+      const button = $('[data-verify]', codeForm);
+      setBusy(button, true);
+      const { data, error } = await db.auth.verifyOtp({ email, token: input.value.replace(/\s/g, ''), type: 'signup' });
+      if (error || !data.session) {
+        setBusy(button, false);
+        const wrong = !error || error.code === 'otp_expired' || /expired|invalid/i.test(error.message || '');
+        setFieldError(input, wrong ? 'That code is wrong or has run out. Check the newest email, or send a new code.' : friendlyError(error));
+        shakeField(input);
+        input.focus();
+        input.select();
+        return;
+      }
+      try { sessionStorage.removeItem(VERIFY_KEY); } catch (e) { /* ignore */ }
+      showMessage('Your email is confirmed. Welcome to RZGS-PRO!', 'success');
+      markJustIn();
+      setTimeout(() => location.replace(afterSignIn()), 700);
     });
   }
 
@@ -489,6 +670,8 @@
 
     wireValidation(requestForm);
     wireValidation(updateForm);
+    const captcha = wireCaptcha(requestForm, 'reset');
+    if (!request.hidden) captcha.start();
 
     requestForm.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -498,7 +681,13 @@
       const submit = $('[data-submit]', requestForm);
       const email = requestForm.elements.email.value.trim();
       setBusy(submit, true);
-      const { error } = await db.auth.resetPasswordForEmail(email, { redirectTo: pageUrl('reset-password.html') });
+      const captchaToken = await captcha.take();
+      if (captchaToken === null) {
+        setBusy(submit, false);
+        return;
+      }
+      const { error } = await db.auth.resetPasswordForEmail(email, { redirectTo: pageUrl('reset-password.html'), captchaToken });
+      captcha.reset();
       setBusy(submit, false);
       if (error) {
         showMessage(friendlyError(error));
@@ -614,6 +803,8 @@
       location.replace('login' + (urlError ? '?error=link' : firstOfTwo ? '?confirm=other' : ''));
       return;
     }
+    // Gmail or Telegram has no box to tick: the words beside the button said that continuing accepts the terms.
+    if (session.user.app_metadata.provider !== 'email' && !session.user.user_metadata.accepted_terms) db.auth.updateUser({ data: { accepted_terms: true } });
     const wanted = afterSignIn();
     if (wanted !== 'dashboard') {
       if (arrivedFrom === 'signup') markJustIn();
@@ -1246,6 +1437,8 @@
     }
     renderEmailChange();
     wireValidation(emailForm);
+    const captcha = wireCaptcha(emailForm, 'change_email');
+    emailForm.addEventListener('focusin', captcha.start, { once: true });
     emailForm.addEventListener('submit', async (event) => {
       event.preventDefault();
       if (!validateAll(emailForm)) return;
@@ -1260,7 +1453,13 @@
       }
       const submit = $('[data-submit]', emailForm);
       setBusy(submit, true);
-      const check = await db.auth.signInWithPassword({ email: user.email, password: password.value });
+      const captchaToken = await captcha.take();
+      if (captchaToken === null) {
+        setBusy(submit, false);
+        return;
+      }
+      const check = await db.auth.signInWithPassword({ email: user.email, password: password.value, options: { captchaToken } });
+      captcha.reset();
       if (check.error) {
         setBusy(submit, false);
         if (check.error.code === 'invalid_credentials') {

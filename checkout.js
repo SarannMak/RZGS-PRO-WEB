@@ -55,6 +55,8 @@
   let robot = null;
   let robotAsked = false;
   let robotPose = 'rest';
+  let justDone = ''; // what was just confirmed, for the words of the celebration
+  let cancelling = null; // the plan and the days a person is being asked about
 
   /* ---------------------------------------------------------------- the server */
   async function session() {
@@ -402,6 +404,114 @@
         <a class="btn btn-ghost" href="${pageUrl('app')}">Open control app</a>
         <a class="btn btn-ghost" href="${pageUrl('dashboard')}">Go to my dashboard</a>
       </div>`, { title: 'Done, congratulations!', text: 'Your bot is ready. Put me on your MT5 and we can start.', pose: 'cheer' });
+    celebrate(licence);
+  }
+
+  // Paper falling over the whole screen, in the site's colours. It stands above the box, in the top layer, and lets clicks through.
+  function confetti() {
+    const canvas = document.createElement('canvas');
+    canvas.className = 'co-confetti';
+    canvas.setAttribute('aria-hidden', 'true');
+    const open = 'showPopover' in HTMLElement.prototype;
+    if (open) canvas.setAttribute('popover', 'manual');
+    (open ? document.body : box).append(canvas);
+    if (open) canvas.showPopover();
+    const ratio = Math.min(window.devicePixelRatio || 1, 2);
+    const wide = innerWidth, high = innerHeight;
+    canvas.width = wide * ratio;
+    canvas.height = high * ratio;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(ratio, ratio);
+    const COLORS = ['#19d3ff', '#a6ff1a', '#37efb8', '#ffd23f', '#ffffff', '#5aa9ff'];
+    const pieces = [];
+    // two bursts from the lower corners, one from the middle; a phone gets fewer
+    const count = wide < 600 ? 70 : 110;
+    const burst = (x, y, angle, spread, power, wait) => {
+      for (let i = 0; i < count; i++) {
+        const way = angle + (Math.random() - 0.5) * spread, speed = power * (0.55 + Math.random() * 0.75);
+        pieces.push({ x, y, vx: Math.cos(way) * speed, vy: Math.sin(way) * speed, w: 5 + Math.random() * 6, h: 8 + Math.random() * 8, turn: Math.random() * 6.28, spin: (Math.random() - 0.5) * 14, flip: Math.random() * 6.28, color: COLORS[i % COLORS.length], wait });
+      }
+    };
+    const power = Math.max(high * 1.5, 900);
+    burst(0, high, -1.05, 0.9, power, 0);
+    burst(wide, high, -2.09, 0.9, power, 0);
+    burst(wide / 2, high * 0.42, -1.57, 3.2, power * 0.5, 0.18);
+    const started = performance.now();
+    let last = started;
+    const frame = (now) => {
+      const dt = Math.min(0.04, (now - last) / 1000);
+      last = now;
+      const age = (now - started) / 1000;
+      ctx.clearRect(0, 0, wide, high);
+      ctx.globalAlpha = Math.min(1, Math.max(0, (3.1 - age) / 0.7));
+      for (const p of pieces) {
+        if (age < p.wait) continue;
+        p.vy += 1500 * dt;
+        p.vx *= 1 - 1.5 * dt;
+        p.vy *= 1 - 1.5 * dt;
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.turn += p.spin * dt;
+        p.flip += 9 * dt;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.turn);
+        ctx.scale(1, Math.cos(p.flip));
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        ctx.restore();
+      }
+      if (age < 3.1) requestAnimationFrame(frame);
+      else canvas.remove();
+    };
+    requestAnimationFrame(frame);
+  }
+
+  // The moment the bot is theirs (the owner, 2026-11-02): "Congratulations!" over the page, which is ready underneath.
+  // Once for each bot: opening the same bot again later does not start the party again. A tap goes straight to the page.
+  function celebrate(licence) {
+    const mark = `rzgs_cheered_${licence.mt5}_${licence.expires_at}`;
+    let seen = null;
+    try {
+      seen = localStorage.getItem(mark);
+      localStorage.setItem(mark, '1');
+    } catch (e) { /* private window */ }
+    const words = justDone;
+    justDone = '';
+    if (seen && !words) return;
+    const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const over = document.createElement('div');
+    over.className = 'co-tick co-party';
+    over.setAttribute('role', 'status');
+    over.innerHTML = `<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="28"/><path d="M19 33l9 9 17-19"/></svg>
+      <h3 class="text-gradient">Congratulations!</h3>
+      <p>${words ? `${esc(words)} ` : ''}Your bot is ready.</p>`;
+    (matchMedia(WIDE).matches ? inner : box).append(over);
+    if (!calm) confetti();
+    let timer = null;
+    const leave = () => {
+      clearTimeout(timer);
+      over.classList.add('is-leaving');
+      setTimeout(() => over.remove(), 280);
+    };
+    timer = setTimeout(leave, calm ? 1500 : 2800);
+    over.addEventListener('click', leave);
+  }
+
+  // The second question before a plan with days left is cancelled: those days can't be brought back (the owner, 2026-11-02).
+  function paintCancelSure() {
+    const { name, left } = cancelling;
+    paint(`<p class="co-plan">Confirm 2 of 2</p>
+      <h2 id="co-title">Are you sure?</h2>
+      <p class="plan-confirm-lead">Your ${esc(name)} plan stops now and its ${left} ${left === 1 ? 'day' : 'days'} are gone for good. We can't bring them back.</p>
+      ${message('')}
+      <div class="co-row">
+        <button class="btn btn-ghost" type="button" data-co-close data-co-first>No, keep my plan</button>
+        <span class="plan-btn-glow co-danger"><button class="plan-btn" type="button" data-co-cancel-yes disabled><span data-plan-label>Yes, cancel it now</span></button></span>
+      </div>`);
+    // It can be pressed after a moment, so a double click on the first Yes can't also answer this one.
+    const yes = inner.querySelector('[data-co-cancel-yes]');
+    setTimeout(() => { yes.disabled = false; }, 1200);
   }
 
   function paintNotice(title, text, buttons = '') {
@@ -513,8 +623,9 @@
     setBusy(button, true);
     const result = await call(action, fields);
     if (!result.ok && button.isConnected) setBusy(button, false);
-    // sent to a person: nothing to tick yet
-    if (result.ok && !(result.order && result.order.stage === 'review')) await tick(action === 'broker' ? 'Account found' : 'MT5 account confirmed');
+    // the bot straight away (Free): the celebration says it. Sent to a person: nothing to tick yet.
+    if (result.ok && result.licence) justDone = 'MT5 account confirmed.';
+    else if (result.ok && !(result.order && result.order.stage === 'review')) await tick(action === 'broker' ? 'Account found' : 'MT5 account confirmed');
     afterAction(result);
   }
 
@@ -532,7 +643,7 @@
     setBusy(button, true);
     const result = await call('check');
     if (!button.isConnected) return;
-    if (result.ok && result.licence) await tick('Payment received');
+    if (result.ok && result.licence) justDone = 'Payment received.';
     setBusy(button, false);
     if (result.ok) { show(result); return; }
     if (result.code === 'too_soon') {
@@ -597,6 +708,7 @@
     if (event.target.closest('[data-co-back]')) { paintLoading(); afterAction(await call('back')); return; }
     const ask = event.target.closest('[data-co-ask]');
     if (ask) { ask.disabled = true; afterAction(await call('ask_review')); return; }
+    if (event.target.closest('[data-co-cancel-sure]')) { paintCancelSure(); return; }
     const yes = event.target.closest('[data-co-cancel-yes]');
     if (yes) {
       setBusy(yes, true, 'Cancelling...');
@@ -678,20 +790,34 @@
       afterAction(result);
     },
     // Asked before anything changes. The days left are gone (the owner, 2026-10-31). next: the plan they are moving up to.
+    // Days left: asked twice. A plan that has ended: asked once, with nothing to lose (the owner, 2026-11-02).
     askCancel(plan, expiresAt, next) {
       openBox();
       movingTo = next || null;
       const name = (PLANS[plan] || {}).name || 'paid';
       const ends = expiresAt ? new Date(expiresAt) : null;
       const left = ends ? Math.max(0, Math.ceil((ends - Date.now()) / 86400000)) : 0;
-      paint(`<h2 id="co-title">${next ? `Move from ${esc(name)} to Diamond?` : `Cancel your ${esc(name)} plan?`}</h2>
+      cancelling = { name, left };
+      if (ends && ends <= Date.now()) {
+        paint(`<h2 id="co-title">${next ? `Move from ${esc(name)} to Diamond?` : `Your ${esc(name)} plan has ended`}</h2>
+          <p class="plan-confirm-lead">It ended on ${dateText(ends)}, so you lose nothing. ${next ? 'Our sales team helps you with Diamond on Telegram.' : 'You can choose a new plan now.'}</p>
+          <div class="co-row">
+            <button class="btn btn-ghost" type="button" data-co-close data-co-first>${next ? 'No, not now' : 'Close'}</button>
+            ${next
+              ? '<a class="btn btn-primary" href="https://t.me/sarannsadboi" target="_blank" rel="noopener" data-co-close>Yes, Contact Sales</a>'
+              : `<a class="btn btn-primary" href="${pageUrl('./#plans')}" data-plans>See plans</a>`}
+          </div>`);
+        return;
+      }
+      paint(`<p class="co-plan">Confirm 1 of 2</p>
+        <h2 id="co-title">${next ? `Move from ${esc(name)} to Diamond?` : `Cancel your ${esc(name)} plan?`}</h2>
         ${next ? `<p class="plan-confirm-lead">To move up, your ${esc(name)} plan is cancelled first. Then our sales team helps you with Diamond on Telegram.</p>` : ''}
         <p class="plan-confirm-lead">${ends ? `It runs until ${dateText(ends)}, ${left} ${left === 1 ? 'day' : 'days'} left. ` : ''}If you cancel, those days are gone: they are not refunded and they do not move to a new plan.</p>
         <p class="plan-confirm-lead">Cancelling does not stop a bot that is running in MT5. To stop it, pause it in the control app or take it off the chart.</p>
         ${message('')}
         <div class="co-row">
           <button class="btn btn-ghost" type="button" data-co-close data-co-first>No, keep my plan</button>
-          <span class="plan-btn-glow co-danger"><button class="plan-btn" type="button" data-co-cancel-yes><span data-plan-label>Yes, cancel my plan</span></button></span>
+          <span class="plan-btn-glow co-danger"><button class="plan-btn" type="button" data-co-cancel-sure><span data-plan-label>Yes, cancel my plan</span></button></span>
         </div>`);
     },
     async drop() {
