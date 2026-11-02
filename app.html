@@ -184,6 +184,11 @@ nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;st
 .chips{display:flex;gap:8px;flex-wrap:wrap}
 .chipx{border:1px solid var(--line);padding:5px 10px;font:500 10px var(--f-mono);letter-spacing:.12em;color:var(--muted)}
 .chipx.on{background:var(--chip);border-color:var(--frame);color:var(--cyan)}
+/* the session row (2 Nov 2026): three boxes of one width filling the row, each name on one line; on a narrow phone they
+   go under the word. Its own class: .chips is also the option buttons in the settings, four to a row. */
+.line.ses-row{flex-wrap:wrap;align-items:center;row-gap:8px}
+.ses-chips{flex:1 1 220px;max-width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.ses-chips .chipx{padding:6px 4px;text-align:center;white-space:nowrap}
 .line{display:flex;justify-content:space-between;gap:12px;align-items:baseline;padding-block:7px;border-top:1px solid var(--line)}
 .line:first-of-type{border-top:0;padding-top:0}
 .line b{font:600 14px var(--f-display);color:var(--title);text-align:right}
@@ -682,8 +687,8 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
           <div class="line"><span class="cap">Mode</span><b id="vMode">BASIC</b></div>
           <div class="line"><span class="cap">Cycles closed today</span><b id="vCycles">0</b></div>
           <div class="line"><span class="cap">License</span><b class="good" id="vLic">4d 12h left</b></div>
-          <div class="line"><span class="cap">Session</span>
-            <span class="chips"><span class="chipx" id="sesAS">ASIA</span><span class="chipx" id="sesLN">LONDON</span><span class="chipx" id="sesNY">NEW YORK</span></span>
+          <div class="line ses-row"><span class="cap">Session</span>
+            <span class="ses-chips"><span class="chipx" id="sesAS">ASIA</span><span class="chipx" id="sesLN">LONDON</span><span class="chipx" id="sesNY">NEW YORK</span></span>
           </div>
         </div>
       </section>
@@ -1488,7 +1493,7 @@ function renderLadder(s, el) {
   const room = Math.max(40, ...tagged.map(t => t.w + 8));
   // newest bar left of that space, older bars to the left of it
   const right = PW - room, bw = right / Math.max(n, 30), bx = i => right - (n - i - .5) * bw;
-  chartView.bw = bw;                                         // a drag of one bar width moves the chart one bar
+  chartView.bw = bw; chartView.right = right;               // a drag of one bar width moves the chart one bar
   for (let i = n - 1; i >= 0; i -= 10) { const xx = Math.round(bx(i)) + .5; g.beginPath(); g.moveTo(xx, 0); g.lineTo(xx, H); g.stroke(); }
   g.setLineDash([]);
   g.beginPath(); g.moveTo(PW + .5, 0); g.lineTo(PW + .5, H); g.stroke();
@@ -1573,7 +1578,14 @@ function renderLadder(s, el) {
   if (s.bid) h += '<div class="ld-line" style="top:' + yp(s.bid) + '"></div>';
   if (s.nextUp) h += '<div class="ld-line next" style="top:' + yp(s.nextUp) + '"><span>NEXT ' + px(s.nextUp) + '</span></div>';
   if (s.nextDn) h += '<div class="ld-line next" style="top:' + yp(s.nextDn) + '"><span>NEXT ' + px(s.nextDn) + '</span></div>';
-  for (const x of exits) h += '<div class="ld-line exit ' + x.side + (x.band ? ' band' : '') + '" style="top:' + yp(x.price) + '"><span>' + x.text + '</span></div>';
+  // a basket's close zone runs from the newest candle to the right, with no word: its colour says it (the owner, 2 Nov 2026).
+  // Moved back in time the newest candle is off the screen, so only the price tag on the scale stays.
+  const nowAt = (Math.max(0, bx(n - 1) - bw / 2) / PW * 100).toFixed(2) + '%';
+  for (const x of exits) {
+    if (x.band && !live) continue;
+    h += '<div class="ld-line exit ' + x.side + (x.band ? ' band' : '') + '" style="' + (x.band ? 'left:' + nowAt + ';' : '') + 'top:' + yp(x.price) + '">' +
+      (x.band ? '' : '<span>' + x.text + '</span>') + '</div>';
+  }
   if (!live) h += '<button type="button" class="ld-now">Now</button>';      // moved back: one tap follows the price again
   plot.innerHTML = h;
 }
@@ -2081,13 +2093,23 @@ $('chartSeg').addEventListener('click', e => {
 syncChartSeg();
 // moving the chart with a finger or the mouse (see renderLadder): one finger drags through time, two fingers pinch to
 // show more or fewer candles, a double tap or NOW follows the price again. The mouse wheel zooms, a sideways one drags.
+// A pinch works whichever way the fingers go, up and down too (the owner, 2 Nov 2026): it is read from the touches,
+// and while two fingers are on the chart the page does not scroll. Moved back in time, a zoom keeps the candles under
+// the fingers (or the mouse) where they are; following the price, the newest candle stays at the right.
 (() => {
-  const el = $('ladder'), pts = new Map();
-  let from = null, lastTap = 0, moved = false;
+  const el = $('ladder'), pts = new Map(), tg = window.Telegram && Telegram.WebApp;
+  let from = null, pinch = null, lastTap = 0, moved = false;
   const redraw = () => renderLadder(view(), el);
-  const spread = () => { const xs = [...pts.values()]; return xs.length > 1 ? Math.abs(xs[0] - xs[1]) : 0; };
-  const anchor = () => { from = { back: chartView.back, count: chartView.count, x: [...pts.values()][0], span: spread() }; };
+  const anchor = () => { from = { back: chartView.back, x: [...pts.values()][0] }; };
   const toNow = () => { chartView.back = 0; chartView.count = 45; redraw(); };
+  const zoom = (count, at, base) => {
+    chartView.count = Math.max(MIN_BARS, Math.min(MAX_BARS, Math.round(count)));
+    if (base.back > 0 && chartView.right) {
+      const bw = chartView.right / Math.max(Math.min(chartView.count, chartView.total || chartView.count), 30);
+      chartView.back = Math.round(base.back + Math.max(0, chartView.right - at) * (1 / base.bw - 1 / bw));
+    }
+    redraw();
+  };
   el.addEventListener('pointerdown', e => {
     if (e.target.closest('.ld-now')) return;
     pts.set(e.pointerId, e.clientX);
@@ -2098,16 +2120,33 @@ syncChartSeg();
   el.addEventListener('pointermove', e => {
     if (!pts.has(e.pointerId) || !from) return;
     pts.set(e.pointerId, e.clientX);
-    if (pts.size > 1) {
-      const span = spread();                       // fingers apart: fewer, wider candles
-      if (from.span > 20 && span > 20) chartView.count = Math.round(from.count * from.span / span);
-    } else {
-      const dx = e.clientX - from.x;              // dragged right: older candles come in from the left
-      if (Math.abs(dx) > 4) moved = true;
-      chartView.back = Math.round(from.back + dx / (chartView.bw || 6));
-    }
+    if (pinch || pts.size > 1) return;           // two fingers: the pinch below
+    const dx = e.clientX - from.x;                // dragged right: older candles come in from the left
+    if (Math.abs(dx) > 4) moved = true;
+    chartView.back = Math.round(from.back + dx / (chartView.bw || 6));
     redraw();
   });
+  const gap = t => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+  el.addEventListener('touchstart', e => {
+    if (e.touches.length < 2) return;
+    if (e.cancelable) e.preventDefault();        // two fingers belong to the chart: no page scroll or zoom under them
+    const t = e.touches;
+    pinch = { span: gap(t), count: chartView.count, back: chartView.back, bw: chartView.bw || 6,
+      at: (t[0].clientX + t[1].clientX) / 2 - el.getBoundingClientRect().left };
+    moved = true;
+  }, { passive: false });
+  el.addEventListener('touchmove', e => {
+    if (!pinch || e.touches.length < 2) return;
+    if (e.cancelable) e.preventDefault();
+    const span = gap(e.touches);                 // fingers apart: fewer, wider candles
+    if (pinch.span > 20 && span > 20) zoom(pinch.count * pinch.span / span, pinch.at, pinch);
+  }, { passive: false });
+  // inside Telegram a swipe down closes or shrinks the app: not while a finger is on the chart
+  const swipes = on => { try { if (tg && tg.isVersionAtLeast && tg.isVersionAtLeast('7.7')) { if (on) tg.enableVerticalSwipes(); else tg.disableVerticalSwipes(); } } catch (x) {} };
+  el.addEventListener('touchstart', () => swipes(false), { passive: true });
+  const lift = e => { if (e.touches.length < 2) pinch = null; if (!e.touches.length) swipes(true); };
+  el.addEventListener('touchend', lift);
+  el.addEventListener('touchcancel', lift);
   const up = e => {
     if (!pts.has(e.pointerId)) return;
     pts.delete(e.pointerId);
@@ -2120,9 +2159,8 @@ syncChartSeg();
   el.addEventListener('pointercancel', up);
   el.addEventListener('wheel', e => {
     e.preventDefault();
-    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) chartView.back = Math.round(chartView.back - e.deltaX / (chartView.bw || 6));
-    else chartView.count = Math.round(chartView.count * (e.deltaY > 0 ? 1.15 : 1 / 1.15));
-    redraw();
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) { chartView.back = Math.round(chartView.back - e.deltaX / (chartView.bw || 6)); redraw(); return; }
+    zoom(chartView.count * (e.deltaY > 0 ? 1.15 : 1 / 1.15), e.clientX - el.getBoundingClientRect().left, { back: chartView.back, bw: chartView.bw || 6 });
   }, { passive: false });
   el.addEventListener('click', e => { if (e.target.closest('.ld-now')) toNow(); });
 })();

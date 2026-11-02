@@ -327,16 +327,24 @@
         motion.conceal(note);
       }
     };
+    // Cloudflare's box is never narrower than 300 px. On a narrow phone it is drawn a little smaller to fit the form,
+    // instead of its tall square (the owner, 2026-11-02).
+    const fit = () => {
+      const room = holder.clientWidth;
+      slot.style.zoom = room && room < 300 ? (room / 300).toFixed(3) : '';
+    };
     const start = () => {
       if (widget !== null) return;
       widget = '';
       holder.hidden = false;
+      fit();
+      window.addEventListener('resize', fit);
       loadTurnstile().then((turnstile) => {
         widget = turnstile.render(slot, {
           sitekey: TURNSTILE_SITE_KEY,
           action,
           theme: 'dark',
-          size: slot.clientWidth && slot.clientWidth < 300 ? 'compact' : 'flexible',
+          size: 'flexible',
           appearance: holder.hasAttribute('data-captcha-quiet') ? 'interaction-only' : 'always',
           callback: (answer) => { token = answer; broken = false; say(''); settle(); },
           'expired-callback': () => { token = ''; },
@@ -797,6 +805,13 @@
 
   async function initDashboard() {
     const root = $('[data-dash]');
+    // an older link to Settings opens Manage account, when the page opens or later in the address
+    const toManage = () => {
+      const part = { '#tools': '', '#settings': '', '#security': '', '#support': '#help', '#legal': '#help' }[location.hash];
+      if (part !== undefined) location.replace(`manage-account${part}`);
+      return part !== undefined;
+    };
+    if (toManage()) return;
     // When someone arrives from the confirmation email, supabase-js signs them in here.
     const { data: { session } } = await db.auth.getSession();
     if (!session) {
@@ -814,7 +829,7 @@
     if (arrivedFrom === 'signup') showMessage('Your email is confirmed. Welcome to RZGS-PRO!', 'success');
     else if (arrivedFrom === 'email_change') showMessage('Your email address is changed. Log in with the new one from now on.', 'success');
     else if (firstOfTwo) showMessage(FIRST_OF_TWO, 'success');
-    else if (urlError) showMessage('That link has expired or was already used. If you were changing your email, send the request again in Settings, under Security.');
+    else if (urlError) showMessage('That link has expired or was already used. If you were changing your email, send the request again in Manage account.');
 
     let user = session.user;
     // A change of email that was waiting may have been finished on another device since this one last looked.
@@ -838,12 +853,15 @@
     const stored = (key) => profile[key] || (user.user_metadata || {})[key] || '';
     const setAll = (selector, text) => $$(selector, root).forEach((el) => { el.textContent = text; });
 
-    /* ----- menu: one view at a time, remembered in the address (#plan, #tools ...) ----- */
-    const tabs = $$('.dash-dock [role="tab"]', root);
+    /* ----- menu: one view at a time, remembered in the address (#plan, #awards ...) ----- */
+    // In the menu on the left since 2 Nov 2026 (a drawer on a phone); Settings became the Manage account page.
+    const closeMenu = wireAccountMenu(root);
+    const tabs = $$('[data-dash-tabs] [role="tab"]', root);
     const tabFor = (name) => tabs.find((tab) => tab.dataset.tab === name);
     let settled = false;
     const selectTab = setupTabs(tabs, (tab) => {
       root.dataset.view = tab.dataset.tab;
+      closeMenu();
       if (!settled) return;
       history.replaceState(null, '', `#${tab.dataset.tab}`);
       window.scrollTo({ top: 0, behavior: 'instant' }); // every view starts at its top, like a new screen
@@ -867,10 +885,10 @@
     });
     // links inside the page, like "See plans", switch tab through the address
     window.addEventListener('hashchange', () => {
+      if (toManage()) return;
       const tab = tabFor(location.hash.slice(1));
       if (tab && tab.getAttribute('aria-selected') !== 'true') selectTab(tab);
     });
-    setupTabs($$('.dash-seg [role="tab"]', root))($('.dash-seg [role="tab"]', root));
 
     /* ----- the checkout: what was bought on this website (checkout.js and the "checkout" server function) ----- */
     let checkout = { order: null, licence: null, trial_used: false };
@@ -1273,36 +1291,7 @@
       $('[data-log-empty]', root).hidden = events.length > 0;
     }
 
-    /* ----- forms ----- */
-    // Each form saves a few fields of the person's own profile, then says so next to its button.
-    function wireSaveForm(form, readFields, successText) {
-      wireValidation(form);
-      form.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        if (!validateAll(form)) return;
-        const submit = $('[data-submit]', form);
-        const fields = readFields();
-        setBusy(submit, true);
-        const { data, error } = await db.auth.updateUser(fields.password ? fields : { data: fields });
-        setBusy(submit, false);
-        if (error) {
-          formMessage(form, friendlyError(error), 'error');
-          return;
-        }
-        if (fields.password) {
-          form.reset();
-        } else {
-          if (data && data.user) user = data.user;
-          Object.assign(profile, fields);
-          renderHeader();
-          renderInfo();
-        }
-        formMessage(form, successText, 'success');
-      });
-    }
-
     const profileForm = $('[data-profile-form]');
-    const passwordForm = $('[data-password-form]');
     const editBox = $('[data-edit-dialog]', root);
     const country = profileForm.elements.country;
     fillCountries(country);
@@ -1358,6 +1347,7 @@
       if (!fresh || JSON.stringify(fresh) === seen) return;
       Object.assign(profile, fresh);
       seen = JSON.stringify(fresh);
+      if (window.rzgsPlans) window.rzgsPlans.repaint({ plan: fresh.plan, plan_expires_at: fresh.plan_expires_at });
       renderHeader();
       renderInfo();
       renderPlan();
@@ -1423,7 +1413,151 @@
     setInterval(refreshBot, 60000);
     document.addEventListener('visibilitychange', refreshBot);
 
-    wireSaveForm(passwordForm, () => ({ password: passwordForm.elements.new_password.value }), 'Password updated.');
+    wireSignOut();
+
+    // signed out in another tab
+    db.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT') location.replace('./');
+    });
+  }
+
+  /* ----------------------------------------------------- the menu of the account pages */
+  // The owner's sketch (2 Nov 2026): a column on the left of a computer screen that folds to its icons (remembered), a
+  // drawer on a phone opened by the button left of the logo. The profile button at its bottom opens the account card
+  // (plans.js). Gives back a function that closes the drawer.
+  function wireAccountMenu(root) {
+    const side = $('[data-acc-side]', root);
+    const shade = $('[data-acc-shade]', root);
+    const opener = $('[data-acc-open]');
+    const accountCard = $('[data-acc-card]', root);
+    const phone = window.matchMedia('(max-width: 1023.98px)');
+    function setDrawer(open) {
+      const yes = open && phone.matches;
+      side.classList.toggle('is-open', yes);
+      shade.hidden = !yes;
+      if (opener) opener.setAttribute('aria-expanded', String(yes));
+      document.documentElement.classList.toggle('acc-locked', yes);
+    }
+    if (opener) {
+      opener.addEventListener('click', () => {
+        setDrawer(true);
+        ($('[aria-current="page"], [aria-selected="true"]', side) || $('a', side)).focus();
+      });
+    }
+    shade.addEventListener('click', () => setDrawer(false));
+    phone.addEventListener('change', () => setDrawer(false));
+    // Escape closes the account card first (plans.js), then the drawer
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && side.classList.contains('is-open') && accountCard.hidden) {
+        setDrawer(false);
+        if (opener) opener.focus();
+      }
+    });
+    const FOLD_KEY = 'rzgs_acc_folded';
+    const fold = $('[data-acc-fold]', side);
+    const setFold = (yes) => {
+      root.classList.toggle('is-folded', yes);
+      const words = yes ? 'Open the menu' : 'Fold the menu';
+      fold.setAttribute('aria-label', words);
+      fold.title = words;
+    };
+    try { setFold(localStorage.getItem(FOLD_KEY) === '1'); } catch (e) { /* open */ }
+    fold.addEventListener('click', () => {
+      if (phone.matches) { setDrawer(false); return; }
+      const yes = !root.classList.contains('is-folded');
+      setFold(yes);
+      try { localStorage.setItem(FOLD_KEY, yes ? '1' : '0'); } catch (e) { /* only for this visit */ }
+    });
+    if (window.rzgsPlans && window.rzgsPlans.mountCard) window.rzgsPlans.mountCard(accountCard, $('[data-acc-me]', root));
+    return () => setDrawer(false);
+  }
+
+  // Logging out asks first, like the power button of the control app: "Do you want to log out?"  No / Yes.
+  // Every Log out button of the account pages comes here: in Manage account, in the Edit profile box and in the account card.
+  function wireSignOut() {
+    const confirmBox = $('[data-sign-out-dialog]');
+    const confirmMsg = $('[data-sign-out-msg]', confirmBox);
+    document.addEventListener('click', (event) => {
+      if (!event.target.closest('[data-sign-out]')) return;
+      confirmMsg.hidden = true;
+      motion.fromTap(confirmBox);
+      confirmBox.showModal(); // the browser puts the cursor on "No" and gives it back when the box closes
+    });
+    $('[data-sign-out-no]', confirmBox).addEventListener('click', () => confirmBox.close());
+    // a tap on the dark area around the card also means "No"
+    confirmBox.addEventListener('click', (event) => { if (event.target === confirmBox) confirmBox.close(); });
+    $('[data-sign-out-yes]', confirmBox).addEventListener('click', async (event) => {
+      const yes = event.currentTarget;
+      setBusy(yes, true);
+      const { error } = await db.auth.signOut();
+      // When the server can't be reached, this device may or may not have been signed out. Look, don't guess.
+      const { data } = await db.auth.getSession();
+      if (error && data.session) {
+        // still signed in: say so instead of pretending
+        setBusy(yes, false);
+        confirmMsg.textContent = friendlyError(error);
+        confirmMsg.hidden = false;
+        return;
+      }
+      location.replace('./'); // signed out: back to the home page
+    });
+  }
+
+  /* ------------------------------------------------------- Manage account page */
+  // A page of its own since 2 Nov 2026 (the owner: "Manage account and Profile are separate"): Personal profile,
+  // Subscription, Usage, Sessions and Help. The profile (the dashboard) keeps the plan, the bot, the awards and the log.
+  async function initManage() {
+    const root = $('[data-manage]');
+    const { data: { session } } = await db.auth.getSession();
+    if (!session) {
+      location.replace('login');
+      return;
+    }
+    let user = session.user;
+    // a change of email may have been finished on another device since this one last looked
+    if (user.new_email) {
+      const { data } = await db.auth.getUser();
+      if (data && data.user) user = data.user;
+    }
+    const COLUMNS = 'full_name, username, avatar_url, email, plan, plan_expires_at, created_at, email_confirmed_at, mt5_account, broker, bot_mt5_account, bot_broker';
+    async function fetchProfile() {
+      try {
+        const { data } = await db.from('web_users').select(COLUMNS).eq('id', user.id).maybeSingle();
+        return data || null;
+      } catch (e) {
+        return null;
+      }
+    }
+    const profile = (await fetchProfile()) || {};
+    const stored = (key) => profile[key] || (user.user_metadata || {})[key] || '';
+    const setAll = (selector, text) => $$(selector, root).forEach((el) => { el.textContent = text; });
+    wireAccountMenu(root);
+    wireSignOut();
+
+    /* ----- Personal profile: the picture, the name, the email, the account ----- */
+    // only a picture from the person's own folder is ever shown (as on the dashboard)
+    const avatarFolder = `${SUPABASE_URL}/storage/v1/object/public/avatars/${user.id}/`;
+    function paintIdentity() {
+      const name = (stored('full_name') || stored('username') || 'RZGS-PRO member').trim();
+      const letter = name.charAt(0).toUpperCase() || 'R';
+      const url = stored('avatar_url');
+      setAll('[data-acc-name]', name);
+      setAll('[data-dash-email]', profile.email || user.email || '');
+      $$('[data-dash-avatar]', root).forEach((box) => {
+        if (!url.startsWith(avatarFolder)) { box.textContent = letter; return; }
+        const img = new Image();
+        img.alt = '';
+        img.onerror = () => { box.textContent = letter; };
+        img.src = url;
+        box.replaceChildren(img);
+      });
+      const joined = profile.created_at || user.created_at;
+      const confirmed = profile.email_confirmed_at || user.email_confirmed_at;
+      setAll('[data-info="joined"]', joined ? longDate(joined) : '-');
+      setAll('[data-info="email-status"]', confirmed ? 'Confirmed' : 'Not confirmed');
+      setAll('[data-info="mt5"]', profile.bot_mt5_account || stored('mt5_account') || 'Not set');
+      setAll('[data-info="broker"]', profile.bot_broker || stored('broker') || 'Not set');
+    }
 
     /* ----- change email ----- */
     // The new address counts only after the person opens the link we email to it (Supabase can also send one to
@@ -1487,57 +1621,533 @@
       emailForm.reset();
       const changed = (user.email || '').toLowerCase() === next; // no confirmation asked for: it is changed already
       if (changed) profile.email = user.email;
-      renderHeader();
+      paintIdentity();
       renderEmailChange();
       formMessage(emailForm, changed ? 'Email address changed.' : 'Link sent. Check the inbox of your new address.', 'success');
     });
 
-    /* ----- session ----- */
-    // Logging out asks first, like the power button of the control app: "Do you want to log out?"  No / Yes.
-    // Every Log out button on this page comes here: in Settings, in the Edit profile box and in the box under the profile button.
-    const confirmBox = $('[data-sign-out-dialog]');
-    const confirmMsg = $('[data-sign-out-msg]', confirmBox);
-    document.addEventListener('click', (event) => {
-      if (!event.target.closest('[data-sign-out]')) return;
-      confirmMsg.hidden = true;
-      motion.fromTap(confirmBox);
-      confirmBox.showModal(); // the browser puts the cursor on "No" and gives it back when the box closes
-    });
-    $('[data-sign-out-no]', confirmBox).addEventListener('click', () => confirmBox.close());
-    // a tap on the dark area around the card also means "No"
-    confirmBox.addEventListener('click', (event) => { if (event.target === confirmBox) confirmBox.close(); });
-    $('[data-sign-out-yes]', confirmBox).addEventListener('click', async (event) => {
-      const yes = event.currentTarget;
-      setBusy(yes, true);
-      const { error } = await db.auth.signOut();
-      // When the server can't be reached, this device may or may not have been signed out. Look, don't guess.
-      const { data } = await db.auth.getSession();
-      if (error && data.session) {
-        // still signed in: say so instead of pretending
-        setBusy(yes, false);
-        confirmMsg.textContent = friendlyError(error);
-        confirmMsg.hidden = false;
+    const passwordForm = $('[data-password-form]', root);
+    wireValidation(passwordForm);
+    passwordForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (!validateAll(passwordForm)) return;
+      const submit = $('[data-submit]', passwordForm);
+      setBusy(submit, true);
+      const { error } = await db.auth.updateUser({ password: passwordForm.elements.new_password.value });
+      setBusy(submit, false);
+      if (error) {
+        formMessage(passwordForm, friendlyError(error), 'error');
         return;
       }
-      location.replace('./'); // signed out: back to the home page
+      passwordForm.reset();
+      formMessage(passwordForm, 'Password updated.', 'success');
     });
 
-    const others = $('[data-sign-out-others]');
+    /* ----- what was bought on this website: whether the free days are used ----- */
+    let checkout = { trial_used: false };
+    async function refreshCheckout() {
+      try {
+        const { data } = await db.rpc('web_my_checkout');
+        if (data && data.ok) checkout = data;
+      } catch (e) { /* the free days stay as they were */ }
+    }
+    const onOpen = {}; // Usage and Sessions ask the server when they are shown
+
+    /* ----- Subscription: the plan now, what it gives, its next step, then the other plans (the owner's sketch) ----- */
+    const sub = $('[data-sub]', root);
+    const check = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
+    function renderSubscription(state, paidRunning, canMoveUp) {
+      const plans = (window.rzgsPlans && window.rzgsPlans.plans) || [];
+      const mine = plans.find((plan) => plan.id === state.plan);
+      const ended = state.status === 'Expired';
+      $('[data-sub-tone]', sub).dataset.subTone = state.plan && !ended ? state.plan : 'off';
+      $('[data-sub-name]', sub).textContent = state.plan ? `${mine ? mine.name : state.name} plan${ended ? ' (ended)' : ''}` : 'No plan yet';
+      $('[data-sub-until]', sub).textContent = !state.plan ? 'Start with 7 free days. No payment needed.'
+        : !profile.plan_expires_at ? 'No end date.'
+          : `${ended ? 'It ended on' : 'Your plan runs until'} ${state.until}.`;
+      $('[data-sub-price]', sub).textContent = mine && !ended ? `${mine.amount} ${mine.per}` : '';
+      // its one next step: the free days, renewing, moving up, or the plans to look at
+      const [label, checkoutId, main] = !state.plan ? (checkout.trial_used ? ['Choose a plan', '', true] : ['Claim your free trial', 'trial', true])
+        : ended ? [`Renew ${mine ? mine.name : state.name}`, state.plan, true]
+          : state.plan === 'trial' ? ['Upgrade your plan', '', true]
+            : canMoveUp ? ['Move up to Diamond', 'diamond', true]
+              : ['See plans', '', false];
+      const action = $('[data-sub-action]', sub);
+      action.textContent = label;
+      action.classList.toggle('btn-primary', main);
+      action.classList.toggle('btn-ghost', !main);
+      if (checkoutId) {
+        action.dataset.checkout = checkoutId;
+        delete action.dataset.plans;
+        action.href = '#plan';
+      } else {
+        action.dataset.plans = '';
+        delete action.dataset.checkout;
+        action.href = './#plans';
+      }
+      const gets = (mine || plans.find((plan) => plan.id === 'trial') || { get: [] }).get;
+      $('[data-sub-get]', sub).innerHTML = gets.map((line) => `<li>${check}<span></span></li>`).join('');
+      $$('[data-sub-get] span', sub).forEach((span, index) => { span.textContent = gets[index]; });
+      $('[data-sub-cancel]', sub).hidden = !paidRunning;
+      // the other plans: everything but the one running now
+      const others = plans.filter((plan) => plan.id !== state.plan || ended);
+      $('[data-sub-others]', root).replaceChildren(...others.map((plan) => {
+        const card = document.createElement('article');
+        card.className = 'acc-plan-card';
+        card.dataset.tone = plan.id;
+        card.innerHTML = `<div class="acc-plan-card-top"><b></b><span></span></div>
+          <p class="acc-plan-card-price"><b></b><span></span></p>
+          <p class="acc-plan-card-lead"></p>
+          <button class="btn btn-ghost btn-sm" type="button"></button>`;
+        $('.acc-plan-card-top b', card).textContent = plan.name;
+        $('.acc-plan-card-top span', card).textContent = plan.chip;
+        $('.acc-plan-card-price b', card).textContent = plan.amount;
+        $('.acc-plan-card-price span', card).textContent = plan.per;
+        $('.acc-plan-card-lead', card).textContent = plan.lead;
+        const button = $('button', card);
+        button.textContent = plan.id === 'diamond' && canMoveUp ? 'Move up' : plan.button;
+        button.dataset.planLink = plan.id;
+        button.dataset.checkout = plan.id;
+        return card;
+      }));
+    }
+    $('[data-sub-cancel]', sub).addEventListener('click', () => { if (window.rzgsPlans && window.rzgsPlans.cancel) window.rzgsPlans.cancel(); });
+
+    function renderPlan() {
+      const state = planState(profile);
+      // a paid plan that is running: nothing else starts until it ends or is cancelled; from Elite, Diamond can (plans.js)
+      const paidRunning = Boolean(state.plan) && state.plan !== 'trial' && state.status !== 'Expired';
+      const canMoveUp = paidRunning && state.plan === 'elite';
+      setAll('[data-plan-choice-note]', paidRunning
+        ? `Your ${state.name} plan runs until ${state.until}. You can renew it or start another plan when it ends.${canMoveUp ? ' To move up now, choose Diamond.' : ''}`
+        : 'Trial and Elite start right here. Diamond opens a chat with our sales team on Telegram.');
+      renderSubscription(state, paidRunning, canMoveUp);
+      $$('[data-plan-link]', root).forEach((button) => {
+        const on = button.dataset.planLink === state.plan;
+        const freeUsed = button.dataset.planLink === 'trial' && checkout.trial_used;
+        const moveUp = canMoveUp && button.dataset.planLink === 'diamond';
+        const locked = !moveUp && (paidRunning || freeUsed || (on && (state.plan === 'trial' || state.status !== 'Expired'))); // the free days only once
+        button.disabled = locked;
+        button.classList.toggle('is-locked', locked && !on);
+        button.classList.toggle('is-on', on);
+        if (on) button.setAttribute('aria-current', 'true');
+        else button.removeAttribute('aria-current');
+      });
+    }
+
+    /* ----- Usage: the client's own bot, in money (web_my_usage; the owner chose to show it, 2 Nov 2026) ----- */
+    const usageBox = $('#m-usage', root);
+    const rangeBox = $('[data-usage-range]', usageBox);
+    const RANGE_KEY = 'rzgs_usage_range';
+    try {
+      const saved = localStorage.getItem(RANGE_KEY);
+      if ([...rangeBox.options].some((option) => option.value === saved)) rangeBox.value = saved;
+    } catch (e) { /* this week */ }
+    let usage = null;
+    const dollars = (value) => `${value < 0 ? '-' : ''}$${Math.abs(Number(value) || 0).toFixed(2)}`;
+    const plusMinus = (value) => (value > 0.004 ? '+' : '') + dollars(value);
+    async function loadUsage(again) {
+      if (usage && usage.ok && !again) { renderUsage(); return; }
+      const button = $('[data-usage-refresh]', usageBox);
+      setBusy(button, true);
+      try {
+        const { data, error } = await db.rpc('web_my_usage');
+        if (error) throw error;
+        usage = data || { ok: false };
+      } catch (e) {
+        usage = { ok: false, offline: !navigator.onLine };
+      }
+      setBusy(button, false);
+      renderUsage();
+    }
+    onOpen.usage = () => loadUsage(false);
+    $('[data-usage-refresh]', usageBox).addEventListener('click', () => loadUsage(true));
+    rangeBox.addEventListener('change', () => {
+      try { localStorage.setItem(RANGE_KEY, rangeBox.value); } catch (e) { /* only for this visit */ }
+      renderUsage();
+    });
+
+    // Closed profit by range, as the control app's Report draws it: This week and Last week a bar a day, Monday to Sunday;
+    // Last 5 weeks a bar a week; All time a bar a week, or a bar a month after half a year. From the bot's "rep".
+    const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const WEEK = 7 * 86400;
+    const dayMonth = (sec) => { const d = new Date(sec * 1000); return `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]}`; };
+    function usageSeries(u, range) {
+      const r = u.rep || {};
+      if (!Array.isArray(r.d14) || !Array.isArray(r.wk) || !r.wk.length) {
+        const days = Array.isArray(u.days) ? u.days.slice(0, 7).map(Number) : [];
+        const names = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const today = new Date().getDay();
+        return { title: 'Closed profit, last 7 days ($)', label: 'Closed profit, last 7 days', vals: days,
+          labels: days.map((v, i) => (i === 6 ? 'Today' : names[(today + i + 1) % 7])), now: days.length - 1 };
+      }
+      const wd = (new Date(r.day0 * 1000).getUTCDay() + 6) % 7; // today, 0 = Monday
+      if (range === 'week' || range === 'last') {
+        const from = 13 - wd - (range === 'last' ? 7 : 0);
+        const vals = [];
+        const labels = [];
+        for (let i = 0; i < 7; i += 1) {
+          const k = from + i;
+          vals.push(k <= 13 ? Number(r.d14[k]) : null); // null: a day still to come
+          labels.push(range === 'week' && k === 13 ? 'Today' : WEEKDAYS[i]);
+        }
+        return range === 'week'
+          ? { title: 'Closed profit this week ($)', label: 'Closed profit this week', vals, labels, now: wd }
+          : { title: 'Closed profit last week ($)', label: 'Closed profit last week', vals, labels, now: -1 };
+      }
+      const n = r.wk.length;
+      if (range === 'month') {
+        const k0 = Math.max(0, n - 5);
+        const vals = r.wk.slice(k0).map(Number);
+        return { title: 'Closed profit a week, last 5 weeks ($)', label: 'Closed profit, last 5 weeks', vals,
+          labels: vals.map((v, i) => dayMonth(r.wk0 + (k0 + i) * WEEK)), now: vals.length - 1 };
+      }
+      if (n <= 26) {
+        return { title: 'Closed profit a week, since the start ($)', label: 'Closed profit since the start', vals: r.wk.map(Number),
+          labels: r.wk.map((v, i) => dayMonth(r.wk0 + i * WEEK)), now: n - 1 };
+      }
+      const months = []; // a week counts in the month of its Monday
+      r.wk.forEach((v, i) => {
+        const d = new Date((r.wk0 + i * WEEK) * 1000);
+        const key = d.getUTCFullYear() * 12 + d.getUTCMonth();
+        const last = months[months.length - 1];
+        if (last && last.key === key) last.v += Number(v);
+        else months.push({ key, v: Number(v), label: `${MONTHS[d.getUTCMonth()]} ${String(d.getUTCFullYear()).slice(2)}` });
+      });
+      return { title: 'Closed profit a month, since the start ($)', label: 'Closed profit since the start', vals: months.map((m) => m.v),
+        labels: months.map((m) => m.label), now: months.length - 1 };
+    }
+    // bars over and under the zero line: the bar of today is cyan, a loss red; the amounts over the bars while they fit
+    function drawBars(svg, vals, labels, now) {
+      const nums = vals.filter((v) => v !== null);
+      const n = vals.length;
+      if (!n) { svg.innerHTML = '<text x="150" y="76">Nothing closed yet</text>'; return; }
+      let hi = Math.max(0, ...nums);
+      const lo = Math.min(0, ...nums);
+      if (hi - lo < 1) hi = lo + 1;
+      const top = 18;
+      const bottom = 122;
+      const y = (v) => top + ((hi - v) / (hi - lo)) * (bottom - top);
+      const cw = 300 / n;
+      const bw = Math.min(26, cw * 0.64);
+      const every = Math.ceil(n / 7);
+      const amounts = n <= 12;
+      let h = `<line x1="0" y1="${y(0).toFixed(1)}" x2="300" y2="${y(0).toFixed(1)}" class="zero"/>`;
+      vals.forEach((v, i) => {
+        const cx = cw * (i + 0.5);
+        const here = i === now;
+        if (v !== null) {
+          const y0 = y(Math.max(v, 0));
+          const y1 = y(Math.min(v, 0));
+          h += `<rect x="${(cx - bw / 2).toFixed(1)}" y="${y0.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(1, y1 - y0).toFixed(1)}" class="${v < 0 ? 'loss' : here ? 'now' : 'win'}"/>`;
+          if (amounts) h += `<text x="${cx.toFixed(1)}" y="${(v < 0 ? y1 + 11 : y0 - 5).toFixed(1)}" class="amt">${Number(v).toFixed(Math.abs(v) >= 100 ? 0 : 1)}</text>`;
+        }
+        if ((n - 1 - i) % every === 0) h += `<text x="${cx.toFixed(1)}" y="146" class="${here ? 'today' : v === null ? 'later' : ''}">${labels[i]}</text>`;
+      });
+      svg.innerHTML = h;
+    }
+    function renderUsage() {
+      const state = $('[data-usage-state]', usageBox);
+      const u = usage || {};
+      const u$ = (key) => $(`[data-u="${key}"]`, usageBox);
+      const problem = !u.ok
+        ? (u.offline ? "You're offline. Check your connection and try again." : 'Usage is not available yet. Please try again later.')
+        : !u.bot
+          ? (profile.plan ? 'Your bot has not reported yet. Its numbers show here once it runs in MT5.' : 'No bot yet. Choose a plan to get your bot, and its numbers show here.')
+          : '';
+      $$('[data-usage-part]', usageBox).forEach((part) => { part.hidden = Boolean(problem); });
+      if (problem) {
+        state.dataset.tone = 'off';
+        state.textContent = problem;
+        return;
+      }
+      state.dataset.tone = u.online ? 'good' : 'bad';
+      state.textContent = u.online ? `Live from MT5 account ${u.account}.` : `Offline. Last report ${u.seen_at ? shortDateTime(u.seen_at) : 'not known'}.`;
+      const series = usageSeries(u, rangeBox.value);
+      const total = series.vals.reduce((sum, v) => sum + (Number(v) || 0), 0);
+      u$('profit').textContent = plusMinus(total);
+      u$('profit').dataset.tone = total > 0.004 ? 'good' : total < -0.004 ? 'bad' : '';
+      u$('profit-label').textContent = series.label;
+      u$('balance').textContent = dollars(u.balance);
+      u$('balance-label').textContent = `Balance · today ${plusMinus(u.day_profit)}`;
+      u$('trades').textContent = String(Number(u.trades) || 0);
+      const dd = Number(u.max_dd) || 0;
+      u$('dd').textContent = dd > 0.004 ? `-${dd.toFixed(2)}%` : '0.00%';
+      u$('dd').dataset.tone = dd > 0.004 ? 'bad' : '';
+      u$('chart-title').textContent = series.title;
+      u$('bars').setAttribute('aria-label', series.title);
+      drawBars(u$('bars'), series.vals, series.labels, series.now);
+      // today's closes: by take profit, or a whole side together (a basket)
+      const tp = Number(u.tp) || 0;
+      const baskets = Number(u.baskets) || 0;
+      const all = tp + baskets;
+      const share = (count) => Math.round((count / all) * 100);
+      u$('split').innerHTML = all
+        ? `<div class="acc-split-bar"><i data-k="tp" style="flex:${tp}"></i><i data-k="basket" style="flex:${baskets}"></i></div>
+          <ul class="acc-split-legend">
+            <li data-k="tp">Take profit <b>${share(tp)}%</b><small>${tp}</small></li>
+            <li data-k="basket">Basket <b>${share(baskets)}%</b><small>${baskets}</small></li>
+            <li data-k="cycles">Cycles closed <b>${Number(u.cycles) || 0}</b></li>
+          </ul>`
+        : '<p class="dash-hint">No trades closed yet today.</p>';
+    }
+
+    /* ----- Sessions: the devices logged in to this account, and to the control app (web_my_sessions) ----- */
+    const sessionsBox = $('#m-sessions', root);
+    const note = $('[data-sessions-note]', sessionsBox);
+    const NOTE_KEY = 'rzgs_sessions_note';
+    try { if (localStorage.getItem(NOTE_KEY)) note.hidden = true; } catch (e) { /* shown */ }
+    $('[data-sessions-note-x]', note).addEventListener('click', () => {
+      note.hidden = true;
+      try { localStorage.setItem(NOTE_KEY, '1'); } catch (e) { /* only for this visit */ }
+    });
+    let sessions = null;
+    async function loadSessions(again) {
+      if (sessions && sessions.ok && !again) return;
+      const button = $('[data-sessions-refresh]', sessionsBox);
+      setBusy(button, true);
+      try {
+        const { data, error } = await db.rpc('web_my_sessions');
+        if (error) throw error;
+        sessions = data || { ok: false };
+      } catch (e) {
+        sessions = { ok: false, offline: !navigator.onLine };
+      }
+      setBusy(button, false);
+      renderSessions();
+    }
+    onOpen.sessions = () => loadSessions(false);
+    $('[data-sessions-refresh]', sessionsBox).addEventListener('click', () => loadSessions(true));
+
+    // what a browser says about itself, in words: the system and the browser with its version
+    function deviceOf(agent) {
+      const a = agent || '';
+      const version = (re) => { const m = a.match(re); return m ? m[1].split('.')[0] : ''; };
+      const system = /iPhone/.test(a) ? 'iPhone' : /iPad/.test(a) ? 'iPad' : /Android/.test(a) ? 'Android' : /CrOS/.test(a) ? 'ChromeOS'
+        : /Windows/.test(a) ? 'Windows' : /Mac OS X|Macintosh/.test(a) ? 'Mac' : /Linux/.test(a) ? 'Linux' : 'Unknown device';
+      const browser = /Telegram/.test(a) ? ['Telegram', ''] : /Edg\//.test(a) ? ['Edge', version(/Edg\/([\d.]+)/)]
+        : /OPR\//.test(a) ? ['Opera', version(/OPR\/([\d.]+)/)] : /SamsungBrowser\//.test(a) ? ['Samsung Internet', version(/SamsungBrowser\/([\d.]+)/)]
+          : /Firefox\/|FxiOS\//.test(a) ? ['Firefox', version(/(?:Firefox|FxiOS)\/([\d.]+)/)] : /CriOS\//.test(a) ? ['Chrome', version(/CriOS\/([\d.]+)/)]
+            : /Chrome\//.test(a) ? ['Chrome', version(/Chrome\/([\d.]+)/)] : /Safari\//.test(a) ? ['Safari', version(/Version\/([\d.]+)/)] : ['Browser', ''];
+      const phoneLike = /iPhone|Android|Mobile/.test(a) && !/iPad|Tablet/.test(a);
+      return { system, browser: browser.filter(Boolean).join(' '), phone: phoneLike };
+    }
+    const ago = (when) => {
+      const minutes = Math.round((Date.now() - new Date(when)) / 60000);
+      if (minutes < 5) return 'Active now';
+      const words = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+      if (minutes < 60) return `Active ${words.format(-minutes, 'minute')}`;
+      if (minutes < 48 * 60) return `Active ${words.format(-Math.round(minutes / 60), 'hour')}`;
+      if (minutes < 30 * 24 * 60) return `Active ${words.format(-Math.round(minutes / 1440), 'day')}`;
+      return `Active on ${longDate(when)}`;
+    };
+    // The town of an IP address, from a free lookup service (the owner chose this, 2 Nov 2026); kept a week on this device.
+    const PLACES_KEY = 'rzgs_ip_places';
+    let places = {};
+    try { places = JSON.parse(localStorage.getItem(PLACES_KEY) || '{}') || {}; } catch (e) { /* asked again */ }
+    async function placeOf(ip) {
+      if (!ip || !/^[0-9a-fA-F:.]+$/.test(ip)) return '';
+      const known = places[ip];
+      if (known && Date.now() - known.at < 7 * 86400000) return known.place;
+      try {
+        const answer = await fetch(`https://get.geojs.io/v1/ip/geo/${encodeURIComponent(ip)}.json`);
+        if (!answer.ok) return '';
+        const geo = await answer.json();
+        const place = [geo.city, geo.country].filter((word) => typeof word === 'string' && word).join(', ');
+        places[ip] = { place, at: Date.now() };
+        try { localStorage.setItem(PLACES_KEY, JSON.stringify(places)); } catch (e) { /* asked again next time */ }
+        return place;
+      } catch (e) {
+        return '';
+      }
+    }
+    const sessionMsg = (text, tone) => {
+      const line = $('[data-session-msg]', sessionsBox);
+      line.textContent = text;
+      line.dataset.tone = tone;
+      line.hidden = false;
+    };
+    function renderSessions() {
+      const state = $('[data-sessions-state]', sessionsBox);
+      const s = sessions || {};
+      const problem = !s.ok ? (s.offline ? "You're offline. Check your connection and try again." : 'Your devices are not available yet. Please try again later.') : '';
+      $$('[data-sessions-part]', sessionsBox).forEach((part) => { part.hidden = Boolean(problem); });
+      state.hidden = !problem;
+      state.textContent = problem;
+      if (problem) return;
+      const list = Array.isArray(s.sessions) ? s.sessions : [];
+      $('[data-sessions-count]', sessionsBox).textContent = list.length;
+      $('[data-sessions-list]', sessionsBox).replaceChildren(...list.map((one) => {
+        const device = deviceOf(one.agent);
+        const row = document.createElement('li');
+        row.className = 'acc-device';
+        row.innerHTML = `<span class="acc-device-ico"><svg class="icon" aria-hidden="true"><use href="#i-${device.phone ? 'smartphone' : 'laptop'}"/></svg></span>
+          <p class="acc-device-name"><b></b></p>
+          <p class="acc-device-meta"><span data-browser></span><span data-place>Finding the place...</span><span data-seen></span></p>`;
+        $('.acc-device-name b', row).textContent = device.system;
+        if (one.me) $('.acc-device-name', row).insertAdjacentHTML('beforeend', '<span class="acc-here">This device</span>');
+        $('[data-browser]', row).textContent = device.browser;
+        $('[data-seen]', row).textContent = ago(one.seen);
+        const placeBox = $('[data-place]', row);
+        placeOf(one.ip).then((place) => { placeBox.textContent = [place || 'Unknown place', one.ip].filter(Boolean).join(' · '); });
+        if (!one.me) {
+          const out = document.createElement('button');
+          out.className = 'btn btn-ghost btn-sm';
+          out.type = 'button';
+          out.textContent = 'Log out';
+          out.addEventListener('click', async () => {
+            setBusy(out, true);
+            const { data, error } = await db.rpc('web_end_session', { p_id: one.id });
+            if (error || !data || !data.ok) {
+              setBusy(out, false);
+              sessionMsg(error ? friendlyError(error) : "We couldn't log that device out. Please try again.", 'error');
+              return;
+            }
+            row.classList.add('is-gone');
+            out.replaceWith(Object.assign(document.createElement('span'), { className: 'acc-gone', textContent: 'Logged out' }));
+            sessionMsg('That device is logged out. It may stay open there for up to an hour.', 'success');
+          });
+          row.append(out);
+        }
+        return row;
+      }));
+      // the control app keeps no device names: how many, and one button for all of them
+      const devices = Number(s.app_devices) || 0;
+      $('[data-app-count]', sessionsBox).textContent = devices;
+      const account = profile.bot_mt5_account;
+      $('[data-app-note]', sessionsBox).textContent = !s.has_bot
+        ? 'Your control app opens once your bot is delivered. Its devices show here then.'
+        : devices
+          ? `${devices} ${devices === 1 ? 'device is' : 'devices are'} logged in to your control app${account ? ` with MT5 account ${account}` : ''}.`
+          : 'No device is logged in to your control app.';
+      $('[data-app-row]', sessionsBox).hidden = !s.has_bot || !devices;
+    }
+    $('[data-app-out]', sessionsBox).addEventListener('click', async (event) => {
+      const button = event.currentTarget;
+      const yes = await ask('Log out of the control app everywhere?', 'Every phone and computer using your control app is logged out. You log in again with your MT5 account number and App Password. Your bot keeps running.');
+      if (!yes) return;
+      setBusy(button, true);
+      let answer = null;
+      try { answer = (await db.rpc('web_end_app_sessions')).data; } catch (e) { /* said below */ }
+      setBusy(button, false);
+      const line = $('[data-app-msg]', sessionsBox);
+      line.textContent = answer && answer.ok ? 'Every device is logged out of your control app.' : "We couldn't do that just now. Please try again.";
+      line.dataset.tone = answer && answer.ok ? 'success' : 'error';
+      line.hidden = false;
+      if (answer && answer.ok) loadSessions(true);
+    });
+    const others = $('[data-sign-out-others]', root);
     others.addEventListener('click', async () => {
       setBusy(others, true);
       const { error } = await db.auth.signOut({ scope: 'others' });
       setBusy(others, false);
-      const line = $('[data-session-msg]');
+      const line = $('[data-session-msg]', root);
       line.textContent = error ? friendlyError(error) : 'Your other devices are logged out.';
       line.dataset.tone = error ? 'error' : 'success';
       line.hidden = false;
+      if (!error) loadSessions(true);
     });
 
+    /* ----- a yes-or-no question, like the one before logging out ----- */
+    const askBox = $('[data-ask-dialog]', root);
+    function ask(title, text) {
+      $('[data-ask-title]', askBox).textContent = title;
+      $('[data-ask-text]', askBox).textContent = text;
+      motion.fromTap(askBox);
+      askBox.showModal(); // the browser puts the cursor on "No"
+      return new Promise((resolve) => {
+        const done = (yes) => {
+          askBox.onclose = null;
+          if (askBox.open) askBox.close();
+          resolve(yes);
+        };
+        $('[data-ask-yes]', askBox).onclick = () => done(true);
+        $('[data-ask-no]', askBox).onclick = () => done(false);
+        askBox.onclick = (event) => { if (event.target === askBox) done(false); };
+        askBox.onclose = () => resolve(false); // Escape
+      });
+    }
+
+    /* ----- the tabs: one part at a time, remembered in the address (#subscription, #usage ...) ----- */
+    const ROUTES = {
+      personal: 'personal', tools: 'personal', account: 'personal', security: 'personal',
+      subscription: 'plan', plan: 'plan', usage: 'usage', sessions: 'sessions', help: 'help', support: 'help', legal: 'help',
+    };
+    const ADDRESS = { personal: 'personal', plan: 'subscription', usage: 'usage', sessions: 'sessions', help: 'help' };
+    let settled = false;
+    function go(name) {
+      const part = ROUTES[name] || 'personal';
+      $$('[role="tab"][data-part]', root).forEach((tab) => {
+        const on = tab.dataset.part === part;
+        tab.setAttribute('aria-selected', String(on));
+        tab.tabIndex = on ? 0 : -1;
+        document.getElementById(tab.getAttribute('aria-controls')).hidden = !on;
+        // the chosen chip in sight, in a row that scrolls sideways on a phone
+        if (on) tab.parentElement.scrollLeft = tab.offsetLeft - (tab.parentElement.clientWidth - tab.offsetWidth) / 2;
+      });
+      if (settled) {
+        history.replaceState(null, '', `#${ADDRESS[part]}`);
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      }
+      if (onOpen[part]) onOpen[part]();
+    }
+    root.addEventListener('click', (event) => {
+      if (event.metaKey || event.ctrlKey || event.shiftKey) return;
+      const jump = event.target.closest('[data-jump]');
+      if (jump) {
+        event.preventDefault();
+        const place = document.getElementById(jump.dataset.jump);
+        place.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const field = $('input', place);
+        if (field) field.focus({ preventScroll: true });
+        return;
+      }
+      const link = event.target.closest('[data-go]');
+      if (!link) return;
+      event.preventDefault();
+      go(link.dataset.go);
+    });
+    window.addEventListener('hashchange', () => {
+      const name = location.hash.slice(1);
+      if (ROUTES[name]) go(name);
+    });
+    // the arrow keys move along the tabs, Home and End jump to their ends
+    $$('[role="tablist"]', root).forEach((list) => {
+      list.addEventListener('keydown', (event) => {
+        const tabs = $$('[role="tab"]', list);
+        const index = tabs.indexOf(document.activeElement);
+        if (index < 0) return;
+        const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[event.key];
+        const next = step ? tabs[(index + step + tabs.length) % tabs.length] : event.key === 'Home' ? tabs[0] : event.key === 'End' ? tabs[tabs.length - 1] : null;
+        if (!next) return;
+        event.preventDefault();
+        go(next.dataset.go);
+        next.focus();
+      });
+    });
+
+    paintIdentity();
+    await refreshCheckout();
+    renderPlan();
+    go(location.hash.slice(1));
+    settled = true;
+    root.setAttribute('aria-busy', 'false');
+    if (window.rzgsPlans) {
+      window.rzgsPlans.repaint({ full_name: stored('full_name'), username: stored('username'), plan: profile.plan || null, plan_expires_at: profile.plan_expires_at || null });
+    }
+    // a plan bought or cancelled from here (checkout.js) shows at once
+    document.addEventListener('rzgs:checkout', async () => {
+      const fresh = await fetchProfile();
+      if (fresh) Object.assign(profile, fresh);
+      await refreshCheckout();
+      renderPlan();
+    });
     // signed out in another tab
     db.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_OUT') location.replace('./');
     });
   }
 
-  ({ login: initLogin, signup: initSignup, reset: initReset, dashboard: initDashboard }[page] || (() => {}))();
+  ({ login: initLogin, signup: initSignup, reset: initReset, dashboard: initDashboard, manage: initManage }[page] || (() => {}))();
 })();

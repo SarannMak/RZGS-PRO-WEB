@@ -955,3 +955,77 @@ dialog.plan-confirm::backdrop {
 .pm-logout-msg {
   color: #ff8a8a;
 }
+
+/* ---------------------------------------------------------------- the account card that opens with a tap (2 Nov 2026) */
+/* at the bottom of the phone menu, and at the bottom of the dashboard's own menu (plans.js mountCard) */
+.pm-slot {
+  padding: 1px;
+  background: linear-gradient(180deg, rgba(25, 211, 255, 0.75), rgba(25, 211, 255, 0.16));
+  clip-path: var(--cut-14);
+}
+.pm-slot[hidden] {
+  display: none;
+}
+.nav-me-btn,
+.acc-me {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 54px;
+  padding: 8px 12px 8px 10px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  clip-path: var(--cut-10);
+  transition: border-color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
+}
+.nav-me-btn:hover,
+.acc-me:hover,
+.nav-me-btn[aria-expanded="true"],
+.acc-me[aria-expanded="true"] {
+  border-color: var(--frame);
+  background: var(--surface-2);
+}
+.nav-me-btn .nav-profile-pic,
+.acc-me .nav-profile-pic {
+  width: 34px;
+  height: 34px;
+}
+.nav-me-btn .pm-who,
+.acc-me .pm-who {
+  flex: 1;
+  min-width: 0;
+}
+.nav-me-btn > .icon,
+.acc-me > .icon {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  color: var(--text-subtle);
+}
+.nav-me {
+  display: none;
+}
+@media (max-width: 1023.98px) {
+  .nav-me {
+    display: grid;
+    gap: 8px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+  /* the card has View profile and Manage account, so "My dashboard" is not needed under it */
+  .primary-nav:has(.nav-me) .nav-menu-cta.signed-only {
+    display: none;
+  }
+  /* the card opened on a short screen: the menu scrolls instead of running off it */
+  .primary-nav:has(.nav-me) {
+    max-height: calc(100dvh - var(--header-h) - 16px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+

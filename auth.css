@@ -2332,7 +2332,7 @@ dialog.dash-edit::backdrop {
   font-size: 22px;
 }
 .auth-verify > p {
-  margin: 0;
+  margin: 0 auto;
   color: var(--text-muted);
   font-size: 14px;
   line-height: 1.5;
@@ -2396,3 +2396,1086 @@ dialog.dash-edit::backdrop {
   text-align: left;
 }
 
+
+/* ==========================================================================
+   The account area (the owner's sketch, 2 Nov 2026): two pages, the profile (the dashboard as it was, its menu
+   moved to the left) and Manage account (Personal profile, Subscription, Usage, Sessions, Help). Both have the menu
+   on the left, a drawer on a phone. The older menu and layout rules above are overridden here.
+   ========================================================================== */
+body.acc-page .primary-nav,
+body.acc-page .menu-toggle,
+body.acc-page .header-cta,
+body.acc-page .nav-menu-cta,
+body.acc-page .site-footer {
+  display: none;
+}
+body.acc-page {
+  padding-bottom: 0;
+}
+html:has(body.acc-page) {
+  scrollbar-gutter: stable;
+  scroll-padding-bottom: 0;
+}
+.dash-shell.acc {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  max-width: 1180px;
+}
+.acc-main,
+.acc-view,
+.acc-part {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  min-width: 0;
+}
+.acc-main {
+  gap: 14px;
+}
+.acc-view {
+  gap: 16px;
+}
+.acc-view[hidden],
+.acc-part[hidden],
+.acc-shade[hidden] {
+  display: none;
+}
+.acc[aria-busy="true"] .acc-main {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* ---------- the menu ---------- */
+.acc-side {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+.acc-side-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 2px 4px;
+}
+.acc-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  color: var(--text);
+  font: 700 16px/1 var(--font-display);
+  letter-spacing: 0.04em;
+  text-decoration: none;
+}
+.acc-brand img {
+  flex: none;
+  width: 30px;
+  height: 30px;
+}
+.acc-fold {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  clip-path: var(--cut-10);
+  transition: color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
+.acc-fold:hover {
+  border-color: var(--frame);
+  color: var(--cyan);
+}
+.acc-fold .icon {
+  width: 18px;
+  height: 18px;
+  transition: transform var(--dur) var(--ease-out);
+}
+/* the control app, the one big way out of this menu (Higgsfield's Create) */
+.acc-app {
+  justify-content: flex-start;
+  gap: 12px;
+  padding-inline: 14px;
+}
+.acc-app .icon {
+  flex: none;
+  width: 20px;
+  height: 20px;
+}
+.acc-nav {
+  display: grid;
+  gap: 2px;
+}
+.acc-nav a,
+.acc-nav button {
+  position: relative;
+  width: 100%;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 42px;
+  padding: 0 12px;
+  color: var(--text-muted);
+  font: 500 14px/1.2 var(--font-body);
+  text-decoration: none;
+  transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.acc-nav a:hover,
+.acc-nav button:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.acc-nav a[aria-current="page"],
+.acc-nav button[aria-selected="true"] {
+  background: var(--chip);
+  color: var(--cyan);
+  box-shadow: inset 2px 0 0 var(--cyan);
+}
+.acc-nav .icon,
+.acc-nav svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+}
+/* the pictures of the old menu draw with lines */
+.acc-nav svg:not(.icon) {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.acc-nav button:focus-visible {
+  outline-offset: -3px;
+}
+.acc-nav span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.acc-count {
+  flex: none;
+  padding: 4px 6px;
+  background: rgba(166, 255, 26, 0.08);
+  color: var(--neon);
+  font: 600 10px/1 var(--font-mono);
+  letter-spacing: 0.04em;
+}
+.acc-nav-cap {
+  margin: 6px 12px 0;
+  color: var(--text-subtle);
+  font: 500 10.5px/1 var(--font-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.acc-nav--site a {
+  min-height: 38px;
+  font-size: 13.5px;
+}
+.acc-nav--site .icon {
+  width: 18px;
+  height: 18px;
+}
+/* the profile button at the bottom; its card opens above it (plans.js) */
+.acc-me-wrap {
+  position: relative;
+  margin-top: auto;
+  padding-top: 10px;
+}
+.acc-card {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 2px);
+  left: 0;
+  z-index: 5;
+  filter: drop-shadow(0 18px 30px rgba(0, 0, 0, 0.7));
+}
+
+/* the button in the header that opens the drawer: only on a phone */
+.acc-open {
+  display: none;
+}
+
+@media (max-width: 1023.98px) {
+  body.acc-page .acc-open {
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+  }
+  body.acc-page .header-inner {
+    justify-content: flex-start;
+    gap: 10px;
+  }
+  body.acc-page .header-actions {
+    margin-left: auto;
+  }
+  .acc-side {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 90;
+    width: min(320px, 86vw);
+    padding: 14px 12px calc(14px + env(safe-area-inset-bottom, 0px));
+    border-right: 1px solid var(--border-strong);
+    background: #05121a;
+    box-shadow: 30px 0 60px -20px rgba(0, 0, 0, 0.85);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    transform: translateX(-104%);
+    visibility: hidden;
+    transition: transform 0.26s var(--ease-out), visibility 0s linear 0.26s;
+  }
+  .acc-side.is-open {
+    transform: none;
+    visibility: visible;
+    transition: transform 0.26s var(--ease-out), visibility 0s;
+  }
+  .acc-fold .icon {
+    transform: none;
+  }
+  .acc-shade {
+    position: fixed;
+    inset: 0;
+    z-index: 89;
+    background: rgba(2, 8, 12, 0.64);
+    backdrop-filter: blur(2px);
+  }
+  html.acc-locked {
+    overflow: hidden;
+  }
+  .acc-main {
+    padding-top: 4px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .dash-shell.acc {
+    grid-template-columns: 252px minmax(0, 1fr);
+    gap: 28px;
+    align-items: start;
+  }
+  .acc-side {
+    position: sticky;
+    top: calc(var(--header-h) + 16px);
+    z-index: 3;
+    min-height: min(640px, calc(100vh - var(--header-h) - 40px));
+    padding: 12px;
+    border: 1px solid transparent;
+    border-image: var(--hud-panel) 16 fill / 16px;
+  }
+  /* folded to its icons: the words stay for screen readers and come back as a tip on hover */
+  .dash-shell.acc.is-folded {
+    grid-template-columns: 66px minmax(0, 1fr);
+  }
+  .acc.is-folded .acc-side {
+    padding: 12px 8px;
+  }
+  .acc.is-folded .acc-side-top {
+    flex-direction: column;
+  }
+  .acc.is-folded .acc-brand .brand-name,
+  .acc.is-folded .acc-count,
+  .acc.is-folded .acc-nav-cap,
+  .acc.is-folded .acc-me .pm-who,
+  .acc.is-folded .acc-me > .icon {
+    display: none;
+  }
+  .acc.is-folded .acc-nav span,
+  .acc.is-folded .acc-app span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .acc.is-folded .acc-nav a,
+  .acc.is-folded .acc-nav button,
+  .acc.is-folded .acc-app {
+    justify-content: center;
+    padding: 0;
+  }
+  .acc.is-folded .acc-me {
+    justify-content: center;
+    padding: 8px 0;
+  }
+  .acc.is-folded .acc-fold .icon {
+    transform: rotate(180deg);
+  }
+  /* the card is wider than the menu, so its words fit on one line */
+  .acc-card {
+    right: auto;
+    width: 300px;
+  }
+}
+/* a narrow computer screen: the profile has two columns already, so the menu keeps to its icons */
+@media (min-width: 1024px) and (max-width: 1279.98px) {
+  .dash-shell.acc {
+    grid-template-columns: 66px minmax(0, 1fr);
+    gap: 20px;
+  }
+  .acc .acc-side {
+    padding: 12px 8px;
+  }
+  .acc .acc-side-top {
+    flex-direction: column;
+  }
+  .acc .acc-brand .brand-name,
+  .acc .acc-count,
+  .acc .acc-nav-cap,
+  .acc .acc-me .pm-who,
+  .acc .acc-me > .icon {
+    display: none;
+  }
+  .acc .acc-nav span,
+  .acc .acc-app span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .acc .acc-nav a,
+  .acc .acc-nav button,
+  .acc .acc-app {
+    justify-content: center;
+    padding: 0;
+  }
+  .acc .acc-me {
+    justify-content: center;
+    padding: 8px 0;
+  }
+  .acc-fold {
+    display: none;
+  }
+}
+
+/* ---------- the profile (the dashboard): its card, then the tab on screen; on a computer the card is a column ---------- */
+.acc-main--dash {
+  gap: 12px;
+}
+@media (min-width: 1024px) {
+  .acc-main--dash {
+    grid-template-columns: 290px minmax(0, 1fr);
+    column-gap: 24px;
+    align-items: start;
+  }
+  .acc-main--dash > .dash-profile {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+  }
+  .acc-main--dash > .auth-msg,
+  .acc-main--dash > .dash-deck {
+    grid-column: 2;
+  }
+}
+
+/* ---------- Manage account ---------- */
+.acc-chips::-webkit-scrollbar {
+  display: none;
+}
+.acc-chips button:focus-visible {
+  outline-offset: -3px;
+}
+.acc-h1 {
+  margin: 2px 0 0;
+  color: var(--text);
+  font: 700 clamp(24px, 3.4vw, 32px)/1.1 var(--font-display);
+  letter-spacing: 0.02em;
+}
+/* the tabs as chips with a coloured picture, scrolling sideways on a phone (Higgsfield's account page) */
+.acc-chips {
+  display: flex;
+  gap: 8px;
+  margin-inline: calc(var(--gutter) * -1);
+  padding: 2px var(--gutter) 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+}
+.acc-chips button {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  gap: 10px;
+  min-height: 48px;
+  padding: 6px 16px 6px 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font: 500 14px/1 var(--font-body);
+  cursor: pointer;
+  clip-path: var(--cut-10);
+  transition: border-color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.acc-chips button:hover {
+  color: var(--text);
+}
+.acc-chips button[aria-selected="true"] {
+  border-color: var(--frame);
+  background: var(--surface-2);
+  color: var(--text);
+}
+.acc-chip-ico {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  color: #fff;
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}
+.acc-chip-ico .icon {
+  width: 18px;
+  height: 18px;
+}
+.acc-chip-ico[data-tone="user"] {
+  background: linear-gradient(135deg, #3b6a7c, #1a3c4a);
+}
+.acc-chip-ico[data-tone="plan"] {
+  background: linear-gradient(135deg, #e0569f, #8a2f8f);
+}
+.acc-chip-ico[data-tone="usage"] {
+  background: linear-gradient(135deg, #2bd88f, #0f7a55);
+}
+.acc-chip-ico[data-tone="sessions"] {
+  background: linear-gradient(135deg, #6f7dff, #3b3fc4);
+}
+.acc-chip-ico[data-tone="help"] {
+  background: linear-gradient(135deg, #ffc04d, #d77d1f);
+}
+@media (min-width: 1024px) {
+  .acc-chips {
+    flex-wrap: wrap;
+    margin-inline: 0;
+    padding-inline: 0;
+  }
+}
+.acc-part-head {
+  display: grid;
+  gap: 4px;
+  margin-top: 4px;
+}
+.acc-part-head h2 {
+  margin: 0;
+  color: var(--text);
+  font: 700 22px/1.15 var(--font-display);
+  letter-spacing: 0.02em;
+}
+.acc-part-head p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+.acc-part-head--row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+.acc-part-head .btn .icon,
+.acc-toolbar .btn .icon,
+.acc-id-name .btn .icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Personal profile: the picture, the name with Edit, and the email */
+.acc-id {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid transparent;
+  border-image: var(--hud-panel) 16 fill / 16px;
+}
+.acc-id .avatar-xl {
+  width: 76px;
+  height: 76px;
+  font-size: 30px;
+}
+.acc-id-text {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.acc-id-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+.acc-id-name b {
+  color: var(--text);
+  font: 700 clamp(20px, 3vw, 26px)/1.1 var(--font-display);
+  overflow-wrap: anywhere;
+}
+.acc-id-name .btn {
+  gap: 6px;
+}
+.acc-id-mail {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-muted);
+  font-size: 14px;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.acc-id-mail:hover {
+  color: var(--cyan);
+}
+.acc-id-mail .icon {
+  flex: none;
+  width: 16px;
+  height: 16px;
+}
+
+/* Subscription */
+.acc-plan {
+  display: grid;
+}
+.acc-plan-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.acc-plan-ico {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 46px;
+  height: 46px;
+  background: var(--chip);
+  color: var(--text-subtle);
+  clip-path: var(--cut-10);
+}
+.acc-plan-ico .icon {
+  width: 22px;
+  height: 22px;
+}
+.acc-plan-ico[data-sub-tone="trial"] {
+  color: var(--neon);
+}
+.acc-plan-ico[data-sub-tone="elite"] {
+  color: var(--cyan);
+}
+.acc-plan-ico[data-sub-tone="diamond"] {
+  color: #c58bff;
+}
+.acc-plan-text {
+  flex: 1;
+  min-width: 0;
+}
+.acc-plan-name {
+  margin: 0;
+  color: var(--text);
+  font: 700 22px/1.15 var(--font-display);
+}
+.acc-plan-until {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+.acc-plan-price {
+  margin: 0;
+  color: var(--text);
+  font: 600 14px/1 var(--font-mono);
+  white-space: nowrap;
+}
+.acc-plan .btn-block {
+  margin-top: 16px;
+}
+.dash-panel.acc-plan .dash-hint {
+  margin-top: 14px;
+}
+.acc-plan-get {
+  display: grid;
+  gap: 10px;
+  margin: 16px 0 0;
+  padding: 14px 0 0;
+  border-top: 1px solid var(--border);
+  list-style: none;
+}
+.acc-plan-get li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.acc-plan-get .icon {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  color: var(--neon);
+}
+.acc-text-btn {
+  justify-self: start;
+  margin-top: 12px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-subtle);
+  font: 500 13px/1.4 var(--font-body);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.acc-text-btn:hover {
+  color: var(--bad);
+}
+.acc-text-btn[hidden] {
+  display: none;
+}
+.acc-plans {
+  display: grid;
+  gap: 10px;
+}
+@media (min-width: 640px) {
+  .acc-plans {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+}
+.acc-plan-card {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  background: rgba(10, 35, 48, 0.55);
+  clip-path: var(--cut-10);
+}
+.acc-plan-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.acc-plan-card-top b {
+  color: var(--text);
+  font: 700 17px/1 var(--font-display);
+}
+.acc-plan-card-top span {
+  padding: 4px 7px;
+  background: var(--chip);
+  color: var(--cyan);
+  font: 600 10px/1 var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.acc-plan-card[data-tone="trial"] .acc-plan-card-top span {
+  color: var(--neon);
+}
+.acc-plan-card[data-tone="diamond"] .acc-plan-card-top span {
+  color: #c58bff;
+}
+.acc-plan-card-price {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.acc-plan-card-price b {
+  margin-right: 4px;
+  color: var(--text);
+  font: 700 22px/1 var(--font-display);
+}
+.acc-plan-card-lead {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+.acc-plan-card .btn {
+  margin-top: 4px;
+}
+
+/* Usage */
+.acc-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.acc-select {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  clip-path: var(--cut-10);
+}
+.acc-select:focus-within {
+  border-color: var(--cyan);
+}
+.acc-select select {
+  padding: 0 24px 0 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: 500 14px/1 var(--font-body);
+  appearance: none;
+  cursor: pointer;
+}
+.acc-select select:focus-visible {
+  outline: none;
+}
+.acc-select option {
+  background: #071922;
+  color: var(--text);
+}
+.acc-select .icon {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: var(--text-subtle);
+}
+.acc-select .icon:last-child {
+  position: absolute;
+  right: 10px;
+  pointer-events: none;
+}
+.acc-state {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+.acc-state[hidden] {
+  display: none;
+}
+.acc-state::before {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-subtle);
+}
+.acc-state[data-tone="good"]::before {
+  background: var(--good);
+  box-shadow: 0 0 8px var(--good);
+}
+.acc-state[data-tone="bad"]::before {
+  background: var(--bad);
+}
+.acc-stats {
+  display: grid;
+  gap: 10px;
+}
+@media (min-width: 640px) {
+  .acc-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.acc-stat {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--border);
+  background: rgba(10, 35, 48, 0.55);
+  clip-path: var(--cut-10);
+}
+.acc-stat-ico {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  background: var(--chip);
+  color: var(--cyan);
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}
+.acc-stat-ico .icon {
+  width: 20px;
+  height: 20px;
+}
+.acc-stat > div {
+  min-width: 0;
+}
+.acc-stat b {
+  display: block;
+  color: var(--text);
+  font: 700 22px/1.1 var(--font-display);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.acc-stat b[data-tone="good"] {
+  color: var(--good);
+}
+.acc-stat b[data-tone="bad"] {
+  color: var(--bad);
+}
+.acc-stat span {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.acc-bars {
+  display: block;
+  width: 100%;
+  max-width: 560px;
+  height: auto;
+  margin: 4px auto 0;
+  overflow: visible;
+}
+.acc-bars .zero {
+  stroke: var(--border-strong);
+}
+.acc-bars .win {
+  fill: var(--frame);
+}
+.acc-bars .now {
+  fill: var(--cyan);
+}
+.acc-bars .loss {
+  fill: var(--bad);
+}
+.acc-bars text {
+  fill: var(--text-subtle);
+  font: 500 9.5px var(--font-mono);
+  text-anchor: middle;
+}
+.acc-bars text.amt {
+  fill: var(--text);
+}
+.acc-bars text.today {
+  fill: var(--cyan);
+}
+.acc-bars text.later {
+  opacity: 0.45;
+}
+.acc-split-bar {
+  display: flex;
+  gap: 3px;
+  height: 12px;
+}
+.acc-split-bar i {
+  display: block;
+  min-width: 6px;
+  border-radius: 6px;
+}
+.acc-split-bar [data-k="tp"],
+.acc-split-legend [data-k="tp"]::before {
+  background: var(--good);
+}
+.acc-split-bar [data-k="basket"],
+.acc-split-legend [data-k="basket"]::before {
+  background: var(--cyan);
+}
+.acc-split-legend [data-k="cycles"]::before {
+  background: var(--neon);
+}
+.acc-split-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.acc-split-legend li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+  font-size: 14px;
+}
+.acc-split-legend li::before {
+  content: "";
+  width: 14px;
+  height: 8px;
+  border-radius: 4px;
+}
+.acc-split-legend small {
+  color: var(--text-subtle);
+  font: 500 12px/1 var(--font-mono);
+}
+
+/* Sessions */
+.acc-note {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  clip-path: var(--cut-10);
+}
+.acc-note[hidden] {
+  display: none;
+}
+.acc-note-ico {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+}
+.acc-note-ico .icon,
+.acc-note-x .icon {
+  width: 18px;
+  height: 18px;
+}
+.acc-note p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.acc-note b {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--text);
+  font-weight: 600;
+}
+.acc-note-x {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.acc-note-x:hover {
+  color: var(--text);
+}
+.dash-panel > h2.acc-h2-count {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.acc-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 26px;
+  height: 22px;
+  padding: 0 7px;
+  background: var(--surface-3);
+  color: var(--text);
+  font: 600 12px/1 var(--font-mono);
+  letter-spacing: 0;
+}
+.acc-devices {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.acc-device {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px 14px;
+  padding: 14px 0;
+  border-top: 1px solid var(--border);
+}
+.acc-device:first-child {
+  padding-top: 4px;
+  border-top: 0;
+}
+.acc-device-ico {
+  display: grid;
+  grid-row: span 2;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}
+.acc-device-ico .icon {
+  width: 20px;
+  height: 20px;
+}
+.acc-device-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  min-width: 0;
+  margin: 0;
+  color: var(--text);
+  font: 600 15px/1.3 var(--font-body);
+}
+.acc-here {
+  padding: 3px 8px;
+  background: rgba(43, 243, 145, 0.12);
+  color: var(--good);
+  font: 600 11px/1.2 var(--font-mono);
+  letter-spacing: 0.04em;
+}
+.acc-device-meta {
+  grid-column: 2;
+  min-width: 0;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.acc-device-meta span:not(:empty) + span:not(:empty)::before {
+  content: " · ";
+  color: var(--text-subtle);
+}
+.acc-device > .btn,
+.acc-gone {
+  grid-row: 1 / span 2;
+  grid-column: 3;
+}
+.acc-gone {
+  color: var(--text-subtle);
+  font: 500 12px/1 var(--font-mono);
+}
+.acc-device.is-gone .acc-device-name,
+.acc-device.is-gone .acc-device-meta {
+  opacity: 0.5;
+}
+@media (max-width: 479.98px) {
+  .acc-device {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .acc-device > .btn,
+  .acc-gone {
+    grid-row: auto;
+    grid-column: 2;
+    justify-self: start;
+    margin-top: 6px;
+  }
+  .acc-part-head--row {
+    grid-template-columns: 1fr;
+  }
+  .acc-part-head--row .btn {
+    justify-self: start;
+  }
+}

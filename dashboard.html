@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
   <title>Dashboard — RZGS-PRO</title>
-  <meta name="description" content="Your RZGS-PRO dashboard: plan, profile and account settings.">
+  <meta name="description" content="Your RZGS-PRO profile: your plan, your bot, your awards.">
   <meta name="robots" content="noindex">
   <meta name="theme-color" content="#030c13">
   <meta name="color-scheme" content="dark">
@@ -25,18 +25,18 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
   <link rel="stylesheet" href="style.css?v=37">
-  <link rel="stylesheet" href="plans.css?v=3">
-  <link rel="stylesheet" href="auth.css?v=20">
+  <link rel="stylesheet" href="plans.css?v=5">
+  <link rel="stylesheet" href="auth.css?v=23">
   <link rel="stylesheet" href="motion.css?v=2">
 
   <script>document.documentElement.classList.add('js');try{if(localStorage.getItem('sb-zaziizzsbytkdlatoutv-auth-token'))document.documentElement.classList.add('signed-in')}catch(e){}</script>
   <script src="script.js?v=10" defer></script>
   <script src="motion.js?v=1" defer></script>
-  <script src="plans.js?v=7" defer></script>
+  <script src="plans.js?v=9" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0" defer></script>
-  <script src="auth.js?v=26" defer></script>
+  <script src="auth.js?v=29" defer></script>
 </head>
-<body data-auth-page="dashboard">
+<body data-auth-page="dashboard" class="acc-page">
   <a class="skip-link" href="#main">Skip to content</a>
 
   <!-- Icon sprite (Lucide-style, 24px grid, stroke icons) -->
@@ -84,6 +84,10 @@
   <!-- Header -->
   <header class="site-header" data-header>
     <div class="container header-inner">
+      <!-- the dashboard's own menu, on a phone (auth.js) -->
+      <button class="icon-btn acc-open" type="button" data-acc-open aria-controls="acc-side" aria-expanded="false" aria-label="Open the account menu">
+        <svg class="icon" aria-hidden="true"><use href="#i-panel-left"/></svg>
+      </button>
       <a class="brand" href="./" aria-label="RZGS-PRO home">
         <img src="assets/logo-192.webp" alt="" width="40" height="40">
         <span class="brand-name">RZGS<span class="brand-accent">-PRO</span></span>
@@ -126,11 +130,66 @@
     <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
       <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.06 12.35a1 1 0 0 1 0-.7 10.75 10.75 0 0 1 19.88 0 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-19.88 0"/><circle cx="12" cy="12" r="3"/></symbol>
       <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M10.73 5.08a10.74 10.74 0 0 1 11.2 6.57 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-1.44 2.49M14.08 14.16a3 3 0 0 1-4.24-4.24"/><path d="M17.48 17.5a10.75 10.75 0 0 1-15.42-5.15 1 1 0 0 1 0-.7 10.75 10.75 0 0 1 4.45-5.14M2 2l20 20"/></symbol>
+      <symbol id="i-panel-left" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></symbol>
+      <symbol id="i-chevrons-left" viewBox="0 0 24 24"><path d="m11 17-5-5 5-5M18 17l-5-5 5-5"/></symbol>
+      <symbol id="i-chevrons-up-down" viewBox="0 0 24 24"><path d="m7 15 5 5 5-5M7 9l5-5 5 5"/></symbol>
+      <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+      <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></symbol>
+      <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></symbol>
+      <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></symbol>
+      <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M21.17 6.81a2.83 2.83 0 0 0-4-4L3.84 16.17a2 2 0 0 0-.5.83l-1.32 4.35a.5.5 0 0 0 .62.62l4.35-1.32a2 2 0 0 0 .83-.5zM15 5l4 4"/></symbol>
+      <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-3.5 8-10V5l-8-3-8 3v7c0 6.5 8 10 8 10z"/><path d="M12 8v4M12 16h.01"/></symbol>
+      <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+      <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
+      <symbol id="i-smartphone" viewBox="0 0 24 24"><rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/></symbol>
+      <symbol id="i-laptop" viewBox="0 0 24 24"><path d="M20 16V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9m16 0H4m16 0 1.28 2.55a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45L4 16"/></symbol>
     </svg>
 
     <section class="auth-section" id="top" aria-labelledby="page-title">
-      <div class="container dash-shell" data-dash aria-busy="true">
+      <div class="container dash-shell acc" data-dash aria-busy="true">
 
+        <!-- The menu (the owner's sketch, 2 Nov 2026): a column on the left of a computer screen that folds to its icons,
+             a drawer on a phone. The profile button at its bottom opens the account card (plans.js). -->
+        <aside class="acc-side" id="acc-side" data-acc-side aria-label="Account menu">
+          <div class="acc-side-top">
+            <a class="acc-brand" href="./" aria-label="RZGS-PRO home">
+              <img src="assets/logo-192.webp" alt="" width="30" height="30">
+              <span class="brand-name">RZGS<span class="brand-accent">-PRO</span></span>
+            </a>
+            <button class="acc-fold" type="button" data-acc-fold aria-label="Fold the menu" title="Fold the menu"><svg class="icon" aria-hidden="true"><use href="#i-chevrons-left"/></svg></button>
+          </div>
+          <a class="btn btn-primary btn-block acc-app" href="app" data-open-app><svg class="icon" aria-hidden="true"><use href="#i-bot"/></svg><span>Open control app</span></a>
+          <p class="acc-nav-cap">Profile</p>
+          <div class="acc-nav" role="tablist" aria-label="Dashboard menu" aria-orientation="vertical" data-dash-tabs>
+            <button type="button" role="tab" id="tab-core" data-tab="core" aria-controls="v-core" aria-selected="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7.8 4.5v9L12 21l-7.8-4.5v-9z"/><circle cx="12" cy="12" r="2.6"/></svg><span>Core</span></button>
+            <button type="button" role="tab" id="tab-plan" data-tab="plan" aria-controls="v-plan" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6M2 9h20"/></svg><span>Plan</span></button>
+            <button type="button" role="tab" id="tab-awards" data-tab="awards" aria-controls="v-awards" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></svg><span>Awards</span></button>
+            <button type="button" role="tab" id="tab-log" data-tab="log" aria-controls="v-log" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7h12M8 12h12M8 17h12M4 7h.01M4 12h.01M4 17h.01"/></svg><span>Log</span></button>
+          </div>
+          <p class="acc-nav-cap">Account</p>
+          <nav class="acc-nav" aria-label="Your account">
+            <a href="manage-account"><svg class="icon" aria-hidden="true"><use href="#i-gear"/></svg><span>Manage account</span></a>
+          </nav>
+          <p class="acc-nav-cap">Website</p>
+          <nav class="acc-nav acc-nav--site" aria-label="Website">
+            <a href="./"><svg class="icon" aria-hidden="true"><use href="#i-home"/></svg><span>Home</span></a>
+            <a href="./#plans" data-plans><svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg><span>Plans</span></a>
+            <a href="how-to-buy"><svg class="icon" aria-hidden="true"><use href="#i-file-text"/></svg><span>How to buy</span></a>
+            <a href="https://t.me/+NvCIdtTmMIViMjg9" target="_blank" rel="noopener"><svg class="icon" aria-hidden="true"><use href="#i-message"/></svg><span>Community</span></a>
+          </nav>
+          <div class="acc-me-wrap">
+            <div class="pm-slot acc-card" id="acc-card" data-acc-card hidden></div>
+            <button class="acc-me" type="button" data-acc-me data-profile aria-expanded="false" aria-controls="acc-card">
+              <span class="nav-profile-pic" data-profile-pic aria-hidden="true"></span>
+              <span class="pm-who"><b data-pm-name>My account</b><small data-pm-plan></small></span>
+              <svg class="icon" aria-hidden="true"><use href="#i-chevrons-up-down"/></svg>
+            </button>
+          </div>
+        </aside>
+        <div class="acc-shade" data-acc-shade hidden></div>
+
+        <div class="acc-main acc-main--dash">
         <!-- the client's profile: who they are, their numbers, and where to add what is missing -->
         <section class="dash-panel dash-profile" aria-labelledby="page-title">
           <div class="dp-id">
@@ -164,256 +223,120 @@
           </div>
         </section>
 
+
         <p class="auth-msg" data-auth-msg role="alert" hidden>
           <svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>
           <span data-auth-msg-text></span>
         </p>
         <noscript><p class="auth-msg" data-tone="error">Please turn on JavaScript in your browser to use your dashboard.</p></noscript>
 
-        <div class="dash-layout">
-          <!-- menu: bottom dock on phones, a row above the content on wide screens -->
-          <div class="dash-side">
-            <nav class="dash-dock" role="tablist" aria-label="Dashboard menu">
-            <button type="button" role="tab" id="tab-core" data-tab="core" aria-controls="v-core" aria-selected="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7.8 4.5v9L12 21l-7.8-4.5v-9z"/><circle cx="12" cy="12" r="2.6"/></svg>Core</button>
-            <button type="button" role="tab" id="tab-plan" data-tab="plan" aria-controls="v-plan" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6M2 9h20"/></svg>Plan</button>
-            <button type="button" role="tab" id="tab-awards" data-tab="awards" aria-controls="v-awards" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></svg>Awards</button>
-            <button type="button" role="tab" id="tab-tools" data-tab="tools" aria-controls="v-tools" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>Settings</button>
-            <button type="button" role="tab" id="tab-log" data-tab="log" aria-controls="v-log" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7h12M8 12h12M8 17h12M4 7h.01M4 12h.01M4 17h.01"/></svg>Log</button>
-            </nav>
-            <div class="dash-actbar">
-              <a class="btn btn-primary btn-block" href="app" data-open-app>Open control app</a>
-            </div>
+
+        <div class="dash-deck">
+          <!-- CORE -->
+          <div class="dash-view" id="v-core" role="tabpanel" aria-labelledby="tab-core">
+            <section class="dash-core" aria-label="Plan status">
+              <svg class="dash-ring" data-ring data-tone="off" viewBox="0 0 120 120" role="img" aria-label="No plan yet">
+                <circle class="ring-track" cx="60" cy="60" r="52"/>
+                <circle class="ring-arc" data-ring-arc cx="60" cy="60" r="52" pathLength="100" stroke-dasharray="0 100"/>
+                <circle class="ring-dash" cx="60" cy="60" r="42"/>
+                <text class="big" data-ring-big x="60" y="66">--</text>
+                <text class="sub" data-ring-sub x="60" y="80">NO PLAN</text>
+              </svg>
+              <div class="dash-core-info">
+                <div class="dash-pill" data-plan-pill data-tone="off"><span class="led" aria-hidden="true"></span><span data-plan-status>No plan</span></div>
+                <div class="dash-kv"><span class="cap">Plan</span><b data-plan-name>Not started</b></div>
+                <div class="dash-kv"><span class="cap">Valid until</span><b data-plan-until>-</b></div>
+              </div>
+            </section>
+
+            <!-- the buying steps of an order that is under way -->
+            <section class="dash-panel" data-order hidden>
+              <h2>Your order: <span data-order-plan></span></h2>
+              <ol class="dash-steps" data-order-steps></ol>
+              <p class="dash-hint" data-order-note></p>
+              <div class="dash-row" data-order-row>
+                <button class="btn btn-primary" type="button" data-order-go>Continue</button>
+                <button class="btn btn-ghost" type="button" data-order-drop>Drop this order</button>
+              </div>
+            </section>
+
+            <section class="dash-panel">
+              <h2>My bot</h2>
+              <div class="dash-pill" data-bot-pill data-tone="off"><span class="led" aria-hidden="true"></span><span data-bot-status>No bot yet</span></div>
+              <p class="dash-hint" data-bot-note>Ready to run your bot? Choose a plan and get your bot file right here.</p>
+              <div class="dash-licence" data-licence hidden></div>
+              <div class="dash-row" data-bot-row>
+                <a class="btn btn-chip" href="./#plans" data-plans data-bot-see>See plans</a>
+                <a class="btn btn-chip" href="how-to-buy" data-bot-howto hidden>How to set it up</a>
+              </div>
+            </section>
+
+            <section class="dash-panel">
+              <h2>Next step</h2>
+              <p class="dash-hint" data-plan-note>Claim your free 7-day trial, or choose a plan. It takes a few minutes, right on this page, and your bot file is here at the end.</p>
+              <div class="dash-row dash-row--wide">
+                <a class="btn btn-primary" data-plan-action href="#plan" data-checkout="trial">Claim your free trial</a>
+                <a class="btn btn-ghost" href="#plan" data-plan-also>See plans</a>
+              </div>
+            </section>
+
+            <section class="dash-panel">
+              <h2>Account</h2>
+              <div class="dash-grid2">
+                <div class="dash-kv"><span class="cap">Member since</span><b data-info="joined">-</b></div>
+                <div class="dash-kv"><span class="cap">Email</span><b data-info="email-status">-</b></div>
+                <div class="dash-kv"><span class="cap">MT5 account</span><b data-info="mt5">-</b></div>
+                <div class="dash-kv"><span class="cap">Broker</span><b data-info="broker">-</b></div>
+              </div>
+            </section>
           </div>
 
-          <div class="dash-deck">
-            <!-- CORE -->
-            <div class="dash-view" id="v-core" role="tabpanel" aria-labelledby="tab-core">
-              <section class="dash-core" aria-label="Plan status">
-                <svg class="dash-ring" data-ring data-tone="off" viewBox="0 0 120 120" role="img" aria-label="No plan yet">
-                  <circle class="ring-track" cx="60" cy="60" r="52"/>
-                  <circle class="ring-arc" data-ring-arc cx="60" cy="60" r="52" pathLength="100" stroke-dasharray="0 100"/>
-                  <circle class="ring-dash" cx="60" cy="60" r="42"/>
-                  <text class="big" data-ring-big x="60" y="66">--</text>
-                  <text class="sub" data-ring-sub x="60" y="80">NO PLAN</text>
-                </svg>
-                <div class="dash-core-info">
-                  <div class="dash-pill" data-plan-pill data-tone="off"><span class="led" aria-hidden="true"></span><span data-plan-status>No plan</span></div>
-                  <div class="dash-kv"><span class="cap">Plan</span><b data-plan-name>Not started</b></div>
-                  <div class="dash-kv"><span class="cap">Valid until</span><b data-plan-until>-</b></div>
-                </div>
-              </section>
+          <!-- PLAN -->
+          <div class="dash-view" id="v-plan" role="tabpanel" aria-labelledby="tab-plan" hidden>
+            <section class="dash-panel">
+              <h2>Your plan</h2>
+              <div class="dash-line"><span class="cap">Plan</span><b data-plan-name>Not started</b></div>
+              <div class="dash-line"><span class="cap">Status</span><b data-plan-status>No plan</b></div>
+              <div class="dash-line"><span class="cap">Valid until</span><b data-plan-until>-</b></div>
+              <div class="dash-line"><span class="cap">MT5 accounts</span><b>1</b></div>
+            </section>
 
-              <!-- the buying steps of an order that is under way -->
-              <section class="dash-panel" data-order hidden>
-                <h2>Your order: <span data-order-plan></span></h2>
-                <ol class="dash-steps" data-order-steps></ol>
-                <p class="dash-hint" data-order-note></p>
-                <div class="dash-row" data-order-row>
-                  <button class="btn btn-primary" type="button" data-order-go>Continue</button>
-                  <button class="btn btn-ghost" type="button" data-order-drop>Drop this order</button>
-                </div>
-              </section>
-
-              <section class="dash-panel">
-                <h2>My bot</h2>
-                <div class="dash-pill" data-bot-pill data-tone="off"><span class="led" aria-hidden="true"></span><span data-bot-status>No bot yet</span></div>
-                <p class="dash-hint" data-bot-note>Ready to run your bot? Choose a plan and get your bot file right here.</p>
-                <div class="dash-licence" data-licence hidden></div>
-                <div class="dash-row" data-bot-row>
-                  <a class="btn btn-chip" href="./#plans" data-plans data-bot-see>See plans</a>
-                  <a class="btn btn-chip" href="how-to-buy" data-bot-howto hidden>How to set it up</a>
-                </div>
-              </section>
-
-              <section class="dash-panel">
-                <h2>Next step</h2>
-                <p class="dash-hint" data-plan-note>Claim your free 7-day trial, or choose a plan. It takes a few minutes, right on this page, and your bot file is here at the end.</p>
-                <div class="dash-row dash-row--wide">
-                  <a class="btn btn-primary" data-plan-action href="#plan" data-checkout="trial">Claim your free trial</a>
-                  <a class="btn btn-ghost" href="#plan" data-plan-also>See plans</a>
-                </div>
-              </section>
-
-              <section class="dash-panel">
-                <h2>Account</h2>
-                <div class="dash-grid2">
-                  <div class="dash-kv"><span class="cap">Member since</span><b data-info="joined">-</b></div>
-                  <div class="dash-kv"><span class="cap">Email</span><b data-info="email-status">-</b></div>
-                  <div class="dash-kv"><span class="cap">MT5 account</span><b data-info="mt5">-</b></div>
-                  <div class="dash-kv"><span class="cap">Broker</span><b data-info="broker">-</b></div>
-                </div>
-              </section>
-            </div>
-
-            <!-- PLAN -->
-            <div class="dash-view" id="v-plan" role="tabpanel" aria-labelledby="tab-plan" hidden>
-              <section class="dash-panel">
-                <h2>Your plan</h2>
-                <div class="dash-line"><span class="cap">Plan</span><b data-plan-name>Not started</b></div>
-                <div class="dash-line"><span class="cap">Status</span><b data-plan-status>No plan</b></div>
-                <div class="dash-line"><span class="cap">Valid until</span><b data-plan-until>-</b></div>
-                <div class="dash-line"><span class="cap">MT5 accounts</span><b>1</b></div>
-              </section>
-
-              <section class="dash-panel">
-                <h2>Start or change plan</h2>
-                <div class="dash-row">
-                  <button class="btn btn-ghost" type="button" data-plan-link="trial" data-checkout="trial">Trial</button>
-                  <button class="btn btn-ghost" type="button" data-plan-link="elite" data-checkout="elite">Elite</button>
-                  <button class="btn btn-ghost" type="button" data-plan-link="diamond" data-checkout="diamond">Diamond</button>
-                </div>
-                <p class="dash-hint" data-plan-choice-note>Trial and Elite start right here. Diamond opens a chat with our sales team on Telegram.</p>
-              </section>
-
-              <section class="dash-panel">
-                <h2>Good to know</h2>
-                <a class="dash-link" href="./#plans" data-plans><span>Compare plans and prices</span><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
-                <a class="dash-link" href="how-to-buy"><span>How buying works</span><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
-                <a class="dash-link" href="license"><span>License rules</span><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
-              </section>
-            </div>
-
-            <!-- AWARDS -->
-            <div class="dash-view" id="v-awards" role="tabpanel" aria-labelledby="tab-awards" hidden>
-              <section class="dash-panel">
-                <h2>Your achievements</h2>
-                <p class="dash-hint"><b data-awards-count>0 of 7</b> reached. Each one is a step to a running bot.</p>
-                <ul class="dp-awards" data-awards></ul>
-              </section>
-            </div>
-
-            <!-- SETTINGS -->
-            <div class="dash-view" id="v-tools" role="tabpanel" aria-labelledby="tab-tools" hidden>
-              <div class="dash-seg" role="tablist" aria-label="Settings">
-                <button type="button" role="tab" id="tool-security" aria-controls="t-security" aria-selected="true">Security</button>
-                <button type="button" role="tab" id="tool-support" aria-controls="t-support" aria-selected="false" tabindex="-1">Support</button>
-                <button type="button" role="tab" id="tool-legal" aria-controls="t-legal" aria-selected="false" tabindex="-1">Legal</button>
+            <section class="dash-panel">
+              <h2>Start or change plan</h2>
+              <div class="dash-row">
+                <button class="btn btn-ghost" type="button" data-plan-link="trial" data-checkout="trial">Trial</button>
+                <button class="btn btn-ghost" type="button" data-plan-link="elite" data-checkout="elite">Elite</button>
+                <button class="btn btn-ghost" type="button" data-plan-link="diamond" data-checkout="diamond">Diamond</button>
               </div>
+              <p class="dash-hint" data-plan-choice-note>Trial and Elite start right here. Diamond opens a chat with our sales team on Telegram.</p>
+            </section>
 
-              <div class="dash-tool" id="t-security" role="tabpanel" aria-labelledby="tool-security">
-                <section class="dash-panel">
-                  <h2>Session</h2>
-                  <div class="dash-line"><span class="cap">Logged in as</span><b data-dash-email>loading</b></div>
-                  <div class="dash-line"><span class="cap">Member since</span><b data-info="joined">-</b></div>
-                  <div class="dash-row dash-row--wide">
-                    <button class="btn btn-ghost" type="button" data-sign-out-others>Log out other devices</button>
-                    <button class="btn btn-danger" type="button" data-sign-out>Log out</button>
-                  </div>
-                  <p class="form-msg" data-session-msg role="status" hidden></p>
-                </section>
-
-                <section class="dash-panel">
-                  <h2>Email</h2>
-                  <div class="dash-line"><span class="cap">Address</span><b data-dash-email>loading</b></div>
-                  <div class="dash-line"><span class="cap">Status</span><b data-info="email-status">-</b></div>
-                  <div class="dash-line" data-email-pending hidden><span class="cap">New address</span><b data-email-new></b></div>
-                  <p class="dash-hint" data-email-pending hidden>Waiting for you: we sent a link to your new address. Open it to finish the change. If a link also arrives at your old address, open that one too. Until then, log in with your old email.</p>
-                  <p class="dash-hint">To change your email address, type the new one and your password. We send you a link to confirm it.</p>
-                  <form data-email-form novalidate>
-                    <div class="field">
-                      <label for="dash-new-email">New email address <span class="req" aria-hidden="true">*</span></label>
-                      <input class="input" id="dash-new-email" name="email" type="email" inputmode="email" autocomplete="email" required aria-describedby="dash-new-email-error" autocapitalize="none" spellcheck="false">
-                      <p class="field-error" id="dash-new-email-error" hidden></p>
-                    </div>
-                    <div class="field">
-                      <label for="dash-email-password">Your password <span class="req" aria-hidden="true">*</span></label>
-                      <div class="input-wrap input-wrap--action">
-                        <input class="input" id="dash-email-password" name="password" type="password" autocomplete="current-password" required aria-describedby="dash-email-password-error">
-                        <button class="toggle-pw" type="button" data-toggle-password aria-controls="dash-email-password" aria-pressed="false" aria-label="Show password">
-                          <svg class="icon icon-show" aria-hidden="true"><use href="#i-eye"/></svg>
-                          <svg class="icon icon-hide" aria-hidden="true"><use href="#i-eye-off"/></svg>
-                        </button>
-                      </div>
-                      <p class="field-error" id="dash-email-password-error" hidden></p>
-                    </div>
-                    <!-- Cloudflare's safety check: shows only once its key is set in auth.js; this one only when Cloudflare needs a tick -->
-                    <div class="captcha captcha--quiet" data-captcha data-captcha-quiet hidden>
-                      <div class="captcha-box" data-captcha-box></div>
-                      <p class="field-error" data-captcha-error aria-live="polite" hidden></p>
-                    </div>
-                    <div class="form-actions">
-                      <button class="btn btn-chip" type="submit" data-submit>Change email</button>
-                      <p class="form-msg" data-form-msg role="status" hidden></p>
-                    </div>
-                  </form>
-                </section>
-
-                <section class="dash-panel">
-                  <h2>Change password</h2>
-                  <form data-password-form novalidate>
-                  <div class="field">
-                    <label for="dash-password">New password <span class="req" aria-hidden="true">*</span></label>
-                    <div class="input-wrap input-wrap--action">
-                      <input class="input" id="dash-password" name="new_password" type="password" autocomplete="new-password" required aria-describedby="dash-password-error dash-password-hint">
-                      <button class="toggle-pw" type="button" data-toggle-password aria-controls="dash-password" aria-pressed="false" aria-label="Show password">
-                        <svg class="icon icon-show" aria-hidden="true"><use href="#i-eye"/></svg>
-                        <svg class="icon icon-hide" aria-hidden="true"><use href="#i-eye-off"/></svg>
-                      </button>
-                    </div>
-                    <p class="hint" id="dash-password-hint">At least 8 characters.</p>
-                    <p class="field-error" id="dash-password-error" hidden></p>
-                  </div>
-                  <div class="field">
-                    <label for="dash-confirm">Confirm new password <span class="req" aria-hidden="true">*</span></label>
-                    <div class="input-wrap input-wrap--action">
-                      <input class="input" id="dash-confirm" name="confirm_password" type="password" autocomplete="new-password" required aria-describedby="dash-confirm-error">
-                      <button class="toggle-pw" type="button" data-toggle-password aria-controls="dash-confirm" aria-pressed="false" aria-label="Show password">
-                        <svg class="icon icon-show" aria-hidden="true"><use href="#i-eye"/></svg>
-                        <svg class="icon icon-hide" aria-hidden="true"><use href="#i-eye-off"/></svg>
-                      </button>
-                    </div>
-                    <p class="field-error" id="dash-confirm-error" hidden></p>
-                  </div>
-                  <div class="form-actions">
-                    <button class="btn btn-chip" type="submit" data-submit>Update password</button>
-                    <p class="form-msg" data-form-msg role="status" hidden></p>
-                  </div>
-                  </form>
-                </section>
-
-              </div>
-
-              <div class="dash-tool" id="t-support" role="tabpanel" aria-labelledby="tool-support" hidden>
-                <section class="dash-panel">
-                  <h2>Support</h2>
-                  <p class="dash-hint">Setup help and support on Telegram. Tell us your plan and your MT5 account number so we can help faster.</p>
-                  <div class="dash-row">
-                    <a class="btn btn-chip" href="https://t.me/sarannsadboi">Message us on Telegram</a>
-                  </div>
-                </section>
-                <section class="dash-panel">
-                  <h2>Help</h2>
-                <a class="dash-link" href="./#faq"><span>Questions and answers</span><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
-                <a class="dash-link" href="how-to-buy"><span>How to buy</span><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
-                <a class="dash-link" href="bot"><span>How the bot works</span><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
-                <a class="dash-link" href="contact"><span>Contact page</span><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
-                </section>
-              </div>
-
-              <div class="dash-tool" id="t-legal" role="tabpanel" aria-labelledby="tool-legal" hidden>
-                <section class="dash-panel">
-                  <h2>Rules and policies</h2>
-                <a class="dash-link" href="license"><span>License rules</span><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
-                <a class="dash-link" href="terms"><span>Terms &amp; Conditions</span><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
-                <a class="dash-link" href="privacy"><span>Privacy Policy</span><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
-                <a class="dash-link" href="risk-disclosure"><span>Risk Disclosure</span><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
-                </section>
-                <section class="dash-panel">
-                  <h2>Risk warning</h2>
-                  <p class="dash-hint">Trading gold (XAUUSD) and other leveraged products carries a high level of risk. You could lose some or all of your capital. RZGS-PRO is trading software and does not provide financial advice.</p>
-                </section>
-              </div>
-            </div>
-
-            <!-- LOG -->
-            <div class="dash-view" id="v-log" role="tabpanel" aria-labelledby="tab-log" hidden>
-              <section class="dash-panel">
-                <h2>Account activity</h2>
-                <div data-log></div>
-                <p class="dash-empty" data-log-empty hidden>Nothing to show yet.</p>
-              </section>
-            </div>
+            <section class="dash-panel">
+              <h2>Good to know</h2>
+              <a class="dash-link" href="./#plans" data-plans><span>Compare plans and prices</span><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+              <a class="dash-link" href="how-to-buy"><span>How buying works</span><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+              <a class="dash-link" href="license"><span>License rules</span><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+            </section>
           </div>
+
+          <!-- AWARDS -->
+          <div class="dash-view" id="v-awards" role="tabpanel" aria-labelledby="tab-awards" hidden>
+            <section class="dash-panel">
+              <h2>Your achievements</h2>
+              <p class="dash-hint"><b data-awards-count>0 of 7</b> reached. Each one is a step to a running bot.</p>
+              <ul class="dp-awards" data-awards></ul>
+            </section>
+          </div>
+
+          <!-- LOG -->
+          <div class="dash-view" id="v-log" role="tabpanel" aria-labelledby="tab-log" hidden>
+            <section class="dash-panel">
+              <h2>Account activity</h2>
+              <div data-log></div>
+              <p class="dash-empty" data-log-empty hidden>Nothing to show yet.</p>
+            </section>
+          </div>
+        </div>
         </div>
 
         <!-- asked before logging out, like the control app's "Do you want to quit?" -->

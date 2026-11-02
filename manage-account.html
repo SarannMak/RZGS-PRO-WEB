@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+  <title>Manage account — RZGS-PRO</title>
+  <meta name="description" content="Manage your RZGS-PRO account: profile, subscription, usage and sessions.">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#030c13">
+  <meta name="color-scheme" content="dark">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Dashboard — RZGS-PRO">
+  <meta property="og:description" content="Your RZGS-PRO dashboard: plan, profile and account settings.">
+  <meta property="og:site_name" content="RZGS-PRO">
+  <meta property="og:image" content="https://rzgspro.com/assets/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" type="image/png" href="assets/logo-192.png">
+  <link rel="apple-touch-icon" href="assets/logo-192.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="style.css?v=37">
+  <link rel="stylesheet" href="plans.css?v=5">
+  <link rel="stylesheet" href="auth.css?v=23">
+  <link rel="stylesheet" href="motion.css?v=2">
+
+  <script>document.documentElement.classList.add('js');try{if(localStorage.getItem('sb-zaziizzsbytkdlatoutv-auth-token'))document.documentElement.classList.add('signed-in')}catch(e){}</script>
+  <script src="script.js?v=10" defer></script>
+  <script src="motion.js?v=1" defer></script>
+  <script src="plans.js?v=9" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0" defer></script>
+  <script src="auth.js?v=29" defer></script>
+</head>
+<body data-auth-page="manage" class="acc-page">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- Icon sprite (Lucide-style, 24px grid, stroke icons) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></symbol>
+    <symbol id="i-arrow-up-right" viewBox="0 0 24 24"><path d="M7 7h10v10M7 17 17 7"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-activity" viewBox="0 0 24 24"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></symbol>
+    <symbol id="i-pointer" viewBox="0 0 24 24"><path d="M22 14a8 8 0 0 1-8 8"/><path d="M18 11v-1a2 2 0 0 0-2-2 2 2 0 0 0-2 2"/><path d="M14 10V9a2 2 0 0 0-2-2 2 2 0 0 0-2 2v1"/><path d="M10 9.5V4a2 2 0 0 0-2-2 2 2 0 0 0-2 2v10"/><path d="M18 11a2 2 0 1 1 4 0v3a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+    <symbol id="i-dollar" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8M12 18V6"/></symbol>
+    <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.94 15.5a2 2 0 0 0-1.44-1.44l-6.13-1.58a.5.5 0 0 1 0-.96L8.5 9.94A2 2 0 0 0 9.94 8.5l1.58-6.14a.5.5 0 0 1 .96 0l1.58 6.14a2 2 0 0 0 1.44 1.44l6.14 1.58a.5.5 0 0 1 0 .96l-6.14 1.58a2 2 0 0 0-1.44 1.44l-1.58 6.14a.5.5 0 0 1-.96 0z"/><path d="M20 3v4M22 5h-4M4 17v2M5 18H3"/></symbol>
+    <symbol id="i-zap" viewBox="0 0 24 24"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></symbol>
+    <symbol id="i-gem" viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6M2 9h20"/></symbol>
+    <symbol id="i-hexagon" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></symbol>
+    <symbol id="i-trending-up" viewBox="0 0 24 24"><path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+    <symbol id="i-bot" viewBox="0 0 24 24"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2M20 14h2M15 13v2M9 13v2"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M6 4.8v14.4a1 1 0 0 0 1.5.86l12-7.2a1 1 0 0 0 0-1.72l-12-7.2A1 1 0 0 0 6 4.8Z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M14.54 21.69a.5.5 0 0 0 .94-.03l6.5-19a.5.5 0 0 0-.64-.63l-19 6.5a.5.5 0 0 0-.02.93l7.93 3.18a2 2 0 0 1 1.11 1.11z"/><path d="m21.85 2.15-10.94 10.94"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4M12 17h.01"/></symbol>
+    <symbol id="i-timer" viewBox="0 0 24 24"><path d="M10 2h4M12 14l3-3"/><circle cx="12" cy="14" r="8"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65M22 12.65l-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M10.27 21a2 2 0 0 0 3.46 0"/><path d="M3.26 15.33A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.67C19.41 13.96 18 12.5 18 8A6 6 0 0 0 6 8c0 4.5-1.41 5.96-2.74 7.33"/></symbol>
+    <symbol id="i-server" viewBox="0 0 24 24"><rect width="20" height="8" x="2" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/><path d="M6 6h.01M6 18h.01"/></symbol>
+    <symbol id="i-monitor" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
+    <symbol id="i-message" viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></symbol>
+    <symbol id="i-key" viewBox="0 0 24 24"><path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4M21 2l-9.6 9.6"/><circle cx="7.5" cy="15.5" r="5.5"/></symbol>
+    <symbol id="i-file-text" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4M10 9H8M16 13H8M16 17H8"/></symbol>
+    <symbol id="i-circle-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-ban" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></symbol>
+    <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></symbol>
+  </svg>
+
+  <!-- Animated background -->
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+  <!-- Header -->
+  <header class="site-header" data-header>
+    <div class="container header-inner">
+      <!-- the menu of the account pages, on a phone (auth.js) -->
+      <button class="icon-btn acc-open" type="button" data-acc-open aria-controls="acc-side" aria-expanded="false" aria-label="Open the account menu">
+        <svg class="icon" aria-hidden="true"><use href="#i-panel-left"/></svg>
+      </button>
+      <a class="brand" href="./" aria-label="RZGS-PRO home">
+        <img src="assets/logo-192.webp" alt="" width="40" height="40">
+        <span class="brand-name">RZGS<span class="brand-accent">-PRO</span></span>
+      </a>
+
+      <nav class="primary-nav" id="primary-nav" aria-label="Main">
+        <ul class="nav-list">
+          <li><a class="nav-link" href="bot">The Bot</a></li>
+          <li><a class="nav-link" href="how-to-buy">How to Buy</a></li>
+          <li><a class="nav-link" href="license">License</a></li>
+          <li><a class="nav-link" href="contact">Contact</a></li>
+        </ul>
+        <div class="nav-menu-cta nav-account guest-only">
+          <a class="btn btn-ghost" href="login">Log in</a>
+          <a class="btn btn-primary" href="signup">Sign up</a>
+        </div>
+        <a class="btn btn-ghost btn-block nav-menu-cta signed-only" href="dashboard">My dashboard</a>
+      </nav>
+
+      <div class="header-actions">
+        <a class="btn btn-ghost btn-sm header-login guest-only" href="login">Log in</a>
+        <a class="btn btn-primary btn-sm header-signup guest-only" href="signup">Sign up</a>
+        <a class="btn btn-ghost btn-sm nav-profile signed-only" href="dashboard" data-profile aria-label="Your profile">
+          <span class="nav-profile-pic" data-profile-pic aria-hidden="true"></span>
+          <span class="nav-profile-name" data-profile-name>My account</span>
+        </a>
+        <a class="icon-btn" href="./" data-dash-close aria-label="Close the dashboard" title="Close">
+          <svg class="icon" aria-hidden="true"><use href="#i-x"/></svg>
+        </a>
+        <button class="icon-btn menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+          <svg class="icon icon-open" aria-hidden="true"><use href="#i-menu"/></svg>
+          <svg class="icon icon-close" aria-hidden="true"><use href="#i-x"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- icons used only by the account pages -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+      <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.06 12.35a1 1 0 0 1 0-.7 10.75 10.75 0 0 1 19.88 0 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-19.88 0"/><circle cx="12" cy="12" r="3"/></symbol>
+      <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M10.73 5.08a10.74 10.74 0 0 1 11.2 6.57 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-1.44 2.49M14.08 14.16a3 3 0 0 1-4.24-4.24"/><path d="M17.48 17.5a10.75 10.75 0 0 1-15.42-5.15 1 1 0 0 1 0-.7 10.75 10.75 0 0 1 4.45-5.14M2 2l20 20"/></symbol>
+      <symbol id="i-panel-left" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></symbol>
+      <symbol id="i-chevrons-left" viewBox="0 0 24 24"><path d="m11 17-5-5 5-5M18 17l-5-5 5-5"/></symbol>
+      <symbol id="i-chevrons-up-down" viewBox="0 0 24 24"><path d="m7 15 5 5 5-5M7 9l5-5 5 5"/></symbol>
+      <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+      <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></symbol>
+      <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></symbol>
+      <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></symbol>
+      <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M21.17 6.81a2.83 2.83 0 0 0-4-4L3.84 16.17a2 2 0 0 0-.5.83l-1.32 4.35a.5.5 0 0 0 .62.62l4.35-1.32a2 2 0 0 0 .83-.5zM15 5l4 4"/></symbol>
+      <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-3.5 8-10V5l-8-3-8 3v7c0 6.5 8 10 8 10z"/><path d="M12 8v4M12 16h.01"/></symbol>
+      <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+      <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
+      <symbol id="i-smartphone" viewBox="0 0 24 24"><rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/></symbol>
+      <symbol id="i-laptop" viewBox="0 0 24 24"><path d="M20 16V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9m16 0H4m16 0 1.28 2.55a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45L4 16"/></symbol>
+    </svg>
+
+    <section class="auth-section" id="top" aria-labelledby="page-title">
+      <div class="container dash-shell acc" data-manage aria-busy="true">
+
+        <!-- The menu (the owner's sketch, 2 Nov 2026): a column on the left of a computer screen that folds to its icons,
+             a drawer on a phone. The profile button at its bottom opens the account card (plans.js). -->
+        <aside class="acc-side" id="acc-side" data-acc-side aria-label="Account menu">
+          <div class="acc-side-top">
+            <a class="acc-brand" href="./" aria-label="RZGS-PRO home">
+              <img src="assets/logo-192.webp" alt="" width="30" height="30">
+              <span class="brand-name">RZGS<span class="brand-accent">-PRO</span></span>
+            </a>
+            <button class="acc-fold" type="button" data-acc-fold aria-label="Fold the menu" title="Fold the menu"><svg class="icon" aria-hidden="true"><use href="#i-chevrons-left"/></svg></button>
+          </div>
+          <a class="btn btn-ghost btn-block acc-app" href="app"><svg class="icon" aria-hidden="true"><use href="#i-bot"/></svg><span>Open control app</span></a>
+          <p class="acc-nav-cap">Profile</p>
+          <nav class="acc-nav" aria-label="Your profile">
+            <a href="dashboard#core"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7.8 4.5v9L12 21l-7.8-4.5v-9z"/><circle cx="12" cy="12" r="2.6"/></svg><span>Core</span></a>
+            <a href="dashboard#plan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6M2 9h20"/></svg><span>Plan</span></a>
+            <a href="dashboard#awards"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></svg><span>Awards</span></a>
+            <a href="dashboard#log"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7h12M8 12h12M8 17h12M4 7h.01M4 12h.01M4 17h.01"/></svg><span>Log</span></a>
+          </nav>
+          <p class="acc-nav-cap">Account</p>
+          <nav class="acc-nav" aria-label="Your account">
+            <a href="manage-account" aria-current="page"><svg class="icon" aria-hidden="true"><use href="#i-gear"/></svg><span>Manage account</span></a>
+          </nav>
+          <p class="acc-nav-cap">Website</p>
+          <nav class="acc-nav acc-nav--site" aria-label="Website">
+            <a href="./"><svg class="icon" aria-hidden="true"><use href="#i-home"/></svg><span>Home</span></a>
+            <a href="./#plans" data-plans><svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg><span>Plans</span></a>
+            <a href="how-to-buy"><svg class="icon" aria-hidden="true"><use href="#i-file-text"/></svg><span>How to buy</span></a>
+            <a href="https://t.me/+NvCIdtTmMIViMjg9" target="_blank" rel="noopener"><svg class="icon" aria-hidden="true"><use href="#i-message"/></svg><span>Community</span></a>
+          </nav>
+          <div class="acc-me-wrap">
+            <div class="pm-slot acc-card" id="acc-card" data-acc-card hidden></div>
+            <button class="acc-me" type="button" data-acc-me data-profile aria-expanded="false" aria-controls="acc-card">
+              <span class="nav-profile-pic" data-profile-pic aria-hidden="true"></span>
+              <span class="pm-who"><b data-pm-name>My account</b><small data-pm-plan></small></span>
+              <svg class="icon" aria-hidden="true"><use href="#i-chevrons-up-down"/></svg>
+            </button>
+          </div>
+        </aside>
+        <div class="acc-shade" data-acc-shade hidden></div>
+
+        <div class="acc-main">
+          <p class="auth-msg" data-auth-msg role="alert" hidden>
+            <svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>
+            <span data-auth-msg-text></span>
+          </p>
+          <noscript><p class="auth-msg" data-tone="error">Please turn on JavaScript in your browser to use your dashboard.</p></noscript>
+
+          <!-- MANAGE ACCOUNT -->
+          <div class="dash-view acc-view" id="v-account">
+            <h1 class="acc-h1" id="page-title">Manage account</h1>
+            <div class="acc-chips" role="tablist" aria-label="Manage account">
+              <button type="button" role="tab" id="mt-personal" data-go="personal" data-part="personal" aria-controls="m-personal" aria-selected="false" tabindex="-1"><span class="acc-chip-ico" data-tone="user"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg></span>Personal profile</button>
+              <button type="button" role="tab" id="mt-plan" data-go="subscription" data-part="plan" aria-controls="m-plan" aria-selected="false" tabindex="-1"><span class="acc-chip-ico" data-tone="plan"><svg class="icon" aria-hidden="true"><use href="#i-gem"/></svg></span>Subscription</button>
+              <button type="button" role="tab" id="mt-usage" data-go="usage" data-part="usage" aria-controls="m-usage" aria-selected="false" tabindex="-1"><span class="acc-chip-ico" data-tone="usage"><svg class="icon" aria-hidden="true"><use href="#i-trending-up"/></svg></span>Usage</button>
+              <button type="button" role="tab" id="mt-sessions" data-go="sessions" data-part="sessions" aria-controls="m-sessions" aria-selected="false" tabindex="-1"><span class="acc-chip-ico" data-tone="sessions"><svg class="icon" aria-hidden="true"><use href="#i-monitor"/></svg></span>Sessions</button>
+              <button type="button" role="tab" id="mt-help" data-go="help" data-part="help" aria-controls="m-help" aria-selected="false" tabindex="-1"><span class="acc-chip-ico" data-tone="help"><svg class="icon" aria-hidden="true"><use href="#i-help"/></svg></span>Help</button>
+            </div>
+
+            <!-- Personal profile -->
+            <div class="acc-part" id="m-personal" role="tabpanel" aria-labelledby="mt-personal">
+              <section class="acc-id">
+                <span class="avatar-xl" data-dash-avatar aria-hidden="true"></span>
+                <div class="acc-id-text">
+                  <div class="acc-id-name">
+                    <b data-acc-name>My account</b>
+                    <a class="btn btn-ghost btn-sm" href="dashboard#profile"><svg class="icon" aria-hidden="true"><use href="#i-pencil"/></svg>Edit</a>
+                  </div>
+                  <a class="acc-id-mail" href="#acc-email" data-jump="acc-email"><span data-dash-email>loading</span><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></a>
+                </div>
+              </section>
+              <section class="dash-panel">
+                <h2>Account</h2>
+                <div class="dash-grid2">
+                  <div class="dash-kv"><span class="cap">Member since</span><b data-info="joined">-</b></div>
+                  <div class="dash-kv"><span class="cap">Email</span><b data-info="email-status">-</b></div>
+                  <div class="dash-kv"><span class="cap">MT5 account</span><b data-info="mt5">-</b></div>
+                  <div class="dash-kv"><span class="cap">Broker</span><b data-info="broker">-</b></div>
+                </div>
+              </section>
+
+              <section class="dash-panel" id="acc-email">
+                <h2>Email</h2>
+                <div class="dash-line"><span class="cap">Address</span><b data-dash-email>loading</b></div>
+                <div class="dash-line"><span class="cap">Status</span><b data-info="email-status">-</b></div>
+                <div class="dash-line" data-email-pending hidden><span class="cap">New address</span><b data-email-new></b></div>
+                <p class="dash-hint" data-email-pending hidden>Waiting for you: we sent a link to your new address. Open it to finish the change. If a link also arrives at your old address, open that one too. Until then, log in with your old email.</p>
+                <p class="dash-hint">To change your email address, type the new one and your password. We send you a link to confirm it.</p>
+                <form data-email-form novalidate>
+                  <div class="field">
+                    <label for="dash-new-email">New email address <span class="req" aria-hidden="true">*</span></label>
+                    <input class="input" id="dash-new-email" name="email" type="email" inputmode="email" autocomplete="email" required aria-describedby="dash-new-email-error" autocapitalize="none" spellcheck="false">
+                    <p class="field-error" id="dash-new-email-error" hidden></p>
+                  </div>
+                  <div class="field">
+                    <label for="dash-email-password">Your password <span class="req" aria-hidden="true">*</span></label>
+                    <div class="input-wrap input-wrap--action">
+                      <input class="input" id="dash-email-password" name="password" type="password" autocomplete="current-password" required aria-describedby="dash-email-password-error">
+                      <button class="toggle-pw" type="button" data-toggle-password aria-controls="dash-email-password" aria-pressed="false" aria-label="Show password">
+                        <svg class="icon icon-show" aria-hidden="true"><use href="#i-eye"/></svg>
+                        <svg class="icon icon-hide" aria-hidden="true"><use href="#i-eye-off"/></svg>
+                      </button>
+                    </div>
+                    <p class="field-error" id="dash-email-password-error" hidden></p>
+                  </div>
+                  <!-- Cloudflare's safety check: shows only once its key is set in auth.js; this one only when Cloudflare needs a tick -->
+                  <div class="captcha captcha--quiet" data-captcha data-captcha-quiet hidden>
+                    <div class="captcha-box" data-captcha-box></div>
+                    <p class="field-error" data-captcha-error aria-live="polite" hidden></p>
+                  </div>
+                  <div class="form-actions">
+                    <button class="btn btn-chip" type="submit" data-submit>Change email</button>
+                    <p class="form-msg" data-form-msg role="status" hidden></p>
+                  </div>
+                </form>
+              </section>
+
+              <section class="dash-panel">
+                <h2>Change password</h2>
+                <form data-password-form novalidate>
+                <div class="field">
+                  <label for="dash-password">New password <span class="req" aria-hidden="true">*</span></label>
+                  <div class="input-wrap input-wrap--action">
+                    <input class="input" id="dash-password" name="new_password" type="password" autocomplete="new-password" required aria-describedby="dash-password-error dash-password-hint">
+                    <button class="toggle-pw" type="button" data-toggle-password aria-controls="dash-password" aria-pressed="false" aria-label="Show password">
+                      <svg class="icon icon-show" aria-hidden="true"><use href="#i-eye"/></svg>
+                      <svg class="icon icon-hide" aria-hidden="true"><use href="#i-eye-off"/></svg>
+                    </button>
+                  </div>
+                  <p class="hint" id="dash-password-hint">At least 8 characters.</p>
+                  <p class="field-error" id="dash-password-error" hidden></p>
+                </div>
+                <div class="field">
+                  <label for="dash-confirm">Confirm new password <span class="req" aria-hidden="true">*</span></label>
+                  <div class="input-wrap input-wrap--action">
+                    <input class="input" id="dash-confirm" name="confirm_password" type="password" autocomplete="new-password" required aria-describedby="dash-confirm-error">
+                    <button class="toggle-pw" type="button" data-toggle-password aria-controls="dash-confirm" aria-pressed="false" aria-label="Show password">
+                      <svg class="icon icon-show" aria-hidden="true"><use href="#i-eye"/></svg>
+                      <svg class="icon icon-hide" aria-hidden="true"><use href="#i-eye-off"/></svg>
+                    </button>
+                  </div>
+                  <p class="field-error" id="dash-confirm-error" hidden></p>
+                </div>
+                <div class="form-actions">
+                  <button class="btn btn-chip" type="submit" data-submit>Update password</button>
+                  <p class="form-msg" data-form-msg role="status" hidden></p>
+                </div>
+                </form>
+              </section>
+
+              <section class="dash-panel">
+                <h2>Log out</h2>
+                <p class="dash-hint">Log out of this device. Your bot keeps running in MT5. To log out your other devices, open Sessions.</p>
+                <div class="dash-row">
+                  <button class="btn btn-danger" type="button" data-sign-out>Log out</button>
+                  <a class="btn btn-ghost" href="#sessions" data-go="sessions">See your devices</a>
+                </div>
+              </section>
+            </div>
+
+            <!-- Subscription -->
+            <div class="acc-part" id="m-plan" role="tabpanel" aria-labelledby="mt-plan" hidden>
+              <header class="acc-part-head">
+                <h2>Subscription</h2>
+                <p>Your plan, when it ends, and the other plans.</p>
+              </header>
+              <section class="dash-panel acc-plan" data-sub>
+                <h2>Your plan</h2>
+                <div class="acc-plan-top">
+                  <span class="acc-plan-ico" data-sub-tone="off"><svg class="icon" aria-hidden="true"><use href="#i-gem"/></svg></span>
+                  <div class="acc-plan-text">
+                    <p class="acc-plan-name" data-sub-name>No plan yet</p>
+                    <p class="acc-plan-until" data-sub-until>Start with 7 free days.</p>
+                  </div>
+                  <p class="acc-plan-price" data-sub-price></p>
+                </div>
+                <a class="btn btn-primary btn-block" href="./#plans" data-sub-action>See plans</a>
+                <ul class="acc-plan-get" data-sub-get></ul>
+                <p class="dash-hint" data-plan-choice-note>Trial and Elite start right here. Diamond opens a chat with our sales team on Telegram.</p>
+                <button class="acc-text-btn" type="button" data-sub-cancel hidden>Cancel plan</button>
+              </section>
+              <section class="dash-panel">
+                <h2>Other plans</h2>
+                <div class="acc-plans" data-sub-others></div>
+              </section>
+              <section class="dash-panel">
+                <h2>Good to know</h2>
+                <a class="dash-link" href="./#plans" data-plans><span>Compare plans and prices</span><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+                <a class="dash-link" href="how-to-buy"><span>How buying works</span><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+                <a class="dash-link" href="license"><span>License rules</span><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+              </section>
+            </div>
+
+            <!-- Usage -->
+            <div class="acc-part" id="m-usage" role="tabpanel" aria-labelledby="mt-usage" hidden>
+              <header class="acc-part-head">
+                <h2>Usage history</h2>
+                <p>Your bot's profit, trades and drawdown.</p>
+              </header>
+              <div class="acc-toolbar">
+                <button class="btn btn-ghost btn-sm" type="button" data-usage-refresh><svg class="icon" aria-hidden="true"><use href="#i-refresh"/></svg>Refresh</button>
+                <label class="acc-select">
+                  <svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg>
+                  <span class="sr-only">Show</span>
+                  <select data-usage-range>
+                    <option value="week">This week</option>
+                    <option value="last">Last week</option>
+                    <option value="month">Last 5 weeks</option>
+                    <option value="all">All time</option>
+                  </select>
+                  <svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg>
+                </label>
+              </div>
+              <p class="acc-state" data-usage-state>Loading your bot...</p>
+              <section class="dash-panel" data-usage-part hidden>
+                <h2>Balance overview</h2>
+                <div class="acc-stats">
+                  <div class="acc-stat"><span class="acc-stat-ico"><svg class="icon" aria-hidden="true"><use href="#i-wallet"/></svg></span><div><b data-u="profit">-</b><span data-u="profit-label">Closed profit</span></div></div>
+                  <div class="acc-stat"><span class="acc-stat-ico"><svg class="icon" aria-hidden="true"><use href="#i-dollar"/></svg></span><div><b data-u="balance">-</b><span data-u="balance-label">Balance</span></div></div>
+                  <div class="acc-stat"><span class="acc-stat-ico"><svg class="icon" aria-hidden="true"><use href="#i-activity"/></svg></span><div><b data-u="trades">-</b><span data-u="trades-label">Trades today</span></div></div>
+                  <div class="acc-stat"><span class="acc-stat-ico"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg></span><div><b data-u="dd">-</b><span data-u="dd-label">Max drawdown</span></div></div>
+                </div>
+              </section>
+              <section class="dash-panel" data-usage-part hidden>
+                <h2 data-u="chart-title">Closed profit ($)</h2>
+                <svg class="acc-bars" viewBox="0 0 300 152" data-u="bars" role="img" aria-label="Closed profit"></svg>
+              </section>
+              <section class="dash-panel" data-usage-part hidden>
+                <h2>How today's trades closed</h2>
+                <div class="acc-split" data-u="split"></div>
+              </section>
+            </div>
+
+            <!-- Sessions -->
+            <div class="acc-part" id="m-sessions" role="tabpanel" aria-labelledby="mt-sessions" hidden>
+              <header class="acc-part-head acc-part-head--row">
+                <div>
+                  <h2>All sessions</h2>
+                  <p>Manage the devices logged in to your account.</p>
+                </div>
+                <button class="btn btn-ghost btn-sm" type="button" data-sessions-refresh><svg class="icon" aria-hidden="true"><use href="#i-refresh"/></svg>Refresh</button>
+              </header>
+              <div class="acc-note" data-sessions-note>
+                <span class="acc-note-ico"><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg></span>
+                <p><b>This is a list of devices that have logged into your account.</b> Log out any device you don't recognize.</p>
+                <button class="acc-note-x" type="button" data-sessions-note-x aria-label="Hide this note"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button>
+              </div>
+              <p class="acc-state" data-sessions-state>Loading your devices...</p>
+              <section class="dash-panel" data-sessions-part hidden>
+                <h2 class="acc-h2-count">Website logins <span class="acc-badge" data-sessions-count>0</span></h2>
+                <ul class="acc-devices" data-sessions-list></ul>
+                <div class="dash-row dash-row--wide">
+                  <button class="btn btn-ghost" type="button" data-sign-out-others>Log out all other devices</button>
+                </div>
+                <p class="form-msg" data-session-msg role="status" hidden></p>
+              </section>
+              <section class="dash-panel" data-sessions-part hidden>
+                <h2 class="acc-h2-count">Control app <span class="acc-badge" data-app-count>0</span></h2>
+                <p class="dash-hint" data-app-note></p>
+                <div class="dash-row" data-app-row hidden>
+                  <button class="btn btn-ghost" type="button" data-app-out>Log out all app devices</button>
+                </div>
+                <p class="form-msg" data-app-msg role="status" hidden></p>
+              </section>
+            </div>
+
+            <!-- Help -->
+            <div class="acc-part" id="m-help" role="tabpanel" aria-labelledby="mt-help" hidden>
+              <section class="dash-panel">
+                <h2>Support</h2>
+                <p class="dash-hint">Setup help and support on Telegram. Tell us your plan and your MT5 account number so we can help faster.</p>
+                <div class="dash-row">
+                  <a class="btn btn-chip" href="https://t.me/sarannsadboi">Message us on Telegram</a>
+                </div>
+              </section>
+              <section class="dash-panel">
+                <h2>Help</h2>
+              <a class="dash-link" href="./#faq"><span>Questions and answers</span><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+              <a class="dash-link" href="how-to-buy"><span>How to buy</span><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+              <a class="dash-link" href="bot"><span>How the bot works</span><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+              <a class="dash-link" href="contact"><span>Contact page</span><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+              </section>
+              <section class="dash-panel">
+                <h2>Rules and policies</h2>
+              <a class="dash-link" href="license"><span>License rules</span><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+              <a class="dash-link" href="terms"><span>Terms &amp; Conditions</span><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+              <a class="dash-link" href="privacy"><span>Privacy Policy</span><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+              <a class="dash-link" href="risk-disclosure"><span>Risk Disclosure</span><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+              </section>
+              <section class="dash-panel">
+                <h2>Risk warning</h2>
+                <p class="dash-hint">Trading gold (XAUUSD) and other leveraged products carries a high level of risk. You could lose some or all of your capital. RZGS-PRO is trading software and does not provide financial advice.</p>
+              </section>
+            </div>
+          </div>
+        </div>
+
+        <!-- a yes-or-no question, asked before something that can't be undone here (auth.js ask()) -->
+        <dialog class="dash-confirm" data-ask-dialog aria-labelledby="ask-title" aria-describedby="ask-text">
+          <div class="dash-confirm-card">
+            <p class="cap">RZGS-PRO</p>
+            <h2 class="dash-confirm-title" id="ask-title" data-ask-title></h2>
+            <p class="dash-confirm-text" id="ask-text" data-ask-text></p>
+            <div class="dash-row">
+              <button class="btn btn-ghost" type="button" data-ask-no>No</button>
+              <button class="btn btn-danger" type="button" data-ask-yes>Yes</button>
+            </div>
+          </div>
+        </dialog>
+
+        <!-- asked before logging out, like the control app's "Do you want to quit?" -->
+        <dialog class="dash-confirm" data-sign-out-dialog aria-labelledby="signout-title" aria-describedby="signout-text">
+          <div class="dash-confirm-card">
+            <p class="cap">RZGS-PRO</p>
+            <h2 class="dash-confirm-title" id="signout-title">Do you want to log out?</h2>
+            <p class="dash-confirm-text" id="signout-text">This device will be logged out of your dashboard. Your bot keeps running in MT5.</p>
+            <p class="form-msg" data-sign-out-msg data-tone="error" role="alert" hidden></p>
+            <div class="dash-row">
+              <button class="btn btn-ghost" type="button" data-sign-out-no>No</button>
+              <button class="btn btn-danger" type="button" data-sign-out-yes>Yes</button>
+            </div>
+          </div>
+        </dialog>
+
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="brand" href="./" aria-label="RZGS-PRO home">
+            <img src="assets/logo-192.webp" alt="" width="36" height="36" loading="lazy">
+            <span class="brand-name">RZGS<span class="brand-accent">-PRO</span></span>
+          </a>
+          <p>Automated gold trading bot for MetaTrader 5, with setup help and support on Telegram.</p>
+          <a class="btn btn-ghost btn-sm" href="signup" data-plans>
+            <svg class="icon" aria-hidden="true"><use href="#i-zap"/></svg>
+            Free 7-day trial
+          </a>
+        </div>
+
+        <nav aria-labelledby="footer-product">
+          <h2 class="footer-title" id="footer-product">Product</h2>
+          <ul class="footer-links">
+            <li><a href="bot">The Bot</a></li>
+            <li><a href="./#plans" data-plans>Plans</a></li>
+            <li><a href="how-to-buy">How to Buy</a></li>
+            <li><a href="./#faq">FAQ</a></li>
+          </ul>
+        </nav>
+
+        <nav aria-labelledby="footer-legal">
+          <h2 class="footer-title" id="footer-legal">Legal</h2>
+          <ul class="footer-links">
+            <li><a href="license">License Rules</a></li>
+            <li><a href="terms">Terms &amp; Conditions</a></li>
+            <li><a href="privacy">Privacy Policy</a></li>
+            <li><a href="risk-disclosure">Risk Disclosure</a></li>
+          </ul>
+        </nav>
+
+        <nav aria-labelledby="footer-support">
+          <h2 class="footer-title" id="footer-support">Support</h2>
+          <ul class="footer-links">
+            <li><a href="contact">Contact us</a></li>
+            <li><a href="signup" data-plans>Free trial</a></li>
+          </ul>
+        </nav>
+      </div>
+
+      <p class="risk">
+        <svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>
+        <span><strong>Risk warning:</strong> Trading gold (XAUUSD) and other leveraged products carries a high level of risk and may not be suitable for every investor. You could lose some or all of your capital. Past performance does not guarantee future results. RZGS-PRO is trading software and does not provide financial advice. <a href="risk-disclosure">Read the full Risk Disclosure</a>.</span>
+      </p>
+
+      <div class="footer-bottom">
+        <p>© <span data-year>2026</span> RZGS-PRO. All rights reserved.</p>
+        <p>Trading software, not financial advice.</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

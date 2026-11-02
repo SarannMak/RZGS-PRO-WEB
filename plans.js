@@ -52,6 +52,7 @@
     group: icon('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>'),
     logout: icon('<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>'),
     right: icon('<path d="m9 18 6-6-6-6"/>'),
+    updown: icon('<path d="m7 15 5 5 5-5M7 9l5-5 5 5"/>'),
     crown: icon('<path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294zM5 21h14"/>'),
     calc: icon('<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 19h.01M12 19h.01M16 19h.01"/>'),
   };
@@ -208,19 +209,15 @@
     });
   }
 
-  /* ---------------------------------------------------------------- the box under the profile button (computers) */
+  /* ---------------------------------------------------------------- the account card */
+  // One card in three places: under the profile button of the header (computers, on hover), at the bottom of the phone
+  // menu, and at the bottom of the dashboard's own menu (the owner's sketch, 2 Nov 2026). The last two open with a tap.
   const PLAN_DAYS = { trial: 7, elite: 30, diamond: 30 };
   const METER_PARTS = 24;
   let menu = null;
+  const cards = [];
 
-  function buildMenu(chip) {
-    const wrap = document.createElement('div');
-    wrap.className = 'nav-profile-wrap';
-    chip.before(wrap);
-    wrap.append(chip);
-    menu = document.createElement('div');
-    menu.className = 'pm';
-    menu.innerHTML = `<div class="pm-in">
+  const accountCardHtml = () => `<div class="pm-in">
       <a class="pm-head" href="${pageUrl('dashboard#core')}" data-profile>
         <span class="nav-profile-pic pm-pic" data-profile-pic aria-hidden="true"></span>
         <span class="pm-who"><b data-pm-name></b><small data-pm-plan></small></span>
@@ -237,11 +234,21 @@
       </div>
       <nav class="pm-links" aria-label="Your account">
         <a href="${pageUrl('dashboard#core')}">${ICONS.user}View profile</a>
-        <a href="${pageUrl('dashboard#tools')}">${ICONS.gear}Manage account</a>
+        <a href="${pageUrl('manage-account')}">${ICONS.gear}Manage account</a>
         <a href="${COMMUNITY_URL}" target="_blank" rel="noopener">${ICONS.group}Community<small>Telegram group</small></a>
       </nav>
       <button class="pm-out" type="button" data-sign-out>${ICONS.logout}Log out</button>
     </div>`;
+
+  function buildMenu(chip) {
+    const wrap = document.createElement('div');
+    wrap.className = 'nav-profile-wrap';
+    chip.before(wrap);
+    wrap.append(chip);
+    menu = document.createElement('div');
+    menu.className = 'pm';
+    menu.innerHTML = accountCardHtml();
+    cards.push(menu);
     wrap.append(menu);
     // A click here always answers: the box goes away, even with the pointer still on it. It can open again once the
     // pointer has left, or when the keyboard comes back to it.
@@ -254,11 +261,51 @@
     window.addEventListener('pageshow', () => wrap.classList.remove('is-shut'));
   }
 
+  // A card that opens with a tap: built in `slot`, opened and closed by `button`, which shows the name and plan too.
+  function mountCard(slot, button) {
+    slot.innerHTML = accountCardHtml();
+    const scope = slot.parentElement;
+    cards.push(scope);
+    const open = (yes) => {
+      slot.hidden = !yes;
+      button.setAttribute('aria-expanded', String(yes));
+    };
+    open(false);
+    button.addEventListener('click', () => open(slot.hidden));
+    document.addEventListener('click', (event) => { if (!slot.hidden && !scope.contains(event.target)) open(false); });
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape' || slot.hidden) return;
+      open(false);
+      button.focus();
+    });
+    slot.addEventListener('click', (event) => { if (event.target.closest('a, button')) open(false); });
+    paintProfile(storedProfile());
+  }
+
+  // the phone menu of every page but the dashboard (which has its own): the profile button at its bottom
+  function buildNavMe() {
+    const nav = document.getElementById('primary-nav');
+    if (!nav || !signedIn() || document.body.classList.contains('acc-page') || nav.querySelector('.nav-me')) return;
+    const box = document.createElement('div');
+    box.className = 'nav-me signed-only';
+    box.innerHTML = `<div class="pm-slot" hidden></div>
+      <button class="nav-me-btn" type="button" data-profile aria-expanded="false">
+        <span class="nav-profile-pic" data-profile-pic aria-hidden="true"></span>
+        <span class="pm-who"><b data-pm-name></b><small data-pm-plan></small></span>
+        ${ICONS.updown}
+      </button>`;
+    nav.append(box);
+    mountCard(box.firstElementChild, box.lastElementChild);
+  }
+
   function paintMenu(profile) {
     const chip = document.querySelector('.header-actions [data-profile]');
-    if (!chip) return;
-    if (!menu) buildMenu(chip);
-    const say = (selector, text) => { menu.querySelector(selector).textContent = text; };
+    if (chip && !menu) buildMenu(chip);
+    cards.forEach((card) => paintCard(card, profile));
+  }
+
+  function paintCard(menu, profile) {
+    const say = (selector, text) => { menu.querySelectorAll(selector).forEach((el) => { el.textContent = text; }); };
     const plan = planById(profile.plan);
     const ends = profile.plan_expires_at ? new Date(profile.plan_expires_at) : null;
     const left = ends ? Math.ceil((ends - Date.now()) / 86400000) : 0;
@@ -604,6 +651,7 @@
     (await loadCheckout()).open(go.dataset.checkout);
   });
 
+  buildNavMe();
   const profileLoaded = loadProfile();
   showBar();
 
@@ -634,6 +682,13 @@
     // the dashboard, right after the email was confirmed
     offer(profile) {
       if (needsPlan(profile)) openPlans();
+    },
+    // the dashboard: the plans for its Subscription tab, the account card in its menu, and Cancel plan
+    plans: PLANS,
+    mountCard,
+    cancel(next) {
+      current = describeCurrent(storedProfile());
+      goCancel(next);
     },
     // the Edit profile box saved something: the header follows at once
     repaint(fields) {
