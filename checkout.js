@@ -142,7 +142,7 @@
     const place = box.querySelector('[data-co-robot]');
     const script = window.rzgsRobot ? Promise.resolve() : new Promise((yes, no) => {
       const tag = document.createElement('script');
-      tag.src = pageUrl('robot-3d.js?v=10');
+      tag.src = pageUrl('robot-3d.js?v=11');
       tag.onload = yes;
       tag.onerror = no;
       document.head.append(tag);
@@ -518,10 +518,19 @@
     paint(`<h2 id="co-title">${title}</h2><p class="plan-confirm-lead">${text}</p>${message('')}<div class="co-row">${buttons}<button class="btn btn-ghost" type="button" data-co-close data-co-first>Close</button></div>`);
   }
 
+  // A hidden password: always twelve dots, so it fits one line on a phone and its length stays unknown. The eye shows
+  // it (open) or hides it again (crossed out).
+  const dots = () => '\u2022'.repeat(12);
+  const EYE = '<svg class="co-eye-show" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.06 12.35a1 1 0 0 1 0-.7 10.75 10.75 0 0 1 19.88 0 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-19.88 0"/><circle cx="12" cy="12" r="3"/></svg>'
+    + '<svg class="co-eye-hide" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.73 5.08a10.74 10.74 0 0 1 11.2 6.57 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-1.44 2.49M14.08 14.16a3 3 0 0 1-4.24-4.24"/><path d="M17.48 17.5a10.75 10.75 0 0 1-15.42-5.15 1 1 0 0 1 0-.7 10.75 10.75 0 0 1 4.45-5.14M2 2l20 20"/></svg>';
+
   // What the bot needs in MT5: on the last step here, and on the dashboard for as long as the plan runs.
   // fileLast: the download button under the steps, as the last thing in the box.
   function licenceHtml(licence, fileLast = false) {
-    const key = (label, value) => `<div class="co-key"><span>${label}</span><code>${esc(value)}</code><button class="co-copy" type="button" data-co-copy="${esc(value)}">Copy</button></div>`;
+    // hidden like a password until its eye is tapped (the owner, 2026-11-03); Copy always copies the real one
+    const key = (label, value) => `<div class="co-key"><span>${label}</span><code data-co-secret="${esc(value)}">${dots(value)}</code>
+      <button class="co-eye" type="button" data-co-eye aria-pressed="false" aria-label="Show your ${label}">${EYE}</button>
+      <button class="co-copy" type="button" data-co-copy="${esc(value)}">Copy</button></div>`;
     const broker = brokerById(licence.broker && String(licence.broker).toLowerCase());
     const file = mainButton('Download your bot file', 'type="button" data-co-file');
     return `<div class="co-keys">${key('Bot Password', licence.bot_password)}${key('App Password', licence.app_password)}</div>
@@ -727,8 +736,18 @@
     }
   }
 
-  // Copy and download also work on the dashboard, outside the box.
+  // Show, copy and download also work on the dashboard, outside the box.
   document.addEventListener('click', async (event) => {
+    const eye = event.target.closest('[data-co-eye]');
+    if (eye) {
+      const shown = eye.getAttribute('aria-pressed') !== 'true';
+      const secret = eye.parentElement.querySelector('[data-co-secret]');
+      secret.textContent = shown ? secret.dataset.coSecret : dots(secret.dataset.coSecret);
+      secret.classList.toggle('is-shown', shown);
+      eye.setAttribute('aria-pressed', String(shown));
+      eye.setAttribute('aria-label', `${shown ? 'Hide' : 'Show'} your ${eye.parentElement.querySelector('span').textContent}`);
+      return;
+    }
     const copy = event.target.closest('[data-co-copy]');
     if (copy) {
       try {

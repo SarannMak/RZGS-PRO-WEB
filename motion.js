@@ -196,6 +196,11 @@
     window.addEventListener('resize', settle);
     settle();
     if (document.fonts) document.fonts.ready.then(settle);
+    // the menu's font can arrive after fonts.ready and make the links wider: the line follows their size, every time
+    if (window.ResizeObserver) {
+      const watch = new ResizeObserver(settle);
+      links.forEach((link) => watch.observe(link));
+    }
   }
 
   window.rzgsMotion = { shake, reveal, conceal, fromTap };

@@ -1044,6 +1044,20 @@ function build(THREE, box, guide = false) {
   // click is taken, and how long a finished line stays in the card.
   const LETTER = 45, FULL_STOP = 260, AT_LEAST = 1000, STAYS = 5000;
   let unsaid = [], lastSaid = -1, quiet = 0, typing = 0, busy = false;
+  // The letters of a line as they appear: a Khmer letter comes with its vowel signs and the letter written under it,
+  // so no half letter shows while it is typed. A full stop is "." or the Khmer "។".
+  const STOP = /[.។]$/;
+  function letters(text) {
+    const parts = window.Intl && Intl.Segmenter
+      ? [...new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(text)].map((piece) => piece.segment)
+      : Array.from(text);
+    const out = [];
+    parts.forEach((part) => {
+      if (out.length && out[out.length - 1].endsWith('្')) out[out.length - 1] += part; // the sign joining a letter under it
+      else out.push(part);
+    });
+    return out;
+  }
   // Types the next line and tells how long that takes.
   function say() {
     if (!lines.length || !resting || !reply) return 0;
@@ -1056,7 +1070,9 @@ function build(THREE, box, guide = false) {
       if (unsaid.length > 1 && unsaid[unsaid.length - 1] === lastSaid) unsaid.reverse(); // never the same line twice in a row
     }
     lastSaid = unsaid.pop();
-    const line = lines[lastSaid];
+    // in the language the visitor chose (i18n.js); the page may have been translated before or after it was read
+    const line = window.rzgsI18n ? window.rzgsI18n.t(lines[lastSaid]) : lines[lastSaid];
+    const parts = letters(line);
     clearTimeout(quiet);
     clearTimeout(typing);
     // The whole line is in the card from the first moment, unseen, so the card has its full size
@@ -1088,13 +1104,13 @@ function build(THREE, box, guide = false) {
     let count = 0, takes = 0;
     const type = () => {
       count++;
-      typed.textContent = line.slice(0, count);
-      toCome.textContent = line.slice(count);
-      if (count >= line.length) return done();
-      typing = setTimeout(type, line[count - 1] === '.' ? FULL_STOP : LETTER);
+      typed.textContent = parts.slice(0, count).join('');
+      toCome.textContent = parts.slice(count).join('');
+      if (count >= parts.length) return done();
+      typing = setTimeout(type, STOP.test(parts[count - 1]) ? FULL_STOP : LETTER);
     };
     typing = setTimeout(type, LETTER);
-    for (let i = 0; i < line.length; i++) takes += i && line[i - 1] === '.' ? FULL_STOP : LETTER;
+    for (let i = 0; i < parts.length; i++) takes += i && STOP.test(parts[i - 1]) ? FULL_STOP : LETTER;
     return takes;
   }
   const ray = new THREE.Raycaster(), spot = new THREE.Vector2();

@@ -304,10 +304,11 @@ dialog.plan-confirm.co {
   transition: background-color var(--dur) var(--ease-out), color var(--dur) var(--ease-out);
 }
 .co-broker:hover span {
-  background: var(--surface-2);
+  background-color: var(--surface-2);
 }
 .co-broker input:checked + span {
-  background: var(--cyan);
+  --edge: var(--cyan);
+  background-color: var(--cyan);
   color: var(--on-accent);
 }
 .co-broker input:focus-visible + span {
@@ -637,7 +638,7 @@ dialog.plan-confirm.co {
 }
 .co-key {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   gap: 2px 12px;
   align-items: center;
   padding: 10px 12px;
@@ -659,8 +660,49 @@ dialog.plan-confirm.co {
   user-select: all;
 }
 .co-key .co-copy {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+}
+/* hidden like a password until the eye is tapped (2026-11-03) */
+.co-key code:not(.is-shown) {
+  color: var(--text-muted);
+  letter-spacing: 0.12em;
+  user-select: none;
+}
+.co-eye {
+  display: grid;
   grid-column: 2;
   grid-row: 1 / span 2;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
+.co-eye:hover,
+.co-eye[aria-pressed="true"] {
+  border-color: var(--frame);
+  color: var(--cyan);
+}
+.co-eye svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.co-eye .co-eye-hide,
+.co-eye[aria-pressed="true"] .co-eye-show {
+  display: none;
+}
+.co-eye[aria-pressed="true"] .co-eye-hide {
+  display: block;
 }
 .co-copy {
   min-width: 64px;
@@ -674,7 +716,7 @@ dialog.plan-confirm.co {
   clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
 }
 .co-copy:hover {
-  background: var(--surface-3);
+  background-color: var(--surface-3);
 }
 .co-small {
   margin: 0 0 14px;
@@ -746,4 +788,27 @@ dialog.plan-confirm.co {
   .co-rail li + li::before {
     width: 6px;
   }
+}
+
+/* ---------- cut corners with a plain outline (the owner, 2026-11-03: "fix these edges") ----------
+   clip-path cuts a box's outline off at its two cut corners. Two thin lines in the outline's colour (--edge), sized to
+   the cut (--cut), draw the cut edges back. Their state rules change --edge (not border-color) and only the background
+   colour, so the lines stay. */
+.co-broker span,
+.co-copy {
+  border-color: var(--edge);
+  background-image:
+    linear-gradient(to bottom right, transparent 50%, var(--edge) 50%, var(--edge) calc(50% + 1px), transparent calc(50% + 1px)),
+    linear-gradient(to bottom right, transparent calc(50% - 1px), var(--edge) calc(50% - 1px), var(--edge) 50%, transparent 50%);
+  background-position: left top, right bottom;
+  background-size: var(--cut, 10px) var(--cut, 10px);
+  background-repeat: no-repeat;
+  background-origin: border-box;
+}
+.co-broker span {
+  --edge: var(--border-strong);
+}
+.co-copy {
+  --edge: var(--frame);
+  --cut: 6px;
 }

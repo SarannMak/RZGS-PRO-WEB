@@ -488,6 +488,17 @@
       select.replaceChildren(new Option('Choose your country', ''));
       countries.forEach((c) => select.add(new Option(c.name, c.name)));
       if (mine) select.value = mine.name;
+      // In another language (i18n.js) the names are translated, so they are put in that language's order once the
+      // translation is in. The value stays the English name, as it is saved.
+      const i18n = window.rzgsI18n;
+      if (i18n && i18n.lang !== 'en' && i18n.ready) {
+        i18n.ready.then(() => {
+          const picked = select.value;
+          const shown = countries.map((c) => ({ ...c, label: i18n.t(c.name) })).sort((a, b) => a.label.localeCompare(b.label, i18n.lang));
+          select.replaceChildren(new Option(i18n.t('Choose your country'), ''), ...shown.map((c) => new Option(c.label, c.name)));
+          select.value = picked;
+        });
+      }
     } catch (e) { /* keep the short list */ }
   }
 
@@ -727,6 +738,15 @@
   /* ------------------------------------------------------------ dashboard page */
   const PLAN_NAMES = { trial: 'Free trial', elite: 'Elite', diamond: 'Diamond' };
   const PLAN_DAYS = { trial: 7, elite: 30, diamond: 30 }; // length of one period, used to fill the ring
+  // A plan's picture (the owner, 2026-11-03): the free trial a bolt, Elite a hexagon, Diamond a gem, each in its own
+  // colour (auth.css .plan-logo). No plan: the layers of the plans to choose from. A plan that ended is shown faded.
+  const PLAN_ICONS = { trial: 'zap', elite: 'hexagon', diamond: 'gem' };
+  function paintPlanLogo(logo, plan, ended) {
+    logo.dataset.tone = PLAN_ICONS[plan] ? plan : 'off';
+    logo.classList.toggle('is-ended', Boolean(ended));
+    $('use', logo).setAttribute('href', `#i-${PLAN_ICONS[plan] || 'layers'}`);
+  }
+  const planOf = (id) => ((window.rzgsPlans && window.rzgsPlans.plans) || []).find((plan) => plan.id === id);
   const longDate = (value) => new Date(value).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
   const shortDateTime = (value) => new Date(value).toLocaleString(undefined, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
@@ -912,128 +932,9 @@
       } catch (e) { /* the last state stays */ }
     }
 
-    /* ----- profile picture ----- */
-    // The picture is a small file in the "avatars" storage bucket, in a folder named after the person's own id.
-    // Its address is kept in the profile (avatar_url). Only a picture from that folder is ever shown.
-    const AVATAR_BUCKET = 'avatars';
-    const avatarFolder = `${SUPABASE_URL}/storage/v1/object/public/${AVATAR_BUCKET}/${user.id}/`;
-    const avatarEdit = $('[data-avatar-edit]', root);
-    const avatarFile = $('[data-avatar-file]', avatarEdit);
-    const avatarPick = $('[data-avatar-pick]', avatarEdit);
-    const avatarRemove = $('[data-avatar-remove]', avatarEdit);
-    const avatarAddress = () => {
-      const url = stored('avatar_url');
-      return url.startsWith(avatarFolder) ? url : '';
-    };
-
-    // the photo, or the first letter of the name: on the profile card and in the Edit profile box
-    function renderAvatar(name) {
-      const letter = name.trim().charAt(0).toUpperCase() || 'R';
-      const url = avatarAddress();
-      $$('[data-dash-avatar], [data-avatar-preview]', root).forEach((box) => {
-        if (!url) { box.textContent = letter; return; }
-        const img = new Image();
-        img.alt = '';
-        img.onerror = () => { box.textContent = letter; }; // the file is gone: back to the letter
-        img.src = url;
-        box.replaceChildren(img);
-      });
-      avatarRemove.hidden = !url;
-    }
-
-    // Cut the photo to a centred square of 320 px, so only a light JPEG is sent (a phone photo is several MB).
-    async function squarePhoto(file) {
-      let source;
-      try {
-        source = await createImageBitmap(file, { imageOrientation: 'from-image' });
-      } catch (e) {
-        source = await new Promise((resolve, reject) => {
-          const img = new Image();
-          img.onload = () => resolve(img);
-          img.onerror = reject;
-          img.src = URL.createObjectURL(file);
-        });
-      }
-      const width = source.naturalWidth || source.width;
-      const height = source.naturalHeight || source.height;
-      const side = Math.min(width, height);
-      const canvas = document.createElement('canvas');
-      canvas.width = 320;
-      canvas.height = 320;
-      canvas.getContext('2d').drawImage(source, (width - side) / 2, (height - side) / 2, side, side, 0, 0, 320, 320);
-      return new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.86));
-    }
-
-    function avatarBusy(busy) {
-      setBusy(avatarPick, busy);
-      avatarRemove.disabled = busy;
-    }
-
-    // keep one file in the person's folder (or none): older pictures are deleted
-    async function tidyAvatars(keep) {
-      try {
-        const { data } = await db.storage.from(AVATAR_BUCKET).list(user.id);
-        const old = (data || []).map((file) => `${user.id}/${file.name}`).filter((path) => path !== keep);
-        if (old.length) await db.storage.from(AVATAR_BUCKET).remove(old);
-      } catch (e) { /* a leftover file does no harm */ }
-    }
-
-    async function saveAvatar(url) {
-      const { data, error } = await db.auth.updateUser({ data: { avatar_url: url } });
-      if (error) return error;
-      if (data && data.user) user = data.user;
-      profile.avatar_url = url;
-      renderHeader();
-      if (window.rzgsPlans) window.rzgsPlans.repaint({ avatar_url: url });
-      return null;
-    }
-
-    avatarPick.addEventListener('click', () => avatarFile.click());
-    avatarFile.addEventListener('change', async () => {
-      const file = avatarFile.files[0];
-      avatarFile.value = ''; // the same photo can be picked again later
-      if (!file) return;
-      if (!/^image\/(jpeg|png|webp)$/.test(file.type)) {
-        formMessage(avatarEdit, 'Choose a JPG, PNG or WebP picture.', 'error');
-        return;
-      }
-      avatarBusy(true);
-      let photo = null;
-      try { photo = await squarePhoto(file); } catch (e) { /* not a picture the browser can read */ }
-      if (!photo) {
-        avatarBusy(false);
-        formMessage(avatarEdit, "We couldn't read this picture. Try another one.", 'error');
-        return;
-      }
-      // a new file name every time, so no browser keeps showing the old picture
-      const path = `${user.id}/avatar-${Date.now()}.jpg`;
-      const { error: uploadError } = await db.storage.from(AVATAR_BUCKET)
-        .upload(path, photo, { contentType: 'image/jpeg', cacheControl: '31536000' });
-      if (uploadError) {
-        avatarBusy(false);
-        formMessage(avatarEdit, navigator.onLine ? "We couldn't save the picture. Please try again." : "You're offline. Check your connection and try again.", 'error');
-        return;
-      }
-      const error = await saveAvatar(avatarFolder + path.split('/')[1]);
-      avatarBusy(false);
-      if (error) {
-        formMessage(avatarEdit, friendlyError(error), 'error');
-        return;
-      }
-      formMessage(avatarEdit, 'Profile picture saved.', 'success');
-      tidyAvatars(path);
-    });
-    avatarRemove.addEventListener('click', async () => {
-      avatarBusy(true);
-      const error = await saveAvatar('');
-      avatarBusy(false);
-      if (error) {
-        formMessage(avatarEdit, friendlyError(error), 'error');
-        return;
-      }
-      formMessage(avatarEdit, 'Profile picture removed.', 'success');
-      tidyAvatars('');
-    });
+    /* ----- the Edit profile box and the picture: shared with Manage account ----- */
+    const editor = wireEditProfile(root, { user: () => user, setUser: (next) => { user = next; }, profile, saved: () => { renderHeader(); renderInfo(); } });
+    const { renderAvatar, avatarAddress } = editor;
 
     /* ----- header + core ----- */
     function renderHeader() {
@@ -1200,7 +1101,24 @@
         action.textContent = 'See plans'; // a plan that is running can't be renewed yet
       }
       $('[data-plan-also]', root).hidden = Boolean(state.plan) && state.plan !== 'trial' && state.status !== 'Expired';
-      // on the Plan view, the current plan's button is shown "on"
+
+      // Subscription: the plan's picture, name, chip, dates and price
+      const hero = $('[data-plan-hero]', root);
+      const mine = planOf(state.plan);
+      const ended = state.status === 'Expired';
+      hero.dataset.tone = state.plan && !ended ? state.plan : 'off';
+      paintPlanLogo($('[data-hero-logo]', hero), state.plan, ended);
+      $('[data-hero-chip]', hero).textContent = !state.plan ? 'Start here' : ended ? 'Ended' : mine ? mine.chip : state.status;
+      $('[data-hero-name]', hero).textContent = state.plan ? state.name : 'No plan yet';
+      $('[data-hero-line]', hero).textContent = !state.plan ? 'Start with 7 free days. No payment needed.'
+        : !profile.plan_expires_at ? state.status
+          : ended ? `Ended on ${state.until}` : `${state.status} until ${state.until}`;
+      $('[data-hero-price]', hero).textContent = mine && !ended ? `${mine.amount} ${mine.per}` : '';
+      // Renew or upgrade: the plans pop-up, where each plan says whether it can start now (plans.js)
+      const renew = $('[data-renew]', root);
+      renew.textContent = !state.plan ? 'Choose a plan' : ended ? 'Renew your plan' : state.plan === 'trial' ? 'Upgrade your plan' : 'See plans and prices';
+      renew.classList.toggle('btn-primary', !healthy);
+      renew.classList.toggle('btn-ghost', healthy);
       // a paid plan that is running: nothing else starts until it ends or is cancelled
       const paidRunning = Boolean(state.plan) && state.plan !== 'trial' && state.status !== 'Expired';
       // moving up from Elite to Diamond is the one change that can start now: it asks to cancel first (plans.js)
@@ -1208,17 +1126,6 @@
       setAll('[data-plan-choice-note]', paidRunning
         ? `Your ${state.name} plan runs until ${state.until}. You can renew it or start another plan when it ends.${canMoveUp ? ' To move up now, choose Diamond.' : ''}`
         : 'Trial and Elite start right here. Diamond opens a chat with our sales team on Telegram.');
-      $$('[data-plan-link]', root).forEach((button) => {
-        const on = button.dataset.planLink === state.plan;
-        const freeUsed = button.dataset.planLink === 'trial' && checkout.trial_used;
-        const moveUp = canMoveUp && button.dataset.planLink === 'diamond';
-        const locked = !moveUp && (paidRunning || freeUsed || (on && (state.plan === 'trial' || state.status !== 'Expired'))); // the free days only once
-        button.disabled = locked;
-        button.classList.toggle('is-locked', locked && !on);
-        button.classList.toggle('is-on', on);
-        if (on) button.setAttribute('aria-current', 'true');
-        else button.removeAttribute('aria-current');
-      });
     }
 
     /* ----- order: the buying steps of an order that is under way ----- */
@@ -1291,38 +1198,6 @@
       $('[data-log-empty]', root).hidden = events.length > 0;
     }
 
-    const profileForm = $('[data-profile-form]');
-    const editBox = $('[data-edit-dialog]', root);
-    const country = profileForm.elements.country;
-    fillCountries(country);
-
-    // The Edit profile box: it always opens with what is on file, so Cancel simply leaves everything as it was.
-    function fillEdit() {
-      const savedCountry = stored('country');
-      if (savedCountry && ![...country.options].some((option) => option.value === savedCountry)) {
-        country.add(new Option(savedCountry, savedCountry));
-      }
-      country.value = savedCountry;
-      ['full_name', 'username', 'phone', 'telegram_username', 'about', 'mt5_account', 'broker'].forEach((name) => {
-        profileForm.elements[name].value = stored(name);
-      });
-      Object.keys(SOCIALS).forEach((kind) => { profileForm.elements[`social_${kind}`].value = (stored('socials') || {})[kind] || ''; });
-      $$('input, select', profileForm).forEach((input) => setFieldError(input, ''));
-      countAbout();
-    }
-    const aboutCount = $('[data-about-count]', editBox);
-    const countAbout = () => { aboutCount.textContent = `${profileForm.elements.about.value.length} / 160`; };
-    profileForm.elements.about.addEventListener('input', countAbout);
-
-    // "Edit profile", "Add your location" and the like: the box, with the cursor in that field
-    function openEdit(fieldName) {
-      fillEdit();
-      motion.fromTap(editBox);
-      editBox.showModal();
-      const wanted = fieldName && profileForm.elements[fieldName];
-      if (wanted) wanted.focus();
-    }
-
     renderHeader();
     renderInfo();
     renderPlan();
@@ -1359,6 +1234,195 @@
     document.addEventListener('visibilitychange', refreshAll);
     document.addEventListener('rzgs:checkout', refreshAll);
 
+    root.addEventListener('click', (event) => {
+      if (event.target.closest('[data-order-go]')) withCheckout((checkoutBox) => checkoutBox.resume());
+      if (event.target.closest('[data-order-drop]')) withCheckout((checkoutBox) => checkoutBox.drop());
+    });
+    // an older link to the Profile tab
+    const editFromAddress = () => {
+      if (location.hash !== '#profile') return;
+      history.replaceState(null, '', location.pathname + location.search);
+      editor.open();
+    };
+    editFromAddress();
+    window.addEventListener('hashchange', editFromAddress);
+    refreshBot();
+    setInterval(refreshBot, 60000);
+    document.addEventListener('visibilitychange', refreshBot);
+
+    wireSignOut();
+
+    // signed out in another tab
+    db.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT') location.replace('./');
+    });
+  }
+
+  /* ----------------------------------------------------- the Edit profile box */
+  // One box on both account pages: it opens on the page where Edit was tapped (the owner, 2026-11-03). `account` gives
+  // the signed-in user (user(), setUser()), the profile row, and saved(), which redraws the page after a change.
+  // Gives back the painter of the picture, the picture's address, and open().
+  function wireEditProfile(root, account) {
+    const { profile } = account;
+    const stored = (key) => profile[key] || (account.user().user_metadata || {})[key] || '';
+    const userId = account.user().id;
+
+    /* the picture */
+    // The picture is a small file in the "avatars" storage bucket, in a folder named after the person's own id.
+    // Its address is kept in the profile (avatar_url). Only a picture from that folder is ever shown.
+    const AVATAR_BUCKET = 'avatars';
+    const avatarFolder = `${SUPABASE_URL}/storage/v1/object/public/${AVATAR_BUCKET}/${userId}/`;
+    const avatarEdit = $('[data-avatar-edit]', root);
+    const avatarFile = $('[data-avatar-file]', avatarEdit);
+    const avatarPick = $('[data-avatar-pick]', avatarEdit);
+    const avatarRemove = $('[data-avatar-remove]', avatarEdit);
+    const avatarAddress = () => {
+      const url = stored('avatar_url');
+      return url.startsWith(avatarFolder) ? url : '';
+    };
+
+    // the photo, or the first letter of the name: on the profile card and in the Edit profile box
+    function renderAvatar(name) {
+      const letter = name.trim().charAt(0).toUpperCase() || 'R';
+      const url = avatarAddress();
+      $$('[data-dash-avatar], [data-avatar-preview]', root).forEach((box) => {
+        if (!url) { box.textContent = letter; return; }
+        const img = new Image();
+        img.alt = '';
+        img.onerror = () => { box.textContent = letter; }; // the file is gone: back to the letter
+        img.src = url;
+        box.replaceChildren(img);
+      });
+      avatarRemove.hidden = !url;
+    }
+
+    // Cut the photo to a centred square of 320 px, so only a light JPEG is sent (a phone photo is several MB).
+    async function squarePhoto(file) {
+      let source;
+      try {
+        source = await createImageBitmap(file, { imageOrientation: 'from-image' });
+      } catch (e) {
+        source = await new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = reject;
+          img.src = URL.createObjectURL(file);
+        });
+      }
+      const width = source.naturalWidth || source.width;
+      const height = source.naturalHeight || source.height;
+      const side = Math.min(width, height);
+      const canvas = document.createElement('canvas');
+      canvas.width = 320;
+      canvas.height = 320;
+      canvas.getContext('2d').drawImage(source, (width - side) / 2, (height - side) / 2, side, side, 0, 0, 320, 320);
+      return new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.86));
+    }
+
+    function avatarBusy(busy) {
+      setBusy(avatarPick, busy);
+      avatarRemove.disabled = busy;
+    }
+
+    // keep one file in the person's folder (or none): older pictures are deleted
+    async function tidyAvatars(keep) {
+      try {
+        const { data } = await db.storage.from(AVATAR_BUCKET).list(userId);
+        const old = (data || []).map((file) => `${userId}/${file.name}`).filter((path) => path !== keep);
+        if (old.length) await db.storage.from(AVATAR_BUCKET).remove(old);
+      } catch (e) { /* a leftover file does no harm */ }
+    }
+
+    async function saveAvatar(url) {
+      const { data, error } = await db.auth.updateUser({ data: { avatar_url: url } });
+      if (error) return error;
+      if (data && data.user) account.setUser(data.user);
+      profile.avatar_url = url;
+      account.saved();
+      if (window.rzgsPlans) window.rzgsPlans.repaint({ avatar_url: url });
+      return null;
+    }
+
+    avatarPick.addEventListener('click', () => avatarFile.click());
+    avatarFile.addEventListener('change', async () => {
+      const file = avatarFile.files[0];
+      avatarFile.value = ''; // the same photo can be picked again later
+      if (!file) return;
+      if (!/^image\/(jpeg|png|webp)$/.test(file.type)) {
+        formMessage(avatarEdit, 'Choose a JPG, PNG or WebP picture.', 'error');
+        return;
+      }
+      avatarBusy(true);
+      let photo = null;
+      try { photo = await squarePhoto(file); } catch (e) { /* not a picture the browser can read */ }
+      if (!photo) {
+        avatarBusy(false);
+        formMessage(avatarEdit, "We couldn't read this picture. Try another one.", 'error');
+        return;
+      }
+      // a new file name every time, so no browser keeps showing the old picture
+      const path = `${userId}/avatar-${Date.now()}.jpg`;
+      const { error: uploadError } = await db.storage.from(AVATAR_BUCKET)
+        .upload(path, photo, { contentType: 'image/jpeg', cacheControl: '31536000' });
+      if (uploadError) {
+        avatarBusy(false);
+        formMessage(avatarEdit, navigator.onLine ? "We couldn't save the picture. Please try again." : "You're offline. Check your connection and try again.", 'error');
+        return;
+      }
+      const error = await saveAvatar(avatarFolder + path.split('/')[1]);
+      avatarBusy(false);
+      if (error) {
+        formMessage(avatarEdit, friendlyError(error), 'error');
+        return;
+      }
+      formMessage(avatarEdit, 'Profile picture saved.', 'success');
+      tidyAvatars(path);
+    });
+    avatarRemove.addEventListener('click', async () => {
+      avatarBusy(true);
+      const error = await saveAvatar('');
+      avatarBusy(false);
+      if (error) {
+        formMessage(avatarEdit, friendlyError(error), 'error');
+        return;
+      }
+      formMessage(avatarEdit, 'Profile picture removed.', 'success');
+      tidyAvatars('');
+    });
+
+    /* the box */
+    const profileForm = $('[data-profile-form]', root);
+    const editBox = $('[data-edit-dialog]', root);
+    const country = profileForm.elements.country;
+    fillCountries(country);
+
+    // The Edit profile box: it always opens with what is on file, so Cancel simply leaves everything as it was.
+    function fillEdit() {
+      const savedCountry = stored('country');
+      if (savedCountry && ![...country.options].some((option) => option.value === savedCountry)) {
+        country.add(new Option(savedCountry, savedCountry));
+      }
+      country.value = savedCountry;
+      ['full_name', 'username', 'phone', 'telegram_username', 'about', 'mt5_account', 'broker'].forEach((name) => {
+        profileForm.elements[name].value = stored(name);
+      });
+      Object.keys(SOCIALS).forEach((kind) => { profileForm.elements[`social_${kind}`].value = (stored('socials') || {})[kind] || ''; });
+      $$('input, select', profileForm).forEach((input) => setFieldError(input, ''));
+      countAbout();
+    }
+    const aboutCount = $('[data-about-count]', editBox);
+    const countAbout = () => { aboutCount.textContent = `${profileForm.elements.about.value.length} / 160`; };
+    profileForm.elements.about.addEventListener('input', countAbout);
+
+    // "Edit profile", "Add your location" and the like: the box, with the cursor in that field
+    function open(fieldName) {
+      fillEdit();
+      motion.fromTap(editBox);
+      editBox.showModal();
+      const wanted = fieldName && profileForm.elements[fieldName];
+      if (wanted) wanted.focus();
+    }
+
     wireValidation(profileForm);
     profileForm.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -1382,10 +1446,9 @@
         formMessage($('.de-foot', editBox), friendlyError(error), 'error');
         return;
       }
-      if (data && data.user) user = data.user;
+      if (data && data.user) account.setUser(data.user);
       Object.assign(profile, fields);
-      renderHeader();
-      renderInfo();
+      account.saved();
       if (window.rzgsPlans) window.rzgsPlans.repaint({ full_name: fields.full_name, username: fields.username });
       editBox.close();
       showMessage('Profile saved.', 'success');
@@ -1395,30 +1458,12 @@
     editBox.addEventListener('click', (event) => {
       if (event.target === editBox || event.target.closest('[data-edit-close]')) editBox.close();
     });
+    // "Edit profile", "Edit", "Add your location" and the like
     root.addEventListener('click', (event) => {
       const asked = event.target.closest('[data-edit]');
-      if (asked) openEdit(asked.dataset.edit);
-      if (event.target.closest('[data-order-go]')) withCheckout((checkoutBox) => checkoutBox.resume());
-      if (event.target.closest('[data-order-drop]')) withCheckout((checkoutBox) => checkoutBox.drop());
+      if (asked) open(asked.dataset.edit);
     });
-    // an older link to the Profile tab
-    const editFromAddress = () => {
-      if (location.hash !== '#profile') return;
-      history.replaceState(null, '', location.pathname + location.search);
-      openEdit();
-    };
-    editFromAddress();
-    window.addEventListener('hashchange', editFromAddress);
-    refreshBot();
-    setInterval(refreshBot, 60000);
-    document.addEventListener('visibilitychange', refreshBot);
-
-    wireSignOut();
-
-    // signed out in another tab
-    db.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_OUT') location.replace('./');
-    });
+    return { renderAvatar, avatarAddress, open };
   }
 
   /* ----------------------------------------------------- the menu of the account pages */
@@ -1519,7 +1564,7 @@
       const { data } = await db.auth.getUser();
       if (data && data.user) user = data.user;
     }
-    const COLUMNS = 'full_name, username, avatar_url, email, plan, plan_expires_at, created_at, email_confirmed_at, mt5_account, broker, bot_mt5_account, bot_broker';
+    const COLUMNS = 'full_name, username, avatar_url, email, country, phone, telegram_username, mt5_account, broker, plan, plan_expires_at, created_at, email_confirmed_at, bot_mt5_account, bot_broker';
     async function fetchProfile() {
       try {
         const { data } = await db.from('web_users').select(COLUMNS).eq('id', user.id).maybeSingle();
@@ -1533,24 +1578,15 @@
     const setAll = (selector, text) => $$(selector, root).forEach((el) => { el.textContent = text; });
     wireAccountMenu(root);
     wireSignOut();
+    // the Edit profile box opens here, on this page
+    const editor = wireEditProfile(root, { user: () => user, setUser: (next) => { user = next; }, profile, saved: () => paintIdentity() });
 
     /* ----- Personal profile: the picture, the name, the email, the account ----- */
-    // only a picture from the person's own folder is ever shown (as on the dashboard)
-    const avatarFolder = `${SUPABASE_URL}/storage/v1/object/public/avatars/${user.id}/`;
     function paintIdentity() {
       const name = (stored('full_name') || stored('username') || 'RZGS-PRO member').trim();
-      const letter = name.charAt(0).toUpperCase() || 'R';
-      const url = stored('avatar_url');
       setAll('[data-acc-name]', name);
       setAll('[data-dash-email]', profile.email || user.email || '');
-      $$('[data-dash-avatar]', root).forEach((box) => {
-        if (!url.startsWith(avatarFolder)) { box.textContent = letter; return; }
-        const img = new Image();
-        img.alt = '';
-        img.onerror = () => { box.textContent = letter; };
-        img.src = url;
-        box.replaceChildren(img);
-      });
+      editor.renderAvatar(name);
       const joined = profile.created_at || user.created_at;
       const confirmed = profile.email_confirmed_at || user.email_confirmed_at;
       setAll('[data-info="joined"]', joined ? longDate(joined) : '-');
@@ -1660,19 +1696,19 @@
       const plans = (window.rzgsPlans && window.rzgsPlans.plans) || [];
       const mine = plans.find((plan) => plan.id === state.plan);
       const ended = state.status === 'Expired';
-      $('[data-sub-tone]', sub).dataset.subTone = state.plan && !ended ? state.plan : 'off';
+      paintPlanLogo($('[data-sub-logo]', sub), state.plan, ended);
       $('[data-sub-name]', sub).textContent = state.plan ? `${mine ? mine.name : state.name} plan${ended ? ' (ended)' : ''}` : 'No plan yet';
       $('[data-sub-until]', sub).textContent = !state.plan ? 'Start with 7 free days. No payment needed.'
         : !profile.plan_expires_at ? 'No end date.'
           : `${ended ? 'It ended on' : 'Your plan runs until'} ${state.until}.`;
       $('[data-sub-price]', sub).textContent = mine && !ended ? `${mine.amount} ${mine.per}` : '';
-      // its one next step: the free days, renewing, moving up, or the plans to look at
+      // its one next step: the free days, renewing or upgrading the trial; none while a paid plan runs (the owner,
+      // 2026-11-03: no "Move up to Diamond" here; Diamond is in Other plans below)
       const [label, checkoutId, main] = !state.plan ? (checkout.trial_used ? ['Choose a plan', '', true] : ['Claim your free trial', 'trial', true])
         : ended ? [`Renew ${mine ? mine.name : state.name}`, state.plan, true]
-          : state.plan === 'trial' ? ['Upgrade your plan', '', true]
-            : canMoveUp ? ['Move up to Diamond', 'diamond', true]
-              : ['See plans', '', false];
+          : ['Upgrade your plan', '', true];
       const action = $('[data-sub-action]', sub);
+      action.hidden = paidRunning;
       action.textContent = label;
       action.classList.toggle('btn-primary', main);
       action.classList.toggle('btn-ghost', !main);
@@ -1705,7 +1741,7 @@
         $('.acc-plan-card-price span', card).textContent = plan.per;
         $('.acc-plan-card-lead', card).textContent = plan.lead;
         const button = $('button', card);
-        button.textContent = plan.id === 'diamond' && canMoveUp ? 'Move up' : plan.button;
+        button.textContent = plan.button;
         button.dataset.planLink = plan.id;
         button.dataset.checkout = plan.id;
         return card;
@@ -1722,6 +1758,7 @@
         ? `Your ${state.name} plan runs until ${state.until}. You can renew it or start another plan when it ends.${canMoveUp ? ' To move up now, choose Diamond.' : ''}`
         : 'Trial and Elite start right here. Diamond opens a chat with our sales team on Telegram.');
       renderSubscription(state, paidRunning, canMoveUp);
+      renderSummary(state);
       $$('[data-plan-link]', root).forEach((button) => {
         const on = button.dataset.planLink === state.plan;
         const freeUsed = button.dataset.planLink === 'trial' && checkout.trial_used;
@@ -1733,6 +1770,27 @@
         if (on) button.setAttribute('aria-current', 'true');
         else button.removeAttribute('aria-current');
       });
+    }
+
+    /* ----- Personal profile: the plan and the profit at a glance (Higgsfield's account page, 2026-11-03) ----- */
+    // the meter: one bar a day of the plan, lit for each day left (as in the account card, plans.js)
+    function paintDays(meter, planId, ends, left, running) {
+      const total = !planId ? PLAN_DAYS.elite : Math.max(PLAN_DAYS[planId], running && ends ? left : 0);
+      if (meter.children.length !== total) meter.innerHTML = '<i></i>'.repeat(total);
+      const lit = !running ? 0 : !ends ? total : Math.min(total, left);
+      [...meter.children].forEach((part, index) => part.classList.toggle('on', index < lit));
+    }
+    function renderSummary(state) {
+      const ends = profile.plan_expires_at ? new Date(profile.plan_expires_at) : null;
+      const left = ends ? Math.ceil((ends - Date.now()) / 86400000) : 0;
+      const running = Boolean(state.plan) && state.status !== 'Expired';
+      paintPlanLogo($('[data-sum-logo]', root), state.plan, Boolean(state.plan) && !running);
+      setAll('[data-sum-name]', state.plan ? state.name : 'No plan yet');
+      setAll('[data-sum-chip]', !state.plan ? 'Start with 7 free days' : !running ? 'Ended' : (planOf(state.plan) || {}).chip || state.status);
+      setAll('[data-sum-left]', !state.plan ? 'No plan yet' : !running ? `${state.name} ended` : ends ? `${left} ${left === 1 ? 'day' : 'days'} left` : `${state.name} plan`);
+      setAll('[data-sum-until]', !state.plan ? 'No payment needed to start.' : !ends ? 'No end date' : `${running ? 'Until' : 'Ended'} ${state.until}`);
+      paintDays($('[data-sum-meter]', root), state.plan, ends, left, running);
+      $('[data-sum-go]', root).textContent = !running ? 'Choose a plan' : state.plan === 'diamond' ? 'See your plan' : 'Upgrade';
     }
 
     /* ----- Usage: the client's own bot, in money (web_my_usage; the owner chose to show it, 2 Nov 2026) ----- */
@@ -1761,6 +1819,7 @@
       renderUsage();
     }
     onOpen.usage = () => loadUsage(false);
+    onOpen.personal = () => loadUsage(false); // its small chart
     $('[data-usage-refresh]', usageBox).addEventListener('click', () => loadUsage(true));
     rangeBox.addEventListener('change', () => {
       try { localStorage.setItem(RANGE_KEY, rangeBox.value); } catch (e) { /* only for this visit */ }
@@ -1847,12 +1906,32 @@
       });
       svg.innerHTML = h;
     }
+    // Personal profile's small chart: closed profit of the last 14 days (7 from an older bot), and See all
+    function renderMini() {
+      const svg = $('[data-sum-bars]', root);
+      const note = $('[data-sum-note]', root);
+      const u = usage || {};
+      if (!u.ok || !u.bot) {
+        svg.innerHTML = '';
+        note.textContent = !u.ok ? 'The P/L Report is not available yet.' : "Your bot's profit shows here once it runs in MT5.";
+        return;
+      }
+      const r = u.rep || {};
+      const daily = Array.isArray(r.d14) && r.d14.length === 14 && r.day0;
+      const vals = daily ? r.d14.map(Number) : (Array.isArray(u.days) ? u.days : []).slice(0, 7).map(Number);
+      // a date under the first, the middle and the last bar (drawBars writes every second one of 14)
+      const labels = vals.map((v, i) => (!daily ? (i === vals.length - 1 ? 'Today' : '') : [1, 7, 13].includes(i) ? dayMonth(r.day0 - (13 - i) * 86400) : ''));
+      drawBars(svg, vals, labels, vals.length - 1);
+      const total = vals.reduce((sum, v) => sum + (Number(v) || 0), 0);
+      note.textContent = `${plusMinus(total)} closed in the last ${vals.length} days`;
+    }
     function renderUsage() {
+      renderMini();
       const state = $('[data-usage-state]', usageBox);
       const u = usage || {};
       const u$ = (key) => $(`[data-u="${key}"]`, usageBox);
       const problem = !u.ok
-        ? (u.offline ? "You're offline. Check your connection and try again." : 'Usage is not available yet. Please try again later.')
+        ? (u.offline ? "You're offline. Check your connection and try again." : 'The P/L Report is not available yet. Please try again later.')
         : !u.bot
           ? (profile.plan ? 'Your bot has not reported yet. Its numbers show here once it runs in MT5.' : 'No bot yet. Choose a plan to get your bot, and its numbers show here.')
           : '';
@@ -2072,7 +2151,7 @@
     /* ----- the tabs: one part at a time, remembered in the address (#subscription, #usage ...) ----- */
     const ROUTES = {
       personal: 'personal', tools: 'personal', account: 'personal', security: 'personal',
-      subscription: 'plan', plan: 'plan', usage: 'usage', sessions: 'sessions', help: 'help', support: 'help', legal: 'help',
+      subscription: 'plan', plan: 'plan', usage: 'usage', report: 'usage', sessions: 'sessions', help: 'help', support: 'help', legal: 'help',
     };
     const ADDRESS = { personal: 'personal', plan: 'subscription', usage: 'usage', sessions: 'sessions', help: 'help' };
     let settled = false;

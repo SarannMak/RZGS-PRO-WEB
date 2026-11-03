@@ -60,9 +60,10 @@
   --cut-14: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
 
   /* Type */
-  --font-display: "Oxanium", "Segoe UI", system-ui, sans-serif;
-  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, Consolas, "Courier New", monospace;
+  /* Kantumruy Pro: the Khmer letters, when the page is in Khmer (i18n.js loads it then; Latin keeps its own font) */
+  --font-display: "Oxanium", "Kantumruy Pro", "Segoe UI", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", "Kantumruy Pro", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", "Kantumruy Pro", ui-monospace, Consolas, "Courier New", monospace;
 
   /* Shape & motion: frames have cut corners, small controls a 2px corner */
   --radius-sm: 2px;
@@ -4454,7 +4455,7 @@ body:has(.tg-float) .site-footer {
   text-transform: uppercase;
 }
 .gp-plan.is-hot {
-  border-color: var(--neon);
+  --edge: var(--neon);
   color: var(--neon);
   box-shadow: inset 0 0 18px rgba(166, 255, 26, 0.16);
 }
@@ -5080,3 +5081,156 @@ h3 {
 .no-fx3d .fx-row {
   grid-template-columns: minmax(0, 1fr);
 }
+
+/* ---------- cut corners with a plain outline (the owner, 2026-11-03: "fix these edges") ----------
+   clip-path cuts a box's outline off at its two cut corners. Two thin lines in the outline's colour (--edge), sized to
+   the cut (--cut), draw the cut edges back. Their state rules change --edge (not border-color) and only the background
+   colour, so the lines stay. */
+.gp-plan,
+.gp-tiles span,
+.gp-btn:not(.gp-btn--main) {
+  border-color: var(--edge);
+  background-image:
+    linear-gradient(to bottom right, transparent 50%, var(--edge) 50%, var(--edge) calc(50% + 1px), transparent calc(50% + 1px)),
+    linear-gradient(to bottom right, transparent calc(50% - 1px), var(--edge) calc(50% - 1px), var(--edge) 50%, transparent 50%);
+  background-position: left top, right bottom;
+  background-size: var(--cut, 10px) var(--cut, 10px);
+  background-repeat: no-repeat;
+  background-origin: border-box;
+}
+.gp-plan,
+.gp-tiles span,
+.gp-btn:not(.gp-btn--main) {
+  --edge: var(--border-strong);
+}
+.gp-tiles span {
+  --cut: 6px;
+}
+.gp-btn:not(.gp-btn--main) {
+  --cut: 7px;
+}
+/* the picture frame of a step: the lines, then its own glow */
+.guide-pic {
+  --edge: var(--border);
+  border-color: var(--edge);
+  background-image:
+    linear-gradient(to bottom right, transparent 50%, var(--edge) 50%, var(--edge) calc(50% + 1px), transparent calc(50% + 1px)),
+    linear-gradient(to bottom right, transparent calc(50% - 1px), var(--edge) calc(50% - 1px), var(--edge) 50%, transparent 50%),
+    radial-gradient(90% 90% at 50% 0%, rgba(25, 211, 255, 0.1), transparent 70%);
+  background-position: left top, right bottom, center;
+  background-size: 10px 10px, 10px 10px, auto;
+  background-repeat: no-repeat;
+  background-origin: border-box;
+  background-color: rgba(3, 12, 19, 0.7);
+}
+
+/* ==========================================================================
+   Other languages (i18n.js, the owner, 2026-11-03)
+   ========================================================================== */
+/* a page in another language waits a moment for its words, rather than showing the English first */
+html.i18n-wait body {
+  opacity: 0;
+}
+/* Khmer: more room between lines for the marks above and below its letters, and no letter-spacing, which pulls
+   Khmer letters apart */
+html:lang(km) body * {
+  letter-spacing: normal !important;
+}
+html:lang(km) body {
+  line-height: 1.7;
+}
+html:lang(km) :is(h1, h2, h3, h4, .hero-title, .page-title, .section-title) {
+  line-height: 1.4;
+}
+
+/* the language button: in the header, and at the bottom of the phone menu */
+.lang-pick {
+  position: relative;
+}
+.lang-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 10px;
+  border: 1px solid var(--border-strong);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-muted);
+  font: 600 12px/1 var(--font-mono);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
+.lang-btn:hover,
+.lang-btn[aria-expanded="true"] {
+  border-color: var(--frame);
+  color: var(--cyan);
+}
+.lang-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+}
+.lang-list {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 70;
+  min-width: 150px;
+  margin: 0;
+  padding: 4px;
+  border: 1px solid var(--border-strong);
+  background: #06141c;
+  list-style: none;
+  box-shadow: 0 18px 30px -10px rgba(0, 0, 0, 0.7);
+}
+.lang-list[hidden] {
+  display: none;
+}
+.lang-list button {
+  display: block;
+  width: 100%;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font: 500 14px/1.2 var(--font-body);
+  text-align: left;
+  cursor: pointer;
+}
+.lang-list button:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.lang-list button[aria-current="true"] {
+  background: var(--chip);
+  color: var(--cyan);
+}
+/* the header keeps room for the account buttons on a phone: the language is in the menu there */
+.lang-pick--menu {
+  display: none;
+}
+@media (max-width: 1023.98px) {
+  .lang-pick--header {
+    display: none;
+  }
+  .lang-pick--menu {
+    display: block;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+  .lang-pick--menu .lang-btn {
+    width: 100%;
+    height: 48px;
+    justify-content: flex-start;
+  }
+  .lang-pick--menu .lang-list {
+    position: static;
+    margin-top: 6px;
+    box-shadow: none;
+  }
+}
+

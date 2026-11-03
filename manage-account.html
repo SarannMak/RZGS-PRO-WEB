@@ -24,17 +24,17 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="style.css?v=37">
-  <link rel="stylesheet" href="plans.css?v=5">
-  <link rel="stylesheet" href="auth.css?v=23">
-  <link rel="stylesheet" href="motion.css?v=2">
+  <link rel="stylesheet" href="style.css?v=38">
+  <link rel="stylesheet" href="plans.css?v=6">
+  <link rel="stylesheet" href="auth.css?v=24">
+  <link rel="stylesheet" href="motion.css?v=3">
 
   <script>document.documentElement.classList.add('js');try{if(localStorage.getItem('sb-zaziizzsbytkdlatoutv-auth-token'))document.documentElement.classList.add('signed-in')}catch(e){}</script>
   <script src="script.js?v=10" defer></script>
-  <script src="motion.js?v=1" defer></script>
-  <script src="plans.js?v=9" defer></script>
+  <script src="motion.js?v=2" defer></script>
+  <script src="plans.js?v=10" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0" defer></script>
-  <script src="auth.js?v=29" defer></script>
+  <script src="auth.js?v=30" defer></script>
 </head>
 <body data-auth-page="manage" class="acc-page">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -96,7 +96,7 @@
       <nav class="primary-nav" id="primary-nav" aria-label="Main">
         <ul class="nav-list">
           <li><a class="nav-link" href="bot">The Bot</a></li>
-          <li><a class="nav-link" href="how-to-buy">How to Buy</a></li>
+          <li><a class="nav-link" href="how-to-buy">Tutorial</a></li>
           <li><a class="nav-link" href="license">License</a></li>
           <li><a class="nav-link" href="contact">Contact</a></li>
         </ul>
@@ -143,6 +143,8 @@
       <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
       <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
       <symbol id="i-smartphone" viewBox="0 0 24 24"><rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/></symbol>
+      <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+      <symbol id="i-log-out" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></symbol>
       <symbol id="i-laptop" viewBox="0 0 24 24"><path d="M20 16V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9m16 0H4m16 0 1.28 2.55a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45L4 16"/></symbol>
     </svg>
 
@@ -162,10 +164,10 @@
           <a class="btn btn-ghost btn-block acc-app" href="app"><svg class="icon" aria-hidden="true"><use href="#i-bot"/></svg><span>Open control app</span></a>
           <p class="acc-nav-cap">Profile</p>
           <nav class="acc-nav" aria-label="Your profile">
-            <a href="dashboard#core"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7.8 4.5v9L12 21l-7.8-4.5v-9z"/><circle cx="12" cy="12" r="2.6"/></svg><span>Core</span></a>
-            <a href="dashboard#plan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6M2 9h20"/></svg><span>Plan</span></a>
-            <a href="dashboard#awards"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></svg><span>Awards</span></a>
-            <a href="dashboard#log"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7h12M8 12h12M8 17h12M4 7h.01M4 12h.01M4 17h.01"/></svg><span>Log</span></a>
+            <a href="dashboard#core"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7.8 4.5v9L12 21l-7.8-4.5v-9z"/><circle cx="12" cy="12" r="2.6"/></svg><span>Main</span></a>
+            <a href="dashboard#plan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6M2 9h20"/></svg><span>Subscription</span></a>
+            <a href="dashboard#awards"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></svg><span>Journey</span></a>
+            <a href="dashboard#log"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7h12M8 12h12M8 17h12M4 7h.01M4 12h.01M4 17h.01"/></svg><span>Activity</span></a>
           </nav>
           <p class="acc-nav-cap">Account</p>
           <nav class="acc-nav" aria-label="Your account">
@@ -175,7 +177,7 @@
           <nav class="acc-nav acc-nav--site" aria-label="Website">
             <a href="./"><svg class="icon" aria-hidden="true"><use href="#i-home"/></svg><span>Home</span></a>
             <a href="./#plans" data-plans><svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg><span>Plans</span></a>
-            <a href="how-to-buy"><svg class="icon" aria-hidden="true"><use href="#i-file-text"/></svg><span>How to buy</span></a>
+            <a href="how-to-buy"><svg class="icon" aria-hidden="true"><use href="#i-file-text"/></svg><span>Tutorial</span></a>
             <a href="https://t.me/+NvCIdtTmMIViMjg9" target="_blank" rel="noopener"><svg class="icon" aria-hidden="true"><use href="#i-message"/></svg><span>Community</span></a>
           </nav>
           <div class="acc-me-wrap">
@@ -197,16 +199,28 @@
           <noscript><p class="auth-msg" data-tone="error">Please turn on JavaScript in your browser to use your dashboard.</p></noscript>
 
           <!-- MANAGE ACCOUNT -->
-          <div class="dash-view acc-view" id="v-account">
-            <h1 class="acc-h1" id="page-title">Manage account</h1>
+          <div class="dash-view acc-view acc-manage" id="v-account">
+            <!-- the parts: chips in a row on a phone, a list on the left of a computer screen with help and log out under it -->
+            <div class="acc-manage-nav">
+              <a class="acc-back" href="dashboard"><svg class="icon" aria-hidden="true"><use href="#i-chevron-left"/></svg><span>Your profile</span></a>
+              <h1 class="acc-h1" id="page-title">Manage account</h1>
             <div class="acc-chips" role="tablist" aria-label="Manage account">
               <button type="button" role="tab" id="mt-personal" data-go="personal" data-part="personal" aria-controls="m-personal" aria-selected="false" tabindex="-1"><span class="acc-chip-ico" data-tone="user"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg></span>Personal profile</button>
               <button type="button" role="tab" id="mt-plan" data-go="subscription" data-part="plan" aria-controls="m-plan" aria-selected="false" tabindex="-1"><span class="acc-chip-ico" data-tone="plan"><svg class="icon" aria-hidden="true"><use href="#i-gem"/></svg></span>Subscription</button>
-              <button type="button" role="tab" id="mt-usage" data-go="usage" data-part="usage" aria-controls="m-usage" aria-selected="false" tabindex="-1"><span class="acc-chip-ico" data-tone="usage"><svg class="icon" aria-hidden="true"><use href="#i-trending-up"/></svg></span>Usage</button>
+              <button type="button" role="tab" id="mt-usage" data-go="usage" data-part="usage" aria-controls="m-usage" aria-selected="false" tabindex="-1"><span class="acc-chip-ico" data-tone="usage"><svg class="icon" aria-hidden="true"><use href="#i-trending-up"/></svg></span>P/L Report</button>
               <button type="button" role="tab" id="mt-sessions" data-go="sessions" data-part="sessions" aria-controls="m-sessions" aria-selected="false" tabindex="-1"><span class="acc-chip-ico" data-tone="sessions"><svg class="icon" aria-hidden="true"><use href="#i-monitor"/></svg></span>Sessions</button>
               <button type="button" role="tab" id="mt-help" data-go="help" data-part="help" aria-controls="m-help" aria-selected="false" tabindex="-1"><span class="acc-chip-ico" data-tone="help"><svg class="icon" aria-hidden="true"><use href="#i-help"/></svg></span>Help</button>
             </div>
+              <div class="acc-help-card">
+                <span class="acc-help-ico"><svg class="icon" aria-hidden="true"><use href="#i-help"/></svg></span>
+                <b>Need help?</b>
+                <p>Answers on plans, payments and your bot.</p>
+                <a class="btn btn-ghost btn-block" href="#help" data-go="help">Go to Help</a>
+              </div>
+              <button class="acc-signout" type="button" data-sign-out><svg class="icon" aria-hidden="true"><use href="#i-log-out"/></svg><span>Log out</span></button>
+            </div>
 
+            <div class="acc-manage-main">
             <!-- Personal profile -->
             <div class="acc-part" id="m-personal" role="tabpanel" aria-labelledby="mt-personal">
               <section class="acc-id">
@@ -214,11 +228,31 @@
                 <div class="acc-id-text">
                   <div class="acc-id-name">
                     <b data-acc-name>My account</b>
-                    <a class="btn btn-ghost btn-sm" href="dashboard#profile"><svg class="icon" aria-hidden="true"><use href="#i-pencil"/></svg>Edit</a>
+                    <button class="btn btn-ghost btn-sm" type="button" data-edit="full_name"><svg class="icon" aria-hidden="true"><use href="#i-pencil"/></svg>Edit</button>
                   </div>
                   <a class="acc-id-mail" href="#acc-email" data-jump="acc-email"><span data-dash-email>loading</span><svg class="icon" aria-hidden="true"><use href="#i-chevron-right"/></svg></a>
                 </div>
               </section>
+              <div class="acc-sum">
+                <section class="dash-panel acc-sum-card">
+                  <h2><svg class="icon" aria-hidden="true"><use href="#i-gem"/></svg><span>Plan</span><a class="acc-sum-all" href="#subscription" data-go="subscription">Details</a></h2>
+                  <div class="acc-sum-plan">
+                    <span class="plan-logo" data-sum-logo data-tone="off"><svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg></span>
+                    <div><b data-sum-name>No plan yet</b><small data-sum-chip></small></div>
+                  </div>
+                  <p class="acc-sum-big" data-sum-left>-</p>
+                  <div class="pm-meter" data-sum-meter aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                  <div class="acc-sum-foot">
+                    <span data-sum-until></span>
+                    <a class="btn btn-ghost btn-sm" href="#subscription" data-go="subscription" data-sum-go>Upgrade</a>
+                  </div>
+                </section>
+                <section class="dash-panel acc-sum-card">
+                  <h2><svg class="icon" aria-hidden="true"><use href="#i-trending-up"/></svg><span>P/L Report</span><a class="acc-sum-all" href="#usage" data-go="usage">See all</a></h2>
+                  <svg class="acc-bars acc-mini" viewBox="0 0 300 152" data-sum-bars role="img" aria-label="Closed profit by day"></svg>
+                  <p class="acc-sum-note" data-sum-note>Loading your bot...</p>
+                </section>
+              </div>
               <section class="dash-panel">
                 <h2>Account</h2>
                 <div class="dash-grid2">
@@ -298,7 +332,7 @@
                 </form>
               </section>
 
-              <section class="dash-panel">
+              <section class="dash-panel acc-out-panel">
                 <h2>Log out</h2>
                 <p class="dash-hint">Log out of this device. Your bot keeps running in MT5. To log out your other devices, open Sessions.</p>
                 <div class="dash-row">
@@ -317,7 +351,7 @@
               <section class="dash-panel acc-plan" data-sub>
                 <h2>Your plan</h2>
                 <div class="acc-plan-top">
-                  <span class="acc-plan-ico" data-sub-tone="off"><svg class="icon" aria-hidden="true"><use href="#i-gem"/></svg></span>
+                  <span class="plan-logo" data-sub-logo data-tone="off"><svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg></span>
                   <div class="acc-plan-text">
                     <p class="acc-plan-name" data-sub-name>No plan yet</p>
                     <p class="acc-plan-until" data-sub-until>Start with 7 free days.</p>
@@ -344,8 +378,8 @@
             <!-- Usage -->
             <div class="acc-part" id="m-usage" role="tabpanel" aria-labelledby="mt-usage" hidden>
               <header class="acc-part-head">
-                <h2>Usage history</h2>
-                <p>Your bot's profit, trades and drawdown.</p>
+                <h2>P/L Report</h2>
+                <p>Your bot's profit and loss, trades and drawdown.</p>
               </header>
               <div class="acc-toolbar">
                 <button class="btn btn-ghost btn-sm" type="button" data-usage-refresh><svg class="icon" aria-hidden="true"><use href="#i-refresh"/></svg>Refresh</button>
@@ -426,7 +460,7 @@
               <section class="dash-panel">
                 <h2>Help</h2>
               <a class="dash-link" href="./#faq"><span>Questions and answers</span><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
-              <a class="dash-link" href="how-to-buy"><span>How to buy</span><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+              <a class="dash-link" href="how-to-buy"><span>Tutorial</span><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
               <a class="dash-link" href="bot"><span>How the bot works</span><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
               <a class="dash-link" href="contact"><span>Contact page</span><svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
               </section>
@@ -441,6 +475,7 @@
                 <h2>Risk warning</h2>
                 <p class="dash-hint">Trading gold (XAUUSD) and other leveraged products carries a high level of risk. You could lose some or all of your capital. RZGS-PRO is trading software and does not provide financial advice.</p>
               </section>
+            </div>
             </div>
           </div>
         </div>
@@ -472,6 +507,133 @@
           </div>
         </dialog>
 
+
+        <!-- Edit profile: everything about the person, in one box with one Save -->
+        <dialog class="dash-edit" data-edit-dialog aria-labelledby="edit-title">
+          <div class="dash-edit-in">
+            <header class="de-head">
+              <h2 id="edit-title">Edit profile</h2>
+              <button class="de-x" type="button" data-edit-close aria-label="Close"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button>
+            </header>
+
+            <div class="de-scroll">
+              <div class="de-block" data-avatar-edit>
+                <p class="de-label">Profile picture</p>
+                <div class="de-pic">
+                  <span class="de-pic-box">
+                    <span class="avatar-xl" data-avatar-preview aria-hidden="true"></span>
+                    <button class="de-pic-add" type="button" data-avatar-pick aria-label="Upload a photo" title="Upload a photo"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+                    <button class="de-pic-del" type="button" data-avatar-remove aria-label="Remove photo" title="Remove photo" hidden><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg></button>
+                  </span>
+                </div>
+                <input type="file" accept="image/jpeg,image/png,image/webp" data-avatar-file hidden>
+                <p class="form-msg" data-form-msg role="status" hidden></p>
+              </div>
+              <p class="dash-hint de-pic-hint">JPG, PNG or WebP. Saved as soon as you pick it.</p>
+
+              <form id="dash-edit-form" data-profile-form novalidate>
+                <div class="field-grid">
+                  <div class="field">
+                    <label for="dash-name">Full name <span class="req" aria-hidden="true">*</span></label>
+                    <input class="input" id="dash-name" name="full_name" type="text" autocomplete="name" required aria-describedby="dash-name-error">
+                    <p class="field-error" id="dash-name-error" hidden></p>
+                  </div>
+                  <div class="field">
+                    <label for="dash-username">Username <span class="req" aria-hidden="true">*</span></label>
+                    <input class="input" id="dash-username" name="username" type="text" autocomplete="username" required autocapitalize="none" spellcheck="false" aria-describedby="dash-username-error">
+                    <p class="field-error" id="dash-username-error" hidden></p>
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="dash-about">About you <span class="opt">(optional)</span></label>
+                  <textarea class="input" id="dash-about" name="about" rows="3" maxlength="160" placeholder="Describe your trading journey in a few words"></textarea>
+                  <small class="de-count" data-about-count>0 / 160</small>
+                </div>
+                <div class="field">
+                  <label for="dash-country">Country <span class="req" aria-hidden="true">*</span></label>
+                  <select class="input" id="dash-country" name="country" autocomplete="country-name" required aria-describedby="dash-country-error">
+                    <option value="">Choose your country</option>
+                    <option>Cambodia</option>
+                    <option>Thailand</option>
+                    <option>Vietnam</option>
+                    <option>Indonesia</option>
+                    <option>Malaysia</option>
+                    <option>India</option>
+                    <option>Türkiye</option>
+                    <option>Brazil</option>
+                    <option>United Kingdom</option>
+                    <option>United States</option>
+                    <option>Other</option>
+                  </select>
+                  <p class="field-error" id="dash-country-error" hidden></p>
+                </div>
+                <div class="field-grid">
+                  <div class="field">
+                    <label for="dash-phone">Phone number <span class="opt">(optional)</span></label>
+                    <input class="input" id="dash-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" aria-describedby="dash-phone-error">
+                    <p class="field-error" id="dash-phone-error" hidden></p>
+                  </div>
+                  <div class="field">
+                    <label for="dash-telegram">Telegram <span class="opt">(optional)</span></label>
+                    <div class="input-wrap input-wrap--prefix">
+                      <span class="input-prefix" aria-hidden="true">@</span>
+                      <input class="input" id="dash-telegram" name="telegram_username" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="dash-telegram-error">
+                    </div>
+                    <p class="field-error" id="dash-telegram-error" hidden></p>
+                  </div>
+                </div>
+
+                <p class="de-label de-label--group">Social links</p>
+                <p class="dash-hint">Type your name there, or paste the link to your page.</p>
+                <div class="field-grid">
+                  <div class="field">
+                    <label for="dash-facebook">Facebook <span class="opt">(optional)</span></label>
+                    <input class="input" id="dash-facebook" name="social_facebook" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="dash-facebook-error">
+                    <p class="field-error" id="dash-facebook-error" hidden></p>
+                  </div>
+                  <div class="field">
+                    <label for="dash-tiktok">TikTok <span class="opt">(optional)</span></label>
+                    <input class="input" id="dash-tiktok" name="social_tiktok" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="dash-tiktok-error">
+                    <p class="field-error" id="dash-tiktok-error" hidden></p>
+                  </div>
+                  <div class="field">
+                    <label for="dash-youtube">YouTube <span class="opt">(optional)</span></label>
+                    <input class="input" id="dash-youtube" name="social_youtube" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="dash-youtube-error">
+                    <p class="field-error" id="dash-youtube-error" hidden></p>
+                  </div>
+                  <div class="field">
+                    <label for="dash-instagram">Instagram <span class="opt">(optional)</span></label>
+                    <input class="input" id="dash-instagram" name="social_instagram" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="dash-instagram-error">
+                    <p class="field-error" id="dash-instagram-error" hidden></p>
+                  </div>
+                </div>
+
+                <p class="de-label de-label--group">Trading account</p>
+                <p class="dash-hint">We use these details to set up your license.</p>
+                <div class="field-grid">
+                  <div class="field">
+                    <label for="dash-mt5">MT5 account number <span class="opt">(optional)</span></label>
+                    <input class="input" id="dash-mt5" name="mt5_account" type="text" autocomplete="off" inputmode="numeric" aria-describedby="dash-mt5-error">
+                    <p class="field-error" id="dash-mt5-error" hidden></p>
+                  </div>
+                  <div class="field">
+                    <label for="dash-broker">Broker <span class="opt">(optional)</span></label>
+                    <input class="input" id="dash-broker" name="broker" type="text" autocomplete="off" aria-describedby="dash-broker-error">
+                    <p class="field-error" id="dash-broker-error" hidden></p>
+                  </div>
+                </div>
+              </form>
+
+            </div>
+
+            <footer class="de-foot">
+              <button class="de-out" type="button" data-sign-out>Log out</button>
+              <p class="form-msg" data-form-msg role="status" hidden></p>
+              <button class="btn btn-ghost btn-sm" type="button" data-edit-close>Cancel</button>
+              <button class="btn btn-primary btn-sm" type="submit" form="dash-edit-form" data-edit-save>Save</button>
+            </footer>
+          </div>
+        </dialog>
       </div>
     </section>
   </main>
@@ -496,7 +658,7 @@
           <ul class="footer-links">
             <li><a href="bot">The Bot</a></li>
             <li><a href="./#plans" data-plans>Plans</a></li>
-            <li><a href="how-to-buy">How to Buy</a></li>
+            <li><a href="how-to-buy">Tutorial</a></li>
             <li><a href="./#faq">FAQ</a></li>
           </ul>
         </nav>

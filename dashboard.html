@@ -24,17 +24,17 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="style.css?v=37">
-  <link rel="stylesheet" href="plans.css?v=5">
-  <link rel="stylesheet" href="auth.css?v=23">
-  <link rel="stylesheet" href="motion.css?v=2">
+  <link rel="stylesheet" href="style.css?v=38">
+  <link rel="stylesheet" href="plans.css?v=6">
+  <link rel="stylesheet" href="auth.css?v=24">
+  <link rel="stylesheet" href="motion.css?v=3">
 
   <script>document.documentElement.classList.add('js');try{if(localStorage.getItem('sb-zaziizzsbytkdlatoutv-auth-token'))document.documentElement.classList.add('signed-in')}catch(e){}</script>
   <script src="script.js?v=10" defer></script>
-  <script src="motion.js?v=1" defer></script>
-  <script src="plans.js?v=9" defer></script>
+  <script src="motion.js?v=2" defer></script>
+  <script src="plans.js?v=10" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0" defer></script>
-  <script src="auth.js?v=29" defer></script>
+  <script src="auth.js?v=30" defer></script>
 </head>
 <body data-auth-page="dashboard" class="acc-page">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -96,7 +96,7 @@
       <nav class="primary-nav" id="primary-nav" aria-label="Main">
         <ul class="nav-list">
           <li><a class="nav-link" href="bot">The Bot</a></li>
-          <li><a class="nav-link" href="how-to-buy">How to Buy</a></li>
+          <li><a class="nav-link" href="how-to-buy">Tutorial</a></li>
           <li><a class="nav-link" href="license">License</a></li>
           <li><a class="nav-link" href="contact">Contact</a></li>
         </ul>
@@ -162,10 +162,10 @@
           <a class="btn btn-primary btn-block acc-app" href="app" data-open-app><svg class="icon" aria-hidden="true"><use href="#i-bot"/></svg><span>Open control app</span></a>
           <p class="acc-nav-cap">Profile</p>
           <div class="acc-nav" role="tablist" aria-label="Dashboard menu" aria-orientation="vertical" data-dash-tabs>
-            <button type="button" role="tab" id="tab-core" data-tab="core" aria-controls="v-core" aria-selected="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7.8 4.5v9L12 21l-7.8-4.5v-9z"/><circle cx="12" cy="12" r="2.6"/></svg><span>Core</span></button>
-            <button type="button" role="tab" id="tab-plan" data-tab="plan" aria-controls="v-plan" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6M2 9h20"/></svg><span>Plan</span></button>
-            <button type="button" role="tab" id="tab-awards" data-tab="awards" aria-controls="v-awards" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></svg><span>Awards</span></button>
-            <button type="button" role="tab" id="tab-log" data-tab="log" aria-controls="v-log" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7h12M8 12h12M8 17h12M4 7h.01M4 12h.01M4 17h.01"/></svg><span>Log</span></button>
+            <button type="button" role="tab" id="tab-core" data-tab="core" aria-controls="v-core" aria-selected="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7.8 4.5v9L12 21l-7.8-4.5v-9z"/><circle cx="12" cy="12" r="2.6"/></svg><span>Main</span></button>
+            <button type="button" role="tab" id="tab-plan" data-tab="plan" aria-controls="v-plan" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6M2 9h20"/></svg><span>Subscription</span></button>
+            <button type="button" role="tab" id="tab-awards" data-tab="awards" aria-controls="v-awards" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></svg><span>Journey</span></button>
+            <button type="button" role="tab" id="tab-log" data-tab="log" aria-controls="v-log" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7h12M8 12h12M8 17h12M4 7h.01M4 12h.01M4 17h.01"/></svg><span>Activity</span></button>
           </div>
           <p class="acc-nav-cap">Account</p>
           <nav class="acc-nav" aria-label="Your account">
@@ -175,7 +175,7 @@
           <nav class="acc-nav acc-nav--site" aria-label="Website">
             <a href="./"><svg class="icon" aria-hidden="true"><use href="#i-home"/></svg><span>Home</span></a>
             <a href="./#plans" data-plans><svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg><span>Plans</span></a>
-            <a href="how-to-buy"><svg class="icon" aria-hidden="true"><use href="#i-file-text"/></svg><span>How to buy</span></a>
+            <a href="how-to-buy"><svg class="icon" aria-hidden="true"><use href="#i-file-text"/></svg><span>Tutorial</span></a>
             <a href="https://t.me/+NvCIdtTmMIViMjg9" target="_blank" rel="noopener"><svg class="icon" aria-hidden="true"><use href="#i-message"/></svg><span>Community</span></a>
           </nav>
           <div class="acc-me-wrap">
@@ -293,6 +293,17 @@
 
           <!-- PLAN -->
           <div class="dash-view" id="v-plan" role="tabpanel" aria-labelledby="tab-plan" hidden>
+            <!-- the plan's picture and name (the owner, 2026-11-03) -->
+            <section class="dash-panel plan-hero" data-plan-hero data-tone="off">
+              <span class="plan-logo" data-hero-logo data-tone="off"><svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg></span>
+              <div class="plan-hero-text">
+                <p class="plan-hero-chip" data-hero-chip>Start here</p>
+                <p class="plan-hero-name" data-hero-name>No plan yet</p>
+                <p class="plan-hero-line" data-hero-line>Start with 7 free days. No payment needed.</p>
+              </div>
+              <p class="plan-hero-price" data-hero-price></p>
+            </section>
+
             <section class="dash-panel">
               <h2>Your plan</h2>
               <div class="dash-line"><span class="cap">Plan</span><b data-plan-name>Not started</b></div>
@@ -301,14 +312,13 @@
               <div class="dash-line"><span class="cap">MT5 accounts</span><b>1</b></div>
             </section>
 
+            <!-- every plan, its price and whether it can start now: in the plans pop-up (plans.js) -->
             <section class="dash-panel">
-              <h2>Start or change plan</h2>
-              <div class="dash-row">
-                <button class="btn btn-ghost" type="button" data-plan-link="trial" data-checkout="trial">Trial</button>
-                <button class="btn btn-ghost" type="button" data-plan-link="elite" data-checkout="elite">Elite</button>
-                <button class="btn btn-ghost" type="button" data-plan-link="diamond" data-checkout="diamond">Diamond</button>
-              </div>
+              <h2>Renew or upgrade</h2>
               <p class="dash-hint" data-plan-choice-note>Trial and Elite start right here. Diamond opens a chat with our sales team on Telegram.</p>
+              <div class="dash-row">
+                <a class="btn btn-ghost" href="./#plans" data-plans data-renew>See plans and prices</a>
+              </div>
             </section>
 
             <section class="dash-panel">
@@ -503,7 +513,7 @@
           <ul class="footer-links">
             <li><a href="bot">The Bot</a></li>
             <li><a href="./#plans" data-plans>Plans</a></li>
-            <li><a href="how-to-buy">How to Buy</a></li>
+            <li><a href="how-to-buy">Tutorial</a></li>
             <li><a href="./#faq">FAQ</a></li>
           </ul>
         </nav>

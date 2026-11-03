@@ -87,15 +87,16 @@
     position: absolute;
     top: 0;
     left: 0;
-    width: 1px;
+    /* its real width, not a 1px strip stretched with scaleX: stretched, it came out about 70% as wide on the
+       owner's laptop (a scaled screen), 2026-11-03 */
+    width: calc(var(--w, 0) * 1px);
     height: 2px;
     border-radius: 2px;
     background: var(--grad);
     list-style: none;
     pointer-events: none;
     opacity: 0;
-    transform-origin: left center;
-    transform: translate(var(--x, 0), var(--y, 0)) scaleX(var(--w, 1));
+    transform: translate(var(--x, 0), var(--y, 0));
   }
   .nav-list.has-glide .nav-glide.is-on {
     opacity: 1;
@@ -206,7 +207,7 @@
     }
   }
   .nav-list.has-glide .nav-glide {
-    transition: transform 0.36s var(--spring-soft), opacity var(--dur-fast) linear;
+    transition: transform 0.36s var(--spring-soft), width 0.36s var(--spring-soft), opacity var(--dur-fast) linear;
   }
   .nav-list.has-glide .nav-glide.is-still {
     transition: opacity var(--dur-fast) linear;

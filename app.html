@@ -101,6 +101,7 @@ button{cursor:pointer}
 .seg{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);background:var(--panel)}
 .seg button{background:none;border:0;padding:11px 2px;font:500 10px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);min-height:42px}
 .seg button[aria-selected="true"]{background:var(--chip);color:var(--cyan);box-shadow:inset 0 -2px 0 var(--cyan)}
+#toolSeg{grid-template-columns:repeat(3,1fr)} #ctlSeg{grid-template-columns:repeat(2,1fr)}
 .set{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:9px;border-top:1px solid var(--line)}
 .set:first-of-type{border-top:0;padding-top:0}
 .set label{font-size:14px;color:var(--body);min-width:0}
@@ -198,8 +199,9 @@ nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;st
 /* the chart moves: drag through time, pinch to zoom; an up-and-down swipe still scrolls the page */
 .ladder{touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
 .ladder:active{cursor:grabbing}
-.ld-now{position:absolute;right:6px;bottom:6px;min-height:26px;padding:0 10px;background:var(--chip);border:1px solid var(--frame);
-  color:var(--cyan);font:600 9px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
+.ld-now{position:absolute;right:6px;bottom:6px;display:grid;place-items:center;min-width:36px;min-height:28px;padding:0 8px;
+  background:var(--chip);border:1px solid var(--frame);color:var(--cyan);cursor:pointer}
+.ld-now svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 .ladder canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .ladder .empty{padding-top:8px}
 .ld-plot{position:absolute;left:0;top:0;bottom:0;right:62px}
@@ -232,9 +234,13 @@ nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;st
 .ld-line.exit span{color:inherit}
 .ld-line.exit.buy span{left:0;right:auto;padding:3px 6px 3px 0}
 .ld-line.exit.sell span{left:50%;right:auto;padding:3px 6px}   /* the right edge holds the tags of the open trades */
-/* basket: a soft band on the profit side of the line marks the close zone */
-.ld-line.exit.band::after{content:"";position:absolute;left:0;right:0;height:14px;background:currentColor;opacity:.13}
-.ld-line.exit.band.buy::after{bottom:0} .ld-line.exit.band.sell::after{top:0}
+/* basket: its close zone, orange whichever side (the owner: "orange is the basket zone"), across the chart: a solid
+   glowing line, a band on the profit side that fades away from it, and BASKET at the left like a TP (3 Nov 2026) */
+.ld-line.exit.band{border-top:2px solid var(--sell);color:var(--sell);filter:drop-shadow(0 0 4px rgba(255,154,61,.6))}
+.ld-line.exit.band::after{content:"";position:absolute;left:0;right:0;height:22px}
+.ld-line.exit.band.buy::after{bottom:0;background:linear-gradient(to top,rgba(255,154,61,.42),rgba(255,154,61,.04))}
+.ld-line.exit.band.sell::after{top:0;background:linear-gradient(to bottom,rgba(255,154,61,.42),rgba(255,154,61,.04))}
+.ld-line.exit.band span{left:0;right:auto;z-index:1;padding:3px 6px 3px 0;color:var(--sell);font-weight:600}
 .legend{display:flex;gap:16px;margin-top:10px;flex-wrap:wrap}
 .legend span{display:flex;align-items:center;gap:6px}
 /* legend marks: the ◀ of an open trade in its colour, the dot of a closed one */
@@ -500,6 +506,7 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
   nav,.seg:not(.seg-mode){position:relative;--pos:0}
   nav{--count:5}
   .seg:not(.seg-mode){--count:4}
+  #toolSeg{--count:3} #ctlSeg{--count:2}
   nav:has(>:nth-child(2)[aria-selected="true"]),.seg:not(.seg-mode):has(>:nth-child(2)[aria-selected="true"]){--pos:1}
   nav:has(>:nth-child(3)[aria-selected="true"]),.seg:not(.seg-mode):has(>:nth-child(3)[aria-selected="true"]){--pos:2}
   nav:has(>:nth-child(4)[aria-selected="true"]),.seg:not(.seg-mode):has(>:nth-child(4)[aria-selected="true"]){--pos:3}
@@ -755,6 +762,12 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
 
     <!-- CONTROL -->
     <div class="view" id="v-control" hidden>
+      <!-- General: the bot's state, lot mode, cooldown and force close; Settings: moved here from Tools (the owner, 3 Nov 2026) -->
+      <div class="seg" id="ctlSeg" role="tablist">
+        <button role="tab" data-ctl="general" aria-selected="true">General</button>
+        <button role="tab" data-ctl="settings" aria-selected="false">Settings</button>
+      </div>
+      <div class="view" id="c-general">
       <section class="panel">
         <h2>Bot state</h2>
         <div class="row">
@@ -792,19 +805,10 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
         <div class="row" style="margin-top:10px"><button class="btn danger" data-ask="closeall">Close all + pause</button></div>
         <p class="hint">Each close asks you to confirm. The confirmation expires after 30 seconds.</p>
       </section>
-    </div>
-
-    <!-- TOOLS -->
-    <div class="view" id="v-tools" hidden>
-      <div class="seg" id="toolSeg" role="tablist">
-        <button role="tab" data-tool="account" aria-selected="true">Account</button>
-        <button role="tab" data-tool="calc" aria-selected="false">Risk calc</button>
-        <button role="tab" data-tool="report" aria-selected="false">Report</button>
-        <button role="tab" data-tool="settings" aria-selected="false">Settings</button>
       </div>
 
       <!-- settings -->
-      <form class="view" id="t-settings" autocomplete="off" novalidate>
+      <form class="view" id="t-settings" autocomplete="off" novalidate hidden>
         <section class="panel">
           <h2>Strategy</h2>
           <div class="set" id="rowTp"><label for="setTp">Take profit<small>points per trade</small></label><input id="setTp" type="number" inputmode="numeric" min="50" step="50"></div>
@@ -866,6 +870,16 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
       </form>
 
       <!-- risk calculator -->
+    </div>
+
+    <!-- TOOLS -->
+    <div class="view" id="v-tools" hidden>
+      <div class="seg" id="toolSeg" role="tablist">
+        <button role="tab" data-tool="report" aria-selected="true">Report</button>
+        <button role="tab" data-tool="account" aria-selected="false">Account</button>
+        <button role="tab" data-tool="calc" aria-selected="false">Risk calc</button>
+      </div>
+
       <div class="view" id="t-calc" hidden>
         <section class="panel">
           <h2>If price keeps moving one way</h2>
@@ -963,8 +977,8 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
   <nav id="dock" hidden role="tablist">
     <button role="tab" data-tab="home" aria-selected="true"><svg viewBox="0 0 24 24"><path d="M3.5 11.2L12 4l8.5 7.2"/><path d="M5.5 9.6V20h13V9.6"/><path d="M10 20v-5.5h4V20"/></svg>Home</button>
     <button role="tab" data-tab="trades" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M12 3v18M5 7h5M5 12h5M14 10h5M14 16h5"/></svg>Trades</button>
-    <button role="tab" data-tab="control" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M12 3l7.8 4.5v9L12 21l-7.8-4.5v-9z"/><circle cx="12" cy="12" r="2.6"/></svg>Control</button>
-    <button role="tab" data-tab="tools" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>Tools</button>
+    <button role="tab" data-tab="control" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>Control</button>
+    <button role="tab" data-tab="tools" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M7 16v-4M12 16V7M17 16v-7"/></svg>Report</button>
     <button role="tab" data-tab="log" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M8 7h12M8 12h12M8 17h12M4 7h.01M4 12h.01M4 17h.01"/></svg>Log</button>
   </nav>
 </div>
@@ -1042,6 +1056,19 @@ const store = {
   get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
   set(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
 };
+// The way back to the website (the owner, 3 Nov 2026): the dashboard for someone logged in on the website, the home
+// page for anyone else, who would only meet the log in page there.
+const siteIn = !!store.get('sb-zaziizzsbytkdlatoutv-auth-token');
+const siteBack = siteIn ? 'dashboard' : './';
+if (!siteIn) {
+  const back = $('backDash');
+  back.href = siteBack;
+  back.title = 'Back to the home page';
+  back.setAttribute('aria-label', 'Back to the home page');
+  const dash = document.querySelector('.ln-dash');
+  dash.href = siteBack;
+  dash.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Home';
+}
 async function rpc(fn, args) {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), 8000);
@@ -1079,7 +1106,7 @@ function addOwnBar(price) {
   if (!b || b[4] !== slot) { ownBars.push([price, price, price, price, slot]); if (ownBars.length > 60) ownBars.shift(); }
   else { b[1] = Math.max(b[1], price); b[2] = Math.min(b[2], price); b[3] = price; }
 }
-let timer = 0, tab = 'home', tool = 'account', pending = null, toastT = 0, settingsFilled = false;
+let timer = 0, tab = 'home', tool = 'report', ctl = 'general', pending = null, toastT = 0, settingsFilled = false;
 const show = { tp: true, basket: true, cool: true, risk: true };      // log filter, kept on this phone
 try { Object.assign(show, JSON.parse(store.get('rz_show') || '{}')); } catch (e) {}
 
@@ -1154,12 +1181,21 @@ function setTab(name) {
   $('actbar').hidden = name !== 'home';              // Activate / Pause stay pinned on the Home tab
   document.querySelectorAll('nav button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === name));
   $('main').scrollTop = 0;
-  if (name === 'tools') setTool(tool); else render();
+  if (name === 'tools') setTool(tool); else if (name === 'control') setCtl(ctl); else render();
 }
 function setTool(name) {
   tool = name;
-  for (const v of ['settings', 'calc', 'report', 'account']) $('t-' + v).hidden = v !== name;
+  for (const v of ['calc', 'report', 'account']) $('t-' + v).hidden = v !== name;
   document.querySelectorAll('#toolSeg button').forEach(b => b.setAttribute('aria-selected', b.dataset.tool === name));
+  render();
+}
+// Control: General (the bot's state, lot mode, cooldown, force close) or Settings (moved here from Tools, 3 Nov 2026)
+function setCtl(name) {
+  ctl = name;
+  $('c-general').hidden = name !== 'general';
+  $('t-settings').hidden = name !== 'settings';
+  document.querySelectorAll('#ctlSeg button').forEach(b => b.setAttribute('aria-selected', b.dataset.ctl === name));
+  $('main').scrollTop = 0;
   render();
 }
 // Settings that can be changed here with a bot that sends cfg.setApp (27 Oct 2026): the field is free, a change
@@ -1558,9 +1594,9 @@ function renderLadder(s, el) {
   }
   g.font = mono(500, 10);
 
-  // exit levels: outlined price tag on the scale, in the colour of the side
+  // exit levels: outlined price tag on the scale, in the colour of the side (a basket's in orange, like its zone)
   for (const x of exits) {
-    const yy = Math.max(8, Math.min(H - 8, y(x.price))), c = col(x.side === 'buy' ? '--buy' : '--sell');
+    const yy = Math.max(8, Math.min(H - 8, y(x.price))), c = col(x.band || x.side === 'sell' ? '--sell' : '--buy');
     g.fillStyle = col('--panel'); g.fillRect(PW + 1, yy - 8, SW - 1, 16);
     g.strokeStyle = c; g.strokeRect(PW + 1.5, yy - 7.5, SW - 2, 15);
     g.fillStyle = c; g.fillText(pxg(x.price), PW + 6, yy + .5);
@@ -1578,15 +1614,10 @@ function renderLadder(s, el) {
   if (s.bid) h += '<div class="ld-line" style="top:' + yp(s.bid) + '"></div>';
   if (s.nextUp) h += '<div class="ld-line next" style="top:' + yp(s.nextUp) + '"><span>NEXT ' + px(s.nextUp) + '</span></div>';
   if (s.nextDn) h += '<div class="ld-line next" style="top:' + yp(s.nextDn) + '"><span>NEXT ' + px(s.nextDn) + '</span></div>';
-  // a basket's close zone runs from the newest candle to the right, with no word: its colour says it (the owner, 2 Nov 2026).
-  // Moved back in time the newest candle is off the screen, so only the price tag on the scale stays.
-  const nowAt = (Math.max(0, bx(n - 1) - bw / 2) / PW * 100).toFixed(2) + '%';
-  for (const x of exits) {
-    if (x.band && !live) continue;
-    h += '<div class="ld-line exit ' + x.side + (x.band ? ' band' : '') + '" style="' + (x.band ? 'left:' + nowAt + ';' : '') + 'top:' + yp(x.price) + '">' +
-      (x.band ? '' : '<span>' + x.text + '</span>') + '</div>';
-  }
-  if (!live) h += '<button type="button" class="ld-now">Now</button>';      // moved back: one tap follows the price again
+  // where a side closes: a TP, or a basket's close zone in orange across the chart with BASKET at its left (the owner, 3 Nov 2026)
+  for (const x of exits) h += '<div class="ld-line exit ' + x.side + (x.band ? ' band' : '') + '" style="top:' + yp(x.price) + '"><span>' + x.text + '</span></div>';
+  // moved back: one tap on >> follows the price again
+  if (!live) h += '<button type="button" class="ld-now" aria-label="Back to the price now" title="Back to the price now"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 17 5-5-5-5M13 17l5-5-5-5"/></svg></button>';
   plot.innerHTML = h;
 }
 function syncChartSeg() {
@@ -1917,10 +1948,10 @@ function render() {
     const cdn = $('cdNow');
     cdn.textContent = s.cooldown > 0 ? (s.cooldown > 99 ? Math.floor(s.cooldown / 60) + 'm ' + (s.cooldown % 60) + 's left' : s.cooldown + 's left') : 'no cooldown';
     cls(cdn, 'warn', s.cooldown > 0);
+    if (ctl === 'settings' && S && !settingsFilled) { fillSettings(s.cfg); settingsFilled = true; }
+    if (ctl === 'settings') { renderTp(s); renderSmartGrid(s); renderBasket(s); syncSettings(s.cfg); }
   }
   if (tab === 'tools') {
-    if (tool === 'settings' && S && !settingsFilled) { fillSettings(s.cfg); settingsFilled = true; }
-    if (tool === 'settings') { renderTp(s); renderSmartGrid(s); renderBasket(s); syncSettings(s.cfg); }
     if (tool === 'calc') renderCalc(s);
     if (tool === 'report') renderReport(s);
     if (tool === 'account') {
@@ -2034,14 +2065,15 @@ function refuse(field) {
   slot.animate([0, -9, 8, -6, 4, -2, 0].map(x => ({ transform: 'translateX(' + x + 'px)' })), { duration: 420, easing: 'ease-out' });
 }
 for (const id of ['acc', 'pw']) $(id).addEventListener('input', () => { $(id).closest('.ln-slot').classList.remove('is-wrong'); $('loginErr').textContent = ''; linkFollow(); });
-// Logged out: to the dashboard. The server is told, but a slow answer doesn't keep anyone waiting.
+// Logged out: back to the website (the dashboard, or the home page for someone not logged in there). The server is
+// told, but a slow answer doesn't keep anyone waiting.
 async function logout() {
   const t = token;
   clearInterval(timer);
   $('quitYes').disabled = $('quitNo').disabled = true;
   token = null; store.set('rz_token', null);
   try { await Promise.race([rpc('app_logout', { p_token: t }), new Promise(done => setTimeout(done, 1500))]); } catch (e) {}
-  location.replace('dashboard');
+  location.replace(siteBack);
 }
 $('acLogout').addEventListener('click', askQuit);
 $('acLogoutOthers').addEventListener('click', async () => {
@@ -2060,6 +2092,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeQuit(
 /* ---------- events ---------- */
 $('dock').addEventListener('click', e => { const b = e.target.closest('button[data-tab]'); if (b) setTab(b.dataset.tab); });
 $('toolSeg').addEventListener('click', e => { const b = e.target.closest('button[data-tool]'); if (b) setTool(b.dataset.tool); });
+$('ctlSeg').addEventListener('click', e => { const b = e.target.closest('button[data-ctl]'); if (b) setCtl(b.dataset.ctl); });
 // the Log type switch and the Report range switch; each choice is kept on this phone
 const syncSeg = (id, attr, val) => document.querySelectorAll('#' + id + ' button').forEach(b => b.setAttribute('aria-selected', b.dataset[attr] === val));
 $('logSeg').addEventListener('click', e => {

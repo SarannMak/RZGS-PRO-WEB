@@ -166,10 +166,10 @@
     checkoutPromise = new Promise((resolve, reject) => {
       const style = document.createElement('link');
       style.rel = 'stylesheet';
-      style.href = pageUrl('checkout.css?v=1');
+      style.href = pageUrl('checkout.css?v=2');
       document.head.append(style);
       const script = document.createElement('script');
-      script.src = pageUrl('checkout.js?v=1');
+      script.src = pageUrl('checkout.js?v=2');
       script.onload = () => resolve(window.rzgsCheckout);
       script.onerror = () => reject(new Error('The checkout did not load'));
       document.head.append(script);
@@ -213,7 +213,6 @@
   // One card in three places: under the profile button of the header (computers, on hover), at the bottom of the phone
   // menu, and at the bottom of the dashboard's own menu (the owner's sketch, 2 Nov 2026). The last two open with a tap.
   const PLAN_DAYS = { trial: 7, elite: 30, diamond: 30 };
-  const METER_PARTS = 24;
   let menu = null;
   const cards = [];
 
@@ -225,7 +224,7 @@
       </a>
       <div class="pm-box" data-pm-box>
         <div class="pm-box-top"><span>Plan</span><b data-pm-left></b></div>
-        <div class="pm-meter" data-pm-meter aria-hidden="true">${'<i></i>'.repeat(METER_PARTS)}</div>
+        <div class="pm-meter" data-pm-meter aria-hidden="true">${'<i></i>'.repeat(PLAN_DAYS.elite)}</div>
         <p class="pm-until" data-pm-until></p>
         <div class="pm-go">
           <span>${ICONS.crown}<span data-pm-go></span></span>
@@ -304,6 +303,15 @@
     cards.forEach((card) => paintCard(card, profile));
   }
 
+  // One bar a day of the plan (the owner, 2026-11-03): lit for each day left, dark for the days used. No plan: 30 dark
+  // bars. A plan given more days than its length gets a bar for each of them.
+  function paintMeter(meter, planId, ends, left, running) {
+    const total = !planId ? PLAN_DAYS.elite : Math.max(PLAN_DAYS[planId], running && ends ? left : 0);
+    if (meter.children.length !== total) meter.innerHTML = '<i></i>'.repeat(total);
+    const lit = !running ? 0 : !ends ? total : Math.min(total, left);
+    [...meter.children].forEach((part, index) => part.classList.toggle('on', index < lit));
+  }
+
   function paintCard(menu, profile) {
     const say = (selector, text) => { menu.querySelectorAll(selector).forEach((el) => { el.textContent = text; }); };
     const plan = planById(profile.plan);
@@ -314,8 +322,7 @@
     say('[data-pm-plan]', !plan ? 'No plan yet' : running ? `${plan.name} plan` : `${plan.name} plan ended`);
     say('[data-pm-left]', running && ends ? `${left} ${left === 1 ? 'day' : 'days'} left` : '');
     say('[data-pm-until]', !plan ? 'Start with 7 free days' : ends ? `${running ? 'Until' : 'Ended'} ${dateText(ends)}` : 'No end date');
-    const lit = !running ? 0 : !ends ? METER_PARTS : Math.max(1, Math.min(METER_PARTS, Math.ceil((left / PLAN_DAYS[plan.id]) * METER_PARTS)));
-    menu.querySelectorAll('[data-pm-meter] i').forEach((part, index) => part.classList.toggle('on', index < lit));
+    paintMeter(menu.querySelector('[data-pm-meter]'), plan && plan.id, ends, left, running);
     menu.querySelector('[data-pm-box]').dataset.tone = running && ends && left <= 3 ? 'warn' : '';
     const [go, cta] = !plan ? ['Start free', 'Get your bot']
       : !running ? [plan.id === 'trial' ? 'Choose a plan' : 'Renew your plan', 'See plans']

@@ -2489,7 +2489,7 @@ html:has(body.acc-page) {
   transition: color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
 }
 .acc-fold:hover {
-  border-color: var(--frame);
+  --edge: var(--frame);
   color: var(--cyan);
 }
 .acc-fold .icon {
@@ -2826,8 +2826,8 @@ html:has(body.acc-page) {
   color: var(--text);
 }
 .acc-chips button[aria-selected="true"] {
-  border-color: var(--frame);
-  background: var(--surface-2);
+  --edge: var(--frame);
+  background-color: var(--surface-2);
   color: var(--text);
 }
 .acc-chip-ico {
@@ -2952,29 +2952,6 @@ html:has(body.acc-page) {
   display: flex;
   align-items: center;
   gap: 14px;
-}
-.acc-plan-ico {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 46px;
-  height: 46px;
-  background: var(--chip);
-  color: var(--text-subtle);
-  clip-path: var(--cut-10);
-}
-.acc-plan-ico .icon {
-  width: 22px;
-  height: 22px;
-}
-.acc-plan-ico[data-sub-tone="trial"] {
-  color: var(--neon);
-}
-.acc-plan-ico[data-sub-tone="elite"] {
-  color: var(--cyan);
-}
-.acc-plan-ico[data-sub-tone="diamond"] {
-  color: #c58bff;
 }
 .acc-plan-text {
   flex: 1;
@@ -3126,7 +3103,7 @@ html:has(body.acc-page) {
   clip-path: var(--cut-10);
 }
 .acc-select:focus-within {
-  border-color: var(--cyan);
+  --edge: var(--cyan);
 }
 .acc-select select {
   padding: 0 24px 0 0;
@@ -3230,7 +3207,7 @@ html:has(body.acc-page) {
 .acc-stat b[data-tone="bad"] {
   color: var(--bad);
 }
-.acc-stat span {
+.acc-stat > div > span {
   display: block;
   margin-top: 4px;
   color: var(--text-muted);
@@ -3478,4 +3455,400 @@ html:has(body.acc-page) {
   .acc-part-head--row .btn {
     justify-self: start;
   }
+}
+
+/* ---------- Manage account on a computer (the owner's Higgsfield picture, 2026-11-03): the list of its parts on the
+   left in place of the menu, with Need help? and Log out under it; the part on the right. Phones keep the chips. ---------- */
+.acc-back,
+.acc-help-card,
+.acc-signout {
+  display: none;
+}
+.acc-manage-nav {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.acc-manage-main {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+/* Personal profile: the picture, the name and the email, as a header without a frame */
+.acc-id {
+  padding: 4px 0 6px;
+  border: 0;
+  border-image: none;
+}
+.acc-id .avatar-xl {
+  width: 92px;
+  height: 92px;
+  font-size: 36px;
+}
+/* the plan and the profit at a glance: one above the other on a phone, side by side on a wide screen */
+.acc-sum {
+  display: grid;
+  gap: 12px;
+}
+.acc-sum-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 210px;
+}
+
+.acc-sum-card > h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+.acc-sum-card > h2 .icon {
+  flex: none;
+  width: 16px;
+  height: 16px;
+}
+.acc-sum-all {
+  margin-left: auto;
+  color: var(--text-muted);
+  font: 500 13px/1 var(--font-body);
+  letter-spacing: 0;
+  text-transform: none;
+  text-decoration: underline dotted;
+  text-underline-offset: 4px;
+}
+.acc-sum-all:hover {
+  color: var(--cyan);
+}
+/* the number sits low in its card, over its meter and its button (Higgsfield's Credits card) */
+.acc-sum-big {
+  margin: auto 0 0;
+  padding-top: 18px;
+  color: var(--text);
+  font: 700 30px/1.1 var(--font-display);
+}
+.acc-sum-card .pm-meter {
+  margin: 4px 0 2px;
+}
+.acc-sum-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 14px;
+  color: var(--text-muted);
+  font-size: 13.5px;
+}
+.acc-mini {
+  max-width: none;
+  margin: 6px 0 0;
+}
+.acc-sum-note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13.5px;
+}
+@media (min-width: 760px) {
+  .acc-sum {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (min-width: 1024px) {
+  /* this page has its own list on the left: the menu stays on the profile (the header's button opens the account card) */
+  body[data-auth-page="manage"] .dash-shell.acc {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  body[data-auth-page="manage"] .acc-side,
+  body[data-auth-page="manage"] .acc-shade {
+    display: none;
+  }
+  .acc-manage {
+    grid-template-columns: 250px minmax(0, 1fr);
+    column-gap: 48px;
+    align-items: start;
+  }
+  .acc-manage-nav {
+    position: sticky;
+    top: calc(var(--header-h) + 16px);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-height: min(720px, calc(100vh - var(--header-h) - 40px));
+  }
+  .acc-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    align-self: flex-start;
+    color: var(--text-subtle);
+    font: 500 13px/1 var(--font-body);
+    text-decoration: none;
+  }
+  .acc-back:hover {
+    color: var(--cyan);
+  }
+  .acc-back .icon {
+    width: 16px;
+    height: 16px;
+  }
+  .acc-manage-nav .acc-h1 {
+    margin: 10px 0 12px;
+    font-size: 22px;
+  }
+  /* the chips become the list */
+  .acc-manage-nav .acc-chips {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+  }
+  .acc-manage-nav .acc-chips button {
+    width: 100%;
+    min-height: 52px;
+    --edge: transparent;
+    background-color: transparent;
+    font-size: 15px;
+  }
+  .acc-manage-nav .acc-chips button:hover {
+    background-color: var(--surface);
+  }
+  .acc-manage-nav .acc-chips button[aria-selected="true"] {
+    --edge: var(--border-strong);
+    background-color: var(--surface-2);
+  }
+  .acc-help-card {
+    display: grid;
+    justify-items: center;
+    gap: 6px;
+    margin-top: auto;
+    padding: 18px 16px 16px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    text-align: center;
+    clip-path: var(--cut-10);
+  }
+  .acc-help-ico {
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    margin-bottom: 4px;
+    background: var(--surface-2);
+    color: var(--cyan);
+    clip-path: var(--cut-10);
+  }
+  .acc-help-ico .icon {
+    width: 22px;
+    height: 22px;
+  }
+  .acc-help-card b {
+    color: var(--text);
+    font: 700 16px/1.2 var(--font-display);
+  }
+  .acc-help-card p {
+    margin: 0 0 8px;
+    color: var(--text-muted);
+    font-size: 13.5px;
+    line-height: 1.45;
+  }
+  .acc-signout {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 0;
+    background: none;
+    color: var(--text-muted);
+    font: 500 14px/1 var(--font-body);
+    cursor: pointer;
+  }
+  .acc-signout:hover {
+    color: var(--bad);
+  }
+  /* Log out is in the list on the left already */
+  .acc-out-panel {
+    display: none;
+  }
+  .acc-signout .icon {
+    width: 18px;
+    height: 18px;
+  }
+  .acc-id .avatar-xl {
+    width: 116px;
+    height: 116px;
+    font-size: 44px;
+  }
+  .acc-id-name b {
+    font-size: 32px;
+  }
+  .acc-id-mail {
+    font-size: 15px;
+  }
+}
+
+/* ---------- a plan's picture (the owner, 2026-11-03): the free trial a bolt, Elite a hexagon, Diamond a gem ---------- */
+.plan-logo {
+  --tone: #5f7d88;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 64px;
+  height: 64px;
+  border: 1px solid color-mix(in srgb, var(--tone) 55%, transparent);
+  background: radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--tone) 26%, transparent), transparent 72%), #051118;
+  color: var(--tone);
+  clip-path: var(--cut-10);
+}
+.plan-logo .icon {
+  width: 30px;
+  height: 30px;
+  filter: drop-shadow(0 0 7px color-mix(in srgb, var(--tone) 70%, transparent));
+}
+.plan-logo[data-tone="trial"] {
+  --tone: var(--neon);
+}
+.plan-logo[data-tone="elite"] {
+  --tone: var(--cyan);
+}
+.plan-logo[data-tone="diamond"] {
+  --tone: #c58bff;
+}
+.plan-logo.is-ended {
+  opacity: 0.55;
+  filter: grayscale(0.6);
+}
+/* the dashboard's Subscription tab: the picture, the name, its dates and price */
+.plan-hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 18px;
+}
+.plan-hero .plan-logo {
+  width: 78px;
+  height: 78px;
+}
+.plan-hero .plan-logo .icon {
+  width: 38px;
+  height: 38px;
+}
+.plan-hero-text {
+  flex: 1;
+  min-width: 150px;
+}
+.plan-hero-chip {
+  margin: 0;
+  color: var(--text-subtle);
+  font: 600 10.5px/1.2 var(--font-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.plan-hero[data-tone="trial"] .plan-hero-chip {
+  color: var(--neon);
+}
+.plan-hero[data-tone="elite"] .plan-hero-chip {
+  color: var(--cyan);
+}
+.plan-hero[data-tone="diamond"] .plan-hero-chip {
+  color: #c58bff;
+}
+.plan-hero-name {
+  margin: 4px 0 0;
+  color: var(--text);
+  font: 700 clamp(26px, 4vw, 32px)/1.1 var(--font-display);
+}
+.plan-hero-line {
+  margin: 6px 0 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+.plan-hero-price {
+  margin: 0;
+  color: var(--text);
+  font: 600 15px/1 var(--font-mono);
+  white-space: nowrap;
+}
+/* Manage account: the picture in the Plan card and on Subscription */
+.acc-sum-plan {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+.acc-sum-plan .plan-logo {
+  width: 50px;
+  height: 50px;
+}
+.acc-sum-plan .plan-logo .icon {
+  width: 24px;
+  height: 24px;
+}
+.acc-sum-plan b {
+  display: block;
+  color: var(--text);
+  font: 700 20px/1.15 var(--font-display);
+}
+.acc-sum-plan small {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-subtle);
+  font: 500 11px/1.2 var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.acc-plan-top .plan-logo {
+  width: 64px;
+  height: 64px;
+}
+.acc-plan [data-sub-action][hidden] {
+  display: none;
+}
+
+/* ---------- cut corners with a plain outline (the owner, 2026-11-03: "fix these edges") ----------
+   clip-path cuts a box's outline off at its two cut corners. Two thin lines in the outline's colour (--edge), sized to
+   the cut (--cut), draw the cut edges back. Their state rules change --edge (not border-color) and only the background
+   colour, so the lines stay. */
+.acc-fold,
+.acc-chips button,
+.acc-plan-card,
+.acc-select,
+.acc-stat,
+.acc-note,
+.acc-help-card {
+  border-color: var(--edge);
+  background-image:
+    linear-gradient(to bottom right, transparent 50%, var(--edge) 50%, var(--edge) calc(50% + 1px), transparent calc(50% + 1px)),
+    linear-gradient(to bottom right, transparent calc(50% - 1px), var(--edge) calc(50% - 1px), var(--edge) 50%, transparent 50%);
+  background-position: left top, right bottom;
+  background-size: var(--cut, 10px) var(--cut, 10px);
+  background-repeat: no-repeat;
+  background-origin: border-box;
+}
+.acc-fold,
+.acc-chips button,
+.acc-plan-card,
+.acc-stat,
+.acc-note,
+.acc-help-card {
+  --edge: var(--border);
+}
+.acc-select {
+  --edge: var(--border-strong);
+}
+/* a plan's picture: the lines, then its own glow */
+.plan-logo {
+  --edge: color-mix(in srgb, var(--tone) 55%, transparent);
+  border-color: var(--edge);
+  background-image:
+    linear-gradient(to bottom right, transparent 50%, var(--edge) 50%, var(--edge) calc(50% + 1px), transparent calc(50% + 1px)),
+    linear-gradient(to bottom right, transparent calc(50% - 1px), var(--edge) calc(50% - 1px), var(--edge) 50%, transparent 50%),
+    radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--tone) 26%, transparent), transparent 72%);
+  background-position: left top, right bottom, center;
+  background-size: 10px 10px, 10px 10px, auto;
+  background-repeat: no-repeat;
+  background-origin: border-box;
+  background-color: #051118;
 }
