@@ -130,7 +130,7 @@ button{cursor:pointer}
 .calc-sum p+p{margin-top:6px}
 .calc-sum b{color:var(--title)}
 .bars{width:100%;height:150px;display:block}
-/* Report: the range switch over the chart, the four figures under it; Log: the type switch */
+/* Report: the range switch over the chart, the four figures under it; History: the type switch */
 .seg-range{margin-bottom:12px}
 .seg-range button,.seg-log button{letter-spacing:.06em;padding-inline:2px}
 .rp-sum{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
@@ -953,7 +953,7 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
       </div>
     </div>
 
-    <!-- LOG: sorted by type (21 Oct 2026); cooldown messages are not shown any more -->
+    <!-- HISTORY (named Log until 3 Nov 2026): sorted by type (21 Oct 2026); cooldown messages are not shown any more -->
     <div class="view" id="v-log" hidden>
       <div class="seg seg-log" id="logSeg" role="tablist" aria-label="Type of alert">
         <button role="tab" data-log="all" aria-selected="true">All</button>
@@ -979,7 +979,7 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
     <button role="tab" data-tab="trades" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M12 3v18M5 7h5M5 12h5M14 10h5M14 16h5"/></svg>Trades</button>
     <button role="tab" data-tab="control" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>Control</button>
     <button role="tab" data-tab="tools" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M7 16v-4M12 16V7M17 16v-7"/></svg>Report</button>
-    <button role="tab" data-tab="log" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M8 7h12M8 12h12M8 17h12M4 7h.01M4 12h.01M4 17h.01"/></svg>Log</button>
+    <button role="tab" data-tab="log" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M8 7h12M8 12h12M8 17h12M4 7h.01M4 12h.01M4 17h.01"/></svg>History</button>
   </nav>
 </div>
 
