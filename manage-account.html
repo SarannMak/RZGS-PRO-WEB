@@ -61,6 +61,9 @@
     <symbol id="i-bot" viewBox="0 0 24 24"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2M20 14h2M15 13v2M9 13v2"/></symbol>
     <symbol id="i-play" viewBox="0 0 24 24"><path d="M6 4.8v14.4a1 1 0 0 0 1.5.86l12-7.2a1 1 0 0 0 0-1.72l-12-7.2A1 1 0 0 0 6 4.8Z"/></symbol>
     <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></symbol>
+    <symbol id="i-gift" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7M7.5 8a2.5 2.5 0 0 1 0-5C10 3 12 8 12 8s2-5 4.5-5a2.5 2.5 0 0 1 0 5"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.59 13.51 6.83 3.98M15.41 6.51l-6.82 3.98"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
     <symbol id="i-send" viewBox="0 0 24 24"><path d="M14.54 21.69a.5.5 0 0 0 .94-.03l6.5-19a.5.5 0 0 0-.64-.63l-19 6.5a.5.5 0 0 0-.02.93l7.93 3.18a2 2 0 0 1 1.11 1.11z"/><path d="m21.85 2.15-10.94 10.94"/></symbol>
     <symbol id="i-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4M12 17h.01"/></symbol>
     <symbol id="i-timer" viewBox="0 0 24 24"><path d="M10 2h4M12 14l3-3"/><circle cx="12" cy="14" r="8"/></symbol>
@@ -209,6 +212,7 @@
               <button type="button" role="tab" id="mt-plan" data-go="subscription" data-part="plan" aria-controls="m-plan" aria-selected="false" tabindex="-1"><span class="acc-chip-ico" data-tone="plan"><svg class="icon" aria-hidden="true"><use href="#i-gem"/></svg></span>Subscription</button>
               <button type="button" role="tab" id="mt-usage" data-go="usage" data-part="usage" aria-controls="m-usage" aria-selected="false" tabindex="-1"><span class="acc-chip-ico" data-tone="usage"><svg class="icon" aria-hidden="true"><use href="#i-trending-up"/></svg></span>P/L Report</button>
               <button type="button" role="tab" id="mt-sessions" data-go="sessions" data-part="sessions" aria-controls="m-sessions" aria-selected="false" tabindex="-1"><span class="acc-chip-ico" data-tone="sessions"><svg class="icon" aria-hidden="true"><use href="#i-monitor"/></svg></span>Sessions</button>
+              <button type="button" role="tab" id="mt-invite" data-go="affiliate" data-part="invite" aria-controls="m-invite" aria-selected="false" tabindex="-1"><span class="acc-chip-ico" data-tone="invite"><svg class="icon" aria-hidden="true"><use href="#i-gift"/></svg></span>Affiliate program</button>
               <button type="button" role="tab" id="mt-help" data-go="help" data-part="help" aria-controls="m-help" aria-selected="false" tabindex="-1"><span class="acc-chip-ico" data-tone="help"><svg class="icon" aria-hidden="true"><use href="#i-help"/></svg></span>Help</button>
             </div>
               <div class="acc-help-card">
@@ -449,6 +453,76 @@
             </div>
 
             <!-- Help -->
+            <!-- Affiliate program (the owner, 2026-11-04): invite 5 friends, get 1 month of Elite free -->
+            <div class="acc-part" id="m-invite" role="tabpanel" aria-labelledby="mt-invite" hidden>
+              <header class="acc-part-head">
+                <h2>Affiliate program</h2>
+                <p>Invite 5 friends and get 1 month of Elite free.</p>
+              </header>
+              <p class="acc-state" data-invite-state>Loading your invites...</p>
+              <section class="dash-panel acc-invite-hero" data-invite-part hidden>
+                <span class="acc-chip-ico acc-invite-ico" data-tone="invite"><svg class="icon" aria-hidden="true"><use href="#i-gift"/></svg></span>
+                <div class="acc-invite-copy">
+                  <h3>Invite 5 friends, <span class="text-gradient">get 1 month free</span></h3>
+                  <p>When 5 friends you invite complete 6 achievements, up to their bot's first closed trade, you get 30 days of Elite at $0. Every 5 more friends give you one more month.</p>
+                </div>
+                <div class="acc-invite-meter" data-invite-meter aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+                <p class="acc-invite-progress" data-invite-progress></p>
+                <div class="acc-invite-ready" data-invite-ready hidden>
+                  <p data-invite-ready-text></p>
+                  <a class="btn btn-primary" href="./#plans" data-plans data-invite-use>Use my free month</a>
+                </div>
+              </section>
+
+              <section class="dash-panel" data-invite-part hidden>
+                <h2 class="acc-h2">Your invite link</h2>
+                <p class="dash-hint">Friends who sign up with this link are linked to you.</p>
+                <div class="acc-invite-link">
+                  <input type="text" readonly aria-label="Your invite link" data-invite-link>
+                  <button class="btn btn-ghost btn-sm" type="button" data-invite-copy="link">Copy</button>
+                </div>
+                <div class="dash-row acc-invite-share">
+                  <a class="btn btn-primary" href="https://t.me/share/url" target="_blank" rel="noopener" data-invite-telegram><svg class="icon" aria-hidden="true"><use href="#i-send"/></svg>Share on Telegram</a>
+                  <button class="btn btn-ghost" type="button" data-invite-share hidden><svg class="icon" aria-hidden="true"><use href="#i-share"/></svg>More ways to share</button>
+                </div>
+                <h3 class="acc-invite-sub">Your referral code</h3>
+                <p class="dash-hint">Friends can also type it in the Referral code box when they sign up.</p>
+                <div class="acc-invite-link">
+                  <input class="acc-invite-code" type="text" readonly aria-label="Your referral code" data-invite-code>
+                  <button class="btn btn-ghost btn-sm" type="button" data-invite-copy="code">Copy</button>
+                </div>
+              </section>
+
+              <section class="dash-panel" data-invite-part hidden>
+                <div class="acc-stats">
+                  <div class="acc-stat"><span class="acc-stat-ico"><svg class="icon" aria-hidden="true"><use href="#i-users"/></svg></span><div><b data-invite-n="invited">0</b><span>Friends invited</span></div></div>
+                  <div class="acc-stat"><span class="acc-stat-ico"><svg class="icon" aria-hidden="true"><use href="#i-bot"/></svg></span><div><b data-invite-n="counted">0</b><span>Friends done</span></div></div>
+                  <div class="acc-stat"><span class="acc-stat-ico"><svg class="icon" aria-hidden="true"><use href="#i-trophy"/></svg></span><div><b data-invite-n="earned">0</b><span>Free months earned</span></div></div>
+                  <div class="acc-stat"><span class="acc-stat-ico"><svg class="icon" aria-hidden="true"><use href="#i-gift"/></svg></span><div><b data-invite-n="left">0</b><span>Free months left</span></div></div>
+                </div>
+              </section>
+
+              <section class="dash-panel" data-invite-part hidden>
+                <h2 class="acc-h2-count">Your friends <span class="acc-badge" data-invite-count>0</span></h2>
+                <p class="dash-hint" data-invite-empty>No friends yet. Share your link to start.</p>
+                <ul class="acc-invites" data-invite-list></ul>
+              </section>
+
+              <section class="dash-panel" data-invite-part hidden>
+                <h2 class="acc-h2">How it works</h2>
+                <ol class="acc-invite-steps">
+                  <li><span aria-hidden="true">1</span><div><b>Share your link</b><p>Send it to friends on Telegram or anywhere you like.</p></div></li>
+                  <li><span aria-hidden="true">2</span><div><b>Your friend completes 6 achievements</b><p>Account, email confirmed, profile complete, bot delivered, bot connected, and their bot's first closed trade.</p></div></li>
+                  <li><span aria-hidden="true">3</span><div><b>Every 5 friends: 1 month free</b><p>Choose Elite in the plans and the payment is skipped.</p></div></li>
+                </ol>
+                <ul class="acc-invite-rules">
+                  <li>Elite needs an MT5 account opened with a partner broker, like any Elite plan.</li>
+                  <li>A plan that is running has to end first, then the free month can start.</li>
+                  <li>Only new accounts made with your link count. Free months can't be changed for money.</li>
+                </ul>
+              </section>
+            </div>
+
             <div class="acc-part" id="m-help" role="tabpanel" aria-labelledby="mt-help" hidden>
               <section class="dash-panel">
                 <h2>Support</h2>

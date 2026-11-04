@@ -55,6 +55,9 @@
     updown: icon('<path d="m7 15 5 5 5-5M7 9l5-5 5 5"/>'),
     crown: icon('<path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294zM5 21h14"/>'),
     calc: icon('<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 19h.01M12 19h.01M16 19h.01"/>'),
+    share: icon('<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.59 13.51 6.83 3.98M15.41 6.51l-6.82 3.98"/>'),
+    send: icon('<path d="M14.54 21.69a.5.5 0 0 0 .94-.03l6.5-19a.5.5 0 0 0-.64-.63l-19 6.5a.5.5 0 0 0-.02.93l7.93 3.18a2 2 0 0 1 1.11 1.11z"/><path d="m21.85 2.15-10.94 10.94"/>'),
+    timer: icon('<path d="M10 2h4M12 14l3-3"/><circle cx="12" cy="14" r="8"/>'),
   };
   const SPINNER = '<span class="plan-spin" aria-hidden="true"></span>';
 
@@ -115,8 +118,8 @@
         <span class="pc-chip" data-plan-chip>${plan.chip}</span>
       </div>
       <p class="pc-lead">${plan.lead}</p>
-      <div class="pc-box"><strong>${plan.box[0]}</strong>${plan.box.slice(1).map((line) => `<span>${line}</span>`).join('')}</div>
-      <p class="pc-price"><b>${plan.amount}</b><span>${plan.per}</span></p>
+      <div class="pc-box"><strong data-plan-box>${plan.box[0]}</strong>${plan.box.slice(1).map((line) => `<span>${line}</span>`).join('')}</div>
+      <p class="pc-price"><b data-plan-amount>${plan.amount}</b><span data-plan-per>${plan.per}</span></p>
       <span class="plan-btn-glow"><button class="plan-btn" type="button" data-plan-go="${plan.id}"><span data-plan-label>${plan.button}</span></button></span>
       <p class="pc-under">${plan.under}</p>
       ${listHtml('What you get', plan.get, ICONS.check, 'pc-list--hot')}
@@ -234,6 +237,7 @@
       <nav class="pm-links" aria-label="Your account">
         <a href="${pageUrl('dashboard#core')}">${ICONS.user}View profile</a>
         <a href="${pageUrl('manage-account')}">${ICONS.gear}Manage account</a>
+        <a href="${pageUrl('manage-account#affiliate')}">${ICONS.share}Affiliate program</a>
         <a href="${COMMUNITY_URL}" target="_blank" rel="noopener">${ICONS.group}Community<small>Telegram group</small></a>
       </nav>
       <button class="pm-out" type="button" data-sign-out>${ICONS.logout}Log out</button>
@@ -391,14 +395,19 @@
     bar.className = 'trial-bar';
     bar.setAttribute('role', 'region');
     bar.setAttribute('aria-label', 'Free trial offer');
+    // during the visitor's welcome offer: 10 days, and the time it has left
+    const welcome = !signedIn() && welcomeUntil();
     bar.innerHTML = `<div class="trial-bar-in">
       <span class="trial-bar-chip">${ICONS.gift}<span class="trial-bar-chip-word">Free trial</span></span>
-      <p class="trial-bar-text"><strong>Start your free 7-day trial.</strong><span class="trial-bar-more"> Try the gold bot on your own MT5 account, with no payment.</span></p>
+      <p class="trial-bar-text">${welcome
+        ? `<strong>Start your free 10-day trial.</strong><span class="trial-bar-more"> Sign up in <b data-bar-left></b> to get 10 days instead of 7.</span>`
+        : '<strong>Start your free 7-day trial.</strong><span class="trial-bar-more"> Try the gold bot on your own MT5 account, with no payment.</span>'}</p>
       <a class="trial-bar-go" href="${pageUrl('signup')}" data-plans>Claim now</a>
       <button class="trial-bar-x" type="button" aria-label="Close this offer">${ICONS.x}</button>
     </div>`;
     bar.querySelector('.trial-bar-x').addEventListener('click', closeBar);
     header.before(bar);
+    if (welcome) tick();
   }
 
   /* ---------------------------------------------------------------- the plans pop-up */
@@ -485,6 +494,23 @@
       card.querySelector('.pc-under').textContent = upgrade ? `Your ${current.name} plan is cancelled first. Days left are not refunded.`
         : paidRunning && current.endsText ? `You can ${running ? 'renew' : 'start this'} after ${current.endsText}` : plan.under;
     });
+    // the promotions: 10 free days for an account made during the welcome offer, and a free month of Elite from the
+    // Affiliate program (the checkout function then skips the payment)
+    const days = (promo && promo.trial_days) || 7;
+    const trial = dialog.querySelector('[data-plan="trial"]');
+    dialog.querySelector('[data-plans-lead]').textContent = `Start free for ${days} days, then pick the plan that fits how you trade.`;
+    trial.querySelector('[data-plan-box]').textContent = `${days} days on 1 MT5 account`;
+    trial.querySelector('[data-plan-per]').textContent = `/ ${days} days`;
+    if (current.plan !== 'trial') trial.querySelector('[data-plan-chip]').textContent = `${days} days`;
+    const elite = dialog.querySelector('[data-plan="elite"]');
+    const eliteButton = elite.querySelector('[data-plan-go]');
+    const freeMonth = Boolean(promo && promo.left > 0) && !eliteButton.disabled;
+    elite.querySelector('[data-plan-amount]').textContent = freeMonth ? '$0' : planById('elite').amount;
+    elite.querySelector('[data-plan-per]').textContent = freeMonth ? '/ free month' : planById('elite').per;
+    if (freeMonth && !eliteButton.classList.contains('is-busy')) {
+      eliteButton.querySelector('[data-plan-label]').textContent = 'Use my free month';
+      elite.querySelector('.pc-under').textContent = 'From inviting 5 friends. No payment needed';
+    }
   }
 
   async function freshCurrent() {
@@ -492,7 +518,10 @@
       const db = await getDb();
       const { data: { session } } = await db.auth.getSession();
       if (!session) return;
-      const { data } = await db.from('web_users').select('plan, plan_expires_at').eq('id', session.user.id).maybeSingle();
+      const [{ data }] = await Promise.all([
+        db.from('web_users').select('plan, plan_expires_at').eq('id', session.user.id).maybeSingle(),
+        loadInvites(true),
+      ]);
       if (data) current = describeCurrent(data);
       renderCurrent();
     } catch (e) { /* what the header already knew stays */ }
@@ -513,7 +542,7 @@
       <div class="plans-wrap" tabindex="-1" autofocus>
         <header class="plans-head">
           <h2 id="plans-title">Choose your <span class="text-gradient">plan</span></h2>
-          <p>Start free for 7 days, then pick the plan that fits how you trade.</p>
+          <p data-plans-lead>Start free for 7 days, then pick the plan that fits how you trade.</p>
           <p class="plans-now" data-plans-now hidden></p>
           <p class="plans-rule" data-plans-rule hidden>A new plan can start when this one ends. Don't want to wait? <button class="plans-cancel" type="button" data-plans-cancel>Cancel plan</button></p>
         </header>
@@ -629,6 +658,210 @@
     logoutBox.showModal();
   }
 
+  /* ---------------------------------------------------------------- the promotions (the owner, 2026-11-04) */
+  // Someone with no account yet: the free trial, 10 days instead of 7 if they sign up within 24 hours of their first
+  // visit (the sign-up page sends the end of those 24 hours; the database and the checkout function give the 3 days).
+  // Someone logged in: invite 5 friends to get a month of Elite free, the Affiliate program (1 Website/
+  // web_promotions.sql). Each box comes up by itself only now and then, never over another box, and never on the log
+  // in and sign-up pages. A friend's invite link is kept for the sign-up.
+  const WELCOME_KEY = 'rzgs_welcome_until';
+  const REF_KEY = 'rzgs_ref';
+  const KNOWN_KEY = 'rzgs_has_account'; // this browser has logged in before: no welcome offer for an account that exists
+  const SEEN_KEY = 'rzgs_promo_seen';
+  const HOUR = 3600000;
+  const DAY = 24 * HOUR;
+
+  // ?ref=CODE on any page: kept for 30 days, and taken out of the address
+  function keepInvite() {
+    const params = new URLSearchParams(location.search);
+    const code = String(params.get('ref') || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12);
+    if (!params.has('ref')) return;
+    if (code) write(REF_KEY, JSON.stringify({ code, at: Date.now() }));
+    params.delete('ref');
+    history.replaceState(null, '', location.pathname + (params.toString() ? `?${params}` : '') + location.hash);
+  }
+  const invitedBy = () => {
+    const ref = parse(read(REF_KEY));
+    return ref && ref.code && Date.now() - ref.at < 30 * DAY ? ref.code : '';
+  };
+
+  // The 24 hours start at the first visit of someone who has never logged in here.
+  function startWelcome() {
+    if (signedIn()) { write(KNOWN_KEY, '1'); return; }
+    if (read(KNOWN_KEY) || read(WELCOME_KEY)) return;
+    write(WELCOME_KEY, String(Date.now() + DAY));
+  }
+  const welcomeUntil = () => {
+    const until = Number(read(WELCOME_KEY)) || 0;
+    return until > Date.now() && !read(KNOWN_KEY) ? until : 0;
+  };
+  const timeLeft = (until) => {
+    const s = Math.max(0, Math.floor((until - Date.now()) / 1000));
+    return [Math.floor(s / 3600), Math.floor((s % 3600) / 60), s % 60];
+  };
+
+  // One clock for the bar and the box: once a second while something shows the time left.
+  let clock = 0;
+  function tick() {
+    const until = welcomeUntil();
+    const [h, m, s] = timeLeft(until);
+    document.querySelectorAll('[data-bar-left]').forEach((el) => { el.textContent = `${h}h ${String(m).padStart(2, '0')}m`; });
+    document.querySelectorAll('[data-promo-left]').forEach((el) => {
+      el.innerHTML = `<b>${h}</b>h <b>${String(m).padStart(2, '0')}</b>m <b>${String(s).padStart(2, '0')}</b>s`;
+    });
+    // the 24 hours are over while the page is open: the offer is the normal 7 days again
+    if (!until) {
+      clearTimeout(clock);
+      clock = 0;
+      if (bar && bar.querySelector('[data-bar-left]')) { bar.remove(); bar = null; showBar(); }
+      if (promoBox && promoBox.open && promoBox.dataset.kind === 'welcome') paintWelcome();
+      return;
+    }
+    clearTimeout(clock);
+    clock = setTimeout(tick, 1000 - (Date.now() % 1000));
+  }
+
+  // When each box last came up by itself: { welcome: time, invite: time }
+  const seen = () => parse(read(SEEN_KEY)) || {};
+  const markSeen = (kind) => write(SEEN_KEY, JSON.stringify({ ...seen(), [kind]: Date.now() }));
+
+  let promoBox = null;
+  function openPromo(kind, html) {
+    if (!promoBox) {
+      promoBox = document.createElement('dialog');
+      promoBox.className = 'plan-confirm promo';
+      promoBox.setAttribute('aria-labelledby', 'promo-title');
+      promoBox.innerHTML = '<div class="plan-confirm-in promo-in" tabindex="-1"></div>';
+      document.body.append(promoBox);
+      promoBox.addEventListener('click', async (event) => {
+        if (event.target === promoBox || event.target.closest('[data-promo-close]')) { promoBox.close(); return; }
+        if (event.target.closest('[data-promo-signup]')) { event.preventDefault(); toSignUp(); return; }
+        const copy = event.target.closest('[data-promo-copy]');
+        if (copy) copyLink(copy, promoBox.querySelector('[data-promo-link]'));
+        const share = event.target.closest('[data-promo-share]');
+        if (share) navigator.share({ title: 'RZGS-PRO', text: SHARE_TEXT, url: share.dataset.promoShare }).catch(() => {});
+      });
+    }
+    promoBox.dataset.kind = kind;
+    promoBox.firstElementChild.innerHTML = html;
+    if (!promoBox.open) promoBox.showModal();
+    promoBox.firstElementChild.focus({ preventScroll: true });
+  }
+
+  // Copy: the link is copied, or selected when the browser does not allow it
+  async function copyLink(button, field) {
+    try {
+      await navigator.clipboard.writeText(field.value);
+      button.textContent = 'Copied';
+    } catch (e) {
+      field.select();
+      button.textContent = 'Select it';
+    }
+    setTimeout(() => { button.textContent = 'Copy'; }, 1800);
+  }
+
+  function paintWelcome() {
+    const until = welcomeUntil();
+    const days = until ? 10 : 7;
+    openPromo('welcome', `<button class="plans-x plans-x--in" type="button" data-promo-close aria-label="Close this offer">${ICONS.x}</button>
+      <div class="promo-top">${until
+        ? `<span class="promo-timer" role="timer" aria-label="This offer ends within 24 hours">${ICONS.timer}<span class="promo-timer-word">Offer ends in</span><span class="promo-left" data-promo-left aria-hidden="true"></span></span>`
+        : `<span class="promo-chip">${ICONS.gift}Free trial</span>`}</div>
+      ${invitedBy() ? '<p class="promo-friend">A friend invited you to RZGS-PRO.</p>' : ''}
+      <h2 id="promo-title">Try the gold bot<br><span class="text-gradient">${days} days free</span></h2>
+      <p class="plan-confirm-lead">${until ? 'Sign up before the timer ends and your free trial is 10 days instead of 7.' : 'Try the bot on your own MT5 account before you pay anything.'}</p>
+      <ol class="promo-steps">
+        <li><span aria-hidden="true">1</span><div><b>Create your free account</b><small>Your email and a password. It takes a minute.</small></div></li>
+        <li><span aria-hidden="true">2</span><div><b>Open an MT5 account with a partner broker</b><small>Exness, Investizo or Lirunex, with our link.</small></div></li>
+        <li><span aria-hidden="true">3</span><div><b>Get your bot on this website</b><small>We check your account, then your bot file is ready.</small></div></li>
+      </ol>
+      <span class="plan-btn-glow"><a class="plan-btn" href="${pageUrl('signup')}" data-promo-signup><span data-plan-label>Claim my free ${days}-day trial</span></a></span>
+      <button class="promo-later" type="button" data-promo-close>Maybe later</button>
+      <p class="promo-small">No payment · partner broker account · one trial per person</p>`);
+    if (until) tick();
+  }
+
+  /* the Affiliate program of the person logged in */
+  let promo = null; // web_my_invites: code, invited, counted, earned, used, left, trial_days, friends
+  const SHARE_TEXT = 'Try the RZGS-PRO gold bot free with my link:';
+  const inviteLink = (code) => new URL(`./?ref=${encodeURIComponent(code)}`, SITE).href;
+  const telegramShare = (link) => `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(SHARE_TEXT)}`;
+
+  // Asked with the sign-in saved by supabase-js while it is still good, like the profile: no library needed here.
+  async function loadInvites(fresh = false) {
+    if (!signedIn()) return null;
+    if (promo && !fresh) return promo;
+    const session = parse(read(AUTH_KEY)) || {};
+    if (!session.access_token || (session.expires_at || 0) * 1000 < Date.now()) return promo;
+    try {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/web_my_invites`, {
+        method: 'POST',
+        headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
+        body: '{}',
+      });
+      const data = response.ok ? await response.json() : null;
+      promo = data && data.ok ? data : null;
+    } catch (e) { /* no promotions shown */ }
+    return promo;
+  }
+
+  function paintInvite(p) {
+    const link = inviteLink(p.code);
+    const step = p.counted % 5;
+    const ready = p.left > 0;
+    const lit = ready && step === 0 ? 5 : step;
+    const months = `${p.left} free month${p.left === 1 ? '' : 's'}`;
+    openPromo('invite', `<button class="plans-x plans-x--in" type="button" data-promo-close aria-label="Close">${ICONS.x}</button>
+      <div class="promo-top"><span class="promo-chip">${ICONS.share}Affiliate program</span></div>
+      <h2 id="promo-title">Invite 5 friends,<br><span class="text-gradient">get 1 month free</span></h2>
+      <p class="plan-confirm-lead">When 5 friends you invite complete 6 achievements, up to their bot's first closed trade, you get 30 days of Elite at $0. Every 5 more friends give you one more month.</p>
+      <div class="promo-meter" aria-hidden="true">${Array.from({ length: 5 }, (x, i) => `<i${i < lit ? ' class="on"' : ''}></i>`).join('')}</div>
+      <p class="promo-count">${ready ? `You have <b>${months}</b> of Elite ready.` : `<b>${step} of 5</b> friends done`}</p>
+      <div class="promo-link">
+        <input type="text" value="${link}" readonly aria-label="Your invite link" data-promo-link>
+        <button class="promo-copy" type="button" data-promo-copy>Copy</button>
+      </div>
+      <span class="plan-btn-glow"><a class="plan-btn" href="${telegramShare(link)}" target="_blank" rel="noopener"><span data-plan-label>${ICONS.send}Share on Telegram</span></a></span>
+      ${navigator.share ? `<button class="btn btn-ghost btn-block promo-more" type="button" data-promo-share="${link}">${ICONS.share}More ways to share</button>` : ''}
+      ${ready ? `<a class="btn btn-ghost btn-block promo-more" href="${pageUrl('./#plans')}" data-plans data-promo-close>Use my free month</a>` : ''}
+      <a class="promo-later" href="${pageUrl('manage-account#affiliate')}">See my friends</a>
+      <button class="promo-later" type="button" data-promo-close>Maybe later</button>`);
+  }
+
+  // By itself: the welcome box at most every 6 hours while the offer runs, every 3 days after it; the invite box once
+  // a day. Only when no other box is open and the page is in front.
+  function whenFree(run) {
+    const go = () => {
+      if (document.visibilityState !== 'visible') { document.addEventListener('visibilitychange', go, { once: true }); return; }
+      if (document.querySelector('dialog[open]') || (promoBox && promoBox.open)) return;
+      run();
+    };
+    setTimeout(go, 2800);
+  }
+  async function offerPromotion(profile, justLoggedIn) {
+    const page = document.body.dataset.authPage;
+    const last = seen();
+    if (!signedIn()) {
+      if (page || read(KNOWN_KEY)) return;
+      const wait = welcomeUntil() ? 6 * HOUR : 3 * DAY;
+      if (Date.now() - (last.welcome || 0) < wait) return;
+      whenFree(() => { markSeen('welcome'); paintWelcome(); });
+      return;
+    }
+    // logged in: not on the account's own pages but the dashboard, and not right after logging in (the plans come first)
+    if ((page && page !== 'dashboard') || justLoggedIn || !profile) return;
+    if (Date.now() - (last.invite || 0) < DAY) return;
+    const p = await loadInvites();
+    if (!p || !p.code) return;
+    whenFree(() => { markSeen('invite'); paintInvite(p); });
+  }
+
+  // the log in and sign-up pages say 10 days while the visitor's offer runs
+  function paintTrialDays() {
+    if (!welcomeUntil()) return;
+    document.querySelectorAll('[data-trial-days]').forEach((el) => { el.textContent = '10'; });
+  }
+
   /* ---------------------------------------------------------------- wiring */
   document.addEventListener('click', (event) => {
     // the dashboard has its own question to ask (auth.js)
@@ -658,6 +891,8 @@
     (await loadCheckout()).open(go.dataset.checkout);
   });
 
+  keepInvite();
+  startWelcome();
   buildNavMe();
   const profileLoaded = loadProfile();
   showBar();
@@ -683,9 +918,13 @@
       if (profile && needsPlan(profile)) whenPageIsReady(openPlans);
     });
   }
+  whenPageIsReady(paintTrialDays);
+  profileLoaded.then((profile) => whenPageIsReady(() => offerPromotion(profile, Boolean(justIn))));
   window.rzgsPlans = {
     db: getDb,
     checkout: loadCheckout,
+    // the promotions of the person logged in, once asked for (the checkout box shows the right number of free days)
+    get promo() { return promo; },
     // the dashboard, right after the email was confirmed
     offer(profile) {
       if (needsPlan(profile)) openPlans();

@@ -1049,3 +1049,234 @@ dialog.plan-confirm::backdrop {
 .acc-me {
   --edge: var(--border-strong);
 }
+
+/* ---------------------------------------------------------------- the promotions (the owner, 2026-11-04) */
+/* The welcome offer for visitors (10 days free for 24 hours) and the Affiliate program for clients. The box is the
+   confirm box with a lime edge, so it reads as an offer rather than a question. */
+dialog.promo {
+  width: min(440px, calc(100vw - 32px));
+  background: linear-gradient(180deg, rgba(166, 255, 26, 0.8), rgba(25, 211, 255, 0.28));
+}
+.promo-in {
+  padding: 26px 22px 20px;
+  text-align: center;
+}
+.promo-top {
+  display: flex;
+  justify-content: center;
+  margin: 0 40px 14px;
+}
+.promo-timer,
+.promo-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid rgba(166, 255, 26, 0.45);
+  background: rgba(166, 255, 26, 0.08);
+  font: 600 12px/1 var(--font-mono);
+  letter-spacing: 0.06em;
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}
+.promo-timer .icon,
+.promo-chip .icon {
+  width: 15px;
+  height: 15px;
+  color: var(--neon);
+}
+.promo-timer-word {
+  color: var(--text-subtle);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+.promo-chip {
+  color: var(--neon);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.promo-left {
+  color: var(--text-subtle);
+  font-variant-numeric: tabular-nums;
+}
+.promo-left b {
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 700;
+}
+.promo-friend {
+  margin: 0 0 6px;
+  color: var(--neon);
+  font: 600 12px/1.4 var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.promo-in h2 {
+  margin: 0 0 10px;
+  font: 800 30px/1.08 var(--font-display);
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+.promo-in .plan-confirm-lead {
+  max-width: 34ch;
+  margin: 0 auto 16px;
+}
+.promo-steps {
+  margin: 0 0 18px;
+  padding: 0;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.02);
+  list-style: none;
+  text-align: left;
+}
+.promo-steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 11px 14px;
+}
+.promo-steps li + li {
+  border-top: 1px solid var(--border);
+}
+.promo-steps span {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--frame);
+  color: var(--cyan);
+  font: 700 12px/1 var(--font-display);
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}
+.promo-steps b {
+  display: block;
+  color: var(--text);
+  font: 600 14px/1.3 var(--font-body);
+}
+.promo-steps small {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-subtle);
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+.promo-in a.plan-btn {
+  text-decoration: none;
+}
+.plan-btn .icon {
+  width: 18px;
+  height: 18px;
+}
+.promo-later {
+  display: block;
+  margin: 10px auto 0;
+  padding: 8px 12px;
+  border: 0;
+  background: none;
+  color: var(--text-subtle);
+  font: 500 14px/1.2 var(--font-body);
+  text-decoration: none;
+  cursor: pointer;
+}
+.promo-later:hover,
+.promo-later:focus-visible {
+  color: var(--text);
+}
+.promo-small {
+  margin: 6px 0 0;
+  color: var(--text-subtle);
+  font-size: 12px;
+}
+.promo-meter {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin: 2px 0 8px;
+}
+.promo-meter i {
+  height: 10px;
+  background: var(--surface-3);
+  clip-path: polygon(3px 0, 100% 0, calc(100% - 3px) 100%, 0 100%);
+}
+.promo-meter i.on {
+  background: var(--neon);
+}
+.promo-count {
+  margin: 0 0 14px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+.promo-count b {
+  color: var(--text);
+}
+.promo-link {
+  display: flex;
+  margin: 0 0 12px;
+  border: 1px solid var(--border-strong);
+  background: #041019;
+}
+.promo-link input {
+  flex: 1;
+  min-width: 0;
+  padding: 12px;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: 500 13px/1 var(--font-mono);
+}
+.promo-copy {
+  flex: none;
+  min-width: 76px;
+  padding: 0 14px;
+  border: 0;
+  border-left: 1px solid var(--border-strong);
+  background: var(--surface-2);
+  color: var(--cyan);
+  font: 600 12px/1 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.promo-copy:hover {
+  background: var(--surface-3);
+}
+.promo-more {
+  margin-top: 10px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .promo-meter i.on {
+    animation: promo-lit 0.5s var(--ease-out) both;
+  }
+  .promo-meter i.on:nth-child(2) { animation-delay: 0.08s; }
+  .promo-meter i.on:nth-child(3) { animation-delay: 0.16s; }
+  .promo-meter i.on:nth-child(4) { animation-delay: 0.24s; }
+  .promo-meter i.on:nth-child(5) { animation-delay: 0.32s; }
+}
+@keyframes promo-lit {
+  from { opacity: 0.2; transform: scaleX(0.4); }
+}
+
+/* the numbered steps, the timer and the chip of the promotion boxes: their cut corners get their own lines, as on
+   every cut box of the site (clip-path cuts the outline off at the corners) */
+.promo-steps span,
+.promo-timer,
+.promo-chip {
+  border-color: var(--edge);
+  background-image:
+    linear-gradient(to bottom right, transparent 50%, var(--edge) 50%, var(--edge) calc(50% + 1px), transparent calc(50% + 1px)),
+    linear-gradient(to bottom right, transparent calc(50% - 1px), var(--edge) calc(50% - 1px), var(--edge) 50%, transparent 50%);
+  background-position: left top, right bottom;
+  background-size: 6px 6px;
+  background-repeat: no-repeat;
+  background-origin: border-box;
+}
+.promo-steps span {
+  --edge: var(--frame);
+}
+.promo-timer,
+.promo-chip {
+  --edge: rgba(166, 255, 26, 0.45);
+  background-color: rgba(166, 255, 26, 0.08);
+}

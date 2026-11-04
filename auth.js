@@ -181,6 +181,12 @@
       return /^[\d\s-]+$/.test(v.trim()) && digits.length >= 4 && digits.length <= 15 ? '' : 'Enter your MT5 account number, using digits only.';
     },
     broker: (v) => (v.trim() && v.trim().length < 2 ? 'Enter the name of your broker.' : v.trim().length > 60 ? 'Use 60 characters or fewer.' : ''),
+    // a friend's referral code on the sign-up page: optional, 6 letters and numbers (spaces and dashes are left out)
+    ref_code: (v) => {
+      const code = v.replace(/[\s-]/g, '');
+      if (!code) return '';
+      return /^[A-Za-z0-9]{4,12}$/.test(code) ? '' : 'Check the code: it has 6 letters and numbers, like K7Q2MX.';
+    },
   };
 
   function setFieldError(input, message) {
@@ -510,6 +516,30 @@
     return { full_name: local.slice(0, 100), username };
   }
 
+  // The promotions (the owner, 2026-11-04): the referral code of the friend who invited this visitor (typed on the
+  // sign-up page, or kept by plans.js from their invite link), and the end of their 24-hour welcome offer (10 free
+  // days instead of 7). The database checks both.
+  function storedRef() {
+    try {
+      const ref = JSON.parse(localStorage.getItem('rzgs_ref') || 'null');
+      return ref && ref.code && Date.now() - ref.at < 30 * 86400000 ? String(ref.code).slice(0, 12) : '';
+    } catch (e) {
+      return '';
+    }
+  }
+  function promoMeta(form) {
+    const meta = {};
+    // the box on the sign-up page counts as it is (filled from the invite link, changed or emptied by the person)
+    const box = form && form.elements.ref_code;
+    const ref = box ? box.value.replace(/[\s-]/g, '').toUpperCase().slice(0, 12) : storedRef();
+    if (ref) meta.ref = ref;
+    try {
+      const until = Number(localStorage.getItem('rzgs_welcome_until')) || 0;
+      if (until > Date.now() && !localStorage.getItem('rzgs_has_account')) meta.welcome_until = new Date(until).toISOString();
+    } catch (e) { /* private window: no promotions */ }
+    return meta;
+  }
+
   async function initSignup() {
     const form = $('[data-signup-form]');
     const wrap = $('[data-signup-wrap]');
@@ -517,7 +547,7 @@
     const codeForm = $('[data-verify-form]', verify);
     const password = form.elements.create_password;
     const DRAFT_KEY = 'rz_signup_draft';
-    const DRAFT_FIELDS = ['email', 'country'];
+    const DRAFT_FIELDS = ['email', 'country', 'ref_code'];
     let email = '';
 
     const { data: { session } } = await db.auth.getSession();
@@ -532,8 +562,10 @@
     // Keep what was typed (never the password) if the page is refreshed by accident.
     try {
       const draft = JSON.parse(sessionStorage.getItem(DRAFT_KEY) || '{}');
-      DRAFT_FIELDS.forEach((name) => { if (draft[name]) form.elements[name].value = draft[name]; });
+      DRAFT_FIELDS.forEach((name) => { if (draft[name] && form.elements[name]) form.elements[name].value = draft[name]; });
     } catch (e) { /* no draft */ }
+    // came through a friend's invite link: their code is already in the box
+    if (form.elements.ref_code && !form.elements.ref_code.value) form.elements.ref_code.value = storedRef();
     form.addEventListener('input', () => {
       try {
         const draft = {};
@@ -607,8 +639,8 @@
         password: password.value,
         options: {
           emailRedirectTo: pageUrl('dashboard.html'),
-          // copied into the web_users table by the database
-          data: { ...nameFromEmail(address), country: form.elements.country.value, accepted_terms: true },
+          // copied into the web_users table by the database, with the promotions plans.js kept (web_promotions.sql)
+          data: { ...nameFromEmail(address), country: form.elements.country.value, accepted_terms: true, ...promoMeta(form) },
           captchaToken,
         },
       });
@@ -2128,6 +2160,91 @@
       if (!error) loadSessions(true);
     });
 
+    /* ----- Affiliate program: the invite link, the friends, the free months (the owner, 2026-11-04) ----- */
+    // web_my_invites (1 Website/web_promotions.sql). Friends are shown by the start of their name only.
+    const inviteBox = $('#m-invite', root);
+    const SHARE_TEXT = 'Try the RZGS-PRO gold bot free with my link:';
+    let invitesAt = 0;
+    async function loadInvites(force) {
+      if (!inviteBox || (!force && Date.now() - invitesAt < 30000)) return;
+      invitesAt = Date.now();
+      const state = $('[data-invite-state]', inviteBox);
+      let answer = null;
+      try {
+        const { data, error } = await db.rpc('web_my_invites');
+        if (!error) answer = data;
+      } catch (e) { /* said below */ }
+      const ok = Boolean(answer && answer.ok && answer.code);
+      $$('[data-invite-part]', inviteBox).forEach((part) => { part.hidden = !ok; });
+      state.hidden = ok;
+      if (!ok) {
+        invitesAt = 0;
+        state.textContent = navigator.onLine === false ? "You're offline. Check your connection and try again."
+          : 'The Affiliate program is not available yet. Please try again later.';
+        return;
+      }
+      const link = new URL(`./?ref=${encodeURIComponent(answer.code)}`, location.href).href;
+      const step = answer.counted % 5;
+      const ready = answer.left > 0;
+      const lit = ready && step === 0 ? 5 : step;
+      $$('[data-invite-meter] i', inviteBox).forEach((slot, i) => slot.classList.toggle('on', i < lit));
+      $('[data-invite-progress]', inviteBox).textContent = ready && step === 0
+        ? '5 of 5 friends done'
+        : `${step} of 5 friends done. ${5 - step} more for your next free month.`;
+      const readyBox = $('[data-invite-ready]', inviteBox);
+      readyBox.hidden = !ready;
+      if (ready) {
+        const running = ['elite', 'diamond'].includes(profile.plan) && profile.plan_expires_at && new Date(profile.plan_expires_at) > new Date();
+        $('[data-invite-ready-text]', readyBox).textContent = `You have ${answer.left} free month${answer.left === 1 ? '' : 's'} of Elite ready.`
+          + (running ? ' It can start when your current plan ends.' : ' Choose Elite and the payment is skipped.');
+      }
+      $('[data-invite-link]', inviteBox).value = link;
+      $('[data-invite-code]', inviteBox).value = answer.code;
+      $('[data-invite-telegram]', inviteBox).href = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(SHARE_TEXT)}`;
+      $('[data-invite-share]', inviteBox).hidden = !navigator.share;
+      ['invited', 'counted', 'earned', 'left'].forEach((key) => { $(`[data-invite-n="${key}"]`, inviteBox).textContent = String(answer[key]); });
+      const friends = Array.isArray(answer.friends) ? answer.friends : [];
+      $('[data-invite-count]', inviteBox).textContent = String(answer.invited);
+      $('[data-invite-empty]', inviteBox).hidden = friends.length > 0;
+      const list = $('[data-invite-list]', inviteBox);
+      list.replaceChildren(...friends.map((friend) => {
+        const item = document.createElement('li');
+        const who = document.createElement('div');
+        const name = document.createElement('b');
+        name.textContent = friend.name;
+        const when = document.createElement('small');
+        when.textContent = `Joined ${longDate(friend.joined)}`;
+        who.append(name, when);
+        const tag = document.createElement('span');
+        tag.className = 'acc-invite-tag';
+        tag.dataset.tone = friend.counted ? 'good' : '';
+        // how far the friend is: the 6 achievements of their Journey (web_promotions_2.sql)
+        const steps = Math.min(Number(friend.steps) || 1, 6);
+        tag.textContent = friend.counted ? 'Counted' : `${steps} of 6`;
+        item.append(who, tag);
+        return item;
+      }));
+    }
+    if (inviteBox) {
+      onOpen.invite = () => loadInvites(false);
+      inviteBox.addEventListener('click', async (event) => {
+        // Copy: the link, or the code alone (data-invite-copy says which)
+        const copy = event.target.closest('[data-invite-copy]');
+        const field = $(copy && copy.dataset.inviteCopy === 'code' ? '[data-invite-code]' : '[data-invite-link]', inviteBox);
+        if (copy) {
+          try {
+            await navigator.clipboard.writeText(field.value);
+            copy.textContent = 'Copied';
+          } catch (e) {
+            field.select();
+            copy.textContent = 'Select it';
+          }
+          setTimeout(() => { copy.textContent = 'Copy'; }, 1800);
+        }
+        if (event.target.closest('[data-invite-share]')) navigator.share({ title: 'RZGS-PRO', text: SHARE_TEXT, url: field.value }).catch(() => {});
+      });
+    }
+
     /* ----- a yes-or-no question, like the one before logging out ----- */
     const askBox = $('[data-ask-dialog]', root);
     function ask(title, text) {
@@ -2152,8 +2269,9 @@
     const ROUTES = {
       personal: 'personal', tools: 'personal', account: 'personal', security: 'personal',
       subscription: 'plan', plan: 'plan', usage: 'usage', report: 'usage', sessions: 'sessions', help: 'help', support: 'help', legal: 'help',
+      affiliate: 'invite', invite: 'invite', invites: 'invite', referral: 'invite',
     };
-    const ADDRESS = { personal: 'personal', plan: 'subscription', usage: 'usage', sessions: 'sessions', help: 'help' };
+    const ADDRESS = { personal: 'personal', plan: 'subscription', usage: 'usage', sessions: 'sessions', invite: 'affiliate', help: 'help' };
     let settled = false;
     function go(name) {
       const part = ROUTES[name] || 'personal';

@@ -514,8 +514,10 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
   nav>button,.seg:not(.seg-mode)>button{position:relative;z-index:1}
   nav>button[aria-selected="true"]{border-top-color:transparent}
   .seg:not(.seg-mode)>button[aria-selected="true"]{background:none;box-shadow:none}
+  /* border-box: `*` does not reach ::before, and without it the frame made the box 2px bigger than a tab, so every
+     step slid 2px too far (the owner, 4 Nov 2026: a strip under History, boxes off-centre on the phone) */
   nav::before,.seg:not(.seg-mode)::before{content:"";position:absolute;top:0;bottom:0;left:0;width:calc(100% / var(--count));
-    border:1px solid transparent;border-image:var(--hud-callout) 16 fill / 16px;pointer-events:none;
+    box-sizing:border-box;border:1px solid transparent;border-image:var(--hud-callout) 16 fill / 16px;pointer-events:none;
     transform:translateX(calc(var(--pos) * 100%))}
   @media (min-width:1024px){
     nav>button[aria-selected="true"]{background:none;box-shadow:none;border-top-color:var(--line)}
@@ -525,6 +527,22 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
   @media (prefers-reduced-motion:no-preference){
     nav::before,.seg:not(.seg-mode)::before{transition:transform .42s var(--sp-soft)}
   }
+}
+/* The menu moves (the owner, 4 Nov 2026: "add animation in these menu"). A tab dips when it is pressed, its icon
+   pops as it is chosen while the lit box slides to it, and the screen or part it opens rises in. Nothing waits for
+   an animation: a tap works at once, and a new tap simply starts the next one. */
+@media (prefers-reduced-motion:no-preference){
+  nav>button,.seg:not(.seg-mode)>button{transition:color .25s,background-color .25s}
+  nav>button svg{transition:transform .5s var(--sp)}
+  nav>button:active svg{transform:scale(.84);transition-duration:.08s}
+  nav>button[aria-selected="true"] svg{animation:tab-pop .55s var(--sp)}
+  @keyframes tab-pop{0%{transform:scale(.78)}50%{transform:scale(1.18)}100%{transform:scale(1)}}
+  .seg:not(.seg-mode)>button:active{transform:scale(.96);transition:transform .08s}
+  .view:not([hidden]){animation:view-in .34s cubic-bezier(.16,1,.3,1)}
+  @keyframes view-in{from{opacity:0;transform:translateY(10px)}}
+}
+@media (prefers-reduced-motion:no-preference) and (hover:hover) and (min-width:1024px){
+  nav>button:hover svg{transform:translateX(3px)}
 }
 /* ==========================================================================
    The link screen (2 Nov 2026). Not a sign-in card like the website's: the console with its light off, and a

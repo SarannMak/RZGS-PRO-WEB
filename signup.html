@@ -191,6 +191,12 @@
                   </select>
                   <p class="field-error" id="signup-country-error" hidden></p>
                 </div>
+                <!-- a friend's code (the owner, 2026-11-04): filled in from their invite link, or typed here -->
+                <div class="field">
+                  <label for="signup-ref">Referral code <span class="field-opt">(optional)</span></label>
+                  <input class="input input-code" id="signup-ref" name="ref_code" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="12" placeholder="Enter a referral code" aria-describedby="signup-ref-error">
+                  <p class="field-error" id="signup-ref-error" hidden></p>
+                </div>
                 <div class="check-field">
                 <input id="signup-terms" name="accepted_terms" type="checkbox" required aria-describedby="signup-terms-error">
                 <label for="signup-terms">I accept the <a href="terms" target="_blank" rel="noopener">Terms &amp; Conditions</a> and the <a href="privacy" target="_blank" rel="noopener">Privacy Policy</a>. <span class="req" aria-hidden="true">*</span></label>
@@ -252,10 +258,10 @@
           <aside class="trial-panel" aria-label="Free trial">
             <div class="trial-banner">
               <span class="trial-banner-icon"><svg class="icon" aria-hidden="true"><use href="#i-gift"/></svg></span>
-              <span class="trial-banner-text"><strong>Free <span class="nowrap">7-day</span> trial</strong><small>No payment needed to start.</small></span>
+              <span class="trial-banner-text"><strong>Free <span class="nowrap"><span data-trial-days>7</span>-day</span> trial</strong><small>No payment needed to start.</small></span>
             </div>
             <ul class="check-list">
-              <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>7-day license after approval</li>
+              <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span><span data-trial-days>7</span>-day license after approval</span></li>
               <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>1 MT5 trading account</li>
               <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Setup help on Telegram</li>
             </ul>

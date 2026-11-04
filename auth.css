@@ -3852,3 +3852,278 @@ html:has(body.acc-page) {
   background-origin: border-box;
   background-color: #051118;
 }
+
+/* ---------- the Manage account menu moves (the owner, 4 Nov 2026: "add animation in these menu") ----------
+   A row's picture lifts under the pointer and dips when pressed; the chosen row's picture pops as its box lights
+   up, and the part it opens rises in. A tap works at once, and with "reduce motion" nothing moves. */
+@media (prefers-reduced-motion: no-preference) {
+  .acc-chip-ico {
+    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), filter var(--dur-fast) var(--ease-out);
+  }
+  .acc-chips button:active .acc-chip-ico {
+    transform: scale(0.88);
+    transition-duration: 0.08s;
+  }
+  .acc-chips button[aria-selected="true"] .acc-chip-ico {
+    animation: acc-chip-pop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .acc-part:not([hidden]) {
+    animation: acc-part-in 0.36s var(--ease-out);
+  }
+}
+@media (prefers-reduced-motion: no-preference) and (hover: hover) {
+  .acc-chips button:hover .acc-chip-ico {
+    transform: translateY(-2px) rotate(-4deg);
+    filter: brightness(1.12);
+  }
+}
+@keyframes acc-chip-pop {
+  0% {
+    transform: scale(0.78);
+  }
+  55% {
+    transform: scale(1.16);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes acc-part-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+/* ---------- Affiliate program (the owner, 2026-11-04): invite 5 friends, get 1 month of Elite free ---------- */
+.acc-chip-ico[data-tone="invite"] {
+  background: linear-gradient(135deg, #a6ff1a, #1f9e6a);
+  color: #04131a;
+}
+.acc-invite-hero {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 14px 16px;
+}
+.acc-invite-ico {
+  width: 52px;
+  height: 52px;
+}
+.acc-invite-ico .icon {
+  width: 26px;
+  height: 26px;
+}
+.acc-invite-copy h3 {
+  margin: 0 0 4px;
+  color: var(--text);
+  font: 700 20px/1.2 var(--font-display);
+}
+.acc-invite-copy p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.acc-invite-meter {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+.acc-invite-meter i {
+  height: 12px;
+  background: var(--surface-3);
+  clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%);
+}
+.acc-invite-meter i.on {
+  background: var(--neon);
+}
+.acc-invite-progress {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+.acc-invite-ready {
+  display: flex;
+  flex-wrap: wrap;
+  grid-column: 1 / -1;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid rgba(166, 255, 26, 0.45);
+  background: rgba(166, 255, 26, 0.07);
+}
+.acc-invite-ready[hidden] {
+  display: none;
+}
+.acc-invite-ready p {
+  margin: 0;
+  color: var(--text);
+  font-weight: 600;
+}
+.acc-invite-link {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  margin: 12px 0;
+}
+.acc-invite-link input {
+  flex: 1;
+  min-width: 0;
+  padding: 11px 12px;
+  border: 1px solid var(--border-strong);
+  background: #041019;
+  color: var(--text);
+  font: 500 14px/1 var(--font-mono);
+}
+.acc-invite-code {
+  color: var(--neon);
+  font-family: var(--font-mono);
+  letter-spacing: 0.12em;
+}
+.acc-invites {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.acc-invites li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+}
+.acc-invites li:first-child {
+  border-top: 0;
+}
+.acc-invites b {
+  display: block;
+  color: var(--text);
+  font-weight: 600;
+}
+.acc-invites small {
+  color: var(--text-subtle);
+  font-size: 12.5px;
+}
+.acc-invite-tag {
+  flex: none;
+  padding: 5px 9px;
+  border: 1px solid var(--border-strong);
+  color: var(--text-subtle);
+  font: 600 11px/1 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.acc-invite-tag[data-tone="good"] {
+  border-color: rgba(166, 255, 26, 0.5);
+  color: var(--neon);
+}
+.acc-invite-steps {
+  display: grid;
+  gap: 12px;
+  margin: 10px 0 14px;
+  padding: 0;
+  list-style: none;
+}
+.acc-invite-steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.acc-invite-steps span {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--frame);
+  color: var(--cyan);
+  font: 700 13px/1 var(--font-display);
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}
+.acc-invite-steps b {
+  color: var(--text);
+}
+.acc-invite-steps p {
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.acc-invite-rules {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text-subtle);
+  font-size: 13px;
+  line-height: 1.6;
+}
+@media (min-width: 720px) {
+  .acc-invite-steps {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .acc-invite-meter i.on {
+    animation: acc-invite-lit 0.5s var(--ease-out) both;
+  }
+  .acc-invite-meter i.on:nth-child(2) { animation-delay: 0.08s; }
+  .acc-invite-meter i.on:nth-child(3) { animation-delay: 0.16s; }
+  .acc-invite-meter i.on:nth-child(4) { animation-delay: 0.24s; }
+  .acc-invite-meter i.on:nth-child(5) { animation-delay: 0.32s; }
+}
+@keyframes acc-invite-lit {
+  from {
+    opacity: 0.2;
+    transform: scaleX(0.4);
+  }
+}
+
+/* ---------- the referral code (the owner, 2026-11-04): its own copy box, and a box on the sign-up page ---------- */
+.field .field-opt {
+  color: var(--text-subtle);
+  font-weight: 400;
+}
+.input-code {
+  font-family: var(--font-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.input-code::placeholder {
+  font-family: var(--font-body);
+  letter-spacing: normal;
+  text-transform: none;
+}
+.acc-invite-sub {
+  margin: 18px 0 4px;
+  color: var(--text-subtle);
+  font: 500 12px/1.2 var(--font-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.acc-invite-link .acc-invite-code {
+  color: var(--neon);
+  font: 700 16px/1 var(--font-mono);
+  letter-spacing: 0.24em;
+}
+/* the 1 2 3 boxes of How it works: their cut corners get their own lines, as on every cut box of the site
+   (clip-path cuts the outline off at the corners) */
+.acc-invite-steps span {
+  --edge: var(--frame);
+  border-color: var(--edge);
+  background-image:
+    linear-gradient(to bottom right, transparent 50%, var(--edge) 50%, var(--edge) calc(50% + 1px), transparent calc(50% + 1px)),
+    linear-gradient(to bottom right, transparent calc(50% - 1px), var(--edge) calc(50% - 1px), var(--edge) 50%, transparent 50%);
+  background-position: left top, right bottom;
+  background-size: 6px 6px;
+  background-repeat: no-repeat;
+  background-origin: border-box;
+}
+
+/* the two share buttons: side by side on a computer, one under the other on a phone (each needs about 220px) */
+.acc-invite-share > .btn {
+  flex: 1 1 220px;
+}

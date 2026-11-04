@@ -174,8 +174,10 @@
 
   const paintLoading = () => paint(`<div class="co-loading" role="status">${SPINNER}<span>One moment...</span></div>`, { title: 'One moment', pose: 'rest' });
 
+  // A free month from the Affiliate program has no payment step (the order's amount is $0).
+  const freeMonth = () => Boolean(order && order.reward === 'free_month');
   function rail(plan, at) {
-    const steps = PLANS[plan].steps;
+    const steps = PLANS[plan].steps.filter((step) => !(step === 'pay' && freeMonth()));
     const now = steps.indexOf(at);
     return `<ol class="co-rail" aria-label="Steps">${steps.map((step, index) => {
       const state = index < now ? 'done' : index === now ? 'now' : 'todo';
@@ -183,7 +185,9 @@
     }).join('')}</ol>`;
   }
 
-  const planLine = (plan) => `<p class="co-plan"><b>${PLANS[plan].name}</b> ${PLANS[plan].amount} · ${PLANS[plan].days} days · 1 MT5 account</p>`;
+  // the free trial is 10 days for an account made during the welcome offer (plans.js knows, from web_my_invites)
+  const trialDays = () => (window.rzgsPlans && window.rzgsPlans.promo && window.rzgsPlans.promo.trial_days) || PLANS.trial.days;
+  const planLine = (plan) => `<p class="co-plan"><b>${PLANS[plan].name}</b> ${freeMonth() ? '$0 · free month' : PLANS[plan].amount} · ${plan === 'trial' ? trialDays() : PLANS[plan].days} days · 1 MT5 account</p>`;
   const message = (note) => `<p class="co-msg" data-co-msg role="alert"${note ? ' data-tone="error"' : ' hidden'}>${esc(note || '')}</p>`;
   const mainButton = (label, attributes = '') => `<span class="plan-btn-glow"><button class="plan-btn" ${attributes}><span data-plan-label>${label}</span></button></span>`;
   // Stuck on any step: the words go to our team on Telegram, with the order number already typed.
