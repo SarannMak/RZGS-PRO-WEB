@@ -621,6 +621,42 @@
     if (waiting && EMAIL_RE.test(waiting)) showCode(waiting, false);
     else captcha.start();
 
+    // The referral code is asked about while it is typed (web_promotions_3.sql): "Code found", or not found. When the
+    // server can't be asked, nothing is said and the sign-up goes on as before.
+    const refBox = form.elements.ref_code;
+    const refOk = $('[data-ref-ok]', form);
+    const NOT_FOUND = "We can't find this code. Check it with your friend, or leave the box empty.";
+    const cleanRef = (value) => value.replace(/[\s-]/g, '').toUpperCase();
+    let refTimer = 0;
+    let refAsked = { code: '', found: null };
+    async function refFound(code) {
+      if (refAsked.code === code) return refAsked.found;
+      let found = null;
+      try {
+        const { data, error } = await db.rpc('web_check_ref', { p_code: code });
+        if (!error && typeof data === 'boolean') found = data;
+      } catch (e) { /* not known */ }
+      refAsked = { code, found };
+      return found;
+    }
+    async function paintRef() {
+      const code = cleanRef(refBox.value);
+      if (!code || !/^[A-Z0-9]{4,12}$/.test(code)) { refOk.hidden = true; return; }
+      const found = await refFound(code);
+      if (cleanRef(refBox.value) !== code) return; // typed on since
+      refOk.hidden = found !== true;
+      if (found === false) setFieldError(refBox, NOT_FOUND);
+      else if (found === true) setFieldError(refBox, '');
+    }
+    if (refBox && refOk) {
+      refBox.addEventListener('input', () => {
+        refOk.hidden = true;
+        clearTimeout(refTimer);
+        refTimer = setTimeout(paintRef, 450);
+      });
+      if (refBox.value) paintRef();
+    }
+
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       clearMessage();
@@ -629,6 +665,15 @@
       const submit = $('[data-submit]', form);
       const address = form.elements.email.value.trim();
       setBusy(submit, true);
+      // a code that belongs to nobody is not sent: the friend would not be linked
+      const refCode = refBox ? cleanRef(refBox.value) : '';
+      if (refCode && (await refFound(refCode)) === false) {
+        setBusy(submit, false);
+        setFieldError(refBox, NOT_FOUND);
+        shakeField(refBox);
+        refBox.focus();
+        return;
+      }
       const captchaToken = await captcha.take();
       if (captchaToken === null) {
         setBusy(submit, false);
@@ -2165,6 +2210,7 @@
     const inviteBox = $('#m-invite', root);
     const SHARE_TEXT = 'Try the RZGS-PRO gold bot free with my link:';
     let invitesAt = 0;
+    let justJoined = false;
     async function loadInvites(force) {
       if (!inviteBox || (!force && Date.now() - invitesAt < 30000)) return;
       invitesAt = Date.now();
@@ -2198,6 +2244,12 @@
         $('[data-invite-ready-text]', readyBox).textContent = `You have ${answer.left} free month${answer.left === 1 ? '' : 's'} of Elite ready.`
           + (running ? ' It can start when your current plan ends.' : ' Choose Elite and the payment is skipped.');
       }
+      // who invited this person, and the box to add a code while the account has not started (web_promotions_3.sql)
+      const by = $('[data-invite-by]', inviteBox);
+      by.hidden = !answer.invited_by;
+      by.textContent = answer.invited_by ? `${justJoined ? 'Code added. ' : ''}You were invited by ${answer.invited_by}.` : '';
+      justJoined = false;
+      $('[data-invite-join]', inviteBox).hidden = answer.can_add_code !== true;
       $('[data-invite-link]', inviteBox).value = link;
       $('[data-invite-code]', inviteBox).value = answer.code;
       $('[data-invite-telegram]', inviteBox).href = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(SHARE_TEXT)}`;
@@ -2242,6 +2294,43 @@
           setTimeout(() => { copy.textContent = 'Copy'; }, 1800);
         }
         if (event.target.closest('[data-invite-share]')) navigator.share({ title: 'RZGS-PRO', text: SHARE_TEXT, url: field.value }).catch(() => {});
+      });
+      // Invited by a friend? Their code, added once while this account has not started
+      const JOIN_WHY = {
+        not_found: "We can't find this code. Check it with your friend.",
+        own: "That's your own code. Type your friend's code.",
+        newer: "This code is from an account made after yours, so it can't be added.",
+        not_new: 'A code can only be added before your first bot. Your account has already started.',
+      };
+      inviteBox.addEventListener('submit', async (event) => {
+        const form = event.target.closest('[data-invite-join-form]');
+        if (!form) return;
+        event.preventDefault();
+        const field = form.elements.code;
+        const msg = $('[data-invite-join-msg]', inviteBox);
+        const say = (text, tone) => { msg.textContent = text; msg.dataset.tone = tone; msg.hidden = false; };
+        const code = field.value.replace(/[\s-]/g, '').toUpperCase();
+        if (!/^[A-Z0-9]{4,12}$/.test(code)) {
+          say('Check the code: it has 6 letters and numbers, like K7Q2MX.', 'error');
+          field.focus();
+          return;
+        }
+        const button = form.querySelector('button');
+        setBusy(button, true);
+        let answer = null;
+        try {
+          const { data, error } = await db.rpc('web_set_inviter', { p_code: code });
+          if (!error) answer = data;
+        } catch (e) { /* said below */ }
+        setBusy(button, false);
+        if (answer && answer.ok) {
+          justJoined = true;
+          msg.hidden = true;
+          field.value = '';
+          await loadInvites(true);
+          return;
+        }
+        say((answer && JOIN_WHY[answer.err]) || (navigator.onLine === false ? "You're offline. Check your connection and try again." : 'Something went wrong. Please try again.'), 'error');
       });
     }
 

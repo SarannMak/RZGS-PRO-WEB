@@ -4127,3 +4127,26 @@ html:has(body.acc-page) {
 .acc-invite-share > .btn {
   flex: 1 1 220px;
 }
+
+/* the referral code check (the owner, 2026-11-06): "Code found" under the sign-up box, and who invited this person */
+.field-ok {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 6px 0 0;
+  color: var(--neon);
+  font-size: 13px;
+}
+.field-ok[hidden] {
+  display: none;
+}
+.field-ok .icon {
+  width: 15px;
+  height: 15px;
+}
+.acc-invite-by {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--text-subtle);
+  font-size: 13px;
+}

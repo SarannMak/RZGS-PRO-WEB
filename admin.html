@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
-  <title>Orders — RZGS-PRO</title>
+  <title>Admin — RZGS-PRO</title>
   <meta name="robots" content="noindex">
   <meta name="theme-color" content="#030c13">
   <meta name="color-scheme" content="dark">
@@ -12,61 +12,235 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
   <link rel="stylesheet" href="style.css?v=38">
-  <link rel="stylesheet" href="auth.css?v=24">
-  <style>
-    .adm { padding-top: 32px; padding-bottom: 64px; }
-    .adm h1 { margin: 0 0 6px; font: 800 30px/1.1 var(--font-display); }
-    .adm-card { margin-top: 12px; padding: 14px; border: 1px solid var(--border-strong); background: var(--bg); }
-    .adm-card h3 { margin: 0 0 8px; font: 700 18px/1.2 var(--font-display); }
-    .adm-card dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 14px; margin: 0 0 10px; font-size: 14px; }
-    .adm-card dt { color: var(--text-subtle); font: 500 12px/1.6 var(--font-mono); }
-    .adm-card dd { margin: 0; overflow-wrap: anywhere; }
-    .adm-why { margin: 0 0 12px; padding: 10px 12px; border-left: 2px solid var(--warn); background: rgba(255, 210, 63, 0.08); color: var(--text-muted); font-size: 14px; }
-    .adm-note { width: 100%; min-height: 44px; margin-bottom: 10px; padding: 8px 12px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text); font: 400 14px/1.4 var(--font-body); }
-    .adm-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .adm-table th, .adm-table td { padding: 8px 10px 8px 0; border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
-    .adm-table th { color: var(--text-subtle); font: 500 11px/1.3 var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; }
-    .adm-scroll { overflow-x: auto; }
-    .adm-empty { margin: 8px 0 0; color: var(--text-subtle); font-size: 14px; }
-    .adm-top { display: flex; margin: 14px 0 20px; }
-    .adm-give { margin-top: 12px; }
-    .adm-give .btn { width: 100%; }
-    .adm-why[hidden] { display: none; }
-    .adm-why code { font: 600 14px/1.6 var(--font-mono); user-select: all; }
-    .adm .dash-panel + .dash-panel { margin-top: 16px; }
-  </style>
+  <link rel="stylesheet" href="auth.css?v=25">
+  <link rel="stylesheet" href="admin.css?v=1">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0" defer></script>
-  <script src="admin.js?v=1" defer></script>
+  <script src="admin.js?v=2" defer></script>
 </head>
-<body>
-  <main class="container adm" id="main">
-    <h1>Orders</h1>
-    <p class="dash-hint" data-adm-status>Loading...</p>
-    <div class="adm-top"><a class="btn btn-ghost btn-sm" href="dashboard">My dashboard</a></div>
+<body class="adm-page">
+  <!-- The owner's page (rzgspro.com/admin, the owner, 6 Nov 2026): every part of the site in one place. Only the
+       website accounts in rz_config checkout_admins get answers from the server (web_admin.sql, the checkout function). -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <symbol id="a-overview" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></symbol>
+    <symbol id="a-orders" viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></symbol>
+    <symbol id="a-clients" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+    <symbol id="a-bots" viewBox="0 0 24 24"><path d="M12 8V4H8"/><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M2 14h2M20 14h2M15 13v2M9 13v2"/></symbol>
+    <symbol id="a-signups" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></symbol>
+    <symbol id="a-statement" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v4a2 2 0 0 0 2 2h4M10 9H8M16 13H8M16 17H8"/></symbol>
+    <symbol id="a-reports" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16V9M12 16V5M17 16v-4"/></symbol>
+    <symbol id="a-affiliate" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.59 13.51 6.83 3.98M15.41 6.51l-6.82 3.98"/></symbol>
+    <symbol id="a-traffic" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
+    <symbol id="a-admins" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></symbol>
+    <symbol id="a-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></symbol>
+    <symbol id="a-send" viewBox="0 0 24 24"><path d="M14.54 21.69a.5.5 0 0 0 .94-.03l6.5-19a.5.5 0 0 0-.64-.63l-19 6.5a.5.5 0 0 0-.02.93l7.93 3.18a2 2 0 0 1 1.11 1.11z"/><path d="m21.85 2.15-10.94 10.94"/></symbol>
+    <symbol id="a-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+  </svg>
 
-    <section class="dash-panel" data-adm-area hidden>
-      <h2>Waiting for you</h2>
-      <div data-adm-waiting></div>
-    </section>
+  <div class="adm-shell">
+    <header class="adm-head">
+      <h1>Admin</h1>
+      <div class="adm-head-act">
+        <span class="adm-updated" data-adm-updated aria-live="polite"></span>
+        <button class="btn btn-ghost btn-sm" type="button" data-adm-refresh><svg class="icon" aria-hidden="true"><use href="#a-refresh"/></svg>Refresh</button>
+        <a class="btn btn-ghost btn-sm" href="dashboard">My dashboard</a>
+      </div>
+    </header>
+    <p class="adm-status" data-adm-status>Loading...</p>
 
-    <section class="dash-panel" data-adm-area hidden>
-      <h2>Give a Diamond plan</h2>
-      <p class="dash-hint">Diamond is sold on Telegram. When the client has paid you, type their website email and their MT5 number. Their bot, passwords and file appear on their dashboard, for 30 days from now.</p>
-      <form class="adm-give" data-adm-give novalidate>
-        <input class="adm-note" name="email" type="email" inputmode="email" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="The client's website email" aria-label="The client's website email">
-        <input class="adm-note" name="account" type="text" inputmode="numeric" autocomplete="off" placeholder="Their MT5 number" aria-label="Their MT5 number">
-        <p class="adm-why" data-adm-give-msg role="status" hidden></p>
-        <button class="btn btn-primary btn-sm" type="submit" data-adm-give-go>Give Diamond</button>
-      </form>
-    </section>
+    <div class="adm-body">
+      <nav class="adm-nav" aria-label="Admin">
+        <a href="#overview" data-adm-go="overview"><svg aria-hidden="true"><use href="#a-overview"/></svg>Overview</a>
+        <a href="#orders" data-adm-go="orders"><svg aria-hidden="true"><use href="#a-orders"/></svg>Orders<span class="adm-badge" data-adm-badge="orders" hidden></span></a>
+        <a href="#clients" data-adm-go="clients"><svg aria-hidden="true"><use href="#a-clients"/></svg>Clients<span class="adm-badge adm-badge--quiet" data-adm-badge="clients" hidden></span></a>
+        <a href="#bots" data-adm-go="bots"><svg aria-hidden="true"><use href="#a-bots"/></svg>Bots</a>
+        <a href="#signups" data-adm-go="signups"><svg aria-hidden="true"><use href="#a-signups"/></svg>Sign-ups</a>
+        <a href="#statement" data-adm-go="statement"><svg aria-hidden="true"><use href="#a-statement"/></svg>Statement</a>
+        <a href="#reports" data-adm-go="reports"><svg aria-hidden="true"><use href="#a-reports"/></svg>Reports</a>
+        <a href="#affiliate" data-adm-go="affiliate"><svg aria-hidden="true"><use href="#a-affiliate"/></svg>Affiliate</a>
+        <a href="#traffic" data-adm-go="traffic"><svg aria-hidden="true"><use href="#a-traffic"/></svg>Traffic</a>
+        <a href="#admins" data-adm-go="admins"><svg aria-hidden="true"><use href="#a-admins"/></svg>Admins</a>
+      </nav>
 
-    <section class="dash-panel" data-adm-area hidden>
-      <h2>Latest</h2>
-      <div class="adm-scroll"><table class="adm-table">
-        <thead><tr><th>When</th><th>Client</th><th>Plan</th><th>Broker</th><th>MT5</th><th>Paid</th><th>Stage</th></tr></thead>
-        <tbody data-adm-recent></tbody>
-      </table></div>
-    </section>
-  </main>
+      <main class="adm-main" id="main">
+        <!-- OVERVIEW -->
+        <section class="adm-view" data-adm-view="overview" hidden>
+          <div class="adm-view-head">
+            <h2>Overview</h2>
+            <div class="adm-seg" role="group" aria-label="Period" data-adm-period="overview">
+              <button type="button" data-period="daily" aria-pressed="true">Today</button>
+              <button type="button" data-period="weekly" aria-pressed="false">This week</button>
+              <button type="button" data-period="monthly" aria-pressed="false">This month</button>
+            </div>
+          </div>
+          <div class="adm-tiles" data-adm-tiles="overview"></div>
+          <div class="adm-two">
+            <section class="dash-panel"><h2>Sign-ups, last 30 days</h2><div data-adm-chart="signups"></div></section>
+            <section class="dash-panel"><h2>Plan income, last 30 days ($)</h2><div data-adm-chart="income"></div></section>
+          </div>
+        </section>
+
+        <!-- ORDERS (the checkout function's admin actions) -->
+        <section class="adm-view" data-adm-view="orders" hidden>
+          <div class="adm-view-head"><h2>Orders</h2></div>
+          <section class="dash-panel">
+            <h2>Waiting for you</h2>
+            <div data-adm-waiting><p class="adm-empty">Loading...</p></div>
+          </section>
+          <section class="dash-panel">
+            <h2>Give a Diamond plan</h2>
+            <p class="dash-hint">Diamond is sold on Telegram. When the client has paid you, type their website email and their MT5 number. Their bot, passwords and file appear on their dashboard, for 30 days from now.</p>
+            <form class="adm-give" data-adm-give novalidate>
+              <input class="adm-input" name="email" type="email" inputmode="email" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="The client's website email" aria-label="The client's website email">
+              <input class="adm-input" name="account" type="text" inputmode="numeric" autocomplete="off" placeholder="Their MT5 number" aria-label="Their MT5 number">
+              <p class="adm-why" data-adm-give-msg role="status" hidden></p>
+              <button class="btn btn-primary btn-sm" type="submit" data-adm-give-go>Give Diamond</button>
+            </form>
+          </section>
+          <section class="dash-panel">
+            <h2>Latest orders</h2>
+            <div class="adm-scroll"><table class="adm-table">
+              <thead><tr><th>When</th><th>Client</th><th>Plan</th><th>Broker</th><th>MT5</th><th>Paid</th><th>Stage</th></tr></thead>
+              <tbody data-adm-recent></tbody>
+            </table></div>
+          </section>
+        </section>
+
+        <!-- CLIENTS -->
+        <section class="adm-view" data-adm-view="clients" hidden>
+          <div class="adm-view-head"><h2>Clients</h2><span class="adm-count" data-adm-count="clients"></span></div>
+          <div class="adm-tools">
+            <label class="adm-search"><svg aria-hidden="true"><use href="#a-search"/></svg><input type="search" placeholder="Search name, email, MT5, Telegram" aria-label="Search clients" data-adm-search="clients"></label>
+            <div class="adm-chips" role="group" aria-label="Show" data-adm-filter="clients">
+              <button type="button" data-filter="all" aria-pressed="true">All</button>
+              <button type="button" data-filter="running" aria-pressed="false">Plan running</button>
+              <button type="button" data-filter="trial" aria-pressed="false">Free</button>
+              <button type="button" data-filter="elite" aria-pressed="false">Elite</button>
+              <button type="button" data-filter="diamond" aria-pressed="false">Diamond</button>
+              <button type="button" data-filter="ended" aria-pressed="false">Plan ended</button>
+              <button type="button" data-filter="none" aria-pressed="false">No plan</button>
+              <button type="button" data-filter="unconfirmed" aria-pressed="false">Email not confirmed</button>
+            </div>
+          </div>
+          <section class="dash-panel adm-flush"><div class="adm-scroll" data-adm-table="clients"></div></section>
+        </section>
+
+        <!-- BOTS: who uses the bot, who doesn't -->
+        <section class="adm-view" data-adm-view="bots" hidden>
+          <div class="adm-view-head"><h2>Bots</h2></div>
+          <p class="adm-lead">Who uses the bot and who doesn't, from what each bot reports to the control app.</p>
+          <div class="adm-tiles" data-adm-tiles="bots"></div>
+          <div data-adm-bot-groups></div>
+        </section>
+
+        <!-- SIGN-UPS -->
+        <section class="adm-view" data-adm-view="signups" hidden>
+          <div class="adm-view-head">
+            <h2>Sign-ups</h2>
+            <div class="adm-seg" role="group" aria-label="Show" data-adm-period="signups">
+              <button type="button" data-period="7" aria-pressed="true">Last 7 days</button>
+              <button type="button" data-period="30" aria-pressed="false">Last 30 days</button>
+              <button type="button" data-period="all" aria-pressed="false">All</button>
+            </div>
+          </div>
+          <section class="dash-panel"><h2>Sign-ups, last 30 days</h2><div data-adm-chart="signups2"></div></section>
+          <section class="dash-panel adm-flush"><div class="adm-scroll" data-adm-table="signups"></div></section>
+        </section>
+
+        <!-- STATEMENT -->
+        <section class="adm-view" data-adm-view="statement" hidden>
+          <div class="adm-view-head">
+            <h2>Statement</h2>
+            <div class="adm-seg" role="group" aria-label="Statement" data-adm-period="statement">
+              <button type="button" data-period="daily" aria-pressed="true">Daily</button>
+              <button type="button" data-period="weekly" aria-pressed="false">Weekly</button>
+              <button type="button" data-period="monthly" aria-pressed="false">Monthly</button>
+            </div>
+          </div>
+          <p class="adm-lead" data-adm-statement-period></p>
+          <div class="adm-statement" data-adm-statement></div>
+          <section class="dash-panel">
+            <h2>Income from brokers</h2>
+            <p class="dash-hint">Read live from the Exness, Lirunex and Investizo partner areas. It takes a few seconds.</p>
+            <div data-adm-brokers></div>
+            <div class="dash-row adm-row-left"><button class="btn btn-ghost btn-sm" type="button" data-adm-load-brokers>Load broker income</button></div>
+          </section>
+          <section class="dash-panel">
+            <h2>Send to Telegram</h2>
+            <p class="dash-hint">The same statement as the one sent at 20:00, as Excel and PDF, to your report group now. It gets its own statement number.</p>
+            <div class="dash-row adm-row-left"><button class="btn btn-primary btn-sm" type="button" data-adm-send="statement"><svg class="icon" aria-hidden="true"><use href="#a-send"/></svg><span>Send this statement</span></button></div>
+            <p class="form-msg" data-adm-send-msg="statement" role="status" hidden></p>
+          </section>
+        </section>
+
+        <!-- REPORTS -->
+        <section class="adm-view" data-adm-view="reports" hidden>
+          <div class="adm-view-head"><h2>Reports</h2></div>
+          <section class="dash-panel">
+            <div class="adm-panel-head">
+              <h2>Payment statement</h2>
+              <div class="adm-seg adm-seg--sm" role="group" aria-label="Period" data-adm-period="payments">
+                <button type="button" data-period="today" aria-pressed="false">Today</button>
+                <button type="button" data-period="week" aria-pressed="false">This week</button>
+                <button type="button" data-period="month" aria-pressed="true">This month</button>
+                <button type="button" data-period="all" aria-pressed="false">All</button>
+              </div>
+            </div>
+            <div class="adm-tiles adm-tiles--sm" data-adm-tiles="payments"></div>
+            <div class="adm-scroll" data-adm-table="payments"></div>
+            <div class="dash-row adm-row-left"><button class="btn btn-ghost btn-sm" type="button" data-adm-send="payments"><svg class="icon" aria-hidden="true"><use href="#a-send"/></svg><span>Send to Telegram</span></button></div>
+            <p class="form-msg" data-adm-send-msg="payments" role="status" hidden></p>
+          </section>
+          <section class="dash-panel">
+            <div class="adm-panel-head">
+              <h2>Customer list</h2>
+              <div class="adm-seg adm-seg--sm" role="group" aria-label="Period" data-adm-period="users">
+                <button type="button" data-period="today" aria-pressed="false">Today</button>
+                <button type="button" data-period="week" aria-pressed="false">This week</button>
+                <button type="button" data-period="month" aria-pressed="true">This month</button>
+                <button type="button" data-period="all" aria-pressed="false">All</button>
+              </div>
+            </div>
+            <div class="adm-scroll" data-adm-table="users"></div>
+            <div class="dash-row adm-row-left"><button class="btn btn-ghost btn-sm" type="button" data-adm-send="users"><svg class="icon" aria-hidden="true"><use href="#a-send"/></svg><span>Send to Telegram</span></button></div>
+            <p class="form-msg" data-adm-send-msg="users" role="status" hidden></p>
+          </section>
+        </section>
+
+        <!-- AFFILIATE -->
+        <section class="adm-view" data-adm-view="affiliate" hidden>
+          <div class="adm-view-head"><h2>Affiliate program</h2></div>
+          <p class="adm-lead">A friend counts after 6 achievements, up to their bot's first closed trade. Every 5 friends who count give their inviter one month of Elite free.</p>
+          <div class="adm-tiles" data-adm-tiles="affiliate"></div>
+          <section class="dash-panel adm-flush"><div class="adm-scroll" data-adm-table="affiliate"></div></section>
+        </section>
+
+        <!-- TRAFFIC -->
+        <section class="adm-view" data-adm-view="traffic" hidden>
+          <div class="adm-view-head">
+            <h2>Traffic</h2>
+            <div class="adm-seg" role="group" aria-label="Period" data-adm-period="traffic">
+              <button type="button" data-period="daily" aria-pressed="true">Today</button>
+              <button type="button" data-period="weekly" aria-pressed="false">This week</button>
+              <button type="button" data-period="monthly" aria-pressed="false">This month</button>
+            </div>
+          </div>
+          <p class="adm-lead">Counted by the website since 6 Nov 2026: a random number in each browser, no names. A browser that asks not to be tracked is not counted.</p>
+          <div class="adm-tiles" data-adm-tiles="traffic"></div>
+          <section class="dash-panel"><h2>Visitors, last 30 days</h2><div data-adm-chart="visitors"></div></section>
+          <div class="adm-two">
+            <section class="dash-panel adm-flush"><h2 class="adm-flush-title">Most opened pages</h2><div class="adm-scroll" data-adm-table="pages"></div></section>
+            <section class="dash-panel adm-flush"><h2 class="adm-flush-title">Most clicked</h2><div class="adm-scroll" data-adm-table="clicks"></div></section>
+          </div>
+        </section>
+
+        <!-- ADMINS -->
+        <section class="adm-view" data-adm-view="admins" hidden>
+          <div class="adm-view-head"><h2>Admins</h2></div>
+          <p class="adm-lead">Only these website accounts can open this page and approve orders. For safety, an admin can't be added from here: adding one is a line of SQL in Supabase.</p>
+          <section class="dash-panel adm-flush"><div class="adm-scroll" data-adm-table="admins"></div></section>
+        </section>
+      </main>
+    </div>
+  </div>
 </body>
 </html>

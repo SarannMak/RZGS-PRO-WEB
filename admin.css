@@ -1,0 +1,756 @@
+/* ==========================================================================
+   RZGS-PRO admin page (admin.html, 6 Nov 2026): a menu of every part of the site and one view at a time.
+   Uses the site's neon HUD tokens and panels (style.css, auth.css); only what the admin page adds is here.
+   ========================================================================== */
+.adm-page {
+  --adm-nav-w: 212px;
+}
+.adm-shell {
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 24px var(--gutter) 72px;
+}
+[hidden] {
+  display: none !important;
+}
+
+/* ----- top line ----- */
+.adm-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+}
+.adm-head h1 {
+  margin: 0;
+  font: 800 28px/1.1 var(--font-display);
+  letter-spacing: 0.02em;
+}
+.adm-head-act {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.adm-updated {
+  color: var(--text-subtle);
+  font: 500 12px/1.3 var(--font-mono);
+}
+/* a phone: the two buttons share one row, the time goes under them */
+@media (max-width: 599px) {
+  .adm-head-act {
+    width: 100%;
+  }
+  .adm-head-act .btn {
+    flex: 1 1 0;
+    min-width: 0;
+    padding-inline: 10px;
+  }
+  .adm-updated {
+    order: 3;
+    width: 100%;
+  }
+}
+.adm-status {
+  margin: 10px 0 0;
+  color: var(--text-subtle);
+  font-size: 13px;
+}
+.adm-status.is-bad {
+  color: var(--warn);
+}
+
+/* ----- menu + view ----- */
+.adm-body {
+  display: grid;
+  gap: 16px;
+  margin-top: 18px;
+}
+.adm-nav {
+  display: flex;
+  gap: 6px;
+  margin: 0 calc(var(--gutter) * -1);
+  padding: 4px var(--gutter) 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+.adm-nav::-webkit-scrollbar {
+  display: none;
+}
+.adm-nav a {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font: 600 14px/1 var(--font-body);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
+}
+.adm-nav a svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.adm-nav a:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+.adm-nav a[aria-current="page"] {
+  border-color: var(--frame);
+  background: var(--chip);
+  color: var(--cyan);
+  box-shadow: inset 0 -2px 0 var(--neon);
+}
+.adm-nav a:focus-visible,
+.adm-seg button:focus-visible,
+.adm-chips button:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
+.adm-badge {
+  min-width: 20px;
+  padding: 2px 6px;
+  border-radius: 2px;
+  background: var(--warn);
+  color: var(--on-accent);
+  font: 700 11px/1.2 var(--font-mono);
+  text-align: center;
+}
+.adm-badge--quiet {
+  background: var(--surface-3);
+  color: var(--text-muted);
+}
+@media (min-width: 1024px) {
+  .adm-body {
+    grid-template-columns: var(--adm-nav-w) minmax(0, 1fr);
+    align-items: start;
+    gap: 24px;
+  }
+  .adm-nav {
+    position: sticky;
+    top: 16px;
+    flex-direction: column;
+    margin: 0;
+    padding: 8px;
+    overflow: visible;
+    border: 1px solid transparent;
+    border-image: var(--hud-panel) 16 fill / 16px;
+  }
+  .adm-nav a {
+    border-color: transparent;
+    background: none;
+  }
+  .adm-nav a[aria-current="page"] {
+    box-shadow: inset 2px 0 0 var(--neon);
+  }
+  .adm-badge {
+    margin-left: auto;
+  }
+}
+
+.adm-main {
+  min-width: 0;
+}
+/* wide tables scroll inside their panel; nothing in a view may push it past the screen */
+.adm-view > *,
+.adm-group {
+  min-width: 0;
+}
+.adm-view {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  min-width: 0;
+  animation: adm-in var(--dur) var(--ease-out);
+}
+@keyframes adm-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .adm-view { animation: none; }
+}
+.adm-view-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+}
+.adm-view-head h2 {
+  margin: 0;
+  font: 700 22px/1.2 var(--font-display);
+  letter-spacing: 0.02em;
+}
+.adm-count {
+  color: var(--text-subtle);
+  font: 500 13px/1.2 var(--font-mono);
+}
+.adm-lead {
+  max-width: 72ch;
+  margin: -6px 0 0;
+  color: var(--text-subtle);
+  font-size: 14px;
+}
+
+/* ----- switches (period) and filter chips ----- */
+.adm-seg {
+  display: inline-flex;
+  gap: 3px;
+  max-width: 100%;
+  padding: 3px;
+  overflow-x: auto;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  scrollbar-width: none;
+}
+.adm-seg::-webkit-scrollbar {
+  display: none;
+}
+.adm-seg button,
+.adm-chips button {
+  flex: none;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font: 600 13px/1 var(--font-body);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
+}
+.adm-seg button:hover,
+.adm-chips button:hover {
+  color: var(--text);
+}
+.adm-seg button[aria-pressed="true"] {
+  background: var(--chip);
+  color: var(--cyan);
+  box-shadow: inset 0 -2px 0 var(--neon);
+}
+.adm-seg--sm button {
+  min-height: 32px;
+  padding: 0 11px;
+  font-size: 12px;
+}
+.adm-tools {
+  display: grid;
+  gap: 10px;
+}
+.adm-search {
+  position: relative;
+  display: block;
+  max-width: 460px;
+}
+.adm-search svg {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: var(--text-subtle);
+  stroke-width: 2;
+  stroke-linecap: round;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.adm-input,
+.adm-search input,
+.adm-note {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 2px;
+  background: var(--bg);
+  color: var(--text);
+  font: 400 15px/1.4 var(--font-body);
+}
+.adm-search input {
+  padding-left: 40px;
+}
+.adm-input:focus,
+.adm-search input:focus,
+.adm-note:focus {
+  outline: none;
+  border-color: var(--cyan);
+}
+.adm-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.adm-chips button {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 12px;
+}
+.adm-chips button[aria-pressed="true"] {
+  border-color: var(--frame);
+  background: var(--chip);
+  color: var(--cyan);
+}
+.adm-chips button span {
+  margin-left: 6px;
+  color: var(--text-subtle);
+  font: 500 11px/1 var(--font-mono);
+}
+
+/* ----- figures ----- */
+.adm-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+@media (min-width: 1024px) {
+  .adm-tiles {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+}
+.adm-tiles--sm {
+  margin-bottom: 14px;
+}
+.adm-tile {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  min-width: 0;
+  padding: 14px 14px 12px;
+  border: 1px solid transparent;
+  border-image: var(--hud-panel) 16 fill / 16px;
+}
+.adm-tile-label {
+  color: var(--text-subtle);
+  font: 500 11px/1.3 var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.adm-tile .adm-num {
+  color: var(--text);
+  font: 700 26px/1.1 var(--font-display);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.adm-tile .adm-sub {
+  color: var(--text-subtle);
+  font-size: 12px;
+  line-height: 1.4;
+}
+.adm-tile--hot {
+  border-image: var(--hud-panel-hot) 16 fill / 16px;
+}
+.adm-tile--hot .adm-num {
+  color: var(--warn);
+}
+a.adm-tile {
+  color: inherit;
+  text-decoration: none;
+}
+a.adm-tile:hover .adm-sub {
+  color: var(--cyan);
+}
+.adm-two {
+  display: grid;
+  gap: 16px;
+}
+@media (min-width: 900px) {
+  .adm-two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.adm-main .dash-panel + .dash-panel {
+  margin-top: 0;
+}
+.adm-panel-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.adm-panel-head > h2 {
+  margin: 0;
+  color: var(--text-subtle);
+  font: 500 11px/1.2 var(--font-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.adm-row-left {
+  margin-top: 14px;
+}
+.adm-row-left > .btn {
+  flex: 0 1 auto;
+  padding-inline: 18px;
+}
+.adm-empty {
+  margin: 4px 0 0;
+  color: var(--text-subtle);
+  font-size: 14px;
+}
+
+/* ----- charts: one series, cyan bars with a 2px gap, a hover line per bar, a table view ----- */
+.adm-chart {
+  position: relative;
+}
+.adm-chart svg {
+  display: block;
+  width: 100%;
+  height: 168px;
+  overflow: visible;
+}
+.adm-chart .bar {
+  fill: var(--cyan);
+}
+.adm-chart .bar.is-zero {
+  fill: var(--border-strong);
+}
+.adm-chart .hit {
+  fill: transparent;
+  cursor: default;
+}
+.adm-chart .hit:hover + .bar,
+.adm-chart g:hover .bar {
+  fill: var(--neon);
+}
+.adm-chart .axis {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+.adm-chart .grid {
+  stroke: var(--border);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+}
+.adm-chart text {
+  fill: var(--text-subtle);
+  font: 500 10px/1 var(--font-mono);
+}
+.adm-tip {
+  position: absolute;
+  z-index: 2;
+  padding: 6px 9px;
+  border: 1px solid var(--frame);
+  background: var(--bg);
+  color: var(--text);
+  font: 500 12px/1.35 var(--font-mono);
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translate(-50%, calc(-100% - 8px));
+}
+.adm-tip b {
+  color: var(--cyan);
+  font-weight: 600;
+}
+.adm-chart-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 12px;
+  margin-top: 8px;
+  color: var(--text-subtle);
+  font-size: 12px;
+}
+.adm-chart-foot b {
+  color: var(--text);
+  font: 600 13px/1 var(--font-display);
+}
+.adm-chart details summary {
+  color: var(--cyan);
+  font-size: 12px;
+  cursor: pointer;
+}
+.adm-chart details[open] .adm-scroll {
+  max-height: 260px;
+  margin-top: 8px;
+  overflow-y: auto;
+}
+
+/* ----- tables ----- */
+.adm-scroll {
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+.adm-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.adm-table th,
+.adm-table td {
+  padding: 9px 12px 9px 0;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+  white-space: nowrap;
+}
+.adm-table th:first-child,
+.adm-table td:first-child {
+  padding-left: 0;
+}
+.adm-table th {
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  color: var(--text-subtle);
+  font: 500 11px/1.3 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.adm-table td.num,
+.adm-table th.num {
+  text-align: right;
+}
+.adm-table tbody tr:hover td {
+  background: rgba(25, 211, 255, 0.04);
+}
+.adm-table .who b {
+  display: block;
+  color: var(--text);
+  font-weight: 600;
+}
+.adm-table .who span {
+  color: var(--text-subtle);
+  font-size: 12px;
+}
+.adm-table .muted {
+  color: var(--text-subtle);
+}
+.adm-table tfoot td {
+  border-bottom: 0;
+  color: var(--text);
+  font-weight: 600;
+}
+.adm-flush {
+  padding: 4px 16px 8px;
+}
+.adm-flush-title {
+  margin: 14px 0 6px;
+  color: var(--text-subtle);
+  font: 500 11px/1.2 var(--font-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.adm-up { color: var(--good); }
+.adm-down { color: var(--bad); }
+.adm-more {
+  margin: 10px 0 4px;
+  color: var(--text-subtle);
+  font-size: 12px;
+}
+
+/* a state, always with its word: running / stopped / not connected */
+.adm-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+.adm-state::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--text-subtle);
+}
+.adm-state--good { color: var(--good); }
+.adm-state--good::before { background: var(--good); }
+.adm-state--warn { color: var(--warn); }
+.adm-state--warn::before { background: var(--warn); }
+.adm-state--bad { color: var(--bad); }
+.adm-state--bad::before { background: var(--bad); }
+.adm-state--off::before { background: transparent; border: 1px solid var(--text-subtle); }
+
+.adm-plan {
+  display: inline-block;
+  padding: 2px 7px;
+  border: 1px solid var(--border-strong);
+  color: var(--text-muted);
+  font: 600 11px/1.4 var(--font-mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.adm-plan--elite { border-color: var(--frame); color: var(--cyan); }
+.adm-plan--diamond { border-color: var(--neon); color: var(--neon); }
+.adm-plan--ended { border-style: dashed; color: var(--text-subtle); }
+
+/* ----- bot groups ----- */
+.adm-group + .adm-group {
+  margin-top: 16px;
+}
+.adm-group > summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 4px;
+  list-style: none;
+  cursor: pointer;
+}
+.adm-group > summary::-webkit-details-marker {
+  display: none;
+}
+.adm-group > summary h3 {
+  margin: 0;
+  font: 700 16px/1.3 var(--font-display);
+}
+.adm-group > summary small {
+  color: var(--text-subtle);
+  font-size: 13px;
+}
+.adm-group > summary::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  margin-left: auto;
+  border-right: 2px solid var(--text-subtle);
+  border-bottom: 2px solid var(--text-subtle);
+  transform: rotate(45deg);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.adm-group[open] > summary::after {
+  transform: rotate(-135deg);
+}
+.adm-group > p {
+  margin: 0 0 6px;
+  color: var(--text-subtle);
+  font-size: 13px;
+}
+
+/* ----- statement ----- */
+.adm-statement {
+  display: grid;
+  gap: 16px;
+}
+@media (min-width: 900px) {
+  .adm-statement {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.adm-st {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.adm-st th {
+  padding: 0 0 6px;
+  border-bottom: 1px solid var(--border-strong);
+  color: var(--text-subtle);
+  font: 500 11px/1.3 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-align: right;
+  text-transform: uppercase;
+}
+.adm-st td {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.adm-st td + td {
+  padding-left: 12px;
+  color: var(--text);
+  font-weight: 600;
+  text-align: right;
+  white-space: nowrap;
+}
+.adm-st tr.is-total td {
+  border-bottom: 0;
+  color: var(--cyan);
+  font: 700 16px/1.3 var(--font-display);
+}
+.adm-st .hint {
+  display: block;
+  color: var(--text-subtle);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+/* ----- orders (kept from the first admin page) ----- */
+.adm-card {
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px solid var(--border-strong);
+  background: var(--bg);
+}
+.adm-card:first-child {
+  margin-top: 0;
+}
+.adm-card h3 {
+  margin: 0 0 8px;
+  font: 700 18px/1.2 var(--font-display);
+}
+.adm-card dl {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 4px 14px;
+  margin: 0 0 10px;
+  font-size: 14px;
+}
+.adm-card dt {
+  color: var(--text-subtle);
+  font: 500 12px/1.6 var(--font-mono);
+}
+.adm-card dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.adm-why {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-left: 2px solid var(--warn);
+  background: rgba(255, 210, 63, 0.08);
+  color: var(--text-muted);
+  font-size: 14px;
+}
+.adm-why code {
+  font: 600 14px/1.6 var(--font-mono);
+  user-select: all;
+}
+.adm-note {
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+.adm-give {
+  display: grid;
+  gap: 10px;
+  max-width: 520px;
+  margin-top: 12px;
+}
+.adm-give .adm-why {
+  margin: 0;
+}
+
+/* sending to Telegram: asked once more on the button itself */
+.btn[data-sure] {
+  border-color: var(--warn);
+}
+.form-msg.is-good {
+  color: var(--good);
+}
+.form-msg.is-bad {
+  color: var(--bad);
+}

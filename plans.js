@@ -71,7 +71,7 @@
       lead: 'Get familiar with the strategy.',
       box: ['7 days on 1 MT5 account', 'Starts when your trial is approved', 'One free trial per person'],
       amount: '$0', per: '/ 7 days', button: 'Claim Free Trial', under: 'No payment needed',
-      get: ['The same RZGS-PRO gold bot as Elite', 'Bot file and Bot Password on your dashboard', 'Phone control app', 'Setup help on Telegram'],
+      get: ['The same RZGS-PRO gold bot as Elite', 'Bot file and Bot Password on your dashboard', 'Phone control app', 'P/L Report in your account'],
       needs: [NEEDS_PARTNER, NEEDS_PC],
       not: ['Any broker of your choice', 'Basic VPS'],
     },
@@ -80,7 +80,7 @@
       lead: 'For traders with a partner broker account.',
       box: ['30 days on 1 MT5 account', 'Starts when your bot is delivered', 'You can renew once it has ended'],
       amount: '$5', per: '/ month', button: 'Upgrade Plan', under: 'You pay by KHQR on this website',
-      get: ['The RZGS-PRO gold bot for 30 days', 'Bot file and Bot Password on your dashboard', 'Phone control app', 'Setup help on Telegram'],
+      get: ['The RZGS-PRO gold bot for 30 days', 'Bot file and Bot Password on your dashboard', 'Phone control app', 'P/L Report in your account'],
       needs: [NEEDS_PARTNER, NEEDS_PC],
       not: ['Any broker of your choice', 'Basic VPS'],
     },
@@ -861,6 +861,45 @@
     if (!welcomeUntil()) return;
     document.querySelectorAll('[data-trial-days]').forEach((el) => { el.textContent = '10'; });
   }
+
+  /* ---------------------------------------------------------------- the visit counter (the owner, 2026-11-06) */
+  // For the statement's Website Traffic (1 Website/web_admin.sql, web_track): a random number kept in this browser,
+  // the page, and what was clicked: a plan button (interested), a partner broker link (referral), a Telegram link
+  // (other). No name, email or IP address. Nothing is counted when the browser asks not to be tracked, or on a PC
+  // preview of the site.
+  const VISITOR_KEY = 'rzgs_visitor';
+  const counting = !/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) && navigator.doNotTrack !== '1' && window.doNotTrack !== '1';
+  function visitorId() {
+    let id = read(VISITOR_KEY);
+    if (!id || !/^[A-Za-z0-9-]{8,40}$/.test(id)) {
+      id = window.crypto && crypto.randomUUID ? crypto.randomUUID() : `v-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+      write(VISITOR_KEY, id);
+    }
+    return id;
+  }
+  function track(kind, target = null) {
+    if (!counting) return;
+    try {
+      fetch(`${SUPABASE_URL}/rest/v1/rpc/web_track`, {
+        method: 'POST',
+        keepalive: true, // a click that opens another page is still counted
+        headers: { apikey: SUPABASE_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ p_kind: kind, p_visitor: visitorId(), p_page: location.pathname.replace(/\.html$/, '') || '/', p_target: target }),
+      }).catch(() => {});
+    } catch (e) { /* not counted */ }
+  }
+  document.addEventListener('click', (event) => {
+    const el = event.target.closest('a, button');
+    if (!el) return;
+    let host = '';
+    try { host = el.tagName === 'A' && el.href ? new URL(el.href, location.href).hostname : ''; } catch (e) { /* not a link */ }
+    if (/exness|investizo|lirunex/i.test(host)) track('referral', host);
+    else if (/(^|\.)t\.me$/i.test(host)) track('other', 'telegram');
+    else if (el.matches('[data-plans], [data-checkout], [data-plan-go], [data-promo-signup]')) {
+      track('interested', String(el.dataset.planGo || el.dataset.checkout || el.textContent).replace(/\s+/g, ' ').trim().slice(0, 60));
+    }
+  }, true);
+  track('visit');
 
   /* ---------------------------------------------------------------- wiring */
   document.addEventListener('click', (event) => {
