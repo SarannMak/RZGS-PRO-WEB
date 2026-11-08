@@ -145,8 +145,13 @@ if (reducedMotion.matches || !('IntersectionObserver' in window)) {
 } else {
   const revealer = new IntersectionObserver(
     (entries, observer) => {
+      // what comes into sight together comes one after another (the owner's video, 8 Nov 2026), unless the page
+      // already gave it its own delay
+      let next = 0;
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
+        if (!entry.target.style.getPropertyValue('--d')) entry.target.style.setProperty('--d', `${Math.min(next, 5) * 70}ms`);
+        next += 1;
         entry.target.classList.add('is-visible');
         observer.unobserve(entry.target);
       });

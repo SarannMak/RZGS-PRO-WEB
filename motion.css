@@ -71,7 +71,8 @@
   }
 }
 
-/* ---------------------------------------------------------------- the line under the top menu */
+/* ---------------------------------------------------------------- the line under the top menu
+   (the pages without the video's motion; motion.js puts it there) */
 .nav-glide {
   display: none;
 }
@@ -100,6 +101,216 @@
   }
   .nav-list.has-glide .nav-glide.is-on {
     opacity: 1;
+  }
+}
+
+/* ---------------------------------------------------------------- the lit box that stretches (8 Nov 2026)
+   motion.js puts one .rz-pill in every menu and row of tabs and moves its four edges (--l --t --r --b): the edge in
+   front leads, the one behind follows, so it stretches to the new item and catches up. It takes over the look the
+   chosen item had, so the item itself drops its background and keeps its colour. A "frame" box is an outline drawn
+   over items that keep a background of their own. */
+.rz-pill-box {
+  position: relative;
+}
+.rz-pill {
+  position: absolute;
+  top: var(--t, 0);
+  right: var(--r, 0);
+  bottom: var(--b, 0);
+  left: var(--l, 0);
+  z-index: 0;
+  list-style: none;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s var(--ease-out);
+}
+.rz-pill.is-on {
+  opacity: 1;
+}
+.rz-pill.is-leaving {
+  opacity: 0;
+}
+.has-pill:not(.has-pill--acc) > :not(.rz-pill),
+.has-pill--acc .acc-nav > *,
+.has-pill--toc a {
+  position: relative;
+  z-index: 1;
+}
+.rz-pill--frame {
+  z-index: 2;
+}
+.has-pill--acc .rz-pill,
+.has-pill--toc .rz-pill,
+.has-pill--seg .rz-pill,
+.has-pill--adm .rz-pill {
+  background: var(--chip);
+}
+
+/* the top menu (computers): the lit box around this page's link */
+.has-pill--nav .rz-pill {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .nav-list.has-pill {
+    gap: 6px;
+  }
+  .nav-list.has-pill .nav-link {
+    padding: 0 14px;
+  }
+  .nav-list.has-pill .nav-link::after {
+    display: none;
+  }
+  .has-pill--nav .rz-pill {
+    display: block;
+    top: calc(var(--t, 0px) + 5px);
+    bottom: calc(var(--b, 0px) + 5px);
+    border: 1px solid transparent;
+    border-image: var(--hud-callout) 16 fill / 16px;
+  }
+}
+
+/* log in / sign up: the lit box that slid with the page before (the page itself no longer carries it) */
+.has-pill--auth .rz-pill {
+  border: 1px solid transparent;
+  border-image: var(--hud-callout) 16 fill / 16px;
+}
+.has-pill--auth .auth-switch-glide {
+  display: none;
+}
+.has-pill--auth a {
+  view-transition-name: none;
+}
+
+/* the account menu (dashboard, Manage account) and the "On this page" lists */
+.has-pill--acc .rz-pill {
+  box-shadow: inset 2px 0 0 var(--cyan);
+}
+.has-pill--toc .rz-pill {
+  box-shadow: inset 2px 0 0 var(--neon);
+}
+.has-pill--acc .acc-nav a[aria-current="page"],
+.has-pill--acc .acc-nav button[aria-selected="true"],
+.has-pill--toc a.is-active {
+  background: none;
+  box-shadow: none;
+}
+
+/* the admin page: its menu, its period switches, its filter chips */
+.has-pill--adm .rz-pill {
+  box-shadow: inset 2px 0 0 var(--neon);
+}
+@media (max-width: 1023.98px) {
+  .has-pill--adm .rz-pill {
+    border: 1px solid var(--frame);
+    box-shadow: inset 0 -2px 0 var(--neon);
+  }
+  .has-pill--adm a {
+    background: transparent;
+  }
+}
+.has-pill--adm a[aria-current="page"] {
+  border-color: transparent;
+  background: none;
+  box-shadow: none;
+}
+.has-pill--seg .rz-pill {
+  box-shadow: inset 0 -2px 0 var(--neon);
+}
+.has-pill--seg button[aria-pressed="true"] {
+  background: none;
+  box-shadow: none;
+}
+.has-pill--filter .rz-pill {
+  border: 1px solid var(--frame);
+}
+.has-pill--filter button[aria-pressed="true"] {
+  border-color: var(--border);
+}
+
+/* Manage account's tabs: a cut-corner outline that travels; the chosen tab keeps its own background */
+.has-pill--chips .rz-pill {
+  border: 1px solid transparent;
+  border-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M10.21 0.5H47.5V37.79L37.79 47.5H0.5V10.21Z' fill='none' stroke='%2319d3ff'/%3E%3Cpath d='M.5 10.21L10.21 .5M47.5 37.79L37.79 47.5' fill='none' stroke='%23a6ff1a'/%3E%3C/svg%3E") 16 / 16px;
+}
+.has-pill--chips button[aria-selected="true"] {
+  --edge: var(--border);
+}
+@media (min-width: 1024px) {
+  .acc-manage-nav .has-pill--chips button[aria-selected="true"] {
+    --edge: transparent;
+  }
+}
+
+/* the tutorial's 3D path: an outline in the colour of the order it follows */
+.has-pill--path .rz-pill {
+  border: 1px solid var(--pill-c, var(--cyan));
+  border-radius: var(--radius);
+}
+.path3d-bar:has([data-view="free"][aria-pressed="true"]) .rz-pill {
+  --pill-c: var(--neon);
+}
+.path3d-bar:has([data-view="paid"][aria-pressed="true"]) .rz-pill {
+  --pill-c: var(--warn);
+}
+/* (stronger than process-3d.css, which colours the chosen Free and Paid buttons' own outline) */
+.path3d-bar.has-pill.has-pill--path button[data-view][aria-pressed="true"] {
+  border-color: var(--border-strong);
+}
+
+/* ---------------------------------------------------------------- a title out of a blur, the rest after it */
+/* Until motion.js has cut the title into letters, the title and what follows it in its block wait unseen. If the
+   script never runs, they show after 1.6 s anyway. */
+@media (prefers-reduced-motion: no-preference) {
+  .js:not(.rz-in) [data-motion="video"] :is(.hero-title, #page-title),
+  .js:not(.rz-in) [data-motion="video"] :is(.hero-title, #page-title) ~ *,
+  html:not(.rz-in) [data-motion="video"] .adm-head h1 {
+    opacity: 0;
+    animation: rz-failsafe 0s 1.6s forwards;
+  }
+  /* The profile and Manage account pages: their content waits unseen until the account's figures are drawn
+     (aria-busy, motion.js), then comes in at once; after 3 s it shows anyway. The menu beside it stays. */
+  .js [data-motion="video"] .acc[aria-busy="true"] .acc-main {
+    opacity: 0;
+    animation: rz-failsafe 0s 3s forwards;
+  }
+  /* the home page's first block had its own fade; the letters and the steps after them take its place */
+  .js.rz-in [data-motion="video"] .hero-copy > * {
+    animation: none;
+  }
+}
+@keyframes rz-failsafe {
+  to {
+    opacity: 1;
+  }
+}
+/* while a gradient word comes in, each letter wears one colour of the gradient (motion.js) and the word paints nothing */
+.rz-grad-cut {
+  background: none !important;
+}
+
+/* ---------------------------------------------------------------- bars grow from their zero line */
+.acc-bars rect,
+.adm-chart path.bar {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+.acc-bars rect.loss {
+  transform-origin: 50% 0;
+}
+
+/* ---------------------------------------------------------------- what comes into sight: out of a light blur */
+@media (prefers-reduced-motion: no-preference) {
+  .js [data-motion="video"] .reveal {
+    filter: blur(6px);
+    transition:
+      opacity var(--dur-slow) var(--ease-out),
+      transform var(--dur-slow) var(--ease-out),
+      filter var(--dur-slow) var(--ease-out),
+      border-color var(--dur) var(--ease-out);
+    transition-delay: var(--d, 0ms), var(--d, 0ms), var(--d, 0ms), 0ms;
+  }
+  .js [data-motion="video"] .reveal.is-visible {
+    filter: none;
   }
 }
 
