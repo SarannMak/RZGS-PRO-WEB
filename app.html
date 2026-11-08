@@ -1134,26 +1134,45 @@ function lotAt(l) {
   if (s.mode === 'high') return Math.max(0.01, Math.round(c.highStart * Math.pow(c.highMult, l) * 100 + 1e-9) / 100);
   return c.lots[Math.min(l, c.lots.length - 1)] || 0.01;
 }
+// The light answer (app_state_lite, the owner, 8 Nov 2026): the app says what it already has, the server sends only
+// what is new. evTop: the newest history line it has (the 50 lines come only when there is a newer one). barKey: the
+// key of the bot's bars it has; inside a minute only the newest bar changes, so the server then sends that bar alone
+// (bar_last) and the app puts it in place of its own newest. About 1.6 KB a second instead of about 10 KB.
+// While the server has no app_state_lite yet (404), the app asks app_state as before.
+let evTop = null, barKey = null, botBars = null, lite = true;
+async function askState() {
+  if (lite) {
+    try { return await rpc('app_state_lite', { p_token: token, p_ev: evTop, p_bk: barKey }); }
+    catch (e) { if (!/HTTP 404/.test(e.message)) throw e; lite = false; }
+  }
+  return rpc('app_state', { p_token: token });
+}
 let polling = false;
 async function poll() {
   if (!token || document.hidden || polling) return;       // asked every second; never two requests at once
   polling = true;
   try {
-    const r = await rpc('app_state', { p_token: token });
+    const r = await askState();
     netErr = false;
     if (!r.ok) { polling = false; if (r.err === 'session') leave('Your login has expired. Log in again.'); return; }
     account = String(r.account); symbol = r.symbol || '';
-    age = r.age; events = r.events || []; devices = r.sessions == null ? null : r.sessions;
+    age = r.age; devices = r.sessions == null ? null : r.sessions;
+    if (Array.isArray(r.events)) events = r.events;          // left out when there is nothing new
+    evTop = r.ev == null ? null : r.ev;
     if (r.state) {
-      S = Object.assign({}, EMPTY, r.state);
-      S.cfg = Object.assign({}, EMPTY.cfg, r.state.cfg || {});
+      let st = r.state;
+      if (Array.isArray(r.bar_last) && botBars && r.bk === barKey) st = Object.assign({}, st, { bars: botBars.slice(0, -1).concat([r.bar_last]) });
+      if (Array.isArray(st.bars) && st.bars.length >= 2) { botBars = st.bars; barKey = r.bk || null; }
+      else { botBars = null; barKey = null; }
+      S = Object.assign({}, EMPTY, st);
+      S.cfg = Object.assign({}, EMPTY.cfg, st.cfg || {});
       if (S.dig != null) dig = S.dig;
     }
     online = !!r.state && age != null && age <= OFFLINE_AFTER;
     if (online) { eq.push(S.equity); if (eq.length > 300) eq.shift(); }
     // chart bars, best source first: 1. MT5 history sent by the bot  2. one-minute bars the server
     // keeps from the bot's price (still there after a reload)  3. bars built in this app while it is open
-    if (S && !(r.state && r.state.bars && r.state.bars.length >= 2)) {
+    if (S && !(r.state && botBars)) {
       if (r.bars && r.bars.length >= 2) { S.bars = r.bars; S.barTf = 'M1'; }
       else {
         if (online && S.bid) addOwnBar(S.bid);
@@ -2023,6 +2042,7 @@ function leave(message) {
   clearInterval(timer); closeSheet(); closeQuit();
   token = null; store.set('rz_token', null);
   S = null; age = null; events = []; online = false; eq.length = 0; ownBars.length = 0; waiting.clear();
+  evTop = null; barKey = null; botBars = null;
   oldBars = []; oldBarsAt = 0; chartView.back = 0;
   for (const k in kindEvents) { delete kindEvents[k]; delete kindAt[k]; }
   for (const id of ['hdr', 'main', 'dock', 'actbar']) $(id).hidden = true;
@@ -2059,6 +2079,7 @@ $('loginForm').addEventListener('submit', async e => {
     if (r.ok) {
       token = r.token; account = String(r.account); symbol = r.symbol || '';
       store.set('rz_token', token); store.set('rz_account', account);
+      evTop = null; barKey = null; botBars = null;          // a new login starts with the full answer
       linkShow('ok'); btn.textContent = 'Linked';
       setTimeout(enter, matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 640);
       return;
