@@ -765,23 +765,26 @@
       setTimeout(() => { arc.style.transition = ''; }, 1200);
     });
   }
-  // A page marked data-build (Manage account; the owner, 9 Nov 2026) is built by the cursors of build-motion.js once
-  // the account is read, and each part the first time it is opened: in place of the letters, the panels rising and the
-  // fill-in. Until it is read, its sections stand as the scan-line frames.
+  // A page marked data-build (Manage account, the profile page, log in and sign up; the owner, 9 Nov 2026) is built by
+  // the cursors of build-motion.js once the account is read (at once on log in and sign up), and each part or tab the
+  // first time it is opened: in place of the letters, the panels rising and the fill-in. Until the account is read, its
+  // sections stand as the scan-line frames.
   const buildPage = document.body.hasAttribute('data-build') && window.rzgsBuild && window.rzgsBuild.active();
-  const BUILD_BLOCKS = '.acc-side, .acc-back, .acc-h1, .acc-chips, .acc-help-card, .acc-signout, .acc-id, .acc-part-head, .dash-panel, .dash-profile, .dash-core';
+  const BUILD_BLOCKS = '.acc-side, .acc-back, .acc-h1, .acc-chips, .acc-help-card, .acc-signout, .acc-id, .acc-part-head, .dash-panel, .dash-profile, .dash-core,'
+    + ' .auth-switch, .kicker, .auth-title, .auth-lead, .steps-bar, .field, .check-field, .form-actions, .auth-social, .trial-banner, .auth-note, .auth-alt, .trial-panel';
+  const PARTS = '.acc-part, .dash-view';
   const BUILD_BITS = 'p, a, dt, dd, .dash-hint, .acc-sum-big, .acc-id-name, .acc-chip-ico';
   const builtParts = new Set();
   function buildPart(root) {
-    root.querySelectorAll('.acc-part:not([hidden])').forEach((part) => builtParts.add(part.id));
-    if (root.matches('.acc-part')) builtParts.add(root.id);
+    root.querySelectorAll(PARTS).forEach((part) => { if (!part.hidden) builtParts.add(part.id); });
+    if (root.matches(PARTS)) builtParts.add(root.id);
     document.documentElement.classList.add('rz-in');
     window.rzgsBuild.play({ blocks: window.rzgsBuild.blocksIn(root, BUILD_BLOCKS), bits: BUILD_BITS });
   }
   function arriveWhenReady() {
     const waiting = busy();
     if (buildPage) {
-      const page = document.querySelector('.acc') || document.querySelector('main') || document.body;
+      const page = document.querySelector('.acc') || document.querySelector('.auth-section') || document.querySelector('main') || document.body;
       if (!waiting || !window.MutationObserver) {
         buildPart(page);
         return;
@@ -818,7 +821,7 @@
       const view = change.target;
       // while an account page is still unseen, its first part comes in with the rest of the page
       if (view.hidden || change.oldValue === null || busy()) return;
-      if (buildPage && view.matches('.acc-part') && !builtParts.has(view.id)) buildPart(view);
+      if (buildPage && view.matches(PARTS) && !builtParts.has(view.id)) buildPart(view);
       else enter(view, { again: true });
     }));
     views.forEach((view) => watch.observe(view, { attributes: true, attributeFilter: ['hidden'], attributeOldValue: true }));

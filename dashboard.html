@@ -33,12 +33,14 @@
 
   <script>document.documentElement.classList.add('js');try{if(/^#(plan|awards|log)$/.test(location.hash))document.documentElement.setAttribute('data-dash-start',location.hash.slice(1))}catch(e){}try{if(localStorage.getItem('sb-zaziizzsbytkdlatoutv-auth-token'))document.documentElement.classList.add('signed-in')}catch(e){}</script>
   <script src="script.js?v=11" defer></script>
-  <script src="motion.js?v=5" defer></script>
+  <!-- the page builds itself (build-motion.js, started by motion.js; the owner, 9 Nov 2026) -->
+  <script src="build-motion.js?v=3" defer></script>
+  <script src="motion.js?v=7" defer></script>
   <script src="plans.js?v=12" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0" defer></script>
   <script src="auth.js?v=32" defer></script>
 </head>
-<body data-auth-page="dashboard" class="acc-page" data-motion="video">
+<body data-auth-page="dashboard" class="acc-page" data-motion="video" data-build>
   <a class="skip-link" href="#main">Skip to content</a>
 
   <!-- Icon sprite (Lucide-style, 24px grid, stroke icons) -->
@@ -193,7 +195,7 @@
 
         <div class="acc-main acc-main--dash">
         <!-- the client's profile: who they are, their numbers, and where to add what is missing -->
-        <section class="dash-panel dash-profile" aria-labelledby="page-title">
+        <section class="dash-panel dash-profile" aria-labelledby="page-title" data-build-name="Profile">
           <div class="dp-id">
             <span class="avatar-xl" data-dash-avatar aria-hidden="true"></span>
             <div class="dp-name">

@@ -83,11 +83,13 @@
   function nameOf(el) {
     const words = (node) => (node ? node.textContent.replace(/\s+/g, ' ').trim() : '');
     const title = el.querySelector('h1, h2, h3');
-    const label = el.querySelector('.cap, [class*="-label"], legend');
+    const label = el.querySelector('.cap, [class*="-label"], legend, label');
+    const buttons = el.querySelectorAll('button, .btn');
     const text = el.dataset.buildName || el.getAttribute('aria-label')
-      || (el.matches('h1, h2, h3, a') && words(el))
+      || (el.matches('h1, h2, h3, a, p') && words(el))
       || (title && words(title.querySelector('span') || title))
-      || (label && words(label)) || '';
+      || (label && words(label).replace(/\s*\*$/, ''))
+      || (buttons.length === 1 && words(buttons[0])) || '';
     if (text) return text.length > 22 ? `${text.slice(0, 21)}…` : text;
     if (el.matches('nav')) return 'Menu';
     if (el.matches('[role="tablist"], .seg')) return 'Tabs';

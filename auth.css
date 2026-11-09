@@ -1395,7 +1395,7 @@ a.trial-banner:hover {
 /* The box comes in out of a blur, as panels do on the main pages (data-motion="video"; motion.js then
    brings in its title letter by letter and what is under it one after another). */
 @media (prefers-reduced-motion: no-preference) {
-  [data-motion="video"] .auth-section .auth-card {
+  [data-motion="video"]:not([data-build]) .auth-section .auth-card {
     animation: auth-box-in 0.55s cubic-bezier(0.16, 1, 0.3, 1) backwards;
   }
 }
