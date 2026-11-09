@@ -236,6 +236,7 @@
       </div>
       <nav class="pm-links" aria-label="Your account">
         <a href="${pageUrl('dashboard#core')}">${ICONS.user}View profile</a>
+        <a href="${pageUrl('app')}">${ICONS.phone}Control App</a>
         <a href="${pageUrl('manage-account')}">${ICONS.gear}Manage account</a>
         <a href="${pageUrl('manage-account#affiliate')}">${ICONS.share}Affiliate program</a>
         <a href="${COMMUNITY_URL}" target="_blank" rel="noopener">${ICONS.group}Community<small>Telegram group</small></a>

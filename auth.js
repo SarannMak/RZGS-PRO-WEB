@@ -945,6 +945,11 @@
         return null;
       }
     }
+    // The plan's order and the bot's state are asked at the same time as the profile (8 Nov 2026): the page then opens
+    // with all of them, instead of showing "No plan" and "No bot yet" first and changing a moment later.
+    const askFirst = (name) => Promise.resolve(db.rpc(name)).then(({ data }) => data).catch(() => null);
+    const firstCheckout = askFirst('web_my_checkout');
+    const firstBot = askFirst('web_my_bot');
     const profile = (await fetchProfile()) || {}; // without it: what the sign-up itself stored
 
     const stored = (key) => profile[key] || (user.user_metadata || {})[key] || '';
@@ -993,10 +998,11 @@
     const withCheckout = async (use) => {
       if (window.rzgsPlans) use(await window.rzgsPlans.checkout());
     };
-    async function refreshCheckout() {
-      if (document.hidden) return;
+    // given: an answer already in hand (the one asked with the profile when the page opened)
+    async function refreshCheckout(given) {
+      if (document.hidden && !given) return;
       try {
-        const { data } = await db.rpc('web_my_checkout');
+        const data = given || (await db.rpc('web_my_checkout')).data;
         if (!data || !data.ok || JSON.stringify(data) === seenCheckout) return;
         seenCheckout = JSON.stringify(data);
         checkout = data;
@@ -1083,44 +1089,160 @@
       renderAwards();
     }
 
-    /* ----- achievements: only what really happened, never anything about profit ----- */
+    /* ----- the journey (the owner, 9 Nov 2026): seven numbered steps to a running bot. Each says what was done, or what
+       to do now and where. Only what really happened, never anything about profit. ----- */
+    const JOURNEY_SUBS = { broker: 'Account opened with a partner broker', mt5: 'MT5 login number sent', pay: 'Payment received', bot: 'Bot file ready' };
+    const make = (tag, className, text) => {
+      const node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text !== undefined) node.textContent = text;
+      return node;
+    };
+    const joinWords = (words) => (words.length < 2 ? words.join('') : `${words.slice(0, -1).join(', ')} and ${words[words.length - 1]}`);
+    let journeySeen = '';
     function renderAwards() {
       const plan = PLAN_NAMES[profile.plan] ? profile.plan : null;
-      const list = [
-        { title: 'Account created', did: 'You joined RZGS-PRO.', done: true },
-        { title: 'Email confirmed', text: 'Open the link we sent to your email.', did: 'Your email address is confirmed.', done: Boolean(profile.email_confirmed_at || user.email_confirmed_at) },
-        { title: 'Profile complete', text: 'Add a photo, a few words about you and your location.', did: 'Your photo, your words and your location are in.', done: Boolean(avatarAddress() && stored('about') && stored('country')), edit: 'about', action: 'Edit profile' },
-        { title: 'First bot delivered', text: 'Choose a plan and get your bot file.', did: 'You have your bot file.', done: Boolean(plan), plans: true, action: 'See plans' },
-        { title: 'Bot connected', text: 'Add the file to MT5, and your bot reports to your control app.', did: 'Your bot reports to your control app.', done: Boolean(bot.bot) },
-        { title: 'First closed trade', text: 'Reached when your bot closes a trade.', did: 'Your bot has closed a trade.', done: Boolean(bot.traded) },
-        { title: 'Elite or Diamond', text: 'Move up to a paid plan.', did: 'You are on a paid plan.', done: plan === 'elite' || plan === 'diamond', plans: true, action: 'See plans' },
+      const paid = plan === 'elite' || plan === 'diamond';
+      const delivered = Boolean(plan || checkout.licence);
+      const confirmed = Boolean(profile.email_confirmed_at || user.email_confirmed_at);
+      const missing = [!avatarAddress() && 'your photo', !stored('about') && 'a few words about you', !stored('country') && 'your location'].filter(Boolean);
+      const connected = Boolean(bot.bot);
+      const mt5 = profile.bot_mt5_account || (checkout.licence && checkout.licence.mt5) || '';
+      // the bot's own steps: the order under way, or the free trial's steps
+      const order = checkout.order && ORDER_STEPS[checkout.order.plan] && checkout.order.stage !== 'done' ? checkout.order : null;
+      const subKeys = order ? ORDER_STEPS[order.plan] : ORDER_STEPS.trial;
+      const checking = Boolean(order) && order.stage === 'review';
+      const at = delivered ? subKeys.length : order ? subKeys.indexOf(checking ? order.review_from : order.stage) : -1;
+      const subs = subKeys.map((key, index) => ({ key, state: index < at ? 'done' : index === at ? (checking ? 'check' : 'now') : 'todo' }));
+      const steps = [
+        { key: 'account', title: 'Account created', done: true, did: 'You joined RZGS-PRO.' },
+        { key: 'email', title: 'Email confirmed', done: confirmed, did: 'Your email address is confirmed.', todo: `Open the link we sent to ${user.email || 'your email'}.` },
+        { key: 'profile', title: 'Profile complete', done: !missing.length, did: 'Your photo, your words and your location are in.', todo: `Still to add: ${joinWords(missing)}.` },
+        { key: 'bot', title: paid ? 'Bot delivered' : 'Free bot delivered', done: delivered, did: 'You have your bot file.',
+          todo: order ? (checking ? 'Our team is checking your details. The next step shows here when it is done.' : 'Pick up where you left off.') : 'A few short steps, right here on the website.' },
+        { key: 'connected', title: 'Bot connected', done: connected, did: mt5 ? `Your bot reports from MT5 account ${mt5}.` : 'Your bot reports to your control app.',
+          todo: delivered ? 'Put the bot on a chart in MT5. It shows here as soon as it runs.' : 'Comes after your bot file is ready.' },
+        { key: 'trade', title: 'First closed trade', done: Boolean(bot.traded), did: 'Your bot has closed a trade.',
+          todo: connected ? 'Comes when your bot closes its first trade. Keep MT5 open and online.' : 'Comes after your bot is connected.' },
+        { key: 'paid', title: 'Elite or Diamond', done: paid, did: 'You are on a paid plan.', todo: 'Move up to Elite or Diamond when you are ready.' },
       ];
-      const count = `${list.filter((award) => award.done).length} of ${list.length}`;
+      const next = steps.find((step) => !step.done);
+      const count = `${steps.filter((step) => step.done).length} of ${steps.length}`;
       setAll('[data-dp-awards]', count);
       setAll('[data-awards-count]', count);
-      $('[data-awards]', root).replaceChildren(...list.map((award) => {
-        const row = document.createElement('li');
-        row.className = award.done ? 'is-done' : '';
-        const mark = document.createElement('span');
-        mark.className = 'dp-award-mark';
+      // drawn again only when something changed, so a button or an open part is not reset by the minute's refresh
+      const seen = JSON.stringify([steps.map((step) => [step.done, step.title, step.todo, step.did]), subs, next && next.key, checkout.trial_used]);
+      if (seen === journeySeen) return;
+      journeySeen = seen;
+
+      $('[data-awards]', root).replaceChildren(...steps.map((step, index) => {
+        const state = step.done ? 'done' : step === next ? 'now' : 'todo';
+        const item = make('li', 'jr-step');
+        item.dataset.state = state;
+        item.dataset.step = step.key;
+        if (state === 'now') item.setAttribute('aria-current', 'step');
+        const mark = make('span', 'jr-mark');
         mark.setAttribute('aria-hidden', 'true');
-        mark.textContent = award.done ? '\u2713' : '';
-        const text = document.createElement('div');
-        const title = document.createElement('strong');
-        title.textContent = award.title;
-        const line = document.createElement('span');
-        line.textContent = award.done ? award.did : award.text;
-        text.append(title, line);
-        row.append(mark, text);
-        if (!award.done && award.action) {
-          const go = document.createElement(award.edit ? 'button' : 'a');
-          go.className = 'btn btn-chip btn-sm';
-          go.textContent = award.action;
-          if (award.edit) { go.type = 'button'; go.dataset.edit = award.edit; }
-          if (award.plans) { go.href = './#plans'; go.dataset.plans = ''; }
-          row.append(go);
+        if (step.done) mark.innerHTML = '<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>';
+        else mark.textContent = String(index + 1);
+        const body = make('div', 'jr-body');
+        const head = make('div', 'jr-head');
+        head.append(make('span', 'sr-only', `Step ${index + 1}:`), make('strong', '', step.title),
+          make('small', 'jr-tag', state === 'done' ? 'Done' : state === 'now' ? 'Your next step' : 'Later'));
+        body.append(head, make('p', 'jr-line', step.done ? step.did : step.todo));
+
+        if (!step.done && step.key === 'email') {
+          // a new link by email, after the same safety check as the sign-up page
+          const quiet = make('div', 'captcha captcha--quiet');
+          quiet.dataset.captcha = '';
+          quiet.dataset.captchaQuiet = '';
+          quiet.hidden = true;
+          const slot = make('div', 'captcha-box');
+          slot.dataset.captchaBox = '';
+          const note = make('p', 'field-error');
+          note.dataset.captchaError = '';
+          note.hidden = true;
+          quiet.append(slot, note);
+          const send = make('button', 'btn btn-chip btn-sm', 'Send the email again');
+          send.type = 'button';
+          const row = make('div', 'jr-act');
+          row.append(send);
+          body.append(quiet, row);
+          const check = wireCaptcha(body, 'resend');
+          wireResend(send, async () => {
+            const captchaToken = await check.take();
+            if (captchaToken === null) return null;
+            const answer = await db.auth.resend({ type: 'signup', email: user.email, options: { emailRedirectTo: pageUrl('dashboard.html'), captchaToken } });
+            check.reset();
+            return answer;
+          });
         }
-        return row;
+        if (!step.done && step.key === 'profile') {
+          const go = make('button', 'btn btn-chip btn-sm', 'Edit profile');
+          go.type = 'button';
+          go.dataset.edit = !stored('about') ? 'about' : !stored('country') ? 'country' : '';
+          const row = make('div', 'jr-act');
+          row.append(go);
+          body.append(row);
+        }
+        if (step.key === 'bot' && !step.done) {
+          const list = make('ol', 'jr-subs');
+          list.append(...subs.map((sub) => {
+            const line = make('li', '', JOURNEY_SUBS[sub.key]);
+            line.dataset.state = sub.state;
+            if (sub.state !== 'todo') line.append(make('small', '', sub.state === 'done' ? 'Done' : sub.state === 'check' ? 'Checking' : 'Now'));
+            return line;
+          }));
+          body.append(list);
+          if (!checking) {
+            const go = make('a', 'btn btn-chip btn-sm', order ? 'Continue' : checkout.trial_used ? 'See plans' : 'Claim your free bot');
+            go.href = order ? '#core' : checkout.trial_used ? './#plans' : '#plan';
+            if (order) go.dataset.orderGo = '';
+            else if (checkout.trial_used) go.dataset.plans = '';
+            else go.dataset.checkout = 'trial';
+            const row = make('div', 'jr-act');
+            row.append(go);
+            body.append(row);
+          }
+        }
+        if (step.key === 'connected' && !step.done && delivered) {
+          // the same steps as the file's own "Set it up in MetaTrader 5", and the MT5 virtual server for a VPS
+          const how = make('div', 'jr-how');
+          how.innerHTML = `
+            <details open>
+              <summary>On your computer</summary>
+              <ol>
+                <li>File &rarr; Open Data Folder &rarr; MQL5 &rarr; Experts. Put the bot file there, then restart MT5.</li>
+                <li>Tools &rarr; Options &rarr; Expert Advisors: tick &ldquo;Allow WebRequest for listed URL&rdquo; and add <code>${SUPABASE_URL}</code></li>
+                <li>Open an XAUUSD chart${mt5 ? ` on account ${mt5}` : ''} and drag the bot onto it.</li>
+                <li>In the Inputs tab, type your Bot Password and App Password.</li>
+                <li>Turn on Algo Trading.</li>
+              </ol>
+            </details>
+            <details>
+              <summary>On a VPS (MT5 virtual hosting)</summary>
+              <ol>
+                <li>Do the steps above first, so the bot runs on your chart.</li>
+                <li>In the Navigator, right-click your account &rarr; Register a Virtual Server, and choose a server.</li>
+                <li>When it is ready, right-click it &rarr; Synchronize Experts, Indicators. The bot then runs there, even with your computer off.</li>
+              </ol>
+            </details>`;
+          const go = make('a', 'btn btn-chip btn-sm', 'Your bot file and passwords');
+          go.href = '#core';
+          const row = make('div', 'jr-act');
+          row.append(go);
+          body.append(how, row);
+        }
+        if (step.key === 'paid' && !step.done) {
+          const go = make('a', 'btn btn-chip btn-sm', 'See plans');
+          go.href = './#plans';
+          go.dataset.plans = '';
+          const row = make('div', 'jr-act');
+          row.append(go);
+          body.append(row);
+        }
+        item.append(mark, body);
+        return item;
       }));
     }
 
@@ -1280,9 +1402,13 @@
     renderPlan();
     renderOrder();
     renderLog();
+    // what was asked with the profile, when it is there within 1.5 s (else it comes a moment later, as before)
+    const extras = await Promise.race([Promise.all([firstCheckout, firstBot]), new Promise((done) => setTimeout(done, 1500, null))]);
+    if (extras && extras[0]) await refreshCheckout(extras[0]);
+    if (extras && extras[1] && extras[1].ok) { bot = extras[1]; renderBot(); }
     root.setAttribute('aria-busy', 'false');
 
-    refreshCheckout();
+    if (!extras || !extras[0]) refreshCheckout();
     // Right after sign-up (the email was just confirmed) the next step is choosing a plan.
     if (arrivedFrom === 'signup' && window.rzgsPlans) window.rzgsPlans.offer(profile);
 
@@ -1323,7 +1449,7 @@
     };
     editFromAddress();
     window.addEventListener('hashchange', editFromAddress);
-    refreshBot();
+    if (!extras || !extras[1]) refreshBot();
     setInterval(refreshBot, 60000);
     document.addEventListener('visibilitychange', refreshBot);
 

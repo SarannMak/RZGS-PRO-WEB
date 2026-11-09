@@ -552,21 +552,38 @@
       : [{ opacity: 0, filter: 'blur(6px)', translate: '0 10px' }, { opacity: 1, filter: 'blur(0px)', translate: '0 0' }],
     { duration, delay, easing: SOFT, fill: 'backwards' },
   );
-  // The panels of a view that are on the screen come one after another; the ones below are already there when
-  // scrolled to. For a short while after, what a script still adds (figures from the server) comes in the same way.
-  function enter(root, { watch = 1200 } = {}) {
+  // A panel below the screen waits unseen and comes in when it is scrolled to.
+  const sight = window.IntersectionObserver ? new IntersectionObserver((entries) => entries.forEach((entry) => {
+    if (!entry.isIntersecting) return;
+    sight.unobserve(entry.target);
+    entry.target.classList.remove('rz-wait');
+    rise(entry.target, 0, quick ? 380 : 520);
+  }), { rootMargin: '0px 0px -40px 0px' }) : null;
+  function waitForSight(el) {
+    if (!sight || el.classList.contains('rz-wait')) return;
+    el.classList.add('rz-wait');
+    sight.observe(el);
+  }
+
+  // The panels of a view that are on the screen come one after another; the ones below come when scrolled to. For a
+  // short while after, what a script still adds (figures from the server) comes in the same way.
+  // title: false leaves the view's title alone; again: a view opened once more comes in once more.
+  function enter(root, { watch = 1200, title = true, again = false } = {}) {
     if (!root || calm.matches || !root.animate || !root.getClientRects().length) return;
     if (root.rzEnteredAt && performance.now() - root.rzEnteredAt < 400) return;
     root.rzEnteredAt = performance.now();
     const gap = quick ? 45 : 70;
     const duration = quick ? 360 : 520;
-    const title = root.querySelector('.adm-view-head h2, .acc-h1, .dash-title');
-    if (title) letters(title, { gap: 18, duration: 320 });
+    const head = title && root.querySelector('.adm-view-head h2, .acc-h1, .dash-title');
+    if (head) letters(head, { gap: 18, duration: 320 });
     let n = 0;
     const take = (el) => {
-      if (el.rzRisen || el.closest('.rz-ch') || !el.getClientRects().length) return;
-      if (el.getBoundingClientRect().top > window.innerHeight) return;
+      if ((el.rzRisen && !again) || el.classList.contains('rz-wait') || el.closest('.rz-ch') || !el.getClientRects().length) return;
       el.rzRisen = true;
+      if (el.getBoundingClientRect().top > window.innerHeight) {
+        waitForSight(el);
+        return;
+      }
       rise(el, Math.min(n, 7) * gap, duration);
       n += 1;
     };
@@ -713,17 +730,40 @@
   // The profile and Manage account pages draw their figures once the account is read (they say so with aria-busy).
   // Until then their content waits unseen (motion.css), so the name, the figures and the panels come in together,
   // instead of placeholders moving and the real figures popping in after them.
+  // The profile page (8 Nov 2026, the owner: "even if it is not loaded, what is on the screen has its own motion"):
+  // its sections come in at once, one after another, as frames with a slow scan line while the account is read
+  // (motion.css hides their placeholders, which said "No plan" before the real plan came). When it is in, each
+  // section's contents come in, the name letter by letter, the figures count up and the plan ring fills.
   const busy = () => document.querySelector('.acc[aria-busy="true"]');
-  function arriveAccount() {
+  const SECTIONS = '.dash-profile, .dash-core, .dash-panel';
+  function fillIn() {
     const accMain = document.querySelector('.acc-main');
-    if (accMain) enter(accMain, { watch: 2000 });
-    // the figures already drawn while unseen count again, from 0
-    document.querySelectorAll(LIVE).forEach((el) => {
+    if (!accMain) return;
+    const sections = [...accMain.querySelectorAll(SECTIONS)].filter((el) => el.getClientRects().length && !el.classList.contains('rz-wait')
+      && el.getBoundingClientRect().top < window.innerHeight && !el.parentElement.closest(SECTIONS));
+    sections.forEach((section, i) => [...section.children].forEach((child) => {
+      if (!child.animate || !child.getClientRects().length) return;
+      child.animate([{ opacity: 0, translate: '0 6px' }, { opacity: 1, translate: '0 0' }],
+        { duration: 340, delay: i * 55, easing: SOFT, fill: 'backwards' });
+    }));
+    const title = accMain.querySelector('.dash-title, .acc-h1');
+    if (title) letters(title, { gap: 24, duration: 380 });
+    // the figures count from 0, the ring fills from empty
+    accMain.querySelectorAll(`${LIVE}, [data-ring-big]`).forEach((el) => {
       if (!el.getClientRects().length) return;
       el.rzCounting = false;
       count(el, 0);
     });
-    document.documentElement.classList.add('rz-in');
+    accMain.querySelectorAll('[data-ring-arc]').forEach((arc) => {
+      const to = arc.getAttribute('stroke-dasharray');
+      if (!to || to === '0 100') return;
+      arc.style.transition = 'none';
+      arc.setAttribute('stroke-dasharray', '0 100');
+      getComputedStyle(arc).strokeDasharray; // the empty ring is drawn first
+      arc.style.transition = `stroke-dasharray 1.1s ${SOFT}`;
+      arc.setAttribute('stroke-dasharray', to);
+      setTimeout(() => { arc.style.transition = ''; }, 1200);
+    });
   }
   function arriveWhenReady() {
     const waiting = busy();
@@ -731,10 +771,13 @@
       arrive();
       return;
     }
+    const accMain = document.querySelector('.acc-main');
+    if (accMain) enter(accMain, { watch: 0, title: false });
+    document.documentElement.classList.add('rz-in');
     const ready = new MutationObserver(() => {
       if (busy()) return;
       ready.disconnect();
-      arriveAccount();
+      fillIn();
     });
     ready.observe(waiting, { attributes: true, attributeFilter: ['aria-busy'] });
   }
@@ -747,7 +790,7 @@
     const watch = new MutationObserver((changes) => changes.forEach((change) => {
       const view = change.target;
       // while an account page is still unseen, its first part comes in with the rest of the page
-      if (!view.hidden && change.oldValue !== null && !busy()) enter(view);
+      if (!view.hidden && change.oldValue !== null && !busy()) enter(view, { again: true });
     }));
     views.forEach((view) => watch.observe(view, { attributes: true, attributeFilter: ['hidden'], attributeOldValue: true }));
   }

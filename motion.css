@@ -267,15 +267,49 @@
     opacity: 0;
     animation: rz-failsafe 0s 1.6s forwards;
   }
-  /* The profile and Manage account pages: their content waits unseen until the account's figures are drawn
-     (aria-busy, motion.js), then comes in at once; after 3 s it shows anyway. The menu beside it stays. */
-  .js [data-motion="video"] .acc[aria-busy="true"] .acc-main {
+  /* The profile page while the account is read (aria-busy): its sections stand as empty frames with a slow scan line
+     instead of placeholders that said "No plan"; motion.js brings their contents in once it is read. After 4 s the
+     contents show anyway. */
+  .js [data-motion="video"] .acc[aria-busy="true"] .acc-main,
+  .js [data-motion="video"] [data-dash][aria-busy="true"] .dash-deck {
+    opacity: 1;
+  }
+  .js [data-motion="video"] .acc[aria-busy="true"] :is(.dash-profile, .dash-core, .dash-panel) > * {
+    visibility: hidden;
+    animation: rz-failsafe-seen 0s 4s forwards;
+  }
+  .js [data-motion="video"] .acc[aria-busy="true"] :is(.dash-profile, .dash-core, .dash-panel) {
+    position: relative;
+    top: 0; /* the profile card is sticky on a computer (top: 84px): as a plain box that offset would push it down */
+    overflow: hidden;
+  }
+  /* not on the plan ring's card: it glows (filter: drop-shadow), and a line moving inside it redraws the glow every frame */
+  .js [data-motion="video"] .acc[aria-busy="true"] :is(.dash-profile, .dash-panel)::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, transparent 35%, rgba(25, 211, 255, 0.08) 50%, transparent 65%);
+    transform: translateX(-100%);
+    animation: rz-scan 1.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+    pointer-events: none;
+  }
+  /* a section below the screen waits unseen until it is scrolled to (motion.js) */
+  .rz-wait {
     opacity: 0;
-    animation: rz-failsafe 0s 3s forwards;
   }
   /* the home page's first block had its own fade; the letters and the steps after them take its place */
   .js.rz-in [data-motion="video"] .hero-copy > * {
     animation: none;
+  }
+}
+@keyframes rz-scan {
+  to {
+    transform: translateX(100%);
+  }
+}
+@keyframes rz-failsafe-seen {
+  to {
+    visibility: visible;
   }
 }
 @keyframes rz-failsafe {
