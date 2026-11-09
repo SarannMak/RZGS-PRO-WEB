@@ -702,6 +702,25 @@
       ], rows, { empty: 'No admin is listed.' })}`;
   }
 
+  /* ---------------------------------------------------------------- the page builds itself (the owner, 9 Nov 2026) */
+  // build-motion.js: a few cursors draw, drag, scale and type the page. The header and the menu at once; a part of the
+  // page the first time it is opened, as soon as its figures are in (unseen until then, 3 s at most).
+  const builder = window.rzgsBuild && window.rzgsBuild.active() ? window.rzgsBuild : null;
+  const BUILD_BLOCKS = '.adm-head, .adm-nav, .adm-view-head, .adm-tools, .adm-lead, .adm-tile, .dash-panel, .adm-statement > *';
+  const BUILD_BITS = '.adm-tile-label, .adm-num, .adm-sub, .adm-empty, .adm-count, .adm-chart-foot, .dash-hint, p, summary, a';
+  const builtViews = new Set();
+  function buildView(name, ready) {
+    if (!builder || builtViews.has(name)) return;
+    builtViews.add(name);
+    const view = $(`[data-adm-view="${name}"]`);
+    view.classList.add('rzb-wait');
+    Promise.race([ready, new Promise((done) => setTimeout(done, 3000))]).then(() => {
+      view.classList.remove('rzb-wait');
+      builder.play({ blocks: builder.blocksIn(view, BUILD_BLOCKS), bits: BUILD_BITS });
+    });
+  }
+  if (builder) builder.play({ blocks: [$('.adm-head'), $('.adm-nav')], bits: BUILD_BITS });
+
   /* ---------------------------------------------------------------- menu */
   const VIEWS = {
     overview: viewOverview, orders: loadOrders, clients: viewClients, bots: viewBots, signups: viewSignups,
@@ -735,7 +754,7 @@
       if (state.view && top < 0) window.scrollTo({ top: window.scrollY + top - 12 });
       state.view = name;
     }
-    run(name);
+    buildView(name, run(name));
   }
   window.addEventListener('hashchange', route);
 
