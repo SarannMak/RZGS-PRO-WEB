@@ -718,7 +718,7 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
         </div>
       </section>
 
-      <section class="panel">
+      <section class="panel" data-build-name="Trades today">
         <div class="stats">
           <div><span class="num" id="stBuy">0</span><span class="cap">Buy trades</span></div>
           <div><span class="num" id="stSell">0</span><span class="cap">Sell trades</span></div>
@@ -730,7 +730,7 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
     <!-- TRADES -->
     <div class="view" id="v-trades" hidden>
       <!-- the bot status, above the grid ladder (on Home until 21 Oct 2026) -->
-      <section class="frame core"><i class="br"></i>
+      <section class="frame core" data-build-name="Bot status"><i class="br"></i>
         <svg class="ring" id="ring" viewBox="0 0 120 120" role="img" aria-label="Grid ladder level">
           <circle class="ring-track" cx="60" cy="60" r="52"/>
           <circle class="ring-arc" id="ringArc" cx="60" cy="60" r="52" pathLength="100" stroke-dasharray="0 100"/>
@@ -745,7 +745,7 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
         </div>
       </section>
       <section class="panel">
-        <div class="panel-head"><h2>Grid ladder</h2>
+        <div class="panel-head"><h2>Chart Grid ladder</h2>
           <div class="ld-tools">
             <button type="button" class="hist-btn" id="histBtn" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="off" d="M3 3l18 18"/></svg>History</button>
             <div class="mini-seg" id="chartSeg">
@@ -987,7 +987,7 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
   </main>
 
   <!-- Activate / Pause: pinned above the dock on the Home tab, never scrolls away -->
-  <div class="actbar row" id="actbar" hidden>
+  <div class="actbar row" id="actbar" data-build-name="Bot controls" hidden>
     <button class="btn go" data-cmd="activate" data-state="activate">Activate</button>
     <button class="btn hold" data-cmd="pause" data-state="pause">Pause</button>
   </div>
@@ -1050,6 +1050,9 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
     </div>
   </div>
 </div>
+<!-- the screen builds itself: a few cursors draw, drag, scale and type it (the owner, 9 Nov 2026). Loaded before the
+     app's script, which opens the console at once when a login is kept. -->
+<script src="build-motion.js?v=1"></script>
 <script>
 (() => {
 'use strict';
@@ -2025,12 +2028,38 @@ function render() {
 }
 function closeSheet() { pending = null; $('sheet').hidden = true; }
 
+/* ---------- the screen builds itself (the owner, 9 Nov 2026) ---------- */
+// When the app opens, a few cursors build the whole console (build-motion.js); after that, each screen the first time it
+// is opened. A tap, a key or a scroll ends it at once.
+const BUILD_BLOCKS = '.eqcard, .panel, .frame, .seg, .row, .actbar';
+const built = new Set();
+function build(key, parts) {
+  if (!window.rzgsBuild || built.has(key)) return;
+  built.add(key);
+  parts = parts.filter(part => part && !part.hidden);
+  const blocks = [];
+  for (const part of parts) {
+    if (part.matches(BUILD_BLOCKS + ', header, nav')) blocks.push(part);
+    else blocks.push(...rzgsBuild.blocksIn(part, BUILD_BLOCKS));
+  }
+  // the screens' own "rise in" waits while they are built
+  const roots = parts.flatMap(part => [...(part.matches('.view') ? [part] : []), ...part.querySelectorAll('.view:not([hidden])')]);
+  rzgsBuild.play({ blocks, roots, scroller: $('main') });
+}
+function openTab(name) {
+  setTab(name);
+  const sub = name === 'tools' ? ':' + tool : name === 'control' ? ':' + ctl : '';
+  build('tab:' + name + sub, [$('v-' + name)]);
+}
+
 /* ---------- login / logout ---------- */
 function enter() {
   $('login').hidden = true;
   for (const id of ['hdr', 'main', 'dock']) $(id).hidden = false;
   settingsFilled = false;
   setTab('home');
+  built.clear();
+  build('tab:home', [$('hdr'), $('v-home'), $('actbar'), $('dock')]);
   clearInterval(timer);
   timer = setInterval(poll, 1000);
   poll();
@@ -2129,9 +2158,9 @@ $('quit').addEventListener('click', e => { if (e.target === $('quit')) closeQuit
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeQuit(); closePwConfirm(); if (pending) { closeSheet(); toast('Canceled.'); } } });
 
 /* ---------- events ---------- */
-$('dock').addEventListener('click', e => { const b = e.target.closest('button[data-tab]'); if (b) setTab(b.dataset.tab); });
-$('toolSeg').addEventListener('click', e => { const b = e.target.closest('button[data-tool]'); if (b) setTool(b.dataset.tool); });
-$('ctlSeg').addEventListener('click', e => { const b = e.target.closest('button[data-ctl]'); if (b) setCtl(b.dataset.ctl); });
+$('dock').addEventListener('click', e => { const b = e.target.closest('button[data-tab]'); if (b) openTab(b.dataset.tab); });
+$('toolSeg').addEventListener('click', e => { const b = e.target.closest('button[data-tool]'); if (b) { setTool(b.dataset.tool); build('tab:tools:' + tool, [$('t-' + tool)]); } });
+$('ctlSeg').addEventListener('click', e => { const b = e.target.closest('button[data-ctl]'); if (b) { setCtl(b.dataset.ctl); build('tab:control:' + ctl, [ctl === 'general' ? $('c-general') : $('t-settings')]); } });
 // the Log type switch and the Report range switch; each choice is kept on this phone
 const syncSeg = (id, attr, val) => document.querySelectorAll('#' + id + ' button').forEach(b => b.setAttribute('aria-selected', b.dataset[attr] === val));
 $('logSeg').addEventListener('click', e => {

@@ -508,6 +508,31 @@
     } catch (e) { /* keep the short list */ }
   }
 
+  // The country of a new account (the owner, 9 Nov 2026: no Country box on the sign up page, it is filled in by itself
+  // like the name and the username): the country of the visitor's internet address, from GeoJS (the free service the
+  // owner chose for the towns of the logged-in devices), named as the profile's country list names it. Asked once
+  // when the page opens; a sign up waits for it a few seconds at most. Unknown: no country is saved, and the profile
+  // asks for it later.
+  function countryOfVisitor() {
+    const asked = (async () => {
+      try {
+        const answer = await fetch('https://get.geojs.io/v1/ip/country.json', { cache: 'no-store' });
+        if (!answer.ok) return '';
+        const found = await answer.json();
+        const code = found && typeof found.country === 'string' && /^[A-Z]{2}$/.test(found.country) ? found.country : '';
+        if (!code) return '';
+        try {
+          const name = new Intl.DisplayNames(['en'], { type: 'region' }).of(code);
+          if (name && name !== code) return name;
+        } catch (e) { /* the service's own name */ }
+        return typeof found.name === 'string' ? found.name.slice(0, 60) : '';
+      } catch (e) {
+        return '';
+      }
+    })();
+    return (wait = 3000) => Promise.race([asked, new Promise((done) => setTimeout(done, wait, ''))]);
+  }
+
   // Name and username start as the part of the email before the @; the dashboard changes them, and adds Telegram or a phone.
   function nameFromEmail(email) {
     const local = email.split('@')[0];
@@ -547,7 +572,7 @@
     const codeForm = $('[data-verify-form]', verify);
     const password = form.elements.create_password;
     const DRAFT_KEY = 'rz_signup_draft';
-    const DRAFT_FIELDS = ['email', 'country', 'ref_code'];
+    const DRAFT_FIELDS = ['email', 'ref_code'];
     let email = '';
 
     const { data: { session } } = await db.auth.getSession();
@@ -556,7 +581,7 @@
       return;
     }
 
-    fillCountries(form.elements.country);
+    const country = countryOfVisitor();
     wireSocial();
 
     // Keep what was typed (never the password) if the page is refreshed by accident.
@@ -679,13 +704,14 @@
         setBusy(submit, false);
         return;
       }
+      const where = await country();
       const { data, error } = await db.auth.signUp({
         email: address,
         password: password.value,
         options: {
           emailRedirectTo: pageUrl('dashboard.html'),
           // copied into the web_users table by the database, with the promotions plans.js kept (web_promotions.sql)
-          data: { ...nameFromEmail(address), country: form.elements.country.value, accepted_terms: true, ...promoMeta(form) },
+          data: { ...nameFromEmail(address), ...(where ? { country: where } : {}), accepted_terms: true, ...promoMeta(form) },
           captchaToken,
         },
       });
