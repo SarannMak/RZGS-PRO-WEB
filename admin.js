@@ -9,7 +9,8 @@
 
   const SUPABASE_URL = 'https://zaziizzsbytkdlatoutv.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_ojfdWkyt22zlG0Uz_CUd4w_IufedKpK';
-  const API = `${SUPABASE_URL}/functions/v1/checkout`;
+  // always run in Singapore, next to the database: Bakong refused the server Supabase picked on 18 Nov 2026 (Seoul, 403)
+  const API = `${SUPABASE_URL}/functions/v1/checkout?forceFunctionRegion=ap-southeast-1`;
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
     auth: { flowType: 'implicit', persistSession: true, autoRefreshToken: true, detectSessionInUrl: false },
   });

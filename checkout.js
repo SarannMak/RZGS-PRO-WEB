@@ -12,7 +12,8 @@
 (() => {
   'use strict';
 
-  const API = 'https://zaziizzsbytkdlatoutv.supabase.co/functions/v1/checkout';
+  // always run in Singapore, next to the database: Bakong refused the server Supabase picked on 18 Nov 2026 (Seoul, 403)
+  const API = 'https://zaziizzsbytkdlatoutv.supabase.co/functions/v1/checkout?forceFunctionRegion=ap-southeast-1';
   const KEY = 'sb_publishable_ojfdWkyt22zlG0Uz_CUd4w_IufedKpK';
   const BOT_SERVER = 'https://zaziizzsbytkdlatoutv.supabase.co'; // the address MT5 has to allow, as in the install steps
 
@@ -142,7 +143,7 @@
     const place = box.querySelector('[data-co-robot]');
     const script = window.rzgsRobot ? Promise.resolve() : new Promise((yes, no) => {
       const tag = document.createElement('script');
-      tag.src = pageUrl('robot-3d.js?v=11');
+      tag.src = pageUrl('robot-3d.js?v=13');
       tag.onload = yes;
       tag.onerror = no;
       document.head.append(tag);
@@ -264,7 +265,7 @@
       <p class="plan-confirm-lead">Your MT5 account has to be opened with our link at one of these brokers.</p>
       <fieldset class="co-brokers">
         <legend>Your broker</legend>
-        ${BROKERS.map((broker) => `<label class="co-broker"><input type="radio" name="broker" value="${broker.id}"${broker.id === pickedBroker ? ' checked' : ''}><span>${broker.name}</span></label>`).join('')}
+        ${BROKERS.map((broker) => `<label class="co-broker"><input type="radio" name="broker" value="${broker.id}"${broker.id === pickedBroker ? ' checked' : ''}><span><img class="co-broker-logo" src="${pageUrl(`assets/broker-${broker.id}.webp`)}" width="20" height="20" alt="">${broker.name}</span></label>`).join('')}
       </fieldset>
       ${message(order.note)}
       <div data-co-broker-go hidden>
