@@ -8958,3 +8958,47 @@ body {
     translate: -50% -50%;
   }
 }
+
+/* ---------------------------------------------------------------- 18 Nov 2026, the owner: "fix this edge". Cloudflare's safety check (its
+   own box, drawn by Cloudflare with square corners and a grey edge) wears the fields' round corners and their border:
+   its corners are cut round and the fields' 1px line is drawn over its edge. Only while the box is there; the quiet
+   check of the sign-up code step shows its frame only when Cloudflare asks for a tick. */
+.captcha-box {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+}
+/* Cloudflare's box sits in a line of text: without this the frame stood 8px lower than the box */
+.captcha-box > * {
+  display: block;
+  line-height: 0;
+}
+.captcha-box:has(> *)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgb(205, 215, 229);
+  border-radius: inherit;
+  pointer-events: none;
+}
+.captcha--quiet:not(.is-asking) .captcha-box::after {
+  display: none;
+}
+
+/* ---------------------------------------------------------------- 18 Nov 2026, the owner: the big word of the dark story was cut (the
+   tails of g and y and the last letter's right edge stopped on a straight line: "make it full, not cut like that"). Its
+   colour is a background painted only inside the word's own box, and those parts of the letters reach outside it. The
+   box now has room round the letters, the same above and below and on both sides, so the word does not move (on a
+   phone, where it hangs from its top, it is lifted by that room), and the colour's steps are moved with it so the
+   letters keep the light they had. */
+.fd.is-pinned .fd-word {
+  padding: 0.22em 0.12em;
+  background-image:
+    linear-gradient(105deg, transparent 38%, rgba(255, 255, 255, 0.92) 50%, transparent 62%),
+    linear-gradient(180deg, rgba(var(--lt), 0.66) 15%, rgba(var(--lt), 0.36) 51%, rgba(var(--lt), 0.12) 85%);
+}
+@media (max-width: 1099.98px) {
+  .fd.is-pinned .fd-word {
+    margin-top: -0.22em;
+  }
+}

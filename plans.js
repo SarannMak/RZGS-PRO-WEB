@@ -763,6 +763,43 @@
     setTimeout(() => { button.textContent = 'Copy'; }, 1800);
   }
 
+  // The welcome offer's gift (the owner, 18 Nov 2026: "don't mention the 3 steps, but a box or a gift to get them
+  // interested to click Claim"): a blue gift box whose lid hops now and then with a glint of light, its FREE tag
+  // swinging and small sparkles round it. Drawn here (plans.css: .promo-gift); a tap on it opens the sign-up too.
+  const giftArt = () => `<div class="promo-gift" data-promo-signup aria-hidden="true"><svg viewBox="0 0 220 170">
+      <defs>
+        <radialGradient id="rzgift-glow" cx="50%" cy="58%" r="50%"><stop offset="0" stop-color="#8dbdff" stop-opacity=".6"/><stop offset=".55" stop-color="#8dbdff" stop-opacity=".18"/><stop offset="1" stop-color="#8dbdff" stop-opacity="0"/></radialGradient>
+        <linearGradient id="rzgift-box" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2f86f0"/><stop offset="1" stop-color="#0a57c4"/></linearGradient>
+        <linearGradient id="rzgift-lid" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5ea2ff"/><stop offset="1" stop-color="#2a78e6"/></linearGradient>
+        <linearGradient id="rzgift-rib" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#e3eeff"/><stop offset=".5" stop-color="#fff"/><stop offset="1" stop-color="#d5e5ff"/></linearGradient>
+      </defs>
+      <ellipse class="rzgift-glow" cx="110" cy="96" rx="104" ry="74" fill="url(#rzgift-glow)"/>
+      <ellipse cx="110" cy="158" rx="64" ry="7" fill="#0b3c8c" opacity=".16"/>
+      <g class="rzgift-body">
+        <rect x="56" y="84" width="108" height="72" rx="12" fill="url(#rzgift-box)"/>
+        <rect x="56" y="84" width="108" height="9" fill="#0a4fb3" opacity=".35"/>
+        <rect x="100" y="84" width="20" height="72" fill="url(#rzgift-rib)"/>
+        <path d="M68 100v40" stroke="#fff" stroke-opacity=".22" stroke-width="5" stroke-linecap="round"/>
+      </g>
+      <ellipse class="rzgift-light" cx="110" cy="86" rx="48" ry="9" fill="#d9e9ff"/>
+      <g class="rzgift-lid">
+        <rect x="48" y="62" width="124" height="28" rx="10" fill="url(#rzgift-lid)"/>
+        <rect x="99" y="62" width="22" height="28" fill="url(#rzgift-rib)"/>
+        <path d="M60 71h34" stroke="#fff" stroke-opacity=".4" stroke-width="4" stroke-linecap="round"/>
+        <path d="M110 62C100 44 76 38 74 52c-2 10 18 12 36 10z" fill="#cfe2ff" stroke="#7fb2ff" stroke-width="1.6" stroke-linejoin="round"/>
+        <path d="M110 62c10-18 34-24 36-10 2 10-18 12-36 10z" fill="#b9d6ff" stroke="#7fb2ff" stroke-width="1.6" stroke-linejoin="round"/>
+        <circle cx="110" cy="61" r="8" fill="#fff" stroke="#7fb2ff" stroke-width="1.6"/>
+        <g class="rzgift-tag">
+          <path d="M114 63c18 6 32 20 40 36" fill="none" stroke="#9cc4ff" stroke-width="1.6"/>
+          <g transform="rotate(14 172 112)"><rect x="146" y="100" width="52" height="24" rx="7" fill="#fff" stroke="#cfe2fb"/><circle cx="153" cy="112" r="2.6" fill="#cfe2fb"/><text x="176" y="117" text-anchor="middle" fill="#0b74de" font-family="Poppins, sans-serif" font-weight="700" font-size="13">FREE</text></g>
+        </g>
+      </g>
+      <g transform="translate(34 50)"><path class="rzgift-spark" d="M0-9C1-3 3-1 9 0C3 1 1 3 0 9C-1 3-3 1-9 0C-3-1-1-3 0-9Z" fill="#3d8ef5"/></g>
+      <g transform="translate(186 40)"><path class="rzgift-spark" d="M0-7C1-2 2-1 7 0C2 1 1 2 0 7C-1 2-2 1-7 0C-2-1-1-2 0-7Z" fill="#8dbdff"/></g>
+      <g transform="translate(26 116)"><path class="rzgift-spark" d="M0-6C1-2 2-1 6 0C2 1 1 2 0 6C-1 2-2 1-6 0C-2-1-1-2 0-6Z" fill="#8dbdff"/></g>
+      <g transform="translate(200 82)"><path class="rzgift-spark" d="M0-5C.6-1.6 1.6-.6 5 0C1.6.6.6 1.6 0 5C-.6 1.6-1.6.6-5 0C-1.6-.6-.6-1.6 0-5Z" fill="#3d8ef5"/></g>
+    </svg></div>`;
+
   function paintWelcome() {
     const until = welcomeUntil();
     const days = until ? 10 : 7;
@@ -773,12 +810,8 @@
       ${invitedBy() ? '<p class="promo-friend">A friend invited you to RZGS-PRO.</p>' : ''}
       <h2 id="promo-title">Try the gold bot<br><span class="text-gradient">${days} days free</span></h2>
       <p class="plan-confirm-lead">${until ? 'Sign up before the timer ends and your free trial is 10 days instead of 7.' : 'Try the bot on your own MT5 account before you pay anything.'}</p>
-      <ol class="promo-steps">
-        <li><span aria-hidden="true">1</span><div><b>Create your free account</b><small>Your email and a password. It takes a minute.</small></div></li>
-        <li><span aria-hidden="true">2</span><div><b>Open an MT5 account with a partner broker</b><small>Exness, Investizo or Lirunex, with our link.</small></div></li>
-        <li><span aria-hidden="true">3</span><div><b>Get your bot on this website</b><small>We check your account, then your bot file is ready.</small></div></li>
-      </ol>
-      <span class="plan-btn-glow"><a class="plan-btn" href="${pageUrl('signup')}" data-promo-signup><span data-plan-label>Claim my free ${days}-day trial</span></a></span>
+      ${giftArt()}
+      <span class="plan-btn-glow"><a class="plan-btn" href="${pageUrl('signup')}" data-promo-signup><span data-plan-label>${ICONS.gift}Claim my free ${days}-day trial</span></a></span>
       <button class="promo-later" type="button" data-promo-close>Maybe later</button>
       <p class="promo-small">No payment · partner broker account · one trial per person</p>`);
     if (until) tick();

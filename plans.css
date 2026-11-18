@@ -1280,3 +1280,161 @@ dialog.promo {
   --edge: rgba(166, 255, 26, 0.45);
   background-color: rgba(166, 255, 26, 0.08);
 }
+
+/* The welcome offer's gift (the owner, 18 Nov 2026), in place of the three steps: a blue gift box (drawn in plans.js,
+   giftArt) whose lid hops now and then with a glint of light from inside, its FREE tag swinging, small sparkles round
+   it. A tap on it opens the sign-up, like the button. Still with "reduce motion". */
+.promo-gift {
+  width: min(220px, 66%);
+  margin: -8px auto 10px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.promo-gift svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.promo-gift .rzgift-lid,
+.promo-gift .rzgift-body,
+.promo-gift .rzgift-tag,
+.promo-gift .rzgift-glow,
+.promo-gift .rzgift-light {
+  transform-box: view-box;
+}
+.promo-gift .rzgift-lid {
+  transform-origin: 110px 90px;
+}
+.promo-gift .rzgift-body {
+  transform-origin: 110px 156px;
+}
+.promo-gift .rzgift-tag {
+  transform-origin: 112px 62px;
+}
+.promo-gift .rzgift-light {
+  opacity: 0;
+}
+.promo-gift .rzgift-spark {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .promo-gift .rzgift-lid {
+    animation: rzgift-hop 2.8s cubic-bezier(0.3, 0.7, 0.3, 1) infinite;
+  }
+  .promo-gift .rzgift-body {
+    animation: rzgift-squash 2.8s ease-in-out infinite;
+  }
+  .promo-gift .rzgift-tag {
+    animation: rzgift-swing 2.8s ease-in-out infinite;
+  }
+  .promo-gift .rzgift-light {
+    animation: rzgift-light 2.8s ease-out infinite;
+  }
+  .promo-gift .rzgift-glow {
+    animation: rzgift-breathe 2.8s ease-in-out infinite;
+  }
+  .promo-gift .rzgift-spark {
+    animation: rzgift-twinkle 1.8s ease-in-out infinite;
+  }
+  .promo-gift g:nth-of-type(4) > .rzgift-spark {
+    animation-delay: -0.5s;
+  }
+  .promo-gift g:nth-of-type(5) > .rzgift-spark {
+    animation-delay: -1s;
+  }
+  .promo-gift g:nth-of-type(6) > .rzgift-spark {
+    animation-delay: -1.4s;
+  }
+  /* a pointer on it: it can't wait to be opened */
+  .promo-gift:hover .rzgift-lid,
+  .promo-gift:hover .rzgift-body,
+  .promo-gift:hover .rzgift-tag,
+  .promo-gift:hover .rzgift-light {
+    animation-duration: 1.4s;
+  }
+}
+@keyframes rzgift-hop {
+  0%,
+  58%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  64% {
+    transform: translateY(-14px) rotate(-5deg);
+  }
+  70% {
+    transform: translateY(0) rotate(0deg);
+  }
+  76% {
+    transform: translateY(-6px) rotate(3deg);
+  }
+  82% {
+    transform: translateY(0) rotate(0deg);
+  }
+}
+@keyframes rzgift-squash {
+  0%,
+  56%,
+  84%,
+  100% {
+    transform: scale(1, 1);
+  }
+  60% {
+    transform: scale(1.04, 0.95);
+  }
+  68% {
+    transform: scale(0.98, 1.02);
+  }
+  74% {
+    transform: scale(1.02, 0.98);
+  }
+}
+@keyframes rzgift-swing {
+  0%,
+  58%,
+  100% {
+    transform: rotate(0deg);
+  }
+  66% {
+    transform: rotate(-7deg);
+  }
+  76% {
+    transform: rotate(5deg);
+  }
+  88% {
+    transform: rotate(-2deg);
+  }
+}
+@keyframes rzgift-light {
+  0%,
+  58%,
+  80%,
+  100% {
+    opacity: 0;
+  }
+  64% {
+    opacity: 0.95;
+  }
+}
+@keyframes rzgift-breathe {
+  0%,
+  100% {
+    opacity: 0.75;
+  }
+  64% {
+    opacity: 1;
+  }
+}
+@keyframes rzgift-twinkle {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.6);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
