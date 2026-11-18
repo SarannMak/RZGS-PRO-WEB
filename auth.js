@@ -349,7 +349,7 @@
         widget = turnstile.render(slot, {
           sitekey: TURNSTILE_SITE_KEY,
           action,
-          theme: 'dark',
+          theme: 'light',
           size: 'flexible',
           appearance: holder.hasAttribute('data-captcha-quiet') ? 'interaction-only' : 'always',
           callback: (answer) => { token = answer; broken = false; say(''); settle(); },
@@ -1739,7 +1739,13 @@
     fold.addEventListener('click', () => {
       if (phone.matches) { setDrawer(false); return; }
       const yes = !root.classList.contains('is-folded');
-      setFold(yes);
+      // the menu narrows to its icons, or opens again, in one smooth move (the owner, 15 Nov 2026): the browser's view
+      // transition morphs the menu and the page beside it (theme.css names them). Without it, or with reduce motion,
+      // it simply changes.
+      const change = () => setFold(yes);
+      if (document.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        try { document.startViewTransition(change); } catch (e) { change(); }
+      } else change();
       try { localStorage.setItem(FOLD_KEY, yes ? '1' : '0'); } catch (e) { /* only for this visit */ }
     });
     if (window.rzgsPlans && window.rzgsPlans.mountCard) window.rzgsPlans.mountCard(accountCard, $('[data-acc-me]', root));
@@ -2106,6 +2112,15 @@
       return { title: 'Closed profit a month, since the start ($)', label: 'Closed profit since the start', vals: months.map((m) => m.v),
         labels: months.map((m) => m.label), now: months.length - 1 };
     }
+    // one bar: square on the zero line and round at its far end, so a gain is round at the top and a loss at the
+    // bottom (the owner, 16 Nov 2026)
+    function barPath(x, y, w, h, down) {
+      const r = Math.min(5, w * 0.3, h);
+      const f = (n) => n.toFixed(1);
+      return down
+        ? `M${f(x)},${f(y)}H${f(x + w)}V${f(y + h - r)}A${f(r)},${f(r)} 0 0 1 ${f(x + w - r)},${f(y + h)}H${f(x + r)}A${f(r)},${f(r)} 0 0 1 ${f(x)},${f(y + h - r)}Z`
+        : `M${f(x)},${f(y + h)}V${f(y + r)}A${f(r)},${f(r)} 0 0 1 ${f(x + r)},${f(y)}H${f(x + w - r)}A${f(r)},${f(r)} 0 0 1 ${f(x + w)},${f(y + r)}V${f(y + h)}Z`;
+    }
     // bars over and under the zero line: the bar of today is cyan, a loss red; the amounts over the bars while they fit
     function drawBars(svg, vals, labels, now) {
       const nums = vals.filter((v) => v !== null);
@@ -2128,7 +2143,7 @@
         if (v !== null) {
           const y0 = y(Math.max(v, 0));
           const y1 = y(Math.min(v, 0));
-          h += `<rect x="${(cx - bw / 2).toFixed(1)}" y="${y0.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(1, y1 - y0).toFixed(1)}" class="${v < 0 ? 'loss' : here ? 'now' : 'win'}"/>`;
+          h += `<path class="bar ${v < 0 ? 'loss' : here ? 'now' : 'win'}" d="${barPath(cx - bw / 2, y0, bw, Math.max(1, y1 - y0), v < 0)}"/>`;
           if (amounts) h += `<text x="${cx.toFixed(1)}" y="${(v < 0 ? y1 + 11 : y0 - 5).toFixed(1)}" class="amt">${Number(v).toFixed(Math.abs(v) >= 100 ? 0 : 1)}</text>`;
         }
         if ((n - 1 - i) % every === 0) h += `<text x="${cx.toFixed(1)}" y="146" class="${here ? 'today' : v === null ? 'later' : ''}">${labels[i]}</text>`;

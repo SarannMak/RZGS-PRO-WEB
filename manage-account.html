@@ -6,8 +6,8 @@
   <title>Manage account — RZGS-PRO</title>
   <meta name="description" content="Manage your RZGS-PRO account: profile, subscription, usage and sessions.">
   <meta name="robots" content="noindex">
-  <meta name="theme-color" content="#030c13">
-  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#f5f8fd">
+  <meta name="color-scheme" content="light">
 
   <meta property="og:type" content="website">
   <meta property="og:title" content="Dashboard — RZGS-PRO">
@@ -23,22 +23,21 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
   <link rel="stylesheet" href="style.css?v=38">
   <link rel="stylesheet" href="plans.css?v=6">
   <link rel="stylesheet" href="auth.css?v=27">
-  <link rel="stylesheet" href="motion.css?v=6">
+  <link rel="stylesheet" href="motion.css?v=7">
+  <link rel="stylesheet" href="theme.css?v=86">
 
   <script>document.documentElement.classList.add('js');try{if(localStorage.getItem('sb-zaziizzsbytkdlatoutv-auth-token'))document.documentElement.classList.add('signed-in')}catch(e){}</script>
-  <script src="script.js?v=11" defer></script>
-  <!-- the page builds itself once the account is read (build-motion.js, started by motion.js; the owner, 9 Nov 2026) -->
-  <script src="build-motion.js?v=3" defer></script>
-  <script src="motion.js?v=7" defer></script>
-  <script src="plans.js?v=12" defer></script>
+  <script src="script.js?v=22" defer></script>
+  <script src="motion.js?v=9" defer></script>
+  <script src="plans.js?v=16" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0" defer></script>
-  <script src="auth.js?v=32" defer></script>
+  <script src="auth.js?v=36" defer></script>
 </head>
-<body data-auth-page="manage" class="acc-page" data-motion="video" data-build>
+<body data-auth-page="manage" class="acc-page" data-motion="video">
   <a class="skip-link" href="#main">Skip to content</a>
 
   <!-- Icon sprite (Lucide-style, 24px grid, stroke icons) -->
@@ -100,10 +99,85 @@
 
       <nav class="primary-nav" id="primary-nav" aria-label="Main">
         <ul class="nav-list">
-          <li><a class="nav-link" href="bot">The Bot</a></li>
-          <li><a class="nav-link" href="how-to-buy">Tutorial</a></li>
-          <li><a class="nav-link" href="license">License</a></li>
-          <li><a class="nav-link" href="contact">Contact</a></li>
+          <li class="nav-item nav-item--home"><a class="nav-link" href="./">Home</a></li>
+          <li class="nav-item" data-menu>
+            <a class="nav-trigger" href="bot">The Bot</a><button class="nav-chev-btn" type="button" aria-expanded="false" aria-controls="menu-bot" aria-label="More about The Bot"><svg class="nav-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+            <div class="mega" id="menu-bot">
+              <div class="mega-col">
+                <p class="mega-head"><span class="mega-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2M20 14h2M15 13v2M9 13v2"/></svg></span>The bot</p>
+                <ul class="mega-links">
+                  <li><a href="bot">Overview</a></li>
+                  <li><a href="bot#how-it-trades">How it trades</a></li>
+                  <li><a href="bot#specs">Specifications</a></li>
+                </ul>
+              </div>
+              <div class="mega-col">
+                <p class="mega-head"><span class="mega-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/></svg></span>Control app</p>
+                <ul class="mega-links">
+                  <li><a href="bot#features">What's inside</a></li>
+                  <li><a href="app">Open the control app</a></li>
+                </ul>
+              </div>
+              <div class="mega-col">
+                <p class="mega-head"><span class="mega-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6M2 9h20"/></svg></span>Plans and brokers</p>
+                <ul class="mega-links">
+                  <li><a href="signup" data-plans="">See the plans</a></li>
+                  <li><a href="./#partners">Partner brokers</a></li>
+                  <li><a href="./#faq">Questions answered</a></li>
+                </ul>
+              </div>
+            </div>
+          </li>
+          <li class="nav-item" data-menu>
+            <a class="nav-trigger" href="how-to-buy">Tutorial</a><button class="nav-chev-btn" type="button" aria-expanded="false" aria-controls="menu-tutorial" aria-label="More about Tutorial"><svg class="nav-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+            <div class="mega" id="menu-tutorial">
+              <div class="mega-col">
+                <p class="mega-head"><span class="mega-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg></span>Get started</p>
+                <ul class="mega-links">
+                  <li><a href="how-to-buy#how-it-works">How to use</a></li>
+                  <li><a href="how-to-buy#steps">How buying works</a></li>
+                  <li><a href="how-to-buy#need-title">What you'll need</a></li>
+                  <li><a href="signup" data-plans="">Start your free trial</a></li>
+                </ul>
+              </div>
+              <div class="mega-col">
+                <p class="mega-head"><span class="mega-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65M22 12.65l-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg></span>Step by step</p>
+                <ul class="mega-links">
+                  <li><a href="how-to-buy#path">From login to a running bot</a></li>
+                </ul>
+              </div>
+              <div class="mega-col">
+                <p class="mega-head"><span class="mega-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg></span>Your plan</p>
+                <ul class="mega-links">
+                  <li><a href="how-to-buy#compare">Elite or Diamond?</a></li>
+                  <li><a href="how-to-buy#know-title">After you buy</a></li>
+                </ul>
+              </div>
+            </div>
+          </li>
+          <li class="nav-item" data-menu>
+            <a class="nav-trigger" href="license">License</a><button class="nav-chev-btn" type="button" aria-expanded="false" aria-controls="menu-license" aria-label="More about License"><svg class="nav-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+            <div class="mega" id="menu-license">
+              <div class="mega-col">
+                <p class="mega-head"><span class="mega-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4M21 2l-9.6 9.6"/><circle cx="7.5" cy="15.5" r="5.5"/></svg></span>License</p>
+                <ul class="mega-links">
+                  <li><a href="license">License rules</a></li>
+                  <li><a href="license#types">Three ways to use the bot</a></li>
+                  <li><a href="license#dos-and-donts">What you can and can't do</a></li>
+                  <li><a href="license#rules">In more detail</a></li>
+                </ul>
+              </div>
+              <div class="mega-col">
+                <p class="mega-head"><span class="mega-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4M10 9H8M16 13H8M16 17H8"/></svg></span>Legal</p>
+                <ul class="mega-links">
+                  <li><a href="terms">Terms &amp; Conditions</a></li>
+                  <li><a href="privacy">Privacy Policy</a></li>
+                  <li><a href="risk-disclosure">Risk Disclosure</a></li>
+                </ul>
+              </div>
+            </div>
+          </li>
+          <li class="nav-item"><a class="nav-link" href="contact">Contact</a></li>
         </ul>
         <div class="nav-menu-cta nav-account guest-only">
           <a class="btn btn-ghost" href="login">Log in</a>

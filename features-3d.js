@@ -33,12 +33,14 @@ if (!stages.length) return;
 const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // ---- the drawing kit of the video: colours, fonts, easing, 2D HUD pieces -------------------------
+// the light site (14 Nov 2026): white panels, dark words, the site's blue; lime only for small marks
+// no green and no cyan in the boxes (the owner, 15 Nov 2026): the old lime and sky accents are blues now
 const C = {
-  bg: '#030c13', panel: '#071922', line: '#123644', line2: '#1c4f61', chip: '#062b38',
-  cyan: '#19d3ff', mint: '#37efb8', neon: '#a6ff1a', buy: '#4aa8ff', sell: '#ff9a3d', good: '#2bf391',
-  bad: '#ff5a6a', warn: '#ffd23f', text: '#f3fbff', body: '#c9dde6', muted: '#7fa3b3', frame: '#1fb6d6', on: '#02131a',
+  bg: '#f5f8fd', panel: '#ffffff', line: '#e3e9f2', line2: '#cdd7e5', chip: '#eef5ff',
+  cyan: '#0b74de', mint: '#6aaaf5', neon: '#3d8ef5', buy: '#0b6bd3', sell: '#d9620f', good: '#12a150',
+  bad: '#e5484d', warn: '#d97706', text: '#0b1426', body: '#3e4a5c', muted: '#667085', frame: '#b9d3f5', on: '#ffffff',
 };
-const DISPLAY = 'Oxanium, sans-serif', SANS = '"IBM Plex Sans", sans-serif', MONO = '"IBM Plex Mono", monospace';
+const DISPLAY = 'Poppins, sans-serif', SANS = 'Poppins, sans-serif', MONO = 'Poppins, sans-serif';
 const f = (weight, size, family) => `${weight} ${size}px ${family}`;
 const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
 const seg = (t, a, b) => clamp((t - a) / (b - a));
@@ -87,7 +89,7 @@ function measure(ctx, s, font, spacing = 0) {
 }
 function grad(ctx, x0, x1) {
   const g = ctx.createLinearGradient(x0, 0, x1, 0);
-  g.addColorStop(0, C.cyan); g.addColorStop(0.52, C.mint); g.addColorStop(1, C.neon);
+  g.addColorStop(0, '#0753c8'); g.addColorStop(0.55, C.cyan); g.addColorStop(1, C.mint);
   return g;
 }
 function cutRect(ctx, x, y, w, h, c) {
@@ -105,7 +107,7 @@ function hud(ctx, x, y, w, h, o = {}) {
   const c = o.cut ?? 12, accent = o.accent ?? C.neon;
   ctx.save();
   cutRect(ctx, x, y, w, h, c);
-  ctx.fillStyle = o.fill ?? 'rgba(6,28,38,0.94)';
+  ctx.fillStyle = o.fill ?? 'rgba(255,255,255,0.96)';
   ctx.fill();
   ctx.lineWidth = o.lineWidth ?? 1.2;
   ctx.strokeStyle = o.border ?? grad(ctx, x, x + w);
@@ -146,7 +148,7 @@ function pill(ctx, s, x, y, color, alpha, size) {
   ctx.save();
   ctx.globalAlpha *= alpha;
   cutRect(ctx, x - w / 2, y - h / 2, w, h, size * 0.4);
-  ctx.fillStyle = 'rgba(4,16,24,0.92)'; ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.95)'; ctx.fill();
   ctx.strokeStyle = color; ctx.lineWidth = 1.3; ctx.shadowColor = color; ctx.shadowBlur = 8; ctx.stroke();
   ctx.restore();
   text(ctx, s, x, y + size * 0.36, { font, spacing: 1, align: 'center', fill: color, alpha });
@@ -212,7 +214,8 @@ const WEEK = [
   { day: 'MON', v: 10.12 }, { day: 'TUE', v: 13.01 }, { day: 'WED', v: 11.96 }, { day: 'THU', v: 9.63 }, { day: 'FRI', v: 14.43 },
 ];
 const WEEK_TOTAL = WEEK.reduce((s, d) => s + d.v, 0); // 59.15
-const SHIELDS = ['MAX SPREAD', 'MAX TOTAL LOTS', 'SMART SHIELD', 'DAILY TARGET'];
+// the four shields (the owner, 15 Nov 2026)
+const SHIELDS = ['MAX GRID & LOTS', 'COOLDOWN SYSTEM', 'MIDNIGHT PROTECTION', 'RISK CALCULATOR'];
 
 // ---- the control app as app.html looks today, drawn for the screen of the 3D phone ------------------------
 // Home: the equity card, the Account box and the Active / Pause bar. Trades: the status card, the grid
@@ -231,7 +234,7 @@ function tap(ctx, t, t0, x, y) {
   const press = seg(t, t0 - 0.12, t0) * (1 - seg(t, t0 + 0.05, t0 + 0.2));
   ctx.save();
   ctx.globalAlpha = Math.min(1, k * 4) * (1 - seg(t, t0 + 0.15, t0 + 0.35));
-  ctx.fillStyle = 'rgba(255,255,255,0.28)';
+  ctx.fillStyle = 'rgba(11,116,222,0.16)';
   ctx.beginPath(); ctx.arc(x, y, 34 - press * 8, 0, Math.PI * 2); ctx.fill();
   const r = seg(t, t0, t0 + 0.35);
   if (r > 0) {
@@ -241,12 +244,12 @@ function tap(ctx, t, t0, x, y) {
   ctx.restore();
 }
 const cap = (ctx, s, x, y, o = {}) => text(ctx, s.toUpperCase(), x, y, { font: f(500, 19, MONO), spacing: 3, fill: C.muted, ...o });
-const sep = (ctx, y) => { ctx.fillStyle = '#123644'; ctx.fillRect(56, y, PW - 112, 2); };
+const sep = (ctx, y) => { ctx.fillStyle = '#e3e9f2'; ctx.fillRect(56, y, PW - 112, 2); };
 // a panel the way the app draws it: dark, cut corners, a cyan tick in two corners, a small capital title
 function panel(ctx, x, y, w, h, title) {
   cutRect(ctx, x, y, w, h, 18);
-  ctx.fillStyle = '#071922'; ctx.fill();
-  ctx.strokeStyle = '#164656'; ctx.lineWidth = 2; ctx.stroke();
+  ctx.fillStyle = '#ffffff'; ctx.fill();
+  ctx.strokeStyle = '#e3e9f2'; ctx.lineWidth = 2; ctx.stroke();
   ctx.save(); ctx.strokeStyle = C.frame; ctx.lineWidth = 2;
   ctx.beginPath(); ctx.moveTo(x + 1, y + 18); ctx.lineTo(x + 18, y + 1); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(x + w - 1, y + h - 18); ctx.lineTo(x + w - 18, y + h - 1); ctx.stroke();
@@ -254,21 +257,21 @@ function panel(ctx, x, y, w, h, title) {
   if (title) cap(ctx, title, x + 30, y + 50);
 }
 function btn(ctx, x, y, w, h, label, kind, on) {
-  const fills = { go: on ? C.good : '#062a1f', hold: on ? C.warn : '#2a2208', danger: '#2c0f19', plain: '#0a2330' };
-  const strokes = { go: '#1fae6b', hold: '#b98f14', danger: '#b23a4c', plain: '#1f5a6d' };
+  const fills = { go: on ? C.good : '#e7f7ee', hold: on ? C.warn : '#fff4e5', danger: '#fdecee', plain: '#f3f6fb' };
+  const strokes = { go: '#a6e3c3', hold: '#f2c994', danger: '#f3b7bd', plain: '#cdd7e5' };
   cutRect(ctx, x, y, w, h, 16);
   ctx.fillStyle = fills[kind]; ctx.fill();
   if (!on) { ctx.strokeStyle = strokes[kind]; ctx.lineWidth = 2; ctx.stroke(); }
-  const color = on ? C.on : { go: C.good, hold: C.warn, danger: '#ff7d8c', plain: C.text }[kind];
+  const color = on ? C.on : { go: C.good, hold: C.warn, danger: '#d92d3a', plain: C.text }[kind];
   text(ctx, label.toUpperCase(), x + w / 2, y + h / 2 + 10, { font: f(700, 27, DISPLAY), spacing: 2, align: 'center', fill: color });
 }
 // a box holding a value, like the app's number fields
 function field(ctx, x, y, w, h, v, left) {
-  cutRect(ctx, x, y, w, h, 10); ctx.fillStyle = '#04121a'; ctx.fill(); ctx.strokeStyle = C.line2; ctx.lineWidth = 2; ctx.stroke();
+  cutRect(ctx, x, y, w, h, 10); ctx.fillStyle = '#f6f9fe'; ctx.fill(); ctx.strokeStyle = C.line2; ctx.lineWidth = 2; ctx.stroke();
   text(ctx, v, left ? x + 22 : x + w - 22, y + h / 2 + 10, { font: f(500, 27, MONO), align: left ? 'left' : 'right', fill: C.body });
 }
 function toggle(ctx, x, y) {
-  cutRect(ctx, x, y, 92, 52, 8); ctx.fillStyle = '#0a2330'; ctx.fill(); ctx.strokeStyle = C.frame; ctx.lineWidth = 2; ctx.stroke();
+  cutRect(ctx, x, y, 92, 52, 8); ctx.fillStyle = '#f3f6fb'; ctx.fill(); ctx.strokeStyle = C.frame; ctx.lineWidth = 2; ctx.stroke();
   ctx.save(); ctx.fillStyle = C.neon; ctx.shadowColor = C.neon; ctx.shadowBlur = 10; ctx.fillRect(x + 50, y + 9, 34, 34); ctx.restore();
 }
 const label2 = (ctx, y, big, small) => {
@@ -282,7 +285,7 @@ function slider(ctx, y, big, small, value, k, min, max) {
   const ty = y + 80, tx0 = 112, tw = PW - 224;
   text(ctx, min, 60, ty + 8, { font: f(500, 19, MONO), fill: C.muted });
   text(ctx, max, PW - 60, ty + 8, { font: f(500, 19, MONO), align: 'right', fill: C.muted });
-  rrect(ctx, tx0, ty - 5, tw, 10, 5); ctx.fillStyle = '#0e2f3e'; ctx.fill();
+  rrect(ctx, tx0, ty - 5, tw, 10, 5); ctx.fillStyle = '#e9eff8'; ctx.fill();
   rrect(ctx, tx0, ty - 5, Math.max(10, tw * k), 10, 5); ctx.fillStyle = C.cyan; ctx.fill();
   ctx.save(); ctx.fillStyle = C.cyan; ctx.shadowColor = C.cyan; ctx.shadowBlur = 16;
   ctx.beginPath(); ctx.arc(tx0 + tw * k, ty, 15, 0, Math.PI * 2); ctx.fill(); ctx.restore();
@@ -303,7 +306,7 @@ const BALANCE = 1212.4, TODAY = 33.38;
 function homeTab(ctx, t) {
   const today = tick(TODAY - 4.6, TODAY, t, 5.55, 6.15), bal = BALANCE - (TODAY - today), fl = sidePL(t, 'buy') + sidePL(t, 'sell');
   // the equity card
-  hud(ctx, 26, 0, PW - 52, 322, { fill: '#061c26', cut: 22, arm: 90, accent: C.cyan, border: '#1c4f61', tick: 5, glow: 10 });
+  hud(ctx, 26, 0, PW - 52, 322, { fill: '#ffffff', cut: 22, arm: 90, accent: C.cyan, border: '#cdd7e5', tick: 5, glow: 10 });
   cap(ctx, 'Equity', 60, 66, { spacing: 4 });
   text(ctx, `$${money(bal + fl)}`, 56, 166, { font: f(800, 90, DISPLAY) });
   text(ctx, `+$${money(today)} today`, 60, 218, { font: f(500, 29, MONO), fill: C.good });
@@ -313,7 +316,7 @@ function homeTab(ctx, t) {
     ctx.save();
     ctx.beginPath(); pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
     ctx.lineTo(sx + sw, base); ctx.lineTo(sx, base); ctx.closePath();
-    const g = ctx.createLinearGradient(0, base - 60, 0, base); g.addColorStop(0, 'rgba(55,239,184,0.2)'); g.addColorStop(1, 'rgba(55,239,184,0)');
+    const g = ctx.createLinearGradient(0, base - 60, 0, base); g.addColorStop(0, 'rgba(11,116,222,0.14)'); g.addColorStop(1, 'rgba(11,116,222,0)');
     ctx.fillStyle = g; ctx.fill();
     ctx.beginPath(); pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
     ctx.strokeStyle = grad(ctx, sx, sx + sw); ctx.lineWidth = 5; ctx.shadowColor = C.mint; ctx.shadowBlur = 12; ctx.stroke();
@@ -336,7 +339,7 @@ function homeTab(ctx, t) {
   ['NEW YORK', 'LONDON', 'ASIA'].forEach((s) => {
     const font = f(500, 19, MONO), w = measure(ctx, s, font, 2.5) + 34, on = s === 'LONDON';
     cx -= w;
-    ctx.fillStyle = on ? C.chip : 'rgba(4,18,26,0.6)'; ctx.fillRect(cx, sy - 34, w, 50);
+    ctx.fillStyle = on ? C.chip : 'rgba(243,246,251,0.92)'; ctx.fillRect(cx, sy - 34, w, 50);
     ctx.strokeStyle = on ? C.cyan : C.line2; ctx.lineWidth = 2; ctx.strokeRect(cx, sy - 34, w, 50);
     text(ctx, s, cx + w / 2, sy - 1, { font, spacing: 2.5, align: 'center', fill: on ? C.cyan : C.muted });
     cx -= 14;
@@ -375,10 +378,10 @@ function tri(ctx, x, y, color) {
 }
 function tradesTab(ctx, t) {
   // the status card
-  hud(ctx, 26, 0, PW - 52, 250, { fill: '#061c26', cut: 22, arm: 90, accent: C.neon, border: C.frame, tick: 4, glow: 10 });
+  hud(ctx, 26, 0, PW - 52, 250, { fill: '#ffffff', cut: 22, arm: 90, accent: C.neon, border: C.frame, tick: 4, glow: 10 });
   const cx = 150, cy = 125, R = 82;
   ctx.save();
-  ctx.lineWidth = 12; ctx.strokeStyle = '#123644';
+  ctx.lineWidth = 12; ctx.strokeStyle = '#e3e9f2';
   ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
   const arc = tick(0, 3 / 15, t, 6.55, 7.0);
   ctx.strokeStyle = C.cyan; ctx.shadowColor = C.cyan; ctx.shadowBlur = 14; ctx.lineCap = 'round';
@@ -399,24 +402,24 @@ function tradesTab(ctx, t) {
   // the grid ladder
   const ly = 270;
   panel(ctx, 26, ly, PW - 52, 650, 'Grid ladder');
-  cutRect(ctx, 292, ly + 22, 150, 46, 8); ctx.fillStyle = '#0a2330'; ctx.fill(); ctx.strokeStyle = C.frame; ctx.lineWidth = 2; ctx.stroke();
+  cutRect(ctx, 292, ly + 22, 150, 46, 8); ctx.fillStyle = '#f3f6fb'; ctx.fill(); ctx.strokeStyle = C.frame; ctx.lineWidth = 2; ctx.stroke();
   ctx.save(); ctx.strokeStyle = C.cyan; ctx.lineWidth = 2.5;
   ctx.beginPath(); ctx.ellipse(318, ly + 45, 13, 8, 0, 0, Math.PI * 2); ctx.stroke();
   ctx.beginPath(); ctx.arc(318, ly + 45, 3.5, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
   text(ctx, 'HISTORY', 390, ly + 52, { font: f(600, 17, MONO), spacing: 2, align: 'center', fill: C.cyan });
-  cutRect(ctx, 454, ly + 22, 190, 46, 8); ctx.fillStyle = '#0a2330'; ctx.fill(); ctx.strokeStyle = C.line2; ctx.lineWidth = 2; ctx.stroke();
+  cutRect(ctx, 454, ly + 22, 190, 46, 8); ctx.fillStyle = '#f3f6fb'; ctx.fill(); ctx.strokeStyle = C.line2; ctx.lineWidth = 2; ctx.stroke();
   ctx.fillStyle = C.chip; ctx.fillRect(458, ly + 26, 104, 38);
   text(ctx, 'CANDLES', 510, ly + 52, { font: f(600, 16, MONO), spacing: 1.5, align: 'center', fill: C.cyan });
   text(ctx, 'LINE', 603, ly + 52, { font: f(600, 16, MONO), spacing: 1.5, align: 'center', fill: C.muted });
   const x0 = 50, x1 = 420, tagX = 432, axisX = PW - 50, y0 = ly + 100, y1 = ly + 560;
   const lo = START - 1.6, hi = START + 7.6, Y = (v) => y1 - ((v - lo) / (hi - lo)) * (y1 - y0);
   for (let v = Math.ceil(lo); v <= hi; v++) {
-    ctx.fillStyle = 'rgba(31,182,214,0.08)'; ctx.fillRect(x0, Y(v), 516, 1.5);
+    ctx.fillStyle = 'rgba(11,116,222,0.06)'; ctx.fillRect(x0, Y(v), 516, 1.5);
     text(ctx, money(v), axisX, Y(v) + 6, { font: f(500, 17, MONO), align: 'right', fill: C.muted });
   }
   // the next entry, dashed, as in the app
   const ny = Y(START + 7.43);
-  ctx.save(); ctx.setLineDash([6, 8]); ctx.strokeStyle = 'rgba(243,251,255,0.55)'; ctx.lineWidth = 1.5;
+  ctx.save(); ctx.setLineDash([6, 8]); ctx.strokeStyle = 'rgba(11,20,38,0.32)'; ctx.lineWidth = 1.5;
   ctx.beginPath(); ctx.moveTo(x0, ny); ctx.lineTo(x1 + 120, ny); ctx.stroke(); ctx.restore();
   text(ctx, `NEXT ${money(START + 7.43)}`, x0 + 4, ny - 9, { font: f(500, 17, MONO), fill: C.body });
   // candles: they fill in as the tab opens, the last one follows the price
@@ -449,7 +452,7 @@ function tradesTab(ctx, t) {
     ctx.save(); ctx.globalAlpha *= clamp(k); tri(ctx, x, y, col); ctx.restore();
     const ty = y + o.dy;
     ctx.save(); ctx.translate(tagX + 56, ty); ctx.scale(Math.max(0.001, k), Math.max(0.001, k));
-    cutRect(ctx, -56, -19, 112, 38, 8); ctx.fillStyle = 'rgba(4,16,24,0.96)'; ctx.fill(); ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.stroke();
+    cutRect(ctx, -56, -19, 112, 38, 8); ctx.fillStyle = 'rgba(255,255,255,0.97)'; ctx.fill(); ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.stroke();
     text(ctx, `L${o.lvl} ${o.lot.toFixed(2)}`, 0, 7, { font: f(600, 18, MONO), align: 'center', fill: col });
     ctx.restore();
   });
@@ -476,7 +479,7 @@ function tradesTab(ctx, t) {
     text(ctx, `${pl >= 0 ? '+' : ''}${pl.toFixed(2)}$`, x, by + 150, { font: f(700, 42, DISPLAY), fill: pl >= 0 ? C.good : C.bad });
     text(ctx, a, x, by + 192, { font: f(500, 17, MONO), spacing: 1.5, fill: C.muted });
     text(ctx, b, x + 270, by + 192, { font: f(500, 17, MONO), spacing: 1.5, align: 'right', fill: C.muted });
-    ctx.fillStyle = '#0e2f3e'; ctx.fillRect(x, by + 212, 270, 8);
+    ctx.fillStyle = '#e9eff8'; ctx.fillRect(x, by + 212, 270, 8);
     const fill = clamp(pl / BASKET);
     if (fill > 0) { ctx.fillStyle = C.good; ctx.fillRect(x, by + 212, 270 * fill, 8); }
   });
@@ -494,7 +497,7 @@ function controlTab(ctx, t) {
   tap(ctx, t, AT.resume, 56 + bw / 2, 122);
   panel(ctx, 26, 320, PW - 52, 210, 'Lot mode (starts with the next cycle)');
   const sx = 56, sw = PW - 112, part = sw / 3, sy = 396;
-  cutRect(ctx, sx, sy, sw, 92, 14); ctx.fillStyle = '#04121a'; ctx.fill(); ctx.strokeStyle = C.line2; ctx.lineWidth = 2; ctx.stroke();
+  cutRect(ctx, sx, sy, sw, 92, 14); ctx.fillStyle = '#f6f9fe'; ctx.fill(); ctx.strokeStyle = C.line2; ctx.lineWidth = 2; ctx.stroke();
   const pos = E.spring(seg(t, AT.smart, AT.smart + 0.44));
   ctx.save();
   cutRect(ctx, sx + 6 + pos * part, sy + 6, part - 12, 80, 12); ctx.fillStyle = C.chip; ctx.fill();
@@ -543,23 +546,23 @@ function reportView(ctx, t) {
   panel(ctx, 26, 488, PW - 52, 700, m ? 'Closed profit by week ($)' : 'Closed profit this week ($)');
   // the range switch
   const rw = (PW - 112) / 4, glide = lerp(0, 2, E.outExpo(month));
-  cutRect(ctx, 56, 560, PW - 112, 70, 10); ctx.fillStyle = '#04121a'; ctx.fill(); ctx.strokeStyle = C.line2; ctx.lineWidth = 2; ctx.stroke();
+  cutRect(ctx, 56, 560, PW - 112, 70, 10); ctx.fillStyle = '#f6f9fe'; ctx.fill(); ctx.strokeStyle = C.line2; ctx.lineWidth = 2; ctx.stroke();
   ctx.fillStyle = C.chip; ctx.fillRect(60 + rw * glide, 564, rw - 8, 62);
   ctx.fillStyle = C.neon; ctx.fillRect(66 + rw * glide, 622, rw - 20, 4);
   ['This week', 'Last week', 'Month', 'All time'].forEach((s, i) => text(ctx, s.toUpperCase(), 56 + rw * i + rw / 2, 604, { font: f(600, 17, MONO), spacing: 1, align: 'center', fill: i === (m ? 2 : 0) ? C.cyan : C.muted }));
   tap(ctx, t, AT.month - 0.02, 56 + rw * 2.5, 595);
   // the columns
   const base = 900, room = 150, bx0 = 70, bx1 = PW - 70;
-  ctx.fillStyle = '#123644'; ctx.fillRect(bx0, base, bx1 - bx0, 2);
+  ctx.fillStyle = '#e3e9f2'; ctx.fillRect(bx0, base, bx1 - bx0, 2);
   const columns = (list, slots, since, alpha) => {
     const max = Math.max(...list.map((d) => d.v)), cw = (bx1 - bx0) / slots;
     for (let i = 0; i < slots; i++) {
       const d = list[i], x = bx0 + cw * i + cw / 2;
-      text(ctx, d ? d.day : ['SAT', 'SUN'][i - list.length], x, base + 34, { font: f(600, 17, MONO), align: 'center', fill: d ? (d.now ? C.cyan : C.body) : '#3d5a66', alpha });
+      text(ctx, d ? d.day : ['SAT', 'SUN'][i - list.length], x, base + 34, { font: f(600, 17, MONO), align: 'center', fill: d ? (d.now ? C.cyan : C.body) : '#a0abbb', alpha });
       if (!d) continue;
       const k = E.outCubic(seg(since, i * 0.05, i * 0.05 + 0.35)), h = (d.v / max) * room * k;
       ctx.save(); ctx.globalAlpha *= alpha;
-      ctx.fillStyle = d.now ? C.cyan : '#1597b5'; if (d.now) { ctx.shadowColor = C.cyan; ctx.shadowBlur = 12; }
+      ctx.fillStyle = d.now ? C.cyan : '#9cc4f2'; if (d.now) { ctx.shadowColor = C.cyan; ctx.shadowBlur = 12; }
       ctx.fillRect(x - cw * 0.3, base - h, cw * 0.6, h);
       ctx.restore();
       if (k > 0.05) text(ctx, d.v.toFixed(2), x, base - h - 12, { font: f(600, 17, MONO), align: 'center', fill: C.text, alpha: alpha * k });
@@ -575,7 +578,7 @@ function reportView(ctx, t) {
 }
 function toolsTab(ctx, t) {
   const tw = (PW - 52) / 4, sub = t >= AT.report ? 2 : 0, glide = lerp(0, 2, E.outExpo(seg(t, AT.report, AT.report + 0.25)));
-  cutRect(ctx, 26, 0, PW - 52, 76, 12); ctx.fillStyle = '#071922'; ctx.fill(); ctx.strokeStyle = C.line2; ctx.lineWidth = 2; ctx.stroke();
+  cutRect(ctx, 26, 0, PW - 52, 76, 12); ctx.fillStyle = '#ffffff'; ctx.fill(); ctx.strokeStyle = C.line2; ctx.lineWidth = 2; ctx.stroke();
   ctx.fillStyle = C.chip; ctx.fillRect(30 + tw * glide, 4, tw - 8, 68);
   ctx.fillStyle = C.neon; ctx.fillRect(38 + tw * glide, 68, tw - 24, 4);
   ['Settings', 'Risk calc', 'Report', 'Account'].forEach((s, i) => text(ctx, s.toUpperCase(), 26 + tw * i + tw / 2, 47, { font: f(600, 18, MONO), spacing: 2, align: 'center', fill: i === sub ? C.cyan : C.muted }));
@@ -592,19 +595,19 @@ function drawPhone(ctx, t) {
   ctx.save();
   ctx.clearRect(0, 0, PW, PH);
   rrect(ctx, 0, 0, PW, PH, 64); ctx.clip();
-  ctx.fillStyle = '#030c13'; ctx.fillRect(0, 0, PW, PH);
-  ctx.strokeStyle = 'rgba(25,211,255,0.05)'; ctx.lineWidth = 1;
+  ctx.fillStyle = '#f5f8fd'; ctx.fillRect(0, 0, PW, PH);
+  ctx.strokeStyle = 'rgba(11,116,222,0.05)'; ctx.lineWidth = 1;
   for (let x = 0; x < PW; x += 44) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, PH); ctx.stroke(); }
   for (let y = 0; y < PH; y += 44) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(PW, y); ctx.stroke(); }
   text(ctx, '9:41', 60, 52, { font: f(600, 24, SANS), fill: C.body });
   text(ctx, '5G', PW - 60, 52, { font: f(600, 20, SANS), align: 'right', fill: C.body });
-  ctx.fillStyle = '#000'; rrect(ctx, PW / 2 - 70, 16, 140, 38, 19); ctx.fill();
+  ctx.fillStyle = '#0b1426'; rrect(ctx, PW / 2 - 70, 16, 140, 38, 19); ctx.fill();
   text(ctx, 'RZGS-PRO.BOT', 40, 128, { font: f(700, 44, DISPLAY), spacing: 1 });
   text(ctx, '#10012345 | XAUUSD', 40, 164, { font: f(400, 22, MONO), spacing: 1, fill: C.muted });
   ctx.save(); ctx.fillStyle = C.good; ctx.shadowColor = C.good; ctx.shadowBlur = 12;
   ctx.beginPath(); ctx.arc(PW - 196, 116, 8, 0, Math.PI * 2); ctx.fill(); ctx.restore();
   text(ctx, 'LIVE', PW - 178, 124, { font: f(600, 22, MONO), spacing: 3, fill: C.body });
-  cutRect(ctx, PW - 106, 84, 66, 66, 14); ctx.fillStyle = '#071922'; ctx.fill(); ctx.strokeStyle = C.line2; ctx.lineWidth = 2.5; ctx.stroke();
+  cutRect(ctx, PW - 106, 84, 66, 66, 14); ctx.fillStyle = '#ffffff'; ctx.fill(); ctx.strokeStyle = C.line2; ctx.lineWidth = 2.5; ctx.stroke();
   ctx.strokeStyle = C.body;
   ctx.beginPath(); ctx.arc(PW - 73, 120, 15, -Math.PI * 0.32, Math.PI * 1.32); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(PW - 73, 100); ctx.lineTo(PW - 73, 118); ctx.stroke();
@@ -618,7 +621,7 @@ function drawPhone(ctx, t) {
   ctx.restore();
   // the dock, as in the app: Home (a house), Trades, Control (a hexagon), Tools (sliders), Log
   const dy = PH - DOCK_H;
-  ctx.fillStyle = 'rgba(4,14,20,0.98)'; ctx.fillRect(0, dy, PW, DOCK_H);
+  ctx.fillStyle = 'rgba(255,255,255,0.98)'; ctx.fillRect(0, dy, PW, DOCK_H);
   ctx.fillStyle = C.line2; ctx.fillRect(0, dy, PW, 2);
   const active = TAB_INDEX[TABS[i].id];
   const glide = i > 0 ? lerp(TAB_INDEX[TABS[i - 1].id], active, E.outExpo(seg(t, at - 0.05, at + 0.2))) : active;
@@ -845,7 +848,8 @@ function buildStrategy(S) {
     update(t) {
       s = story(t);
       const now = STEP_AT.reduce((n, at, i) => (s >= at ? i : n), 0);
-      if (now !== lit) { lit = now; steps.forEach((li, i) => li.classList.toggle('is-on', i === now)); }
+      // the step of the moment comes up from below; the one before it goes on up and away (the owner, 15 Nov 2026)
+      if (now !== lit) { const before = lit; lit = now; steps.forEach((li, i) => { li.classList.toggle('was-on', i === before); li.classList.toggle('is-on', i === now); }); }
       const k = clamp((s - CHART.t0) / (CHART.t1 - CHART.t0));
       const segs = Math.max(1, Math.floor(k * SAMPLES));
       for (const m of tubes) m.geometry.setDrawRange(0, segs * 8 * 6);
@@ -947,7 +951,7 @@ function buildStrategy(S) {
       if (s >= 1.6 && s < 5.4) {
         const p = P(chartX(s), chartY(priceAt(s)) + 0.5);
         const lab = money(START + priceAt(s)), font = f(600, 13 * u, MONO);
-        text(ctx, lab, Math.min(p.x + 12 * u, S.w - measure(ctx, lab, font) - 8), p.y - 4, { font, fill: '#ffffff', alpha: 0.9 });   // kept inside the board
+        text(ctx, lab, Math.min(p.x + 12 * u, S.w - measure(ctx, lab, font) - 8), p.y - 4, { font, fill: C.text, alpha: 0.9 });   // kept inside the board
       }
       // BASKET CLOSED (smaller and calmer on a phone, and never on top of the cycle profit card)
       const bk = seg(s, BASKET_AT, BASKET_AT + 0.22);
@@ -960,9 +964,9 @@ function buildStrategy(S) {
         ctx.globalAlpha *= fade;
         ctx.translate(clamp(p.x, Math.min(cardRight + 8 + bw / 2, maxX), maxX), clamp(p.y - (narrow ? 76 : 100) * u, bh / 2 + 8, S.h - bh / 2 - 8));
         ctx.scale(zoom, zoom);
-        cutRect(ctx, -bw / 2, -bh / 2, bw, bh, 12 * pu); ctx.fillStyle = 'rgba(3,12,19,0.9)'; ctx.fill();
+        cutRect(ctx, -bw / 2, -bh / 2, bw, bh, 12 * pu); ctx.fillStyle = 'rgba(255,255,255,0.95)'; ctx.fill();
         ctx.strokeStyle = C.neon; ctx.lineWidth = 2; ctx.shadowColor = C.neon; ctx.shadowBlur = narrow ? 10 : 20; ctx.stroke();
-        text(ctx, 'BASKET CLOSED', 0, 2 * pu, { font: f(800, 30 * pu, DISPLAY), align: 'center', spacing: lerp(narrow ? 7 : 20, 3, e) * pu, fill: grad(ctx, -bw / 2.4, bw / 2.4), glow: 'rgba(166,255,26,0.6)', glowSize: narrow ? 10 : 18 });
+        text(ctx, 'BASKET CLOSED', 0, 2 * pu, { font: f(800, 30 * pu, DISPLAY), align: 'center', spacing: lerp(narrow ? 7 : 20, 3, e) * pu, fill: grad(ctx, -bw / 2.4, bw / 2.4), glow: 'rgba(95,158,11,0.4)', glowSize: narrow ? 10 : 18 });
         text(ctx, narrow ? '+6.00$  ·  3 sells closed' : '+6.00$  ·  3 sells closed together', 0, 25 * pu, { font: f(500, Math.max(9, 12 * pu), MONO), align: 'center', fill: C.body });
         ctx.restore();
       }
@@ -972,13 +976,13 @@ function buildStrategy(S) {
         const k = E.outExpo(seg(s, 1.75, 2.1)), bx = S.w > 560 ? 22 : 12, by = bx, bw = 250 * u, bh = 152 * u;
         ctx.save();
         ctx.globalAlpha *= k;
-        hud(ctx, bx, by, bw, bh, { fill: 'rgba(3,16,24,0.9)', cut: 10 * u, arm: 22 * u });
+        hud(ctx, bx, by, bw, bh, { fill: 'rgba(255,255,255,0.95)', cut: 10 * u, arm: 22 * u });
         text(ctx, 'CYCLE PROFIT', bx + 16 * u, by + 26 * u, { font: f(500, 11 * u, MONO), spacing: 2, fill: C.muted });
         const cp = cycleProfit(s);
         let shown = cp;
         for (const tr of TRADES) if (tr.close?.kind === 'tp' && s >= tr.close.at && s < tr.close.at + 0.3) shown = lerp(cp - 1, cp, E.outCubic(seg(s, tr.close.at, tr.close.at + 0.3)));
         if (s >= BASKET_AT && s < BASKET_AT + 0.4) shown = lerp(cp - BASKET, cp, E.outCubic(seg(s, BASKET_AT, BASKET_AT + 0.4)));
-        text(ctx, `+${shown.toFixed(2)}$`, bx + 16 * u, by + 68 * u, { font: f(800, 40 * u, DISPLAY), fill: grad(ctx, bx, bx + 200 * u), glow: 'rgba(55,239,184,0.5)', glowSize: 12 });
+        text(ctx, `+${shown.toFixed(2)}$`, bx + 16 * u, by + 68 * u, { font: f(800, 40 * u, DISPLAY), fill: grad(ctx, bx, bx + 200 * u), glow: 'rgba(11,116,222,0.35)', glowSize: 12 });
         // one take-profit chip that adds up, then the basket chip, so the row always fits the card
         const tps = TRADES.filter((tr) => tr.close?.kind === 'tp' && s >= tr.close.at), chips = [];
         if (tps.length) chips.push(['TP', tps[tps.length - 1].close.at, `+${(tps.length * TP).toFixed(2)}`, tps.length > 1]);
@@ -989,7 +993,7 @@ function buildStrategy(S) {
           if (pk <= 0) continue;
           const lab = `${n} ${v}`, font = f(600, 10 * u, MONO), w = measure(ctx, lab, font, 1) + 12 * u;
           ctx.save(); ctx.translate(px + w / 2, by + 90 * u); ctx.scale(pk, pk);
-          cutRect(ctx, -w / 2, -10 * u, w, 20 * u, 4 * u); ctx.fillStyle = n === 'TP' ? 'rgba(43,243,145,0.14)' : 'rgba(166,255,26,0.16)'; ctx.fill();
+          cutRect(ctx, -w / 2, -10 * u, w, 20 * u, 4 * u); ctx.fillStyle = n === 'TP' ? 'rgba(18,161,80,0.12)' : 'rgba(95,158,11,0.14)'; ctx.fill();
           text(ctx, lab, 0, 4 * u, { font, spacing: 1, align: 'center', fill: n === 'TP' ? C.good : C.neon });
           ctx.restore();
           px += w + 6 * u;
@@ -997,14 +1001,14 @@ function buildStrategy(S) {
         const sb = s < BASKET_AT ? Math.max(0, sellBasket(s)) : BASKET, mk = clamp(sb / BASKET);
         text(ctx, 'SELL BASKET', bx + 16 * u, by + 124 * u, { font: f(500, 10 * u, MONO), spacing: 1.5, fill: C.sell });
         text(ctx, `${sb.toFixed(2)} / ${BASKET.toFixed(2)}$`, bx + bw - 16 * u, by + 124 * u, { font: f(600, 11 * u, MONO), align: 'right', fill: mk >= 1 ? C.neon : C.body });
-        ctx.fillStyle = '#0e2f3e'; ctx.fillRect(bx + 16 * u, by + 132 * u, bw - 32 * u, 6 * u);
+        ctx.fillStyle = '#e9eff8'; ctx.fillRect(bx + 16 * u, by + 132 * u, bw - 32 * u, 6 * u);
         ctx.fillStyle = mk >= 1 ? C.neon : C.sell; ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 8;
         ctx.fillRect(bx + 16 * u, by + 132 * u, (bw - 32 * u) * mk, 6 * u);
         ctx.restore();
       }
       // the loop starts again: a quick fade through the dark
       const fade = Math.max(1 - seg(s, 1.45, 1.62), seg(s, 6.35, 6.65));
-      if (fade > 0) { ctx.fillStyle = `rgba(3,12,19,${fade})`; ctx.fillRect(0, 0, S.w, S.h); }
+      if (fade > 0) { ctx.fillStyle = `rgba(245,248,253,${fade})`; ctx.fillRect(0, 0, S.w, S.h); }
     },
   };
 }
@@ -1031,7 +1035,7 @@ function buildApp(S) {
   screenTex.colorSpace = THREE.SRGBColorSpace;
   screenTex.anisotropy = 4;
   const SW = 3.17, SH = 3.17 * (PH / PW);
-  const screen = new THREE.Mesh(new THREE.PlaneGeometry(SW, SH), new THREE.MeshBasicMaterial({ map: screenTex, transparent: true, color: col('#d4d8da') }));
+  const screen = new THREE.Mesh(new THREE.PlaneGeometry(SW, SH), new THREE.MeshBasicMaterial({ map: screenTex, transparent: true, color: col('#ffffff') }));
   screen.position.z = 0.176;
   const halo = new THREE.Sprite(additive(glow, C.cyan, 0.32)); halo.scale.set(10, 12, 1); halo.position.z = -0.6;
   phone.add(halo, shell, body, screen);
@@ -1118,7 +1122,7 @@ function buildResults(S) {
   const sd = dust(220, [26, 12, 18], 21); scene.add(sd);
   const bars = new THREE.Group();
   scene.add(bars);
-  const deck = new THREE.Mesh(new THREE.PlaneGeometry(17, 5.6), new THREE.MeshBasicMaterial({ color: col('#061c26'), transparent: true, opacity: 0.85, depthWrite: false }));
+  const deck = new THREE.Mesh(new THREE.PlaneGeometry(17, 5.6), new THREE.MeshBasicMaterial({ color: col('#eef4fc'), transparent: true, opacity: 0.85, depthWrite: false }));
   deck.rotation.x = -Math.PI / 2; deck.position.y = 0.01;
   bars.add(deck);
   const deckEdge = (w, d, x, z, color) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, 0.03, d), new THREE.MeshBasicMaterial({ color: col(color) })); m.position.set(x, 0.02, z); bars.add(m); };
@@ -1130,7 +1134,7 @@ function buildResults(S) {
   const columns = WEEK.map((d, i) => {
     const geo = new THREE.BoxGeometry(CW, 1, CW);
     geo.translate(0, 0.5, 0);
-    const p = geo.attributes.position, arr = [], low = col('#03161d'), high = col('#0b4652');
+    const p = geo.attributes.position, arr = [], low = col('#e4edf8'), high = col('#b9d3f5');
     for (let j = 0; j < p.count; j++) { const c = p.getY(j) > 0.5 ? high : low; arr.push(c.r, c.g, c.b); }
     geo.setAttribute('color', new THREE.Float32BufferAttribute(arr, 3));
     const top = i === best;
@@ -1195,7 +1199,7 @@ function buildResults(S) {
         ctx.save();
         ctx.globalAlpha *= k;
         cutRect(ctx, top.x - w / 2, top.y - 18 * u, w, 25 * u, 5 * u);
-        ctx.fillStyle = 'rgba(3,12,19,0.85)';
+        ctx.fillStyle = 'rgba(245,248,253,0.9)';
         ctx.fill();
         ctx.restore();
         text(ctx, lab, top.x, top.y, { font, align: 'center', fill: i === best ? C.neon : C.text, alpha: k });
@@ -1228,9 +1232,9 @@ function buildProtection(S) {
     const g = new THREE.Group();
     const hex = new THREE.CylinderGeometry(0.95, 0.95, 0.12, 6);
     hex.rotateX(Math.PI / 2);
-    const face = new THREE.Mesh(hex, new THREE.MeshBasicMaterial({ color: col('#073443'), transparent: true, opacity: 0.86 }));
+    const face = new THREE.Mesh(hex, new THREE.MeshBasicMaterial({ color: col(S.dark ? '#16224a' : '#eaf3ff'), transparent: true, opacity: S.dark ? 0.92 : 0.86 }));
     const rimL = new THREE.LineSegments(new THREE.EdgesGeometry(hex), new THREE.LineBasicMaterial({ color: col(C.neon), transparent: true }));
-    const inner = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.CylinderGeometry(0.6, 0.6, 0.13, 6).rotateX(Math.PI / 2)), new THREE.LineBasicMaterial({ color: col(C.cyan), transparent: true }));
+    const inner = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.CylinderGeometry(0.6, 0.6, 0.13, 6).rotateX(Math.PI / 2)), new THREE.LineBasicMaterial({ color: col(S.dark ? '#7cb6ff' : C.cyan), transparent: true }));
     const sglow = new THREE.Sprite(additive(glow, C.neon, 0.18)); sglow.scale.set(3, 3, 1);
     g.add(sglow, face, rimL, inner);
     scene.add(g);
@@ -1246,12 +1250,71 @@ function buildProtection(S) {
   };
   const wanted = new THREE.Vector3();
   let tt = 0;
+  // a narrow board (a phone): when one name would reach past its half of the board, every name takes two lines and
+  // the scene steps back a little to leave them room (16 Nov 2026)
+  const nameSize = () => 13 * (S.dark ? Math.max(unit(S), 0.92) : unit(S));
+  const twoLines = (s) => {
+    let at = -1;
+    for (let i = 0; i < s.length; i += 1) if (s[i] === ' ' && (at < 0 || Math.abs(i - s.length / 2) < Math.abs(at - s.length / 2))) at = i;
+    return at < 0 ? [s] : [s.slice(0, at), s.slice(at + 1)];
+  };
+  const mctx = document.createElement('canvas').getContext('2d');
+  let split = false;
+  // (16 Nov 2026, the owner's picture: on a phone the names lay over each other and over the card's head) Do all four
+  // names have room where they are drawn on a dark board: over the top shields, under the bottom ones, none over
+  // another, none cut off by the edge of the scene? Measured with the camera where it rests.
+  let names = true;
+  // (17 Nov 2026, the owner: "add text back but so small like this", a short line drawn beside each shield) Where the
+  // names have no room over and under the shields, each stands small beside its shield: left of the left two, right of
+  // the right two, at the height of the shield's upper half; two lines when long.
+  let side = false;
+  const SIDE = { size: 8.5, spacing: 1, gap: 7, edge: 6 };
+  const sideFont = () => f(700, SIDE.size, DISPLAY);
+  const sideLines = (name) => (measure(mctx, name, sideFont(), SIDE.spacing) > 64 ? twoLines(name) : [name]);
+  const sideWidth = () => Math.max(...SHIELDS.map((n) => Math.max(...sideLines(n).map((l) => measure(mctx, l, sideFont(), SIDE.spacing)))));
+  const namesFit = () => {
+    camera.position.set(0, 1.2, S.dist);
+    camera.lookAt(0, -0.25, 0);
+    camera.updateProjectionMatrix();
+    camera.updateMatrixWorld(true);
+    const size = nameSize(), lh = size * 1.22, font = f(700, size, DISPLAY);
+    const boxes = SHIELDS.map((name, i) => {
+      const a = Math.PI / 4 + (i * Math.PI) / 2, x = Math.cos(a) * 3.35, y = -0.2 + Math.sin(a) * 3.35 * 0.55;
+      const p = S.project(x, y, 0), top = p.y < S.h / 2;
+      const edge = S.project(x, y + (top ? 0.95 : -0.95), 0).y;
+      const lines = split ? twoLines(name) : [name];
+      const w = Math.max(...lines.map((line) => measure(mctx, line, font, 1.5)));
+      const more = (lines.length - 1) * lh;
+      return top
+        ? { x0: p.x - w / 2, x1: p.x + w / 2, y0: edge - 7 - more - size * 0.8, y1: edge - 5 }
+        : { x0: p.x - w / 2, x1: p.x + w / 2, y0: edge + 7, y1: edge + size * 0.8 + 7 + more + size * 0.25 };
+    });
+    const inside = boxes.every((b) => b.x0 >= 6 && b.x1 <= S.w - 6 && b.y0 >= 3 && b.y1 <= S.h - 3);
+    const apart = boxes.every((a, i) => boxes.every((b, j) => j <= i || a.x1 + 10 <= b.x0 || b.x1 + 10 <= a.x0 || a.y1 + 2 <= b.y0 || b.y1 + 2 <= a.y0));
+    return inside && apart;
+  };
   return {
     replay: true,
     stillAt: 4,
     fit() {
       camera.fov = 38;
-      S.dist = fitDistance(camera, S.w < 520 ? 9.2 : 13.4, 7.2, 1.0);
+      // (a card of 3 by 4 is narrow: the names take two lines unless the board is wide, 16 Nov 2026)
+      split = (S.dark || S.w < 560) && (S.w < 480 || SHIELDS.some((n) => measure(mctx, n, f(700, nameSize(), DISPLAY), 1.5) > S.w / 2 - 22));
+      // room at the sides for the long names of the four shields (the owner's, 15 Nov 2026)
+      S.dist = fitDistance(camera, S.dark || S.w < 520 ? 10.4 : S.w < 760 ? 21 : 17, S.dark || S.w < 520 ? (split ? 8.4 : 7.2) : 10.8, 1.0);   // on a dark board: close, names over and under   // an open box on a computer is narrower: the side labels stay in
+      // a dark board keeps the names only where they have room; without them the logo and its shields come closer
+      names = true;
+      side = false;
+      if (S.dark) {
+        names = namesFit();
+        if (!names) {
+          // the small names beside the shields: the camera stands back only as far as they need (the outer edge of a
+          // shield is about 3.3 units from the middle, 3.5 with the camera's slow sway)
+          side = true;
+          const room = S.w / 2 - SIDE.gap - sideWidth() - SIDE.edge;
+          S.dist = fitDistance(camera, room > 40 ? Math.max(9.4, (3.5 * S.w) / room) : 12, 6.3, 1.0);
+        }
+      }
     },
     update(t) {
       tt = t;
@@ -1269,20 +1332,39 @@ function buildProtection(S) {
       }
     },
     draw(ctx) {
-      const u = unit(S), narrow = S.w < 560;
+      const u = unit(S), narrow = S.dark || S.w < 560;
       for (const sh of shields) {
         const k = seg(tt, 0.9 + sh.i * 0.12, 1.3 + sh.i * 0.12);
         if (k <= 0) continue;
         const p = S.project(sh.g.position.x, sh.g.position.y, sh.g.position.z);
         if (narrow) {
-          // a phone: the name over a top shield, under a bottom one, so it stays inside the box
-          const top = p.y < S.h / 2, y = p.y + (top ? -46 : 56) * u;
-          text(ctx, sh.name, p.x, y, { font: f(700, 13 * u, DISPLAY), spacing: 1.5, align: 'center', alpha: k });
+          if (side) {
+            // small, beside the shield: left of a left one, right of a right one, at the height of its upper half
+            const right = p.x > S.w / 2;
+            const ex = S.project(sh.g.position.x + (right ? 0.9 : -0.9), sh.g.position.y, sh.g.position.z).x;
+            const half = Math.abs(S.project(sh.g.position.x, sh.g.position.y + 0.95, sh.g.position.z).y - p.y);
+            const lines = sideLines(sh.name), lh = SIDE.size * 1.3;
+            const y0 = p.y - half * 0.3 - ((lines.length - 1) * lh) / 2 + SIDE.size * 0.35;
+            lines.forEach((line, j) => {
+              text(ctx, line, ex + (right ? SIDE.gap : -SIDE.gap), y0 + j * lh, { font: sideFont(), spacing: SIDE.spacing, align: right ? 'left' : 'right', alpha: k * 0.92, fill: '#dfe7ff' });
+            });
+            continue;
+          }
+          if (!names) continue;
+          // a phone or a tablet: the name over a top shield, under a bottom one, clear of the shield's own edge (it is
+          // bigger on a bigger board), so it stays inside the box; two lines when long
+          const top = p.y < S.h / 2, size = nameSize(), lh = size * 1.22;
+          const edge = S.project(sh.g.position.x, sh.g.position.y + (top ? 0.95 : -0.95), sh.g.position.z).y;
+          const lines = split ? twoLines(sh.name) : [sh.name];
+          lines.forEach((line, j) => {
+            const y = top ? edge - 7 - (lines.length - 1 - j) * lh : edge + size * 0.8 + 7 + j * lh;
+            text(ctx, line, p.x, y, { font: f(700, size, DISPLAY), spacing: 1.5, align: 'center', alpha: k, fill: S.dark ? '#eef2ff' : undefined });
+          });
           continue;
         }
-        const right = p.x > S.w / 2, tx = p.x + (right ? 1 : -1) * 64 * u;
-        text(ctx, sh.name, tx, p.y - 2, { font: f(700, 17 * u, DISPLAY), spacing: 2, align: right ? 'left' : 'right', alpha: k });
-        text(ctx, 'your limit', tx, p.y + 17 * u, { font: f(500, 12 * u, MONO), align: right ? 'left' : 'right', fill: C.cyan, alpha: k });
+        const right = p.x > S.w / 2, tx = p.x + (right ? 1 : -1) * 64 * u, tight = S.w < 760;   // an open box: smaller names
+        text(ctx, sh.name, tx, p.y - 2, { font: f(700, (tight ? 15 : 17) * u, DISPLAY), spacing: tight ? 1.2 : 2, align: right ? 'left' : 'right', alpha: k, fill: S.dark ? '#eef2ff' : undefined });
+        text(ctx, 'shield on', tx, p.y + 17 * u, { font: f(500, 12 * u, MONO), align: right ? 'left' : 'right', fill: S.dark ? '#8cc2ff' : C.cyan, alpha: k });
       }
     },
   };
@@ -1311,6 +1393,7 @@ function startStage(el) {
   const v = new THREE.Vector3();
   const S = {
     el, scene, camera, w: 1, h: 1, dpr: 1, dist: 18, live: false,
+    dark: !!el.closest('.fd'),                                      // on a board of the dark story (16 Nov 2026)
     // a point (in an object's own space, or the world's) to CSS pixels of the stage
     project(x, y, z, obj) {
       v.set(x, y, z);
@@ -1321,6 +1404,10 @@ function startStage(el) {
   };
   const sc = build(S);
   let t = 0, last = 0, raf = 0, visible = false;
+  // on a computer the home page boxes fold to their icon (bento.js): a folded box does not draw (the owner, 15 Nov 2026)
+  const card = el.closest('.bento-card, .fd-slide');
+  const shut = () => !!card && card.classList.contains('is-shut');
+  let wasShut = shut();
   function draw() {
     sc.update(t);
     renderer.render(scene, camera);
@@ -1329,9 +1416,9 @@ function startStage(el) {
     sc.draw(ctx);
   }
   function resize() {
-    const r = el.getBoundingClientRect();
-    S.w = Math.max(1, Math.round(r.width)); S.h = Math.max(1, Math.round(r.height));
-    S.dpr = Math.min(window.devicePixelRatio || 1, 1.75);
+    // its size in the layout: a board that is turning or tilted must not squeeze the drawing (16 Nov 2026)
+    S.w = Math.max(1, el.clientWidth); S.h = Math.max(1, el.clientHeight);
+    S.dpr = Math.min(window.devicePixelRatio || 1, innerWidth < 700 ? 1.5 : 1.75);   // a phone draws a little coarser: lighter (18 Nov 2026)
     renderer.setPixelRatio(S.dpr);
     renderer.setSize(S.w, S.h, false);
     ov.width = Math.round(S.w * S.dpr); ov.height = Math.round(S.h * S.dpr);
@@ -1342,7 +1429,7 @@ function startStage(el) {
   }
   function frame(now) {
     raf = 0;
-    if (!visible || document.hidden) return;
+    if (!visible || shut() || document.hidden) return;
     t += Math.min(0.05, (now - last) / 1000);
     last = now;
     draw();
@@ -1350,7 +1437,7 @@ function startStage(el) {
   }
   function run() {
     if (still) return;
-    if (visible && !document.hidden && !raf) { last = performance.now(); raf = requestAnimationFrame(frame); }
+    if (visible && !shut() && !document.hidden && !raf) { last = performance.now(); raf = requestAnimationFrame(frame); }
   }
   if (still) t = sc.stillAt;
   new ResizeObserver(resize).observe(el);
@@ -1362,6 +1449,12 @@ function startStage(el) {
     run();
   }, { rootMargin: '80px 0px' }).observe(el);
   document.addEventListener('visibilitychange', run);
+  if (card) new MutationObserver(() => {
+    const now = shut();
+    if (wasShut && !now && sc.replay && !still) t = 0;            // opened again: the shields fly in again
+    wasShut = now;
+    run();
+  }).observe(card, { attributes: true, attributeFilter: ['class'] });
   el.classList.add('is-live');
 }
 

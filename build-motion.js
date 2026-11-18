@@ -1,3 +1,6 @@
+/* NOT LOADED since 18 Nov 2026: the owner asked to "remove the cursor mouse effect in every page". No page has its
+   <script> tag any more (admin, app, dashboard, login, manage-account, signup; their bodies lost data-build too).
+   Kept here so it can come back: add the tag and data-build again. */
 /* ==========================================================================
    RZGS-PRO: the page builds itself (the owner, 9 Nov 2026, from a reel of an AI design tool).
 
@@ -22,7 +25,8 @@
   'use strict';
 
   const calm = matchMedia('(prefers-reduced-motion: reduce)');
-  const COLOURS = ['#19d3ff', '#a6ff1a', '#37efb8', '#f3fbff'];
+  // the designers' cursors on the light pages (14 Nov 2026): blue, violet, lime and orange, each with white words
+  const COLOURS = ['#0b74de', '#7c4dff', '#4d7c0f', '#e8590c'];
   // in milliseconds: the flight to a block, the making of it, the pause between two typed bits
   const T = { start: 40, travel: 150, make: 280, fade: 160, bitGap: 28 };
   const EASE = {
@@ -42,18 +46,18 @@
     style.textContent = `
 .rzb-layer{position:fixed;inset:0;z-index:60;pointer-events:none;overflow:hidden}
 .rzb-box{position:absolute;border:1px solid var(--c)}
-.rzb-box>i{position:absolute;width:7px;height:7px;background:#030c13;border:1px solid var(--c)}
+.rzb-box>i{position:absolute;width:7px;height:7px;background:#fff;border:1px solid var(--c)}
 .rzb-box>i:nth-of-type(1){left:-4px;top:-4px}.rzb-box>i:nth-of-type(2){right:-4px;top:-4px}
 .rzb-box>i:nth-of-type(3){left:-4px;bottom:-4px}.rzb-box>i:nth-of-type(4){right:-4px;bottom:-4px}
-.rzb-name,.rzb-size{position:absolute;white-space:nowrap;font:600 10px/1.5 'IBM Plex Mono',Consolas,monospace;letter-spacing:.04em}
-.rzb-name{left:-1px;bottom:100%;margin-bottom:4px;padding:0 6px;background:var(--c);color:#02131a}
-.rzb-size{right:-1px;top:100%;margin-top:4px;padding:0 5px;background:#030c13;color:var(--c);border:1px solid var(--c);font-weight:500}
+.rzb-name,.rzb-size{position:absolute;white-space:nowrap;font:600 10.5px/1.6 Poppins,'Segoe UI',system-ui,sans-serif;letter-spacing:.01em}
+.rzb-name{left:-1px;bottom:100%;margin-bottom:4px;padding:0 7px;border-radius:5px;background:var(--c);color:#fff}
+.rzb-size{right:-1px;top:100%;margin-top:4px;padding:0 6px;border-radius:5px;background:#fff;color:var(--c);border:1px solid var(--c);font-weight:500}
 .rzb-box.rzb-top .rzb-name{bottom:auto;top:3px;left:3px;margin:0}
 .rzb-box.rzb-low .rzb-size{top:auto;bottom:3px;right:3px;margin:0}
 .rzb-cursor{position:absolute;left:0;top:0;will-change:transform}
 .rzb-cursor svg{display:block;width:17px;height:20px}
-.rzb-tag{position:absolute;left:13px;top:17px;padding:1px 7px;background:var(--c);color:#02131a;font:600 10px/1.5 'IBM Plex Mono',Consolas,monospace;letter-spacing:.04em;white-space:nowrap}
-.rzb-caret{position:absolute;left:0;top:0;width:2px;background:#a6ff1a}
+.rzb-tag{position:absolute;left:13px;top:17px;padding:1px 8px;border-radius:999px 999px 999px 4px;background:var(--c);color:#fff;font:600 10.5px/1.6 Poppins,'Segoe UI',system-ui,sans-serif;letter-spacing:.01em;white-space:nowrap;box-shadow:0 4px 10px -4px rgba(16,24,40,.35)}
+.rzb-caret{position:absolute;left:0;top:0;width:2px;border-radius:1px;background:#0b74de}
 .rzb-root{animation:none!important}
 .rzb-wait{opacity:0!important}`;
     document.head.append(style);
@@ -137,7 +141,7 @@
     const cursors = Array.from({ length: count }, (_, k) => {
       const node = make('div', 'rzb-cursor', layer);
       node.style.setProperty('--c', COLOURS[k]);
-      node.innerHTML = `<svg viewBox="0 0 17 20"><path d="M1.5 1.5v15.2l4.2-4 2.9 6.6 2.6-1.1-2.9-6.5h5.8z" fill="#f3fbff" stroke="#02131a" stroke-width="1.2" stroke-linejoin="round"/></svg>`;
+      node.innerHTML = `<svg viewBox="0 0 17 20"><path d="M1.5 1.5v15.2l4.2-4 2.9 6.6 2.6-1.1-2.9-6.5h5.8z" fill="#0b1426" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/></svg>`;
       const tag = make('span', 'rzb-tag', node);
       tag.textContent = 'Build';
       return { node, tag, colour: COLOURS[k], path: [], k };

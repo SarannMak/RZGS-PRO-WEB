@@ -213,6 +213,8 @@
      License, Contact for now; the other pages get their own moves later). The app (app.html) is left as it is. */
   const videoPage = document.body.dataset.motion === 'video';
   const SOFT = 'cubic-bezier(0.16, 1, 0.3, 1)';
+  // a letter's growth: quick, with the smallest overshoot before it settles
+  const GROW = 'cubic-bezier(0.22, 1.25, 0.36, 1)';
   const power3 = {
     out: (t) => 1 - (1 - t) ** 3,
     inOut: (t) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2),
@@ -493,13 +495,23 @@
         if (child.nodeType === 3) {
           if (!child.nodeValue.trim()) return;
           const bits = document.createDocumentFragment();
+          // each letter is its own little box so it can grow (the owner's video, 14 Nov 2026); the letters of a
+          // word stay together in a box of their own, so a line never breaks inside a word
+          let word = null;
           graphemes(child.nodeValue).forEach((ch) => {
-            if (/^\s+$/.test(ch)) { bits.append(ch); return; }
+            if (/^\s+$/.test(ch)) { word = null; bits.append(ch); return; }
+            if (!word) {
+              word = document.createElement('span');
+              word.className = 'rz-word';
+              word.style.cssText = 'display:inline-block;white-space:nowrap';
+              bits.append(word);
+            }
             const span = document.createElement('span');
             span.className = 'rz-ch';
+            span.style.cssText = 'display:inline-block;transform-origin:50% 88%';
             span.textContent = ch;
             if (grad) span.rzGrad = grad;
-            bits.append(span);
+            word.append(span);
             cut.push(span);
           });
           child.replaceWith(bits);
@@ -525,9 +537,10 @@
       span.style.webkitTextFillColor = colour;
     });
     const step = Math.min(gap, 520 / cut.length);
+    // a letter grows out of its baseline, out of a light blur, a moment after the one before (the video's titles)
     cut.forEach((span, i) => span.animate(
-      [{ opacity: 0, filter: 'blur(10px)' }, { opacity: 1, filter: 'blur(0px)' }],
-      { duration, delay: delay + i * step, easing: SOFT, fill: 'backwards' },
+      [{ opacity: 0, transform: 'translateY(0.32em) scale(0.35)', filter: 'blur(4px)' }, { opacity: 1, transform: 'none', filter: 'blur(0px)' }],
+      { duration: duration + 80, delay: delay + i * step, easing: GROW, fill: 'backwards' },
     ));
     const total = delay + (cut.length - 1) * step + duration;
     // put back as it was, unless another script has written something else in the meantime
@@ -644,7 +657,7 @@
     el.textContent = el.rzShown;
     requestAnimationFrame(step);
   }
-  const COUNTED = '.adm-num, .license-price, [data-plan-amount], .acc-sum-big, .adm-st tr.is-total td:last-child';
+  const COUNTED = '.adm-num, .license-price, [data-plan-amount], .acc-sum-big, .adm-st tr.is-total td:last-child, [data-count-on-sight]';
   function countIn(node) {
     if (node.nodeType !== 1) return;
     (node.matches(COUNTED) ? [node] : [...node.querySelectorAll(COUNTED)]).forEach((el) => {
@@ -672,7 +685,7 @@
   }
   // a number of the page itself (a price) counts when it comes into sight
   function countOnSight() {
-    const els = [...document.querySelectorAll('.license-price')];
+    const els = [...document.querySelectorAll('.license-price, [data-count-on-sight]')];
     if (!els.length || !window.IntersectionObserver) return;
     const seen = new IntersectionObserver((entries) => entries.forEach((entry) => {
       if (!entry.isIntersecting) return;
@@ -812,6 +825,20 @@
     ready.observe(waiting, { attributes: true, attributeFilter: ['aria-busy'] });
   }
 
+  // The section titles grow in letter by letter as each comes into sight, like the page's own title (the owner's
+  // video, 14 Nov 2026). Once each; never with "reduce motion".
+  function titlesOnSight() {
+    if (calm.matches || !window.IntersectionObserver) return;
+    const seen = new IntersectionObserver((entries) => entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      seen.unobserve(entry.target);
+      letters(entry.target, { gap: 22, duration: 420, delay: 80 });
+    }), { rootMargin: '0px 0px -12% 0px' });
+    document.querySelectorAll('.section-title, .buy-go-title').forEach((el) => {
+      if (!el.closest('.hero, .page-hero, [hidden]') && el.id !== 'page-title') seen.observe(el);
+    });
+  }
+
   // a view of a page that is opened (a tab of the dashboard or of Manage account, a part of the admin page)
   function watchViews() {
     if (!window.MutationObserver) return;
@@ -835,6 +862,7 @@
     watchViews();
     watchBars();
     countOnSight();
+    titlesOnSight();
     arriveWhenReady();
     arrivePills();
     // the fonts change the width of every word: the boxes are put in place again (a slide on its way follows)

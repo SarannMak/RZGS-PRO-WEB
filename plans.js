@@ -170,9 +170,11 @@
       const style = document.createElement('link');
       style.rel = 'stylesheet';
       style.href = pageUrl('checkout.css?v=2');
-      document.head.append(style);
+      // before the light theme (theme.css), which has to stay the last stylesheet
+      const theme = document.querySelector('link[href*="theme.css"]');
+      if (theme) theme.before(style); else document.head.append(style);
       const script = document.createElement('script');
-      script.src = pageUrl('checkout.js?v=2');
+      script.src = pageUrl('checkout.js?v=6');
       script.onload = () => resolve(window.rzgsCheckout);
       script.onerror = () => reject(new Error('The checkout did not load'));
       document.head.append(script);

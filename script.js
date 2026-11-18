@@ -20,9 +20,19 @@ const header = document.querySelector('[data-header]');
 const menuToggle = document.querySelector('.menu-toggle');
 const nav = document.getElementById('primary-nav');
 
+// the dark story of the home page and the partner brokers after it: while they pass under the header, the header is dark
+// glass (theme.css: .on-dark)
+const darkParts = [...document.querySelectorAll('.fd, .pz')];
 function onScroll() {
   header.classList.toggle('is-scrolled', window.scrollY > 8);
   document.documentElement.classList.toggle('past-fold', window.scrollY > window.innerHeight * 0.5);
+  if (darkParts.length) {
+    const middle = header.offsetHeight / 2;
+    header.classList.toggle('on-dark', darkParts.some((part) => {
+      const r = part.getBoundingClientRect();
+      return r.top < middle && r.bottom > middle;
+    }));
+  }
 }
 window.addEventListener('scroll', onScroll, { passive: true });
 onScroll();
@@ -32,7 +42,9 @@ onScroll();
 const community = document.querySelector('.tg-float');
 if (community) {
   const smallScreen = window.matchMedia('(max-width: 1023.98px)');
-  const mainButtons = [...document.querySelectorAll('main .btn-primary, main .btn-lg')];
+  // (and the three partner brokers' buttons, which float low on a phone's screen)
+  const mainButtons = [...document.querySelectorAll('main .btn-primary, main .btn-lg, main .pz .partner-card')];
+  const story = document.querySelector('.fd .fd-stage'); // the dark story of the home page: its words pass under the button
   let fullWidth = 0;
   let looking = false;
   const foldWords = () => {
@@ -44,7 +56,8 @@ if (community) {
     const box = community.getBoundingClientRect();
     fullWidth = Math.max(fullWidth, box.width);
     const left = box.right - fullWidth; // how far it reaches with its words out
-    community.classList.toggle('is-folded', mainButtons.some((button) => {
+    const s = story && story.closest('.is-pinned') ? story.getBoundingClientRect() : null;
+    community.classList.toggle('is-folded', (!!s && s.bottom > box.top && s.top < box.bottom) || mainButtons.some((button) => {
       const r = button.getBoundingClientRect();
       return r.width > 0 && r.bottom > box.top && r.top < box.bottom && r.right > left && r.left < box.right;
     }));
@@ -94,6 +107,77 @@ window.matchMedia('(min-width: 1024px)').addEventListener('change', (event) => {
 });
 
 /* ==========================================================================
+   Top menu: drop-down panels (the owner's picture, 14 Nov 2026)
+   A computer: a panel opens under the menu bar when the pointer rests on its item, or with a click, Enter or Space;
+   it closes when the pointer leaves, with Escape, or with a click elsewhere. A phone: each item opens its links
+   inside the menu, one at a time.
+   ========================================================================== */
+const menuItems = [...document.querySelectorAll('[data-menu]')];
+if (menuItems.length) {
+  const pointerMenus = window.matchMedia('(min-width: 1024px) and (hover: hover)');
+  let openItem = null;
+  let openTimer = 0;
+  let shutTimer = 0;
+  let restedAt = 0; // when the pointer last opened a panel: a click just after keeps it open
+  const show = (item, on) => {
+    item.classList.toggle('is-open', on);
+    item.querySelector('.nav-chev-btn').setAttribute('aria-expanded', String(on));
+  };
+  const openOnly = (item) => {
+    clearTimeout(shutTimer);
+    clearTimeout(openTimer);
+    if (openItem && openItem !== item) show(openItem, false);
+    openItem = item;
+    show(item, true);
+  };
+  const shutMenus = () => {
+    clearTimeout(openTimer);
+    clearTimeout(shutTimer);
+    if (openItem) show(openItem, false);
+    openItem = null;
+  };
+  menuItems.forEach((item) => {
+    // the item's name goes to its page; the small arrow beside it opens and closes its panel (15 Nov 2026)
+    const trigger = item.querySelector('.nav-chev-btn');
+    trigger.addEventListener('click', () => {
+      if (item.classList.contains('is-open') && performance.now() - restedAt > 600) shutMenus();
+      else openOnly(item);
+    });
+    // a mouse: open after a short rest (passing over does not open it), at once while another panel is open
+    item.addEventListener('pointerenter', (event) => {
+      if (!pointerMenus.matches || event.pointerType !== 'mouse') return;
+      clearTimeout(shutTimer);
+      clearTimeout(openTimer);
+      if (openItem === item) return;
+      const rest = () => { restedAt = performance.now(); openOnly(item); };
+      if (openItem) rest();
+      else openTimer = setTimeout(rest, 90);
+    });
+    item.addEventListener('pointerleave', (event) => {
+      if (!pointerMenus.matches || event.pointerType !== 'mouse') return;
+      clearTimeout(openTimer);
+      shutTimer = setTimeout(() => { if (openItem === item) shutMenus(); }, 240);
+    });
+    // the keyboard leaves the panel: it closes
+    item.addEventListener('focusout', (event) => {
+      if (openItem === item && !item.contains(event.relatedTarget)) shutMenus();
+    });
+    item.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape' || !item.classList.contains('is-open')) return;
+      event.stopPropagation(); // on a phone the menu itself stays open
+      shutMenus();
+      trigger.focus();
+    });
+    // a link in the panel: the panel closes (a link to a part of this page only scrolls)
+    item.querySelectorAll('.mega a').forEach((link) => link.addEventListener('click', shutMenus));
+  });
+  document.addEventListener('click', (event) => {
+    if (openItem && !openItem.contains(event.target)) shutMenus();
+  });
+  pointerMenus.addEventListener('change', shutMenus);
+}
+
+/* ==========================================================================
    Highlight the link for the section in view
    (home page nav + the "On this page" list on legal pages)
    ========================================================================== */
@@ -121,6 +205,55 @@ function highlightWhileScrolling(links, extraSections = []) {
 // The hero is observed too, so scrolling back to the top clears the highlight
 highlightWhileScrolling([...document.querySelectorAll('.nav-link[href^="#"]')], [document.getElementById('top')].filter(Boolean));
 highlightWhileScrolling([...document.querySelectorAll('.toc a[href^="#"]')]);
+
+/* ==========================================================================
+   In-page links glide (the owner, 18 Nov 2026: "Start now" reached the partner brokers far too fast, flashing through
+   the six parts of Why choose and lagging on a phone: "scroll slowly but faster than by hand, about 1.5 s to 2 s"):
+   a link to a part of this page scrolls there smoothly, gently starting and stopping, in at most 1.8 s (a short hop
+   about half a second). A touch, the wheel, a key or a mouse press stops it at once. With "reduce motion" it jumps.
+   The parts on the way show and turn over as when scrolling by hand (the owner: "let it flip like normal").
+   ========================================================================== */
+(function glideLinks() {
+  const root = document.documentElement;
+  const ease = (t) => 0.5 - Math.cos(Math.PI * t) / 2;            // slow, quicker, slow
+  let run = 0;
+  const stop = () => {
+    if (!run) return;
+    cancelAnimationFrame(run);
+    run = 0;
+  };
+  ['wheel', 'touchstart', 'keydown', 'mousedown'].forEach((type) => window.addEventListener(type, stop, { passive: true }));
+  document.addEventListener('click', (event) => {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    const link = event.target.closest('a[href]');
+    if (!link || link.hasAttribute('data-plans') || link.classList.contains('skip-link') || link.target === '_blank') return;
+    const url = new URL(link.href, location.href);
+    if (url.origin !== location.origin || url.pathname !== location.pathname || url.search !== location.search || url.hash.length < 2) return;
+    const target = document.getElementById(decodeURIComponent(url.hash.slice(1)));
+    if (!target) return;
+    event.preventDefault();
+    stop();
+    const pad = parseFloat(getComputedStyle(root).scrollPaddingTop) || 0;
+    const goal = () => Math.max(0, Math.min(root.scrollHeight - innerHeight, target.getBoundingClientRect().top + window.scrollY - pad));
+    const from = window.scrollY;
+    const distance = Math.abs(goal() - from);
+    if (url.hash !== location.hash) history.pushState(null, '', url.hash);
+    if (reducedMotion.matches || distance < 2) {
+      window.scrollTo({ top: goal(), behavior: 'instant' });
+      return;
+    }
+    const duration = Math.min(1800, Math.max(500, 400 + distance * 0.25));
+    const t0 = performance.now();
+    const frame = (now) => {
+      const k = Math.min(1, (now - t0) / duration);
+      // the goal is measured again each frame: a phone's bars can change the page's height on the way
+      window.scrollTo({ top: from + (goal() - from) * ease(k), behavior: 'instant' });
+      if (k < 1) run = requestAnimationFrame(frame);
+      else run = 0;
+    };
+    run = requestAnimationFrame(frame);
+  });
+})();
 
 // "On this page" is a collapsible box on phones and an always-open sidebar on desktop
 const tocBoxes = document.querySelectorAll('[data-toc]');
@@ -217,6 +350,31 @@ if (partnerRail && !reducedMotion.matches) {
     });
   }
   partnerRail.style.setProperty('--partner-time', `${Math.round((setWidth * sets) / 40)}s`);   // about 40 px per second
+}
+
+/* ==========================================================================
+   Running lines (the owner, 16 Nov 2026): a line of short points that runs to the left and never ends.
+   The page holds each point once; the copies that fill the loop are made here.
+   Without this script, or with "reduce motion", the points stand still.
+   ========================================================================== */
+if (!reducedMotion.matches) {
+  document.querySelectorAll('[data-run]').forEach((strip) => {
+    const track = strip.querySelector('.run-track');
+    if (!track || !track.children.length) return;
+    const points = [...track.children];
+    strip.classList.add('is-moving');
+    const setWidth = track.scrollWidth;                                           // one set of points
+    if (!setWidth) { strip.classList.remove('is-moving'); return; }
+    const sets = Math.ceil(Math.max(strip.clientWidth, 1600) / setWidth) + 1;     // half of the loop is wider than the line
+    for (let i = 1; i < sets * 2; i += 1) {
+      points.forEach((point) => {
+        const copy = point.cloneNode(true);
+        copy.setAttribute('aria-hidden', 'true');                                  // a screen reader meets each point once
+        track.append(copy);
+      });
+    }
+    strip.style.setProperty('--run-time', `${Math.round((setWidth * sets) / 34)}s`); // about 34 px per second
+  });
 }
 
 /* ==========================================================================
@@ -572,6 +730,8 @@ function frame(now) {
 function startChart() {
   cancelAnimationFrame(rafId);
   lastTime = 0;
+  // the light theme hides the chart: then it is not drawn at all
+  if (getComputedStyle(canvas).display === 'none') return;
   if (reducedMotion.matches) render(0);
   else rafId = requestAnimationFrame(frame);
 }
@@ -583,7 +743,7 @@ window.addEventListener('resize', () => {
   cancelAnimationFrame(resizeRaf);
   resizeRaf = requestAnimationFrame(() => {
     resizeCanvas();
-    if (reducedMotion.matches) render(0);
+    if (reducedMotion.matches && getComputedStyle(canvas).display !== 'none') render(0);
   });
 });
 reducedMotion.addEventListener('change', startChart);
@@ -591,4 +751,4 @@ reducedMotion.addEventListener('change', startChart);
 resizeCanvas();
 startChart();
 // redraw once the mono font is ready so the price tag uses it
-if (document.fonts && reducedMotion.matches) document.fonts.ready.then(() => render(0));
+if (document.fonts && reducedMotion.matches && getComputedStyle(canvas).display !== 'none') document.fonts.ready.then(() => render(0));

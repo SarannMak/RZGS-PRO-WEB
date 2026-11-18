@@ -54,8 +54,9 @@ function build(THREE, root) {
 
   const TAU = Math.PI * 2;
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const HEX = { cyan: 0x19d3ff, lime: 0xa6ff1a, gold: 0xffd23f, mint: 0x2bf391, red: 0xff5a6a, body: 0x0b2733, bodyHi: 0x11394a, dark: 0x061820, plate: 0x071c26 };
-  const INK = { cyan: '#19d3ff', lime: '#a6ff1a', gold: '#ffd23f', mint: '#2bf391', red: '#ff5a6a', text: '#f3fbff', muted: '#9fc0cc', dim: '#5f8492', panel: '#06212c', panelHi: '#0a2f3d', ink: '#02131a', line: '#1c4f61' };
+  // the light site (14 Nov 2026): a white and pale-blue machine, the site's blue, lime only for small marks
+  const HEX = { cyan: 0x0e86ee, lime: 0x6fb514, gold: 0xf5a524, mint: 0x12b76a, red: 0xe5484d, body: 0xe6edf6, bodyHi: 0xd3e0f0, dark: 0xc9d5e4, plate: 0xf3f6fb };
+  const INK = { cyan: '#0b74de', lime: '#5f9e0b', gold: '#d97706', mint: '#12a150', red: '#e5484d', text: '#0b1426', muted: '#667085', dim: '#98a2b3', panel: '#ffffff', panelHi: '#eef5ff', ink: '#0b1426', field: '#f6f9fe', line: '#cdd7e5' };
 
   let renderer;
   try {
@@ -71,7 +72,7 @@ function build(THREE, root) {
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 200);
-  scene.add(new THREE.HemisphereLight(0xcdf3ff, 0x04131b, 1.7));
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xb4c2d4, 1.5));
   const keyLight = new THREE.DirectionalLight(0xffffff, 2.3);
   keyLight.position.set(-5, 10, 9);
   scene.add(keyLight);
@@ -187,8 +188,8 @@ function build(THREE, root) {
   }
 
   /* ------------------------------------------------------------ painted screens */
-  const DISPLAY = 'Oxanium, "Segoe UI", system-ui, sans-serif';
-  const MONO = '"IBM Plex Mono", ui-monospace, Consolas, monospace';
+  const DISPLAY = 'Poppins, "Segoe UI", system-ui, sans-serif';
+  const MONO = 'Poppins, "Segoe UI", system-ui, sans-serif';
   // The screens are painted larger than they are measured, so their words stay sharp close up.
   const SHARP = 1.5;
   function painted(w, h, draw) {
@@ -435,14 +436,14 @@ function build(THREE, root) {
     }
     write(ctx, 'LOG IN', 36, 116, 58, INK.text, 800);
     for (const [value, y] of [['you@email.com', 136], ['• • • • • • •', 202]]) {
-      fillFrame(ctx, 36, y, w - 72, 54, INK.ink, INK.line, 10);
+      fillFrame(ctx, 36, y, w - 72, 54, INK.field, INK.line, 10);
       write(ctx, value, 54, y + 37, 27, INK.muted, 500, MONO);
     }
     const grad = ctx.createLinearGradient(36, 0, w - 36, 0);
-    grad.addColorStop(0, INK.cyan);
-    grad.addColorStop(1, INK.lime);
+    grad.addColorStop(0, '#0753c8');
+    grad.addColorStop(1, INK.cyan);
     fillFrame(ctx, 36, 272, w - 72, 60, grad, null, 16);
-    write(ctx, 'LOG IN', w / 2, 315, 36, INK.ink, 800, DISPLAY, 'center');
+    write(ctx, 'LOG IN', w / 2, 315, 36, '#ffffff', 700, DISPLAY, 'center');
   });
   {
     const b = batch(login.group);
@@ -591,7 +592,7 @@ function build(THREE, root) {
     write(ctx, 'RZGS-PRO BOT', 76, 49, 33, INK.text, 800);
     CHECKS.forEach((label, i) => {
       const y = 82 + i * 86, ok = done > i;
-      fillFrame(ctx, 18, y, w - 36, 74, ok ? '#0c3a2b' : INK.ink, ok ? INK.mint : INK.line, 12);
+      fillFrame(ctx, 18, y, w - 36, 74, ok ? '#e7f7ee' : INK.field, ok ? INK.mint : INK.line, 12);
       write(ctx, label, 36, y + 52, 42, ok ? INK.text : INK.dim, 700);
       if (ok) tick(ctx, w - 58, y + 37, 34, INK.mint);
     });
@@ -600,7 +601,7 @@ function build(THREE, root) {
       return;
     }
     // the file the bot sends
-    fillFrame(ctx, 18, 344, w - 36, 90, '#0b3a4b', INK.cyan, 14);
+    fillFrame(ctx, 18, 344, w - 36, 90, '#eef5ff', INK.cyan, 14);
     fillFrame(ctx, 32, 356, 104, 66, INK.lime, null, 12);
     write(ctx, '.ex5', 84, 402, 36, INK.ink, 800, DISPLAY, 'center');
     write(ctx, 'BOT FILE', 152, 404, 42, INK.text, 800);
@@ -642,9 +643,9 @@ function build(THREE, root) {
     ctx.fillRect(4, 4, w - 8, 58);
     write(ctx, 'XAUUSD', 22, 45, 38, INK.text, 800);
     write(ctx, 'MT5', 192, 44, 24, INK.dim, 600, MONO);
-    fillFrame(ctx, w - 292, 11, 272, 40, running ? '#0c3a2b' : INK.ink, running ? INK.mint : INK.line, 10);
+    fillFrame(ctx, w - 292, 11, 272, 40, running ? '#e7f7ee' : INK.field, running ? INK.mint : INK.line, 10);
     write(ctx, running ? 'ALGO TRADING ON' : 'ALGO TRADING OFF', w - 156, 39, 23, running ? INK.mint : INK.dim, 600, MONO, 'center');
-    ctx.strokeStyle = 'rgba(25, 211, 255, 0.12)';
+    ctx.strokeStyle = 'rgba(11, 116, 222, 0.08)';
     ctx.lineWidth = 1;
     for (let y = 104; y < h - 20; y += 52) {
       ctx.beginPath();
@@ -665,7 +666,7 @@ function build(THREE, root) {
       ctx.fillRect(x, a, step * 0.64, Math.max(3, Math.abs(candle.close - candle.open) * span));
     });
     // the bot's own panel, at the right of the chart
-    fillFrame(ctx, w - 198, 76, 178, h - 98, INK.ink, INK.cyan, 14);
+    fillFrame(ctx, w - 198, 76, 178, h - 98, INK.field, INK.cyan, 14);
     write(ctx, 'RZGS-PRO', w - 109, 120, 27, INK.cyan, 800, DISPLAY, 'center');
     ctx.fillStyle = running ? INK.lime : INK.dim;
     ctx.beginPath();

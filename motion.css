@@ -324,11 +324,13 @@
 
 /* ---------------------------------------------------------------- bars grow from their zero line */
 .acc-bars rect,
+.acc-bars path.bar,
 .adm-chart path.bar {
   transform-box: fill-box;
   transform-origin: 50% 100%;
 }
-.acc-bars rect.loss {
+.acc-bars rect.loss,
+.acc-bars path.bar.loss {
   transform-origin: 50% 0;
 }
 

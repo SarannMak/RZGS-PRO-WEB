@@ -6,7 +6,14 @@
 <script>(function (l) { var p = l.pathname.replace(/\.html$/, ''); if (p !== l.pathname && /[a-z]\.[a-z]/i.test(l.hostname)) history.replaceState(null, '', p + l.search + l.hash); })(location);</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#030c13">
+<meta name="theme-color" content="#060b1c">
+<script>
+/* dark or light (the owner, 16 Nov 2026): dark unless this phone chose light; set before anything is drawn */
+(function (d) { var t = null; try { t = localStorage.getItem('rzgs_app_theme'); } catch (e) {} t = t === 'light' ? 'light' : 'dark'; d.documentElement.setAttribute('data-theme', t); var m = d.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute('content', t === 'light' ? '#f5f8fd' : '#060b1c'); })(document);
+/* a focus ring only for the keyboard: a tap or a click never leaves one (app-board.css, .by-pointer) */
+addEventListener('pointerdown', function () { document.documentElement.classList.add('by-pointer'); }, true);
+addEventListener('keydown', function (e) { if (e.key === 'Tab') document.documentElement.classList.remove('by-pointer'); }, true);
+</script>
 <meta name="robots" content="noindex">
 <script>
 /* never run over plain http: the login and the commands must travel encrypted */
@@ -15,7 +22,7 @@ if (location.protocol === 'http:' && !/^(localhost|127\.0\.0\.1)$/.test(location
 <title>RZGS-PRO Control</title>
 <link rel="icon" type="image/png" href="assets/logo-192.png">
 <link rel="apple-touch-icon" href="assets/logo-192.png">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 html{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -626,6 +633,10 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
   @keyframes ln-snap{from{transform:scaleX(1.1)}}
 }
 </style>
+<!-- the light look (14 Nov 2026): after the styles above, so it wins -->
+<link rel="stylesheet" href="app-theme.css?v=23">
+<!-- the board look, dark or light (16 Nov 2026): last, so it wins -->
+<link rel="stylesheet" href="app-board.css?v=3">
 </head>
 <body>
 <div class="app">
@@ -637,6 +648,7 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
         <h1>RZGS-PRO.BOT</h1>
         <span class="link"><span class="led off" id="lnLed"></span><span class="cap" id="lnState" role="status">Not linked</span></span>
       </div>
+      <button class="icon-btn mode-btn" type="button" data-mode-switch aria-label="Switch to light mode" title="Switch to light mode"><svg class="mode-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4"/></svg><svg class="mode-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7Z"/></svg></button>
       <a class="btn ln-dash" href="dashboard">
         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
         Dashboard
@@ -683,6 +695,7 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
       <span class="cap" id="whoLine">#10012345 | XAUUSD</span>
     </div>
     <span class="link"><span class="led off" id="linkLed"></span><span class="cap" id="linkTxt">LINK</span></span>
+    <button class="icon-btn mode-btn" type="button" data-mode-switch aria-label="Switch to light mode" title="Switch to light mode"><svg class="mode-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4"/></svg><svg class="mode-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7Z"/></svg></button>
     <a class="icon-btn" id="backDash" href="dashboard" aria-label="Back to the dashboard" title="Back to the dashboard">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
     </a>
@@ -694,6 +707,7 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
     <div class="view" id="v-home">
       <!-- equity card (21 Oct 2026, in place of the status card with the ring) -->
       <section class="eqcard" aria-label="Equity">
+        <p class="eq-row"><span class="eq-state" id="eqState" data-tone="off"><i aria-hidden="true"></i><span id="eqStateTxt">Waiting for bot</span></span><span class="eq-meta" id="eqMeta"></span></p>
         <span class="hcap">Equity</span>
         <b class="eq-big" id="vEq">$0.00</b>
         <span class="eq-day good" id="vDay">+$0.00 today</span>
@@ -713,7 +727,7 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
           <div class="line"><span class="cap">Cycles closed today</span><b id="vCycles">0</b></div>
           <div class="line"><span class="cap">License</span><b class="good" id="vLic">4d 12h left</b></div>
           <div class="line ses-row"><span class="cap">Session</span>
-            <span class="ses-chips"><span class="chipx" id="sesAS">ASIA</span><span class="chipx" id="sesLN">LONDON</span><span class="chipx" id="sesNY">NEW YORK</span></span>
+            <span class="ses-chips"><span class="chipx" id="sesAS">Asia</span><span class="chipx" id="sesLN">London</span><span class="chipx" id="sesNY">New York</span></span>
           </div>
         </div>
       </section>
@@ -1050,9 +1064,6 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
     </div>
   </div>
 </div>
-<!-- the screen builds itself: a few cursors draw, drag, scale and type it (the owner, 9 Nov 2026). Loaded before the
-     app's script, which opens the console at once when a login is kept. -->
-<script src="build-motion.js?v=3"></script>
 <script>
 (() => {
 'use strict';
@@ -1421,7 +1432,7 @@ function fillSettings(c) {
 // A calm summary, not every tick: the readings (one a second) are averaged into at most 36 points, softened once
 // more with their neighbours, and joined with smooth curves. The exact equity is the big number above it.
 function renderSpark() {
-  const el = $('spark'), W = Math.max(200, el.clientWidth || 300), H = 60;
+  const el = $('spark'), W = Math.max(200, el.clientWidth || 300), H = Math.max(40, Math.round(el.clientHeight) || 60);
   el.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
   const per = Math.max(1, Math.ceil(eq.length / 36)), avg = [];
   for (let i = 0; i < eq.length; i += per) { const part = eq.slice(i, i + per); avg.push(part.reduce((a, v) => a + v, 0) / part.length); }
@@ -1437,8 +1448,8 @@ function renderSpark() {
     d += 'C' + c.map(v => v.toFixed(1)).join(' ');
   }
   el.innerHTML = '<defs><linearGradient id="eqLine" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="' + W + '" y2="0">' +
-      '<stop offset="0" stop-color="#19d3ff"/><stop offset=".55" stop-color="#37efb8"/><stop offset="1" stop-color="#a6ff1a"/></linearGradient>' +
-      '<linearGradient id="eqFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#37efb8" stop-opacity=".16"/><stop offset="1" stop-color="#37efb8" stop-opacity="0"/></linearGradient></defs>' +
+      '<stop offset="0" style="stop-color:var(--eq-a,#0753c8)"/><stop offset=".55" style="stop-color:var(--eq-b,#0b74de)"/><stop offset="1" style="stop-color:var(--eq-c,#19b8f0)"/></linearGradient>' +
+      '<linearGradient id="eqFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--eq-fill,#0b74de);stop-opacity:var(--eq-fill-o,.14)"/><stop offset="1" style="stop-color:var(--eq-fill,#0b74de);stop-opacity:0"/></linearGradient></defs>' +
     '<path d="' + d + 'L' + x(n - 1).toFixed(1) + ' ' + H + 'L' + x(0).toFixed(1) + ' ' + H + 'Z" fill="url(#eqFill)"/>' +
     '<path class="eq-line" d="' + d + '" fill="none" stroke="url(#eqLine)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
 }
@@ -1628,7 +1639,7 @@ function renderLadder(s, el) {
     g.shadowBlur = 0;
     const cut = 4, L = t.x, T = t.top, R = t.x + t.w, B = t.top + t.h;
     g.beginPath(); g.moveTo(L + cut, T); g.lineTo(R, T); g.lineTo(R, B - cut); g.lineTo(R - cut, B); g.lineTo(L, B); g.lineTo(L, T + cut); g.closePath();
-    g.fillStyle = 'rgba(4,16,24,.92)'; g.fill(); g.strokeStyle = c; g.lineWidth = 1; g.stroke();
+    g.fillStyle = col('--tag-bg') || 'rgba(255,255,255,.94)'; g.fill(); g.strokeStyle = c; g.lineWidth = 1; g.stroke();
     g.font = mono(600, 9.5); g.fillStyle = c; g.fillText(t.text, L + 7, T + t.h / 2 + .5);
     g.restore();
   }
@@ -1842,6 +1853,16 @@ function reportSeries(s) {
   return { title: 'Closed profit a month, since the start ($)', vals: months.map(m => m.v), labels: months.map(m => m.label),
            now: months.length - 1, unit: 'month' };
 }
+// one bar: square on the zero line and round at its far end, so a gain is round at the top and a loss at the bottom
+// (the owner, 16 Nov 2026)
+function barPath(x, y, w, h, down) {
+  const r = Math.min(5, w * .3, h), f = n => n.toFixed(1);
+  return down
+    ? 'M' + f(x) + ',' + f(y) + 'H' + f(x + w) + 'V' + f(y + h - r) + 'A' + f(r) + ',' + f(r) + ' 0 0 1 ' + f(x + w - r) + ',' + f(y + h) +
+      'H' + f(x + r) + 'A' + f(r) + ',' + f(r) + ' 0 0 1 ' + f(x) + ',' + f(y + h - r) + 'Z'
+    : 'M' + f(x) + ',' + f(y + h) + 'V' + f(y + r) + 'A' + f(r) + ',' + f(r) + ' 0 0 1 ' + f(x + r) + ',' + f(y) +
+      'H' + f(x + w - r) + 'A' + f(r) + ',' + f(r) + ' 0 0 1 ' + f(x + w) + ',' + f(y + r) + 'V' + f(y + h) + 'Z';
+}
 // bars over and under the zero line; the bar now is cyan, a loss red; amounts over the bars while they fit
 function drawBars(el, vals, labels, now) {
   if (!vals.length) {
@@ -1858,7 +1879,7 @@ function drawBars(el, vals, labels, now) {
     const cx = cw * (i + .5), cur = i === now;
     if (v !== null) {
       const y0 = y(Math.max(v, 0)), y1 = y(Math.min(v, 0));
-      h += '<rect x="' + (cx - bw / 2).toFixed(1) + '" y="' + y0.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + Math.max(1, y1 - y0).toFixed(1) +
+      h += '<path d="' + barPath(cx - bw / 2, y0, bw, Math.max(1, y1 - y0), v < 0) +
            '" fill="' + (v < 0 ? 'var(--bad)' : cur ? 'var(--cyan)' : 'var(--frame)') + '"/>';
       if (amounts) h += '<text x="' + cx.toFixed(1) + '" y="' + (v < 0 ? y1 + 11 : y0 - 5).toFixed(1) + '" style="fill:var(--body)">' +
                         Number(v).toFixed(Math.abs(v) >= 100 ? 0 : 1) + '</text>';
@@ -1942,6 +1963,12 @@ function render() {
   else if (s.nextDn) next = '▼ ' + px(s.nextDn) + ' (' + Number(s.nextLot).toFixed(2) + ')';
   else next = 'Waiting TP / basket';
   $('nextText').textContent = next;
+  // Home, first row (16 Nov 2026, like the Live board on the website): the state, then the level and the risk
+  $('eqState').dataset.tone = tone;
+  $('eqStateTxt').textContent = status;
+  $('eqMeta').textContent = !S ? '' : !online ? 'Last report ' + ago(age)
+    : (flat ? (s.cooldown > 0 ? 'Cooldown' : 'No open trades') : s.smart ? 'Smart step ' + (s.sSteps + 1) : 'Level ' + s.level) +
+      ' \u00b7 Risk ' + (['safe', 'warning', 'high'][s.risk] || 'safe');
 
   document.querySelectorAll('[data-state]').forEach(b => {
     const act = b.dataset.state === 'activate', on = act ? !s.paused : s.paused;
@@ -2029,6 +2056,8 @@ function render() {
 function closeSheet() { pending = null; $('sheet').hidden = true; }
 
 /* ---------- the screen builds itself (the owner, 9 Nov 2026) ---------- */
+// (Switched off 18 Nov 2026, the owner: "remove the cursor mouse effect": build-motion.js is no longer loaded, so build()
+// returns at once. Load the script again to bring it back.)
 // When the app opens, a few cursors build the whole console (build-motion.js); after that, each screen the first time it
 // is opened. A tap, a key or a scroll ends it at once.
 const BUILD_BLOCKS = '.eqcard, .panel, .frame, .seg, .row, .actbar';
@@ -2374,6 +2403,27 @@ $('pwProceed').addEventListener('click', async () => {
   btn.disabled = false; btn.textContent = 'Yes, change it';
 });
 document.addEventListener('visibilitychange', () => { if (!document.hidden) poll(); });
+
+/* ---------- dark or light (the owner, 16 Nov 2026) ---------- */
+// Dark unless this phone chose light (the page's head sets it before anything is drawn). The sun / moon button switches
+// and remembers it; inside Telegram its bar takes the colour too, and the chart is drawn again in the new colours.
+const MODE_BG = { dark: '#060b1c', light: '#f5f8fd' };
+function paintMode() {
+  const m = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark', say = 'Switch to ' + (m === 'dark' ? 'light' : 'dark') + ' mode';
+  document.querySelectorAll('[data-mode-switch]').forEach(b => { b.setAttribute('aria-label', say); b.title = say; });
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.content = MODE_BG[m];
+  const tg = window.Telegram && Telegram.WebApp;
+  if (tg && tg.initData) { try { tg.setHeaderColor(MODE_BG[m]); tg.setBackgroundColor(MODE_BG[m]); } catch (e) {} }
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('[data-mode-switch]')) return;
+  const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+  const swap = () => { document.documentElement.dataset.theme = next; store.set('rzgs_app_theme', next); paintMode(); if (token) render(); };
+  if (document.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches) document.startViewTransition(swap);
+  else swap();
+});
+paintMode();
 
 /* ---------- start ---------- */
 // settings come from the MT5 inputs; with a bot that sends cfg.setApp most of them can be changed here (syncSettings)

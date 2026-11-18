@@ -6,8 +6,8 @@
   <title>The Bot — RZGS-PRO Automated Gold Trading Bot</title>
   <meta name="description" content="Meet RZGS-PRO: an Expert Advisor for MetaTrader 5 that trades gold (XAUUSD) with buy and sell pairs, a grid and a basket close. See how it works, its features and specifications.">
   <link rel="canonical" href="https://rzgspro.com/bot">
-  <meta name="theme-color" content="#030c13">
-  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#f5f8fd">
+  <meta name="color-scheme" content="light">
 
   <meta property="og:type" content="website">
   <meta property="og:title" content="The Bot — RZGS-PRO Automated Gold Trading Bot">
@@ -23,18 +23,19 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Oxanium:wght@800&display=swap">
   <link rel="stylesheet" href="style.css?v=38">
   <link rel="stylesheet" href="plans.css?v=6">
-  <link rel="stylesheet" href="motion.css?v=6">
+  <link rel="stylesheet" href="motion.css?v=7">
+  <link rel="stylesheet" href="theme.css?v=86">
 
   <script>document.documentElement.classList.add('js');try{if(localStorage.getItem('sb-zaziizzsbytkdlatoutv-auth-token'))document.documentElement.classList.add('signed-in')}catch(e){}</script>
-  <script src="script.js?v=11" defer></script>
-  <script src="motion.js?v=5" defer></script>
-  <script src="plans.js?v=12" defer></script>
+  <script src="script.js?v=22" defer></script>
+  <script src="motion.js?v=9" defer></script>
+  <script src="plans.js?v=16" defer></script>
   <!-- the 3D library the robot needs: asked for at once, so the robot can come up sooner -->
   <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js">
-  <script src="robot-3d.js?v=11" defer></script>
+  <script src="robot-3d.js?v=13" defer></script>
 </head>
 <body data-motion="video">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -96,10 +97,85 @@
 
       <nav class="primary-nav" id="primary-nav" aria-label="Main">
         <ul class="nav-list">
-          <li><a class="nav-link" href="bot" aria-current="page">The Bot</a></li>
-          <li><a class="nav-link" href="how-to-buy">Tutorial</a></li>
-          <li><a class="nav-link" href="license">License</a></li>
-          <li><a class="nav-link" href="contact">Contact</a></li>
+          <li class="nav-item nav-item--home"><a class="nav-link" href="./">Home</a></li>
+          <li class="nav-item" data-menu>
+            <a class="nav-trigger is-current" href="bot" aria-current="page">The Bot</a><button class="nav-chev-btn" type="button" aria-expanded="false" aria-controls="menu-bot" aria-label="More about The Bot"><svg class="nav-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+            <div class="mega" id="menu-bot">
+              <div class="mega-col">
+                <p class="mega-head"><span class="mega-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2M20 14h2M15 13v2M9 13v2"/></svg></span>The bot</p>
+                <ul class="mega-links">
+                  <li><a href="bot" aria-current="page">Overview</a></li>
+                  <li><a href="bot#how-it-trades">How it trades</a></li>
+                  <li><a href="bot#specs">Specifications</a></li>
+                </ul>
+              </div>
+              <div class="mega-col">
+                <p class="mega-head"><span class="mega-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/></svg></span>Control app</p>
+                <ul class="mega-links">
+                  <li><a href="bot#features">What's inside</a></li>
+                  <li><a href="app">Open the control app</a></li>
+                </ul>
+              </div>
+              <div class="mega-col">
+                <p class="mega-head"><span class="mega-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6M2 9h20"/></svg></span>Plans and brokers</p>
+                <ul class="mega-links">
+                  <li><a href="signup" data-plans="">See the plans</a></li>
+                  <li><a href="./#partners">Partner brokers</a></li>
+                  <li><a href="./#faq">Questions answered</a></li>
+                </ul>
+              </div>
+            </div>
+          </li>
+          <li class="nav-item" data-menu>
+            <a class="nav-trigger" href="how-to-buy">Tutorial</a><button class="nav-chev-btn" type="button" aria-expanded="false" aria-controls="menu-tutorial" aria-label="More about Tutorial"><svg class="nav-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+            <div class="mega" id="menu-tutorial">
+              <div class="mega-col">
+                <p class="mega-head"><span class="mega-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg></span>Get started</p>
+                <ul class="mega-links">
+                  <li><a href="how-to-buy#how-it-works">How to use</a></li>
+                  <li><a href="how-to-buy#steps">How buying works</a></li>
+                  <li><a href="how-to-buy#need-title">What you'll need</a></li>
+                  <li><a href="signup" data-plans="">Start your free trial</a></li>
+                </ul>
+              </div>
+              <div class="mega-col">
+                <p class="mega-head"><span class="mega-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65M22 12.65l-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg></span>Step by step</p>
+                <ul class="mega-links">
+                  <li><a href="how-to-buy#path">From login to a running bot</a></li>
+                </ul>
+              </div>
+              <div class="mega-col">
+                <p class="mega-head"><span class="mega-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg></span>Your plan</p>
+                <ul class="mega-links">
+                  <li><a href="how-to-buy#compare">Elite or Diamond?</a></li>
+                  <li><a href="how-to-buy#know-title">After you buy</a></li>
+                </ul>
+              </div>
+            </div>
+          </li>
+          <li class="nav-item" data-menu>
+            <a class="nav-trigger" href="license">License</a><button class="nav-chev-btn" type="button" aria-expanded="false" aria-controls="menu-license" aria-label="More about License"><svg class="nav-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+            <div class="mega" id="menu-license">
+              <div class="mega-col">
+                <p class="mega-head"><span class="mega-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4M21 2l-9.6 9.6"/><circle cx="7.5" cy="15.5" r="5.5"/></svg></span>License</p>
+                <ul class="mega-links">
+                  <li><a href="license">License rules</a></li>
+                  <li><a href="license#types">Three ways to use the bot</a></li>
+                  <li><a href="license#dos-and-donts">What you can and can't do</a></li>
+                  <li><a href="license#rules">In more detail</a></li>
+                </ul>
+              </div>
+              <div class="mega-col">
+                <p class="mega-head"><span class="mega-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4M10 9H8M16 13H8M16 17H8"/></svg></span>Legal</p>
+                <ul class="mega-links">
+                  <li><a href="terms">Terms &amp; Conditions</a></li>
+                  <li><a href="privacy">Privacy Policy</a></li>
+                  <li><a href="risk-disclosure">Risk Disclosure</a></li>
+                </ul>
+              </div>
+            </div>
+          </li>
+          <li class="nav-item"><a class="nav-link" href="contact">Contact</a></li>
         </ul>
         <div class="nav-menu-cta nav-account guest-only">
           <a class="btn btn-ghost" href="login">Log in</a>
@@ -126,14 +202,15 @@
   <main id="main">
     <section class="page-hero" id="top" aria-labelledby="page-title">
       <div class="container page-hero-grid">
-        <div>
-          <nav class="breadcrumb" aria-label="Breadcrumb">
+        <!-- (the breadcrumb stands on its own, so that on a phone the robot comes between it and the words) -->
+        <nav class="breadcrumb" aria-label="Breadcrumb">
           <ol>
             <li><a href="./">Home</a></li>
             <li><span aria-current="page">The Bot</span></li>
           </ol>
         </nav>
-          <p class="kicker">Meet the bot</p>
+        <div>
+          <p class="kicker"><span class="kicker-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2M20 14h2M15 13v2M9 13v2"/></svg><i></i><i></i><i></i></span>Meet the bot</p>
           <h1 class="page-title" id="page-title">An automated trading bot built for <span class="text-gradient">gold</span></h1>
           <p class="page-lead">RZGS-PRO is an Expert Advisor (EA) for MetaTrader 5. It trades gold (XAUUSD) with fixed rules: it opens a buy and a sell together, takes profit on one side, and manages the other side with a grid and a basket close.</p>
           <div class="page-actions">
@@ -146,6 +223,53 @@
         </div>
         <div class="page-hero-art">
           <div class="robot-3d" data-robot-3d role="img" aria-label="The RZGS-PRO robot mascot holding a tablet with a chart"></div>
+          <!-- the robot's two cards (on this page since 15 Nov 2026): the live XAUUSD graph, and the line it says when its
+               head is clicked -->
+          <div class="float-card float-signal" aria-hidden="true">
+            <div class="float-row">
+              <span class="ticker">XAU<span>USD</span></span>
+              <span class="trend-up"><svg class="icon" aria-hidden="true"><use href="#i-trending-up"/></svg>Buy + Sell</span>
+            </div>
+            <!-- robot-3d.js makes this graph run like a live price (slow, fast, slow ...); as written here it is the still picture -->
+            <svg class="sparkline" data-spark viewBox="0 0 120 32" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="spark-fill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#82ff00" stop-opacity=".35"/>
+                  <stop offset="1" stop-color="#82ff00" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path data-spark-area d="M0 24 L12 22 L22 26 L34 20 L46 21 L58 15 L70 17 L82 11 L94 12 L106 6 L120 4 L120 32 L0 32 Z" fill="url(#spark-fill)"/>
+              <path class="spark-line" data-spark-line d="M0 24 L12 22 L22 26 L34 20 L46 21 L58 15 L70 17 L82 11 L94 12 L106 6 L120 4" pathLength="1"/>
+              <path class="spark-dot" data-spark-dot d="M117 4h0.01"/>
+            </svg>
+          </div>
+
+          <div class="float-card float-status" data-robot-says aria-hidden="true">
+            <span class="status-icon"><svg class="icon" aria-hidden="true"><use href="#i-sparkles"/></svg></span>
+            <span>
+              <span class="float-label">Bot</span>
+              <span class="float-value" data-robot-rest>Running<span class="dots"><i></i><i></i><i></i></span></span>
+              <span class="float-value float-reply" data-robot-reply hidden></span>
+            </span>
+            <!-- What the robot says when its head is clicked: one of these lines, picked at random,
+                 shown here for a few seconds. Add, change or remove lines; keep each one short. -->
+            <ul data-robot-lines hidden>
+              <li>I open a buy and a sell on gold at the same time.</li>
+              <li>I take profit on the side that wins.</li>
+              <li>I manage the other side with a grid and a basket close.</li>
+              <li>Each of my trades has its own take profit.</li>
+              <li>I work day and night while MetaTrader 5 is online.</li>
+              <li>One tap starts me. One more tap pauses me.</li>
+              <li>You can watch my trades on your phone.</li>
+              <li>Try me free for 7 days.</li>
+              <li>Elite is $5 a month. Diamond is $49 a month.</li>
+              <li>With Diamond you keep your own broker.</li>
+              <li>One plan covers one MT5 account.</li>
+              <li>I need an MT5 hedging account that can trade gold.</li>
+              <li>Your dashboard sets me up with you, step by step.</li>
+              <li>Trading has risk. Only use money you can afford to lose.</li>
+            </ul>
+          </div>
         </div>
       </div>
     </section>
@@ -153,12 +277,16 @@
     <!-- At a glance -->
     <section class="section section--tight" aria-label="At a glance">
       <div class="container">
-        <ul class="stats reveal">
-          <li class="card stat"><span class="stat-value text-gradient">MT5</span><span class="stat-label">Runs on MetaTrader 5</span></li>
-          <li class="card stat"><span class="stat-value">XAUUSD</span><span class="stat-label">Trades gold</span></li>
-          <li class="card stat"><span class="stat-value">1</span><span class="stat-label">MT5 account per license</span></li>
-          <li class="card stat"><span class="stat-value">24/7</span><span class="stat-label">Runs while MT5 is online</span></li>
-        </ul>
+        <!-- The four facts in one line that runs to the left without end, like the home page's (the owner, 16 Nov 2026).
+             Each fact is written once here; script.js repeats them to fill the line. -->
+        <div class="run-strip run-strip--facts reveal" data-run>
+          <ul class="run-track">
+            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><b>MT5</b>Runs on MetaTrader 5</li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><b>XAUUSD</b>Trades gold</li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><b>1</b>MT5 account per license</li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><b>24/7</b>Runs while MT5 is online</li>
+          </ul>
+        </div>
       </div>
     </section>
 
@@ -166,7 +294,7 @@
     <section class="section" id="how-it-trades" aria-labelledby="flow-title">
       <div class="container">
         <header class="section-head reveal">
-          <p class="kicker">How it trades</p>
+          <p class="kicker"><span class="kicker-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 5v4"/><rect width="4" height="6" x="7" y="9" rx="1"/><path d="M9 15v2M17 3v2"/><rect width="4" height="8" x="15" y="5" rx="1"/><path d="M17 13v3M3 3v16a2 2 0 0 0 2 2h16"/></svg><i></i><i></i><i></i></span>How it trades</p>
           <h2 class="section-title" id="flow-title">From first pair to <span class="text-gradient">closed basket</span></h2>
           <p class="section-lead">Once the bot is active, every cycle follows the same rules. The bot does not predict the price.</p>
         </header>
@@ -214,7 +342,7 @@
     <section class="section" id="features" aria-labelledby="bot-features-title">
       <div class="container">
         <header class="section-head reveal">
-          <p class="kicker">What's inside</p>
+          <p class="kicker"><span class="kicker-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m7.5 4.27 9 5.15M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg><i></i><i></i><i></i></span>What's inside</p>
           <h2 class="section-title" id="bot-features-title">The control app, <span class="text-gradient">tab by tab</span></h2>
           <p class="section-lead">You run the bot from your phone. Five tabs, one screen at a time.</p>
         </header>
@@ -259,7 +387,7 @@
       <div class="container specs-layout">
         <div class="reveal">
           <header class="section-head section-head--left">
-            <p class="kicker">Specifications</p>
+            <p class="kicker"><span class="kicker-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4"/></svg><i></i><i></i><i></i></span>Specifications</p>
             <h2 class="section-title" id="specs-title">The details</h2>
             <p class="section-lead">Everything you need to know before you install.</p>
           </header>
@@ -298,7 +426,7 @@
         <div class="cta-panel reveal">
           <img class="cta-bg" src="trading-engine.webp" alt="" width="1536" height="1024" loading="lazy" decoding="async">
           <div class="cta-copy">
-            <p class="kicker">Your next move</p>
+            <p class="kicker"><span class="kicker-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg><i></i><i></i><i></i></span>Your next move</p>
             <h2 class="section-title" id="cta-title">Try it free <span class="text-gradient">for 7 days</span></h2>
             <p class="section-lead">See how the bot trades on your own MT5 account before you pay, and watch every trade in the phone control app.</p>
             <div class="page-actions">

@@ -1,0 +1,1048 @@
+/* ==========================================================================
+   RZGS-PRO Control App: the board look, dark or light (16 Nov 2026)
+   The owner: "I want the app UI redesigned like this UI (dark mode), I want a button to switch dark mode and light
+   mode". The look is the Live board of the home page: glass cards, every row on a soft tile, tabs in a pill with the
+   chosen one lit, the chosen part in a blue key, red outlined close buttons, buys blue and sells orange.
+   Dark is the default. The page's head sets <html data-theme="dark|light"> from this phone's choice before anything
+   is drawn; the sun / moon button in the header switches it (app.html). Loaded after app-theme.css (the light
+   tokens) and only restyles: the script does not depend on any of it.
+   ========================================================================== */
+
+/* ---------------------------------------------------------------- the colours: light first, then dark */
+:root {
+  --card: #ffffff;
+  --card-line: rgba(15, 35, 70, 0.08);
+  --card-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 10px 28px -14px rgba(16, 24, 40, 0.16);
+  --tile: #f3f6fb;
+  --tile-2: #e9eff7;
+  --tab-bg: #eef2f8;
+  --tab-on: #ffffff;
+  --tab-on-text: #0b1426;
+  --value: #0b6bd3;
+  --big: #0b74de;
+  --key: linear-gradient(180deg, #2f8cf0 0%, #0866cf 100%);
+  --key-shadow: 0 8px 18px -10px rgba(8, 102, 207, 0.85);
+  --hold-key: linear-gradient(180deg, #fbb43c 0%, #f08c0b 100%);
+  --hold-key-text: #1f1300;
+  --glide-go: #1b79df;
+  --glide-hold: #f49b22;
+  --danger-line: #f3b7bd;
+  --danger-text: #d92d3a;
+  --danger-hover: #fdecee;
+  --danger-key: linear-gradient(180deg, #e5484d 0%, #c92a36 100%);
+  --buy-bg: #e8f2ff;
+  --buy-text: #0b6bd3;
+  --sell-bg: #fff1e3;
+  --sell-text: #c2540f;
+  --input-bg: #ffffff;
+  --input-line: #cdd7e5;
+  --ring-focus: rgba(11, 116, 222, 0.16);
+  --tag-bg: rgba(255, 255, 255, 0.94);
+  --state-bg: #eaf3ff;
+  --state-text: #0b6bd3;
+  --flag-line: #f2c994;
+  --flag-bg: #fff4e5;
+  --flag-text: #b95e04;
+  --overlay: rgba(15, 23, 42, 0.42);
+  --dock-bg: rgba(255, 255, 255, 0.9);
+  --dock-on: #e6f0fd;
+  --eq-a: #0753c8;
+  --eq-b: #0b74de;
+  --eq-c: #19b8f0;
+  --eq-fill: #0b74de;
+  --eq-fill-o: 0.16;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #060b1c;
+  --panel: #10173a;          /* solid: the chart draws its price tags on it */
+  --panel-2: #18214a;
+  --line: rgba(148, 170, 255, 0.12);
+  --line-2: rgba(148, 170, 255, 0.24);
+  --grid: rgba(148, 170, 255, 0);
+  --frame: #34508f;          /* the report's bars, a chosen chip's edge */
+  --glow: rgba(61, 142, 245, 0.3);
+  --cyan: #5aa2ff;
+  --neon: #8cc2ff;
+  --chip: rgba(61, 142, 245, 0.16);
+  --title: #ffffff;
+  --body: #c8d2f0;
+  --muted: #8f9bc0;
+  --good: #4cc38a;
+  --bad: #ff7d84;
+  --warn: #f5b04a;
+  --buy: #5aa2ff;
+  --sell: #f5a04a;
+  --on: #ffffff;
+  --grad: linear-gradient(90deg, #3d8ef5 0%, #8cc2ff 100%);
+  --grad-btn: linear-gradient(180deg, #3d8ef5 0%, #1f63d6 100%);
+  --shadow-xs: none;
+  --shadow-sm: 0 18px 40px -26px rgba(0, 0, 0, 0.9);
+  --shadow-md: 0 24px 48px -28px rgba(0, 0, 0, 0.9);
+  --shadow-lg: 0 30px 70px -24px rgba(0, 0, 0, 0.9);
+
+  --card: linear-gradient(180deg, #161f43 0%, #0d1431 100%);
+  --card-line: rgba(148, 170, 255, 0.16);
+  --card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 24px 48px -30px rgba(0, 0, 0, 0.95);
+  --tile: rgba(255, 255, 255, 0.04);
+  --tile-2: rgba(255, 255, 255, 0.07);
+  --tab-bg: rgba(255, 255, 255, 0.05);
+  --tab-on: rgba(255, 255, 255, 0.11);
+  --tab-on-text: #ffffff;
+  --value: #8cc2ff;
+  --big: #8cc2ff;
+  --key: linear-gradient(180deg, #3d8ef5 0%, #1f63d6 100%);
+  --key-shadow: 0 8px 20px -8px rgba(61, 142, 245, 0.7);
+  --hold-key: linear-gradient(180deg, #f5a04a 0%, #d97a1c 100%);
+  --hold-key-text: #1a0f00;
+  --glide-go: #2e79e8;
+  --glide-hold: #e88d33;
+  --danger-line: rgba(255, 138, 143, 0.38);
+  --danger-text: #ff9ca0;
+  --danger-hover: rgba(255, 138, 143, 0.08);
+  --danger-key: linear-gradient(180deg, #e5484d 0%, #b8303a 100%);
+  --buy-bg: rgba(61, 142, 245, 0.18);
+  --buy-text: #8cc2ff;
+  --sell-bg: rgba(245, 154, 60, 0.16);
+  --sell-text: #f5b06b;
+  --input-bg: rgba(4, 8, 22, 0.55);
+  --input-line: rgba(148, 170, 255, 0.2);
+  --ring-focus: rgba(61, 142, 245, 0.22);
+  --tag-bg: rgba(10, 15, 36, 0.94);
+  --state-bg: rgba(61, 142, 245, 0.16);
+  --state-text: #9cc7ff;
+  --flag-line: rgba(245, 160, 74, 0.35);
+  --flag-bg: rgba(245, 160, 74, 0.12);
+  --flag-text: #f5b06b;
+  --overlay: rgba(2, 5, 14, 0.72);
+  --dock-bg: rgba(13, 19, 44, 0.86);
+  --dock-on: rgba(255, 255, 255, 0.11);
+  --eq-a: #3d8ef5;
+  --eq-b: #5aa2ff;
+  --eq-c: #8cc2ff;
+  --eq-fill: #3d8ef5;
+  --eq-fill-o: 0.34;
+}
+
+/* ---------------------------------------------------------------- the page: a night sky with a blue light at the top */
+:root[data-theme="dark"] body {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(ellipse 120% 55% at 50% -8%, rgba(11, 116, 222, 0.34), transparent 66%),
+    radial-gradient(ellipse 60% 40% at 100% 36%, rgba(61, 142, 245, 0.1), transparent 70%);
+  background-size: 100% 900px;
+  background-repeat: no-repeat;
+}
+:root[data-theme="dark"] main {
+  scrollbar-color: rgba(148, 170, 255, 0.22) transparent;
+}
+
+/* ---------------------------------------------------------------- the header: name, the Live pill, the switch, back */
+header h1 {
+  overflow: hidden;
+  color: var(--title);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.link {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 10px;
+  border: 1px solid var(--card-line);
+  border-radius: 999px;
+  background: var(--tab-bg);
+}
+.link .cap {
+  display: inline-block;
+  color: var(--title);
+  font: 600 12.5px/1 var(--f-body);
+  text-transform: lowercase;
+}
+.link .cap::first-letter {
+  text-transform: uppercase;
+}
+.link .led {
+  background: var(--cyan);
+  box-shadow: 0 0 0 4px rgba(61, 142, 245, 0.2);
+}
+.link .led.warn {
+  background: var(--warn);
+  box-shadow: 0 0 0 4px rgba(245, 176, 74, 0.2);
+}
+.link .led.bad {
+  background: var(--bad);
+  box-shadow: 0 0 0 4px rgba(255, 125, 132, 0.2);
+}
+.link .led.off {
+  background: var(--muted);
+  box-shadow: none;
+}
+#login .link {
+  margin-top: 8px;
+}
+.icon-btn {
+  flex: none;
+  border: 1px solid var(--card-line);
+  border-radius: 12px;
+  background: var(--tab-bg);
+  color: var(--body);
+  box-shadow: none;
+}
+.icon-btn:hover {
+  color: var(--title);
+}
+/* the sun and the moon: the one shown is the mode a tap gives */
+.mode-btn svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+:root[data-theme="dark"] .mode-moon,
+:root:not([data-theme="dark"]) .mode-sun {
+  display: none;
+}
+.ln-head .mode-btn {
+  align-self: center;
+}
+
+/* ---------------------------------------------------------------- cards, labels and the rows on tiles */
+.panel,
+.frame,
+.eqcard,
+.quit-card,
+.sheet-card {
+  border: 1px solid var(--card-line);
+  border-image: none;
+  background: var(--card);
+  box-shadow: var(--card-shadow);
+  filter: none;
+}
+.panel {
+  padding: 16px;
+  border-radius: 20px;
+}
+.frame,
+.eqcard {
+  border-radius: 24px;
+}
+.sheet-card {
+  border-color: var(--danger-line);
+}
+.quit-card h3,
+.sheet-card h3 {
+  color: var(--title);
+}
+.cap,
+.hcap,
+.panel > h2,
+.panel-head h2 {
+  color: var(--muted);
+  font: 500 12.5px/1.3 var(--f-body);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.panel > h2 {
+  margin-bottom: 12px;
+}
+/* values the bot sends in capitals read as words: ACTIVE -> Active */
+#stText,
+#riskText,
+#vMode,
+.eq-state span {
+  display: inline-block;
+  text-transform: lowercase;
+}
+#stText::first-letter,
+#riskText::first-letter,
+#vMode::first-letter,
+.eq-state span::first-letter {
+  text-transform: uppercase;
+}
+.grid2 {
+  gap: 8px;
+}
+.grid2 .kv {
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--tile);
+}
+.grid2 .num {
+  color: var(--title);
+  font: 600 16px/1.25 var(--f-display);
+}
+.line,
+.line:first-of-type {
+  align-items: center;
+  padding: 10px 12px;
+  border-top: 0;
+  border-radius: 12px;
+  background: var(--tile);
+}
+.line + .line {
+  margin-top: 6px;
+}
+.line .cap {
+  color: var(--body);
+  font-size: 13px;
+}
+.line b {
+  color: var(--value);
+  font: 600 13.5px/1.3 var(--f-display);
+}
+.hlines {
+  margin-top: 8px;
+}
+.stats {
+  gap: 8px;
+}
+.stats > div {
+  gap: 6px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--tile);
+}
+.stats .num {
+  color: var(--value);
+  -webkit-text-fill-color: currentColor;
+  font-size: 24px;
+}
+.hint {
+  color: var(--muted);
+}
+
+/* ---------------------------------------------------------------- Home: the equity card, as on the board */
+.eqcard {
+  gap: 4px;
+  padding: 16px 18px 14px;
+}
+.eq-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0 0 10px;
+}
+.eq-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 5px 11px 5px 9px;
+  border-radius: 999px;
+  background: var(--state-bg);
+  color: var(--state-text);
+  font: 600 12.5px/1 var(--f-body);
+  white-space: nowrap;
+}
+.eq-state i {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+.eq-state[data-tone="good"] i {
+  background: var(--good);
+  box-shadow: 0 0 0 3px rgba(76, 195, 138, 0.22);
+}
+.eq-state[data-tone="warn"] i,
+.eq-state[data-tone="hold"] i {
+  background: var(--warn);
+  box-shadow: 0 0 0 3px rgba(245, 176, 74, 0.22);
+}
+.eq-state[data-tone="bad"] i {
+  background: var(--bad);
+  box-shadow: 0 0 0 3px rgba(255, 125, 132, 0.22);
+}
+.eq-meta {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font: 500 12.5px/1.2 var(--f-body);
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.eq-big {
+  color: var(--big);
+  font: 600 clamp(32px, 10vw, 42px)/1.08 var(--f-display);
+  letter-spacing: -0.02em;
+}
+.eq-day {
+  font: 500 13.5px var(--f-body);
+}
+.eq-spark {
+  height: 72px;
+  margin-top: 10px;
+}
+
+/* ---------------------------------------------------------------- tabs: a pill bar, the chosen tab lit */
+.seg {
+  border: 1px solid var(--card-line);
+  border-image: none;
+  border-radius: 14px;
+  background: var(--tab-bg);
+  clip-path: none;
+}
+.seg button {
+  min-height: 40px;
+  color: var(--muted);
+  font: 500 12.5px var(--f-body);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.seg button:hover {
+  color: var(--title);
+}
+.seg button[aria-selected="true"] {
+  background: var(--tab-on);
+  color: var(--tab-on-text);
+  box-shadow: none;
+}
+.seg-range button,
+.seg-log button {
+  letter-spacing: 0;
+}
+@supports selector(:has(*)) {
+  .seg:not(.seg-mode) > button[aria-selected="true"] {
+    background: none;
+  }
+  .seg:not(.seg-mode)::before {
+    border: 3px solid transparent;
+    border-image: none;
+    border-radius: 13px;
+    background: var(--tab-on) padding-box;
+    box-shadow: none;
+  }
+}
+/* the small switches on the chart: Candles / Line, History */
+.mini-seg,
+.hist-btn {
+  border: 1px solid var(--card-line);
+  border-radius: 10px;
+  background: var(--tab-bg);
+}
+.mini-seg {
+  gap: 2px;
+  padding: 2px;
+}
+.mini-seg button,
+.hist-btn {
+  min-height: 28px;
+  padding: 0 9px;
+  color: var(--muted);
+  font: 600 11px var(--f-body);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.mini-seg button {
+  border-radius: 8px;
+}
+.mini-seg button[aria-pressed="true"],
+.hist-btn[aria-pressed="true"] {
+  background: var(--tab-on);
+  color: var(--tab-on-text);
+}
+
+/* ---------------------------------------------------------------- the chosen part: a blue key (lot mode, the bot's state) */
+.seg-mode {
+  border: 1px solid var(--card-line);
+  border-radius: 14px;
+  background: var(--tile);
+}
+.seg-mode button {
+  color: var(--muted);
+  font: 600 13px var(--f-body);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.seg-mode button[aria-pressed="true"] {
+  color: #fff;
+  text-shadow: none;
+}
+.seg-glide {
+  border: 4px solid transparent;
+  border-image: none;
+  border-radius: 14px;
+  background: none;
+  box-shadow: none;
+}
+.seg-glide::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  background: var(--key);
+  box-shadow: var(--key-shadow);
+}
+/* Activate / Pause (/ Finish): one bar of keys. The lit key is one piece that slides to the state the bot is in, as
+   the Lot mode key does (the owner, 16 Nov 2026): blue on Active, orange on Paused. --n keys in the bar, --i the lit one. */
+.row:has(> [data-state]) {
+  --n: 3;
+  --i: 0;
+  position: relative;
+  isolation: isolate;
+  flex-wrap: nowrap;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--card-line);
+  border-radius: 14px;
+  background: var(--tile);
+}
+.row:has(> [data-state]):not(:has(> :nth-child(3))) {
+  --n: 2;
+}
+.row:has(> [data-state="pause"].on) {
+  --i: 1;
+}
+.row:has(> [data-state])::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc((100% - 8px - (var(--n) - 1) * 4px) / var(--n));
+  border-radius: 10px;
+  background-color: var(--glide-go);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0) 55%, rgba(0, 0, 0, 0.1) 100%);
+  box-shadow: var(--key-shadow);
+  opacity: 0;
+  transform: translateX(calc(var(--i) * (100% + 4px)));
+  pointer-events: none;
+}
+.row:has(> [data-state].on)::before {
+  opacity: 1;
+}
+.row:has(> [data-state="pause"].on)::before {
+  background-color: var(--glide-hold);
+  box-shadow: 0 8px 20px -10px rgba(245, 160, 74, 0.8);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .row:has(> [data-state])::before {
+    /* the colour turns at once, half way: blue to orange through grey would look dull */
+    transition: transform 0.38s cubic-bezier(0.3, 1.25, 0.45, 1), background-color 0s linear 0.14s, box-shadow 0s linear 0.14s, opacity 0.2s;
+  }
+}
+.row:has(> [data-state]) > .btn,
+.row:has(> [data-state]) > .btn.go.on,
+.row:has(> [data-state]) > .btn.hold.on {
+  min-height: 44px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  box-shadow: none;
+  color: var(--muted);
+  transition: color 0.3s, transform 0.5s var(--sp);
+}
+.row:has(> [data-state]) > .btn:hover {
+  color: var(--title);
+}
+.row:has(> [data-state]) > .btn.go.on {
+  color: #fff;
+}
+.row:has(> [data-state]) > .btn.hold.on {
+  color: var(--hold-key-text);
+}
+/* Finishing (the bot ends its cycle, then stays idle): a red edge on Finish; the lit key stays on the state */
+.row:has(> [data-state]) > .btn.danger.on {
+  background: none;
+  box-shadow: inset 0 0 0 1px var(--danger-line);
+  color: var(--danger-text);
+}
+.actbar {
+  border-top: 0;
+  background: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+#actbar {
+  margin: 6px 0 0;
+}
+
+/* ---------------------------------------------------------------- buttons */
+.btn,
+.btn.go,
+.btn.hold {
+  border: 1px solid var(--card-line);
+  border-image: none;
+  border-radius: 12px;
+  background: var(--tile-2);
+  box-shadow: none;
+  color: var(--title);
+  font: 600 14px var(--f-body);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.btn:hover {
+  border-color: var(--line-2);
+}
+.btn.primary,
+.btn.on:not(.go):not(.hold):not(.danger) {
+  border-color: transparent;
+  background: var(--key);
+  box-shadow: var(--key-shadow);
+  color: #fff;
+}
+.btn.danger {
+  border: 1px solid var(--danger-line);
+  background: transparent;
+  color: var(--danger-text);
+}
+.btn.danger:hover {
+  border-color: var(--danger-text);
+  background: var(--danger-hover);
+}
+.btn.danger.on {
+  border-color: transparent;
+  background: var(--danger-key);
+  color: #fff;
+}
+.btn.primary::after,
+.btn.on::after,
+.btn.primary::before,
+.btn.on::before {
+  display: none;
+}
+/* cooldown: small grey chips, as on the board */
+.btn[data-cmd="cd"],
+.btn[data-cmd="cdcancel"] {
+  min-height: 40px;
+  border-color: transparent;
+  border-radius: 10px;
+  background: var(--tile-2);
+  color: var(--body);
+  font-size: 13px;
+}
+.btn[data-cmd="cd"]:hover,
+.btn[data-cmd="cdcancel"]:hover {
+  color: var(--title);
+}
+
+/* ---------------------------------------------------------------- the menu: a pill bar at the bottom of a phone */
+nav {
+  margin: 8px 0 10px;
+  padding: 4px;
+  border: 1px solid var(--card-line);
+  border-image: none;
+  border-radius: 20px;
+  background: var(--dock-bg);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  box-shadow: var(--card-shadow);
+  clip-path: none;
+}
+nav button {
+  gap: 3px;
+  margin-top: 0;
+  padding: 8px 0 7px;
+  border-top: 0;
+  border-radius: 16px;
+  color: var(--muted);
+  font: 500 10.5px var(--f-body);
+  letter-spacing: 0;
+  text-transform: none;
+}
+nav button[aria-selected="true"] {
+  border-top-color: transparent;
+  color: var(--tab-on-text);
+}
+nav button[aria-selected="true"] svg {
+  color: var(--cyan);
+}
+nav svg {
+  width: 21px;
+  height: 21px;
+}
+@supports selector(:has(*)) {
+  nav::before {
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    width: calc((100% - 8px) / var(--count));
+    border: 0;
+    border-image: none;
+    border-radius: 16px;
+    background: var(--dock-on);
+    box-shadow: none;
+  }
+}
+@media (min-width: 1024px) {
+  nav {
+    margin: 0;
+    padding: 6px;
+    background: var(--card);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  nav button {
+    gap: 12px;
+    padding: 0 16px;
+    border-top: 0;
+    border-radius: 14px;
+    font-size: 13px;
+  }
+  nav button:hover {
+    background: none;
+    color: var(--title);
+  }
+  nav button[aria-selected="true"] {
+    background: none;
+    box-shadow: none;
+  }
+  @supports selector(:has(*)) {
+    nav::before {
+      top: 6px;
+      right: 6px;
+      bottom: auto;
+      left: 6px;
+      width: auto;
+      height: calc((100% - 12px) / var(--count));
+      transform: translateY(calc(var(--pos) * 100%));
+    }
+  }
+  #actbar {
+    gap: 4px;
+    margin-top: 14px;
+    padding: 4px;
+    border: 1px solid var(--card-line);
+    border-radius: 16px;
+    background: var(--card);
+  }
+  #actbar > .btn {
+    min-height: 48px;
+  }
+  #actbar::before {
+    top: 4px;
+    right: 4px;
+    bottom: auto;
+    left: 4px;
+    width: auto;
+    height: calc((100% - 8px - (var(--n) - 1) * 4px) / var(--n));
+    transform: translateY(calc(var(--i) * (100% + 4px)));
+  }
+}
+
+/* ---------------------------------------------------------------- Trades: the state card, the chart, baskets, trades */
+.ring-track {
+  stroke: var(--tile-2);
+}
+.ring-dash {
+  stroke: var(--line-2);
+}
+.ring text {
+  fill: var(--title);
+}
+.ring .sub {
+  fill: var(--muted);
+}
+.core-info .kv b {
+  color: var(--title);
+}
+.ld-now {
+  border: 1px solid var(--card-line);
+  border-radius: 10px;
+  background: var(--tab-bg);
+  color: var(--cyan);
+}
+.ld-line span {
+  background: var(--panel);
+}
+.legend {
+  color: var(--muted);
+}
+.baskets {
+  gap: 8px;
+}
+.baskets > .basket {
+  padding: 12px;
+  border-radius: 14px;
+  background: var(--tile);
+}
+.baskets .basket .num {
+  font: 600 18px/1.2 var(--f-display);
+}
+.bk-meta {
+  font-size: 12px;
+}
+.bar {
+  height: 5px;
+  border-radius: 999px;
+  background: var(--tile-2);
+}
+.bar i {
+  border-radius: inherit;
+}
+.pos,
+.pos:first-child {
+  padding: 9px 12px;
+  border-top: 0;
+  border-radius: 12px;
+  background: var(--tile);
+}
+.pos + .pos {
+  margin-top: 6px;
+}
+.tag {
+  min-width: 72px;
+  padding: 5px 8px;
+  border: 0;
+  border-radius: 7px;
+  font: 600 11.5px/1 var(--f-body);
+}
+.tag.buy {
+  background: var(--buy-bg);
+  color: var(--buy-text);
+}
+.tag.sell {
+  background: var(--sell-bg);
+  color: var(--sell-text);
+}
+.pos small {
+  color: var(--muted);
+}
+
+/* ---------------------------------------------------------------- History */
+.ev,
+.ev:first-child {
+  padding: 10px 12px;
+  border-top: 0;
+  border-radius: 12px;
+  background: var(--tile);
+}
+.ev + .ev {
+  margin-top: 6px;
+}
+.ev p {
+  color: var(--title);
+  font-size: 13.5px;
+}
+.ev .k {
+  font: 600 11px var(--f-body);
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+/* ---------------------------------------------------------------- Report and the risk table */
+.tbl th {
+  color: var(--muted);
+  font: 600 11px var(--f-body);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.tbl td {
+  border-top-color: var(--line);
+}
+.calc-sum {
+  border: 1px solid var(--flag-line);
+  border-radius: 12px;
+  background: var(--flag-bg);
+  color: var(--body);
+}
+.rp-sum {
+  border-top: 0;
+}
+.demo-flag {
+  padding: 4px 9px;
+  border: 1px solid var(--flag-line);
+  border-radius: 999px;
+  background: var(--flag-bg);
+  color: var(--flag-text);
+  font: 600 11px var(--f-body);
+  letter-spacing: 0.02em;
+}
+
+/* ---------------------------------------------------------------- Settings: each setting on its tile, values in blue */
+.panel:has(> .set, > .sg) {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.panel:has(> .set, > .sg) > h2 {
+  margin-bottom: 6px;
+}
+.set,
+.set:first-of-type,
+.sg,
+.sg-first {
+  padding: 10px 12px;
+  border-top: 0;
+  border-radius: 12px;
+  background: var(--tile);
+}
+.sg:not(.is-open) {
+  padding-bottom: 10px;
+}
+.set label,
+.sg-head label {
+  color: var(--body);
+  font-size: 13.5px;
+  font-weight: 500;
+}
+.set label small,
+.sg-head label small {
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 400;
+}
+.set-ok,
+.sg-ok {
+  padding: 2px 4px 6px;
+}
+.field input,
+.set input[type="number"],
+.set input[type="text"],
+.set input[type="password"],
+.set .pw-box input,
+.sg-val,
+.chip {
+  border: 1px solid var(--input-line);
+  border-radius: 10px;
+  background: var(--input-bg);
+}
+.set input[type="number"],
+.set input[type="text"] {
+  color: var(--value);
+  -webkit-text-fill-color: var(--value);
+  font: 600 13.5px var(--f-body);
+}
+.set input[type="password"],
+.set .pw-box input {
+  color: var(--title);
+}
+.sg-val {
+  color: var(--value);
+}
+.sg-val output {
+  font: 600 13.5px var(--f-body);
+}
+.field input:focus,
+.set input:focus,
+.set .pw-box input:focus,
+.sg.is-open .sg-val,
+.pick-row.is-open .sg-val,
+.pick-row.is-custom > input {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 4px var(--ring-focus);
+}
+.chip {
+  color: var(--body);
+}
+.chip[aria-pressed="true"] {
+  border-color: transparent;
+  background: var(--key);
+  box-shadow: var(--key-shadow);
+  color: #fff;
+}
+.chip[aria-pressed="true"] small {
+  color: rgba(255, 255, 255, 0.82);
+}
+.sg-live {
+  background: var(--state-bg);
+  color: var(--state-text);
+}
+/* the on/off switch: a round track, a white knob, blue when on */
+.sw-in {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: var(--tile-2);
+}
+:root[data-theme="dark"] .sw-in {
+  background: rgba(255, 255, 255, 0.12);
+}
+.sw-in::after,
+.sw-in:checked::after {
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+.sw-in:checked,
+:root[data-theme="dark"] .sw-in:checked {
+  border-color: transparent;
+  background: var(--key);
+}
+/* the session chips on Home */
+.chipx {
+  border: 1px solid var(--card-line);
+  border-radius: 999px;
+  background: var(--tile);
+  color: var(--muted);
+  font: 500 11.5px var(--f-body);
+  letter-spacing: 0;
+}
+.chipx.on {
+  border-color: transparent;
+  background: var(--state-bg);
+  color: var(--state-text);
+}
+
+/* ---------------------------------------------------------------- messages and the confirm boxes */
+:root[data-theme="dark"] #toast {
+  border: 1px solid var(--card-line);
+  background: #1b2552;
+  box-shadow: 0 18px 40px -16px rgba(0, 0, 0, 0.7);
+  color: var(--title);
+}
+:root[data-theme="dark"] #sheet,
+:root[data-theme="dark"] #quit,
+:root[data-theme="dark"] #setWarn,
+:root[data-theme="dark"] #pwConfirm {
+  background: var(--overlay) !important;
+}
+
+/* ---------------------------------------------------------------- the link screen */
+.ln-tile {
+  border: 1px solid var(--card-line);
+  border-image: none;
+  border-radius: 22px;
+  background: var(--card);
+  box-shadow: var(--card-shadow);
+}
+.ln-slot {
+  border: 1px solid var(--input-line);
+  border-image: none;
+  border-radius: 14px;
+  background: var(--input-bg);
+}
+.ln-slot:focus-within {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 4px var(--ring-focus);
+}
+.ln-slot input {
+  color: var(--title);
+}
+.ln-form h2 {
+  color: var(--title);
+}
+#login[data-link="ok"] {
+  --ln: var(--good);
+}
+#login[data-link="ok"] .ln-tile {
+  border-color: rgba(76, 195, 138, 0.45);
+  color: var(--good);
+  box-shadow: 0 0 0 4px rgba(76, 195, 138, 0.16), var(--card-shadow);
+}
+#login[data-link="ok"] .ln-rail {
+  background: var(--good);
+  box-shadow: 0 2px 10px rgba(76, 195, 138, 0.4);
+}
+
+/* ---------------------------------------------------------------- focus: for the keyboard only (16 Nov 2026)
+   A tap or a click never leaves a ring (the page's head adds .by-pointer on a pointer, takes it away on Tab); with the
+   keyboard the ring of a key in a bar sits inside it, so a key never gets a second edge around it. */
+.by-pointer :focus-visible {
+  outline: none;
+}
+.row:has(> [data-state]) > .btn:focus-visible,
+.seg button:focus-visible,
+.mini-seg button:focus-visible,
+nav button:focus-visible {
+  outline-offset: -2px;
+}

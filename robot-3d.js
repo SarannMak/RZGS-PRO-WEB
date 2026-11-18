@@ -208,6 +208,7 @@ function build(THREE, box, guide = false) {
   /* ------------------------------------------------------------ light */
   // Glossy black armour shows what is around it. Around the robot: a soft white light above and
   // in front, a cyan wall to the left, a lime wall to the right. Never seen, only mirrored.
+  // (Pearl-white from 14 Nov 2026, black again since 17 Nov 2026: the owner wants "the normal black bot as before".)
   {
     const room = new THREE.Scene();
     room.background = new THREE.Color(0x020608);
@@ -241,11 +242,14 @@ function build(THREE, box, guide = false) {
   const armour = new THREE.MeshPhysicalMaterial({ color: 0x0b1014, metalness: 0.9, roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.22 });
   const plate = new THREE.MeshPhysicalMaterial({ color: 0x1b242a, metalness: 0.82, roughness: 0.4, clearcoat: 0.7, clearcoatRoughness: 0.35 });
   const rubber = new THREE.MeshStandardMaterial({ color: 0x07090b, metalness: 0.25, roughness: 0.72 });
+  // the monitors keep the light site's look (graphite cases, light grey hinges, blue lines): only the robot is black
+  const deskCase = new THREE.MeshStandardMaterial({ color: 0x252e3a, metalness: 0.3, roughness: 0.55 });
+  const deskPlate = new THREE.MeshPhysicalMaterial({ color: 0xcfd8e4, metalness: 0.22, roughness: 0.42, clearcoat: 0.6, clearcoatRoughness: 0.3 });
   const visorGlass = new THREE.MeshPhysicalMaterial({ color: 0x010203, metalness: 0.5, roughness: 0.12, clearcoat: 1, clearcoatRoughness: 0.06, envMapIntensity: 0.55 });
   const lit = (color) => new THREE.MeshBasicMaterial({ color, toneMapped: false });
   const haze = (color, opacity) => new THREE.MeshBasicMaterial({ color, transparent: true, opacity, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false });
-  const LIT = { cyan: lit(CYAN), lime: lit(LIME) };
-  const HAZE = { cyan: haze(CYAN, 0.2), lime: haze(LIME, 0.17) };
+  const LIT = { cyan: lit(CYAN), lime: lit(LIME), desk: lit(0x0e86ee) };
+  const HAZE = { cyan: haze(CYAN, 0.2), lime: haze(LIME, 0.17), desk: haze(0x3a9fff, 0.16) };
 
   /* ------------------------------------------------------------ helpers */
   const add = (parent, geometry, material, x = 0, y = 0, z = 0) => {
@@ -515,7 +519,7 @@ function build(THREE, box, guide = false) {
     texture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
     paintLogo = () => {
       ctx.clearRect(0, 0, 512, 256);
-      ctx.font = 'italic 800 210px Oxanium, "Segoe UI", system-ui, sans-serif';
+      ctx.font = 'italic 800 210px Oxanium, Poppins, "Segoe UI", system-ui, sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.shadowColor = 'rgba(25, 211, 255, 0.9)';
@@ -527,6 +531,8 @@ function build(THREE, box, guide = false) {
       texture.needsUpdate = true;
     };
     paintLogo();
+    // a canvas does not ask for a page font by itself: ask for Oxanium, and paint again once it is here
+    if (document.fonts && document.fonts.load) document.fonts.load('italic 800 210px Oxanium').then(() => paintLogo(), () => {});
     add(body, sheet((u, v) => onTorso(mix(-0.3, 0.3, u), mix(-0.1, -0.37, v), 1.045), 16, 8), new THREE.MeshBasicMaterial({ map: texture, transparent: true, depthWrite: false, toneMapped: false }));
   }
 
@@ -716,8 +722,8 @@ function build(THREE, box, guide = false) {
   // robot turns. Every screen says little, in large letters: most of it is behind the robot.
   const desk = new THREE.Group();
   if (!guide) scene.add(desk);
-  const INK = { cyan: '#19d3ff', lime: '#a6ff1a', mint: '#2bf391', red: '#ff5a6a', gold: '#ffd23f', text: '#f3fbff', muted: '#8fb4c2', dark: '#03151d' };
-  const FONT = 'Oxanium, "Segoe UI", system-ui, sans-serif';
+  const INK = { cyan: '#0b74de', lime: '#4d7c0f', mint: '#12a150', red: '#e5484d', gold: '#d97706', text: '#0b1426', muted: '#667085', dark: '#ffffff' };
+  const FONT = 'Poppins, "Segoe UI", system-ui, sans-serif';
   // One monitor: a dark case, a lit screen with a cyan line round it. `draw` paints the screen.
   function monitor(w, h, across, draw) {
     const group = new THREE.Group();
@@ -729,11 +735,11 @@ function build(THREE, box, guide = false) {
     const texture = new THREE.CanvasTexture(canvas);
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
-    add(group, new THREE.BoxGeometry(w + 0.08, h + 0.08, 0.06), rubber, 0, 0, -0.036);
+    add(group, new THREE.BoxGeometry(w + 0.08, h + 0.08, 0.06), deskCase, 0, 0, -0.036);
     const glass = new THREE.MeshBasicMaterial({ map: texture, toneMapped: false });
     add(group, new THREE.PlaneGeometry(w, h), glass);
     const x = w / 2 + 0.02, y = h / 2 + 0.02, corners = [V(-x, -y, 0.004), V(x, -y, 0.004), V(x, y, 0.004), V(-x, y, 0.004)];
-    corners.forEach((corner, i) => glowLine(group, [corner, corners[(i + 1) % 4]], 0.006, 'cyan'));
+    corners.forEach((corner, i) => glowLine(group, [corner, corners[(i + 1) % 4]], 0.006, 'desk'));
     const screen = {
       group,
       glass,
@@ -741,11 +747,11 @@ function build(THREE, box, guide = false) {
       redraw() {
         // the screen's own light and its grid, then what it shows
         const light = ctx.createLinearGradient(0, 0, 0, canvas.height);
-        light.addColorStop(0, '#08374a');
+        light.addColorStop(0, '#e8f1fd');
         light.addColorStop(1, INK.dark);
         ctx.fillStyle = light;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.strokeStyle = 'rgba(25, 211, 255, 0.12)';
+        ctx.strokeStyle = 'rgba(11, 116, 222, 0.08)';
         ctx.lineWidth = 2;
         ctx.beginPath();
         for (let gx = 70; gx < canvas.width; gx += 70) {
@@ -764,7 +770,7 @@ function build(THREE, box, guide = false) {
     return screen;
   }
   const words = (ctx, text, x, y, size, color, align = 'left') => {
-    ctx.font = `800 ${size}px ${FONT}`;
+    ctx.font = `700 ${size}px ${FONT}`;
     ctx.fillStyle = color;
     ctx.textAlign = align;
     ctx.fillText(text, x, y);
@@ -828,7 +834,7 @@ function build(THREE, box, guide = false) {
   });
   const DESK = { y: 0.96, back: -1.25, turn: 0.6, reach: 1.66 }; // reach: how far the desk shows to each side of the robot's middle
   chart.group.position.set(0, DESK.y, DESK.back);
-  add(desk, new THREE.BoxGeometry(0.14, 1.7, 0.06), rubber, 0, DESK.y - 1.45, DESK.back - 0.1); // its arm, behind the robot
+  add(desk, new THREE.BoxGeometry(0.14, 1.7, 0.06), deskCase, 0, DESK.y - 1.45, DESK.back - 0.1); // its arm, behind the robot
 
   // The left monitor: the grid. Orders wait above and below the price, larger the further away:
   // sells above (hollow), buys below (filled). The cyan line is the price.
@@ -872,7 +878,7 @@ function build(THREE, box, guide = false) {
     const hinge = side * (1.05 + 0.07), half = 0.39;
     screen.group.position.set(hinge + side * half * Math.cos(DESK.turn), DESK.y, DESK.back + half * Math.sin(DESK.turn));
     screen.group.rotation.y = -side * DESK.turn;
-    for (const up of [-0.42, 0.42]) add(desk, new THREE.BoxGeometry(0.07, 0.16, 0.07), plate, hinge - side * 0.02, DESK.y + up, DESK.back - 0.03);
+    for (const up of [-0.42, 0.42]) add(desk, new THREE.BoxGeometry(0.07, 0.16, 0.07), deskPlate, hinge - side * 0.02, DESK.y + up, DESK.back - 0.03);
   }
   const screens = [chart, grid, log];
   screens.forEach((screen) => {
