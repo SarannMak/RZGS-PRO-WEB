@@ -921,7 +921,7 @@
       tone: soon ? 'warn' : 'good',
       big: String(daysLeft),
       sub: daysLeft === 1 ? 'DAY LEFT' : 'DAYS LEFT',
-      arc: Math.max(4, Math.min(100, (daysLeft / (plan === 'vip' && daysLeft > 31 ? 365 : PLAN_DAYS[plan])) * 100)), // VIP: a year
+      arc: Math.max(4, Math.min(100, (daysLeft / (['vip', 'elite'].includes(plan) && daysLeft > 31 ? 365 : PLAN_DAYS[plan])) * 100)), // Elite or VIP: a year
       note: soon
         ? `Your ${what} ends on ${longDate(ends)}. ${plan === 'trial' ? 'Choose a plan now to avoid a break.' : 'You can renew it once it has ended.'}`
         : `Your ${what} is valid until ${longDate(ends)}.`,
@@ -2012,7 +2012,7 @@
 
     /* ----- Personal profile: the plan and the profit at a glance (Higgsfield's account page, 2026-11-03) ----- */
     // the meter: one bar a day of the plan, lit for each day left (as in the account card, plans.js)
-    // a year (VIP) gets one bar a month
+    // a year (Elite or VIP) gets one bar a month
     function paintDays(meter, planId, ends, left, running) {
       const days = !planId ? PLAN_DAYS.elite : Math.max(PLAN_DAYS[planId] || 30, running && ends ? left : 0);
       const byMonth = days > 62;

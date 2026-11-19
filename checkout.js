@@ -55,8 +55,10 @@
   let shownQr = null;
   let qrWatch = null;
   let pickedBroker = ''; // chosen on the first screen of the broker step, not yet sent to the server
-  let typedMt5 = null;   // the MT5 numbers typed before a VIP month became a year: typed in again for them
-  let vipPrices = null;  // the VIP price of the moment (plans.js, web_prices())
+  let typed = null;      // what was typed on a step before its month / year switch was pressed: typed in again
+  let allPrices = null;  // the Elite and VIP prices of the moment (plans.js, web_prices()): { elite, vip }
+  const takeTyped = () => { const kept = typed || {}; typed = null; return kept; };
+  const YEARLY = ['elite', 'vip']; // the plans that can be bought for a month or a year
   // The robot beside the steps, on a computer only (the owner's drawing, 2026-11-02). It is loaded the first time it is needed.
   const WIDE = '(min-width: 860px)';
   let robot = null;
@@ -194,18 +196,29 @@
 
   // the free trial is 10 days for an account made during the welcome offer (plans.js knows, from web_my_invites)
   const trialDays = () => (window.rzgsPlans && window.rzgsPlans.promo && window.rzgsPlans.promo.trial_days) || PLANS.trial.days;
-  const yearly = () => Boolean(order && order.plan === 'vip' && Number(order.months) === 12);
-  const planLine = (plan) => (plan === 'vip' && order
-    ? `<p class="co-plan"><b>VIP</b> ${money(order.amount)} · ${yearly() ? '1 year' : '1 month'} · 1 MT5 account · any broker</p>`
-    : `<p class="co-plan"><b>${PLANS[plan].name}</b> ${freeMonth() ? '$0 · free month' : PLANS[plan].amount} · ${plan === 'trial' ? trialDays() : PLANS[plan].days} days · 1 MT5 account</p>`);
-  // VIP: a month or a year, changed on the MT5 and payment steps (the order's price changes with it, on the server)
+  const yearly = () => Boolean(order && YEARLY.includes(order.plan) && Number(order.months) === 12);
+  const planLine = (plan) => {
+    if (YEARLY.includes(plan) && order) {
+      const price = freeMonth() ? '$0 · free month' : `${money(order.amount)} · ${yearly() ? '1 year' : '1 month'}`;
+      return `<p class="co-plan"><b>${PLANS[plan].name}</b> ${price} · 1 MT5 account${plan === 'vip' ? ' · any broker' : ''}</p>`;
+    }
+    return `<p class="co-plan"><b>${PLANS[plan].name}</b> ${PLANS[plan].amount} · ${plan === 'trial' ? trialDays() : PLANS[plan].days} days · 1 MT5 account</p>`;
+  };
+  // Elite and VIP: a month or a year, changed on any step before the bot (the order's price changes with it, on the
+  // server). What a year gives: Elite "3 months free" (a year of whole months), VIP "Save 17%".
+  const PRICE_DEFAULT = { vip: { month: 29, year: 289, year_off: 17, year_save: 59 }, elite: { month: 5, year: 45, year_save: 15, months_free: 3 } };
+  const dealOf = (plan, p) => (plan === 'elite'
+    ? (p.months_free ? `${p.months_free} months free` : p.year_save > 0 ? `Save ${money(p.year_save)}` : '')
+    : (p.year_off > 0 && p.year_save > 0 ? `Save ${p.year_off}%` : ''));
   function billSwitch() {
-    if (!order || order.plan !== 'vip') return '';
-    const p = vipPrices || { month: 29, year: 289, year_off: 17 };
+    if (!order || !YEARLY.includes(order.plan)) return '';
+    const p = (allPrices && allPrices[order.plan]) || PRICE_DEFAULT[order.plan];
+    // the order's own price for the length it has now, the other length at the price of the moment
     const [month, year] = yearly() ? [p.month, order.amount] : [order.amount, p.year];
-    return `<div class="co-bill" role="group" aria-label="Pay for">
+    const deal = dealOf(order.plan, p);
+    return `<div class="co-bill co-bill--${order.plan}" role="group" aria-label="Pay for">
         <button type="button" data-co-bill="1" aria-pressed="${!yearly()}">1 month <b>${money(month)}</b></button>
-        <button type="button" data-co-bill="12" aria-pressed="${yearly()}">1 year <b>${money(year)}</b>${p.year_off > 0 ? `<i>Save ${p.year_off}%</i>` : ''}</button>
+        <button type="button" data-co-bill="12" aria-pressed="${yearly()}">1 year <b>${money(year)}</b>${deal ? `<i>${deal}</i>` : ''}</button>
       </div>`;
   }
   const message = (note) => `<p class="co-msg" data-co-msg role="alert"${note ? ' data-tone="error"' : ' hidden'}>${esc(note || '')}</p>`;
@@ -274,13 +287,15 @@
   /* ---------------------------------------------------------------- the steps */
   // The broker step is two screens (the owner, 2026-11-02): choose the broker and open an account, then the email is checked.
   function paintBroker() {
-    pickedBroker = order.broker || (last && last.broker) || '';
-    if (order.broker) paintEmail();
+    const kept = takeTyped(); // a month / year switch on this step: the same screen, with what was typed
+    pickedBroker = order.broker || kept.broker || (last && last.broker) || '';
+    if (order.broker || kept.form === 'broker') paintEmail(kept);
     else paintBrokerChoice();
   }
 
   function paintBrokerChoice() {
     paint(`${rail(order.plan, 'broker')}${planLine(order.plan)}
+      ${billSwitch()}
       <h2 id="co-title">Connect Your Broker</h2>
       <p class="plan-confirm-lead">Your MT5 account has to be opened with our link at one of these brokers.</p>
       <fieldset class="co-brokers">
@@ -309,10 +324,11 @@
     go.querySelector('[data-co-open-link]').href = broker.link;
   }
 
-  function paintEmail() {
+  function paintEmail(kept = {}) {
     const broker = brokerById(pickedBroker);
-    const email = order.broker_email || (last && last.broker_email) || accountEmail;
+    const email = kept.email ?? (order.broker_email || (last && last.broker_email) || accountEmail);
     paint(`${rail(order.plan, 'broker')}${planLine(order.plan)}
+      ${billSwitch()}
       <h2 id="co-title">Connect Your Email</h2>
       <p class="plan-confirm-lead">Type the email you used to open your ${broker.name} account. We check that it is under our link.</p>
       <form data-co-form="broker" novalidate>
@@ -333,9 +349,8 @@
     const back = PLANS[order.plan].steps[0] !== 'mt5';
     // any broker (VIP): no broker can say whose number it is, so it is typed twice (the owner, 2026-11-19)
     const twice = order.plan === 'vip';
-    const kept = typedMt5 || {};
-    typedMt5 = null;
-    const typed = kept.account ?? (order.mt5 || (last && last.mt5) || '');
+    const kept = takeTyped();
+    const number = kept.account ?? (order.mt5 || (last && last.mt5) || '');
     const paid = order.amount > 0;
     paint(`${rail(order.plan, 'mt5')}${planLine(order.plan)}
       ${billSwitch()}
@@ -346,7 +361,7 @@
       <form data-co-form="mt5" novalidate>
         <div class="co-field">
           <label for="co-mt5">MT5 login number</label>
-          <input class="co-input" id="co-mt5" name="account" type="text" inputmode="numeric" autocomplete="off" value="${esc(typed)}" required>
+          <input class="co-input" id="co-mt5" name="account" type="text" inputmode="numeric" autocomplete="off" value="${esc(number)}" required>
         </div>
         ${twice ? `<div class="co-field">
           <label for="co-mt5-again">Type it again</label>
@@ -754,18 +769,20 @@
     if (event.target.closest('a[data-plans]')) { box.close(); return; }
     if (event.target.closest('[data-co-registered]')) { paintEmail(); return; }
     if (event.target.closest('[data-co-change-broker]')) { paintBrokerChoice(); return; }
-    // VIP: a month became a year, or back. The server gives the order its new price (and a new QR on the payment step).
+    // Elite and VIP: a month became a year, or back. The server gives the order its new price (and a new QR on the
+    // payment step); the same screen comes back with what was typed in it.
     const bill = event.target.closest('[data-co-bill]');
     if (bill) {
       const months = Number(bill.dataset.coBill) === 12 ? 12 : 1;
       if (!order || bill.disabled || months === (yearly() ? 12 : 1)) return;
-      const form = inner.querySelector('[data-co-form="mt5"]');
-      if (form) typedMt5 = { account: form.elements.account.value, confirm: form.elements.confirm ? form.elements.confirm.value : '' };
+      const form = inner.querySelector('[data-co-form]');
+      const value = (name) => (form && form.elements[name] ? form.elements[name].value : undefined);
+      typed = { form: form ? form.dataset.coForm : '', broker: pickedBroker, email: value('email'), account: value('account'), confirm: value('confirm') };
       inner.querySelectorAll('[data-co-bill]').forEach((one) => { one.disabled = true; });
       bill.setAttribute('aria-busy', 'true');
       const result = await call('start', { plan: order.plan, months });
       if (!result.ok) {
-        typedMt5 = null;
+        typed = null;
         inner.querySelectorAll('[data-co-bill]').forEach((one) => { one.disabled = false; });
         bill.removeAttribute('aria-busy');
       }
@@ -856,25 +873,25 @@
   // The VIP price of the moment, for the other choice of the month / year switch (the order has its own price).
   async function loadPrices() {
     try {
-      if (window.rzgsPlans && window.rzgsPlans.prices) vipPrices = await window.rzgsPlans.prices();
+      if (window.rzgsPlans && window.rzgsPlans.prices) allPrices = await window.rzgsPlans.prices();
     } catch (e) { /* the first price is shown */ }
   }
 
   window.rzgsCheckout = {
-    // A plan button: starts the order, or takes it up again where it was. options.months: VIP for 1 or 12 months.
+    // A plan button: starts the order, or takes it up again where it was. options.months: Elite or VIP for 1 or 12 months.
     async open(plan, options = {}) {
       openBox();
       paintLoading();
-      typedMt5 = null;
-      const months = plan === 'vip' && Number(options.months) === 12 ? 12 : 1;
-      const [result] = await Promise.all([call('start', plan === 'vip' ? { plan, months } : { plan }), loadLast(), loadPrices()]);
+      typed = null;
+      const months = YEARLY.includes(plan) && Number(options.months) === 12 ? 12 : 1;
+      const [result] = await Promise.all([call('start', YEARLY.includes(plan) ? { plan, months } : { plan }), loadLast(), loadPrices()]);
       afterAction(result);
     },
     // "Continue" on the dashboard.
     async resume() {
       openBox();
       paintLoading();
-      typedMt5 = null;
+      typed = null;
       const [result] = await Promise.all([call('state'), loadLast(), loadPrices()]);
       afterAction(result);
     },

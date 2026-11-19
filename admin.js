@@ -16,8 +16,8 @@
   });
 
   const PLAN_NAMES = { trial: 'Free', elite: 'Elite', vip: 'VIP', diamond: 'Diamond' };
-  // a VIP order is for a month or a year
-  const planOf = (order) => `${PLAN_NAMES[order.plan] || esc(order.plan)}${order.plan === 'vip' ? (Number(order.months) === 12 ? ', 1 year' : ', 1 month') : ''}`;
+  // an Elite or VIP order is for a month or a year
+  const planOf = (order) => `${PLAN_NAMES[order.plan] || esc(order.plan)}${['elite', 'vip'].includes(order.plan) ? (Number(order.months) === 12 ? ', 1 year' : ', 1 month') : ''}`;
   const BROKER_NAMES = { exness: 'Exness', investizo: 'Investizo', lirunex: 'Lirunex' };
   const STEP_NAMES = { broker: 'Broker account', mt5: 'MT5 account', pay: 'Payment' };
   const STAGE_NAMES = { broker: 'At broker step', mt5: 'At MT5 step', pay: 'Waiting for payment', review: 'Needs you', done: 'Delivered' };
@@ -359,7 +359,7 @@
     // the seven files the website hands out (Free and Elite for each partner broker, and VIP for every broker)
     const kinds = new Set((data.files || []).map((file) => file.kind));
     const files = BOT_FILES.filter((kind) => kinds.has(kind)).length;
-    showPrices(data.prices);
+    showPrices(data.prices, data.elite);
     status([
       s.bakong_on ? `Bakong on: ${s.bakong_used} of ${s.bakong_day} checks used today` : 'Bakong is OFF on the website server',
       `${files} of 7 bot files${kinds.has('vip') ? '' : ' (the VIP file is missing)'}`,
@@ -536,7 +536,7 @@
         { t: 'Completed (bot delivered)', v: count(p.done) },
         { t: 'Incomplete (not finished)', v: count(p.open) },
         { t: 'Free (trial plan)', v: count(plans.trial) },
-        { t: 'Elite ($5 plan)', v: count(plans.elite) },
+        { t: 'Elite (a month or a year)', v: count(plans.elite) },
         { t: 'VIP (a month or a year)', v: count(plans.vip) },
         { t: 'Plan income', v: money(p.plan_income), total: true },
       ]),
@@ -819,21 +819,28 @@
   const priceSay = $('[data-adm-price-say]');
   const priceGo = $('[data-adm-price-go]');
   const PRICE_WORDS = {
-    price_bad: 'Type a monthly price from $1 to $9999 (cents are fine).',
-    off_bad: 'Type a yearly saving from 0 to 90, a whole number.',
+    price_bad: 'Type a VIP monthly price from $1 to $9999 (cents are fine).',
+    off_bad: 'Type a VIP yearly saving from 0 to 90, a whole number.',
+    elite_bad: 'Type an Elite year price from $1 to $9999 (cents are fine).',
     not_admin: 'This page is for the owner of the site.',
   };
+  const dollars = (input) => Math.round(Number(input.value.trim().replace(',', '.')) * 100) / 100;
   function pricePreview() {
-    const month = Math.round(Number(priceForm.elements.month.value.trim().replace(',', '.')) * 100) / 100;
+    const month = dollars(priceForm.elements.month);
     const off = Number(priceForm.elements.off.value.trim());
+    const elite = dollars(priceForm.elements.elite);
     if (!(month >= 1 && month <= 9999)) { priceSay.textContent = PRICE_WORDS.price_bad; return null; }
     if (!(Number.isInteger(off) && off >= 0 && off <= 90)) { priceSay.textContent = PRICE_WORDS.off_bad; return null; }
+    if (!(elite >= 1 && elite <= 9999)) { priceSay.textContent = PRICE_WORDS.elite_bad; return null; }
     const year = Math.round((month * 12 * (100 - off)) / 100);
-    priceSay.innerHTML = `Clients see <b>${money(month)}</b> a month, or <b>${money(year)}</b> a year${off > 0 && month * 12 > year ? ` (save ${off}%, ${money(month * 12 - year)})` : ''}.`;
-    return { month, off };
+    // a year of Elite in whole months of $5: "3 months free" ($45), as web_prices() says it
+    const free = elite % 5 === 0 && 12 - elite / 5 >= 1 && 12 - elite / 5 <= 11 ? 12 - elite / 5 : 0;
+    const eliteDeal = free ? `${free} month${free === 1 ? '' : 's'} free` : elite < 60 ? `save ${money(60 - elite)}` : '';
+    priceSay.innerHTML = `Clients see VIP <b>${money(month)}</b> a month, or <b>${money(year)}</b> a year${off > 0 && month * 12 > year ? ` (save ${off}%, ${money(month * 12 - year)})` : ''}, and Elite <b>$5</b> a month, or <b>${money(elite)}</b> a year${eliteDeal ? ` (${eliteDeal})` : ''}.`;
+    return { month, off, elite };
   }
-  // the price the server has now (admin_list), unless the owner is typing a new one
-  function showPrices(prices) {
+  // the prices the server has now (admin_list), unless the owner is typing new ones
+  function showPrices(prices, elite) {
     if (!prices) {
       if (!priceForm.elements.month.value) priceSay.textContent = OLD_FUNCTION;
       return;
@@ -841,6 +848,7 @@
     if (priceForm.querySelector('input:focus') || priceForm.dataset.typed) return;
     priceForm.elements.month.value = String(prices.month);
     priceForm.elements.off.value = String(prices.year_off);
+    priceForm.elements.elite.value = String(elite ? elite.year : 45);
     pricePreview();
   }
   priceForm.addEventListener('input', () => { priceForm.dataset.typed = '1'; pricePreview(); });
@@ -849,12 +857,12 @@
     const wanted = pricePreview();
     if (!wanted) return;
     priceGo.disabled = true;
-    const result = await call('admin_prices', { month: wanted.month, year_off: wanted.off });
+    const result = await call('admin_prices', { month: wanted.month, year_off: wanted.off, elite_year: wanted.elite });
     priceGo.disabled = false;
     if (!result.ok) { priceSay.textContent = PRICE_WORDS[result.code] || OLD_FUNCTION; return; }
     delete priceForm.dataset.typed;
     if (document.activeElement && priceForm.contains(document.activeElement)) document.activeElement.blur();
-    showPrices(result.prices);
+    showPrices(result.prices, result.elite);
     priceSay.innerHTML = `Saved. ${priceSay.innerHTML}`;
   });
 

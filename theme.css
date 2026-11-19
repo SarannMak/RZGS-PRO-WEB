@@ -1188,28 +1188,27 @@ dialog.plan-confirm::backdrop {
   --btn-bg: linear-gradient(180deg, #f6b73e 0%, #e2930f 100%);
   --btn-fg: #2a1600;
 }
-/* VIP: a month or a year */
+/* Elite and VIP: a month or a year, at the top right of the card where Free has its chip (the owner, 2026-11-20).
+   It is no taller than the plan's picture beside the name, so the three cards keep the same rows. */
 .pc-bill {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4px;
-  padding: 4px;
+  display: inline-flex;
+  flex: none;
+  gap: 2px;
+  margin-left: auto;
+  padding: 3px;
   border: 1px solid var(--border);
   border-radius: var(--radius-pill);
   background: var(--surface-2);
 }
+/* 28 + 2 x 3 padding + 2 x 1 border = 36px, the height of the plan picture beside the name */
 .pc-bill button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-height: 40px;
-  padding: 0 10px;
+  min-height: 28px;
+  padding: 0 12px;
   border: 0;
   border-radius: var(--radius-pill);
   background: transparent;
   color: var(--text-muted);
-  font: 600 14px/1 var(--font-body);
+  font: 600 13px/1 var(--font-body);
   cursor: pointer;
   transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -1218,26 +1217,81 @@ dialog.plan-confirm::backdrop {
 }
 .pc-bill button[aria-pressed="true"] {
   background: var(--surface);
-  color: var(--text);
+  color: rgb(var(--a-rgb));
   box-shadow: var(--shadow-sm);
 }
 .pc-bill button:focus-visible {
   outline: 2px solid rgba(var(--a-rgb), 0.7);
   outline-offset: 1px;
 }
-.pc-bill i {
-  padding: 4px 7px;
+/* what a year gives, beside the price when Yearly is on: Elite "3 months free", VIP "Save 17%" */
+.pc-deal {
+  align-self: center;
+  margin-left: auto;
+  padding: 5px 10px;
   border-radius: var(--radius-pill);
-  background: var(--vip-soft);
-  color: var(--vip);
-  font: 600 12px/1 var(--font-body);
+  background: rgba(var(--a-rgb), 0.1);
+  font: 600 13px/1 var(--font-body);
   font-style: normal;
+  white-space: nowrap;
 }
-.pc-save {
-  margin: -6px 0 0;
-  color: var(--text-muted);
-  font-size: 13px;
-  line-height: 1.4;
+.pc--elite .pc-deal {
+  color: var(--blue-deep);
+}
+.pc--vip .pc-deal {
+  color: var(--vip);
+}
+/* Elite's "Most popular" (and "Your plan" on a paid card): a flag on the card's top edge, so the top rows stay the same */
+.pc {
+  position: relative;
+}
+.pc-flag {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: 1;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: rgb(var(--a-rgb));
+  color: #fff;
+  font: 600 12px/1 var(--font-body);
+  white-space: nowrap;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 6px 14px -8px rgba(var(--a-rgb), 0.9);
+}
+.pc-flag[hidden] {
+  display: none;
+}
+/* the words under the button: room for two lines in every card, so the lists below start on one line */
+.pc-under {
+  min-height: calc(2 * 1.45em);
+  line-height: 1.45;
+}
+/* Side by side (wide screens), the three cards share their rows: the top, the words, the box, the price, the button,
+   the words under it and up to three lists. Each row starts on one line in all three and its boxes are one height,
+   whatever is written in them. 9 rows: a card with more parts needs a bigger span. Phones stack the cards. */
+@supports (grid-template-rows: subgrid) {
+  @media (min-width: 960px) {
+    .plans-grid {
+      row-gap: 14px;
+    }
+    .pc {
+      display: grid;
+      grid-row: span 9;
+      grid-template-rows: subgrid;
+    }
+    .pc-in {
+      display: grid;
+      grid-row: 1 / -1;
+      grid-template-rows: subgrid;
+      height: auto;
+    }
+  }
+}
+@media (max-width: 640px) {
+  .pc-bill button {
+    min-height: 38px;
+  }
 }
 /* the plan someone was sent to see (rzgspro.com/#vip from the control app): a ring for a moment */
 .pc {
@@ -1246,7 +1300,12 @@ dialog.plan-confirm::backdrop {
 .pc.is-picked {
   box-shadow: 0 0 0 3px rgba(var(--a-rgb), 0.45), var(--shadow-md);
 }
-/* the checkout box: VIP for a month or a year */
+/* the checkout box: Elite's "3 months free" in its own blue (VIP keeps its gold, .co-bill i below) */
+.co-bill.co-bill--elite i {
+  background: var(--blue-soft);
+  color: var(--blue-deep);
+}
+/* the checkout box: Elite and VIP for a month or a year */
 .co-bill {
   display: grid;
   grid-template-columns: 1fr 1fr;

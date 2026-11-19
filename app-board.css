@@ -1156,3 +1156,51 @@ nav button:focus-visible {
 #vipLockGo:hover {
   filter: brightness(1.05);
 }
+/* ---------------------------------------------------------------- the link screen's header (the owner, 19 Nov 2026) */
+/* The name and the "Not linked" state are one block exactly as tall as the two buttons beside it (44 px): the name
+   starts at the buttons' top and the state ends at their bottom, with only a small gap between the two. The Home
+   button is 44 px like the light / dark button (it was 40). */
+.ln-head .who {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  height: 44px;
+}
+.ln-head .who h1 {
+  max-width: 100%;
+  line-height: 1;
+}
+#login .link {
+  margin-top: 0;
+  padding-block: 4px;
+}
+.ln-head .ln-dash {
+  min-height: 44px;
+}
+/* ---------------------------------------------------------------- the console header: Live / Offline (the owner, 20 Nov 2026) */
+/* Like the link screen: everything in the row is 44 px tall, so every top and bottom lines up. The name and the
+   account line are one block (the name at the top, the account line at the bottom) and the Live / Offline pill is a
+   44 px capsule. A wider pill ("Offline 1m", "No internet") never pushes the account line onto a second line: on a
+   narrow phone the line is cut with "..." instead, and the row's gaps are a little smaller there. */
+#hdr .who {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 44px;
+}
+#whoLine {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#hdr .link {
+  height: 44px;
+  padding-block: 0;
+}
+@media (max-width: 420px) {
+  #hdr {
+    gap: 8px;
+  }
+}

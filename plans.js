@@ -21,7 +21,7 @@
   const BUSY_MS = 900; // how long "Processing..." stays at least
   const COMMUNITY_URL = 'https://t.me/+NvCIdtTmMIViMjg9';
   const JUST_IN_KEY = 'rzgs_just_in'; // auth.js leaves this for the next page, right after logging in
-  const PRICES_KEY = 'rzgs_prices'; // the VIP price, as web_prices() said it last (for this visit)
+  const PRICES_KEY = 'rzgs_prices2'; // the Elite and VIP prices, as web_prices() said them last (for this visit)
 
   // This file sits in the site's top folder, so other pages are found from here on any page.
   const SITE = new URL('./', document.currentScript.src);
@@ -78,11 +78,11 @@
       not: ['VIP mode', 'Any broker of your choice'],
     },
     {
-      id: 'elite', name: 'Elite', tone: 'elite', icon: 'hexagon', chip: 'Most popular',
+      id: 'elite', name: 'Elite', tone: 'elite', icon: 'hexagon', chip: 'Most popular', flag: 'Most popular', billing: true,
       lead: 'For traders with a partner broker account.',
       box: ['30 days on 1 MT5 account', 'Starts when your bot is delivered', 'You can renew once it has ended'],
       amount: '$5', per: '/ month', button: 'Upgrade Plan', under: 'You pay by KHQR on this website',
-      get: ['The RZGS-PRO gold bot for 30 days', 'Bot file and Bot Password on your dashboard', 'Phone control app', 'P/L Report in your account'],
+      get: ['The RZGS-PRO gold bot for <span data-plan-days>30 days</span>', 'Bot file and Bot Password on your dashboard', 'Phone control app', 'P/L Report in your account'],
       needs: [NEEDS_PARTNER, NEEDS_PC],
       not: ['VIP mode', 'Any broker of your choice'],
     },
@@ -97,21 +97,28 @@
   ];
   const planById = (id) => PLANS.find((plan) => plan.id === id);
 
-  /* ---------------------------------------------------------------- the VIP price */
-  // The owner sets a month in $ and the yearly saving in % on the admin page; web_prices() in the database gives the
-  // year price from them, so the checkout and every page say the same. Until it answers, the first price is shown.
+  /* ---------------------------------------------------------------- the prices of the moment */
+  // The owner sets them on the admin page: VIP a month in $ and its yearly saving in %, Elite a year in $ (the owner,
+  // 2026-11-20: a year of Elite too, "3 months free"). web_prices() in the database works out the rest, so the
+  // checkout and every page say the same. Until it answers, the first prices are shown.
   const money = (value) => {
     const cents = Math.round(Number(value) * 100) / 100;
     return `$${Number.isInteger(cents) ? cents : cents.toFixed(2)}`;
   };
+  const PRICE_DEFAULT = { vip: { month: 29, year_off: 17, year: 289, year_save: 59 }, elite: { month: 5, year: 45, year_save: 15, months_free: 3 } };
   let prices = (() => {
-    try { return JSON.parse(sessionStorage.getItem(PRICES_KEY)) || null; } catch (e) { return null; }
-  })() || { month: 29, year_off: 17, year: 289, year_save: 59 };
+    try { const saved = JSON.parse(sessionStorage.getItem(PRICES_KEY)); return saved && saved.vip && saved.elite ? saved : null; } catch (e) { return null; }
+  })() || PRICE_DEFAULT;
   let pricesAsked = null;
-  let billing = 1; // the VIP card: 1 = a month, 12 = a year
-  function usePrices(vip) {
-    prices = { month: Number(vip.month), year_off: Number(vip.year_off), year: Number(vip.year), year_save: Number(vip.year_save) };
-    planById('vip').amount = money(prices.month);
+  const billing = { elite: 1, vip: 1 }; // each paid card: 1 = a month, 12 = a year
+  function usePrices(next) {
+    const vip = next.vip || PRICE_DEFAULT.vip;
+    const elite = next.elite || PRICE_DEFAULT.elite;
+    prices = {
+      vip: { month: Number(vip.month), year_off: Number(vip.year_off), year: Number(vip.year), year_save: Number(vip.year_save) },
+      elite: { month: Number(elite.month), year: Number(elite.year), year_save: Number(elite.year_save), months_free: elite.months_free == null ? null : Number(elite.months_free) },
+    };
+    planById('vip').amount = money(prices.vip.month);
   }
   usePrices(prices);
   function loadPrices() {
@@ -121,9 +128,8 @@
       headers: { apikey: SUPABASE_KEY, 'Content-Type': 'application/json' },
       body: '{}',
     }).then((response) => (response.ok ? response.json() : null)).then((data) => {
-      const vip = data && data.vip;
-      if (vip && Number(vip.month) > 0 && Number(vip.year) > 0) {
-        usePrices(vip);
+      if (data && data.vip && Number(data.vip.month) > 0 && Number(data.vip.year) > 0) {
+        usePrices(data);
         try { sessionStorage.setItem(PRICES_KEY, JSON.stringify(prices)); } catch (e) { /* private window */ }
       }
       paintPrices();
@@ -132,32 +138,49 @@
     }).catch(() => prices);
     return pricesAsked;
   }
-  // Words with the VIP price in them, on any page: <span data-vip-price="month | year | save | off | permonth">
+  // What a year gives, in a few words: Elite "3 months free" (when the year is whole months), VIP "Save 17%".
+  const yearDeal = (id) => {
+    const p = prices[id];
+    if (id === 'elite') return p.months_free ? `${p.months_free} months free` : p.year_save > 0 ? `Save ${money(p.year_save)}` : '';
+    return p.year_off > 0 && p.year_save > 0 ? `Save ${p.year_off}%` : '';
+  };
+  // Words with a price in them, on any page:
+  // <span data-vip-price="month | year | save | off | permonth"> and <span data-elite-price="year | save | permonth | deal">
   function paintPrices() {
-    const said = { month: money(prices.month), year: money(prices.year), save: money(prices.year_save),
-      off: `${prices.year_off}%`, permonth: money(prices.year / 12) };
-    document.querySelectorAll('[data-vip-price]').forEach((el) => {
-      if (said[el.dataset.vipPrice]) el.textContent = said[el.dataset.vipPrice];
-    });
-    paintVip();
+    const said = {
+      vip: { month: money(prices.vip.month), year: money(prices.vip.year), save: money(prices.vip.year_save), off: `${prices.vip.year_off}%`, permonth: money(prices.vip.year / 12) },
+      elite: { year: money(prices.elite.year), save: money(prices.elite.year_save), permonth: money(prices.elite.year / 12), deal: yearDeal('elite') },
+    };
+    for (const id of ['vip', 'elite']) {
+      document.querySelectorAll(`[data-${id}-price]`).forEach((el) => {
+        const text = said[id][el.getAttribute(`data-${id}-price`)];
+        if (text) el.textContent = text;
+      });
+    }
+    paintBill('elite');
+    paintBill('vip');
   }
 
-  // The VIP card of the plans: a month or a year, at the price of the moment.
-  function paintVip() {
-    const card = dialog && dialog.querySelector('[data-plan="vip"]');
+  // A paid card of the plans: a month or a year, at the price of the moment. The words under its button say what a
+  // year gives (on Monthly) or what a year costs a month (on Yearly), unless the card has its own words to say there
+  // (renderCurrent: plan running, upgrade, free month).
+  const underSaid = {}; // plan id -> words renderCurrent put under the button, or null
+  function paintBill(id) {
+    const card = dialog && dialog.querySelector(`[data-plan="${id}"]`);
     if (!card) return;
-    const year = billing === 12;
-    const saves = prices.year_off > 0 && prices.year_save > 0;
-    card.querySelectorAll('[data-bill]').forEach((choice) => choice.setAttribute('aria-pressed', String(Number(choice.dataset.bill) === billing)));
-    const off = card.querySelector('[data-bill-off]');
-    off.textContent = `Save ${prices.year_off}%`;
-    off.hidden = !saves;
-    card.querySelector('[data-plan-amount]').textContent = money(year ? prices.year : prices.month);
+    const p = prices[id];
+    const year = billing[id] === 12;
+    const deal = yearDeal(id);
+    card.querySelectorAll('[data-bill]').forEach((choice) => choice.setAttribute('aria-pressed', String(Number(choice.dataset.bill) === billing[id])));
+    card.querySelector('[data-plan-amount]').textContent = money(year ? p.year : p.month);
     card.querySelector('[data-plan-per]').textContent = year ? '/ year' : '/ month';
     card.querySelector('[data-plan-box]').textContent = `${year ? 365 : 30} days on 1 MT5 account`;
-    const save = card.querySelector('[data-plan-save]');
-    save.textContent = year ? `Only ${money(prices.year / 12)} a month. You save ${money(prices.year_save)}.` : `Pay for a year and save ${money(prices.year_save)}.`;
-    save.hidden = !saves;
+    card.querySelectorAll('[data-plan-days]').forEach((days) => { days.textContent = `${year ? 365 : 30} days`; });
+    const badge = card.querySelector('[data-plan-deal]');
+    badge.textContent = deal;
+    badge.hidden = !(year && deal);
+    card.querySelector('.pc-under').textContent = underSaid[id]
+      || (year ? `Only ${money(p.year / 12)} a month, paid once by KHQR` : deal ? `Or pay yearly: ${deal.replace(/^Save/, 'save')}` : planById(id).under);
   }
 
   const EVERY_PLAN = [
@@ -174,23 +197,23 @@
     return `<div class="pc-list ${kind}"><h4>${title}</h4><ul>${items.map((item) => `<li>${mark}<span>${item}</span></li>`).join('')}</ul></div>`;
   }
 
+  // Every card has the same rows, so the three line up (the owner, 2026-11-20): name, words, box, price, button,
+  // the words under it, the lists. A paid plan's Monthly / Yearly switch sits at the top right, where Free has its
+  // chip; Elite's "Most popular" (and "Your plan") is a flag on the card's top edge.
   function cardHtml(plan) {
-    // VIP: a month or a year (the yearly saving is the owner's to set)
-    const bill = plan.billing ? `<div class="pc-bill" role="group" aria-label="Pay for">
+    const right = plan.billing ? `<div class="pc-bill" role="group" aria-label="Pay for">
         <button type="button" data-bill="1" aria-pressed="true">Monthly</button>
-        <button type="button" data-bill="12" aria-pressed="false">Yearly <i data-bill-off>Save ${prices.year_off}%</i></button>
-      </div>` : '';
-    return `<article class="pc pc--${plan.tone}" data-plan="${plan.id}"><div class="pc-in">
+        <button type="button" data-bill="12" aria-pressed="false">Yearly</button>
+      </div>` : `<span class="pc-chip" data-plan-chip>${plan.chip}</span>`;
+    return `<article class="pc pc--${plan.tone}" data-plan="${plan.id}"><span class="pc-flag" data-plan-flag${plan.flag ? '' : ' hidden'}>${plan.flag || ''}</span><div class="pc-in">
       <div class="pc-top">
         <span class="pc-icon">${ICONS[plan.icon]}</span>
         <h3>${plan.name}</h3>
-        <span class="pc-chip" data-plan-chip>${plan.chip}</span>
+        ${right}
       </div>
       <p class="pc-lead">${plan.lead}</p>
       <div class="pc-box"><strong data-plan-box>${plan.box[0]}</strong>${plan.box.slice(1).map((line) => `<span>${line}</span>`).join('')}</div>
-      ${bill}
-      <p class="pc-price"><b data-plan-amount>${plan.amount}</b><span data-plan-per>${plan.per}</span></p>
-      ${plan.billing ? '<p class="pc-save" data-plan-save></p>' : ''}
+      <p class="pc-price"><b data-plan-amount>${plan.amount}</b><span data-plan-per>${plan.per}</span>${plan.billing ? '<i class="pc-deal" data-plan-deal hidden></i>' : ''}</p>
       <span class="plan-btn-glow"><button class="plan-btn" type="button" data-plan-go="${plan.id}"><span data-plan-label>${plan.button}</span></button></span>
       <p class="pc-under">${plan.under}</p>
       ${listHtml('What you get', plan.get, ICONS.check, 'pc-list--hot')}
@@ -245,7 +268,7 @@
       const theme = document.querySelector('link[href*="theme.css"]');
       if (theme) theme.before(style); else document.head.append(style);
       const script = document.createElement('script');
-      script.src = pageUrl('checkout.js?v=7');
+      script.src = pageUrl('checkout.js?v=8');
       script.onload = () => resolve(window.rzgsCheckout);
       script.onerror = () => reject(new Error('The checkout did not load'));
       document.head.append(script);
@@ -545,7 +568,13 @@
       const card = dialog.querySelector(`[data-plan="${plan.id}"]`);
       const mine = current.plan === plan.id;
       card.classList.toggle('is-mine', mine);
-      card.querySelector('[data-plan-chip]').textContent = mine ? 'Your plan' : plan.chip;
+      // Free says "Your plan" in its chip; a paid card (its switch is where the chip was) in its flag
+      const chip = card.querySelector('[data-plan-chip]');
+      if (chip) chip.textContent = mine ? 'Your plan' : plan.chip;
+      const flag = card.querySelector('[data-plan-flag]');
+      const flagText = mine && plan.billing ? 'Your plan' : plan.flag || '';
+      flag.textContent = flagText;
+      flag.hidden = !flagText;
       const button = card.querySelector('[data-plan-go]');
       if (button.classList.contains('is-busy')) return;
       const label = button.querySelector('[data-plan-label]');
@@ -569,10 +598,11 @@
         button.disabled = false;
       }
       const upgrade = plan.id === 'vip' && movingUp(current);
-      card.querySelector('.pc-under').textContent = upgrade ? `Upgrade now. VIP starts when you pay and takes the place of your ${current.name} plan.`
-        : paidRunning && current.endsText ? `You can ${running ? 'renew' : 'start this'} after ${current.endsText}` : plan.under;
+      const said = upgrade ? `Upgrade now. VIP starts when you pay and takes the place of your ${current.name} plan.`
+        : paidRunning && current.endsText ? `You can ${running ? 'renew' : 'start this'} after ${current.endsText}` : null;
+      if (plan.billing) underSaid[plan.id] = said; // paintBill writes it, or the words about the year
+      else card.querySelector('.pc-under').textContent = said || plan.under;
     });
-    paintVip();
     // the promotions: 10 free days for an account made during the welcome offer, and a free month of Elite from the
     // Affiliate program (the checkout function then skips the payment)
     const days = (promo && promo.trial_days) || 7;
@@ -581,14 +611,17 @@
     trial.querySelector('[data-plan-box]').textContent = `${days} days on 1 MT5 account`;
     trial.querySelector('[data-plan-per]').textContent = `/ ${days} days`;
     if (current.plan !== 'trial') trial.querySelector('[data-plan-chip]').textContent = `${days} days`;
+    // a free month of Elite from the Affiliate program is a month: it shows on Monthly only
     const elite = dialog.querySelector('[data-plan="elite"]');
     const eliteButton = elite.querySelector('[data-plan-go]');
-    const freeMonth = Boolean(promo && promo.left > 0) && !eliteButton.disabled;
-    elite.querySelector('[data-plan-amount]').textContent = freeMonth ? '$0' : planById('elite').amount;
-    elite.querySelector('[data-plan-per]').textContent = freeMonth ? '/ free month' : planById('elite').per;
-    if (freeMonth && !eliteButton.classList.contains('is-busy')) {
-      eliteButton.querySelector('[data-plan-label]').textContent = 'Use my free month';
-      elite.querySelector('.pc-under').textContent = 'From inviting 5 friends. No payment needed';
+    const freeMonth = Boolean(promo && promo.left > 0) && !eliteButton.disabled && billing.elite === 1;
+    if (freeMonth) underSaid.elite = 'From inviting 5 friends. No payment needed';
+    paintBill('elite');
+    paintBill('vip');
+    if (freeMonth) {
+      elite.querySelector('[data-plan-amount]').textContent = '$0';
+      elite.querySelector('[data-plan-per]').textContent = '/ free month';
+      if (!eliteButton.classList.contains('is-busy')) eliteButton.querySelector('[data-plan-label]').textContent = 'Use my free month';
     }
   }
 
@@ -636,7 +669,7 @@
     dialog.addEventListener('click', (event) => {
       const button = event.target.closest('[data-plan-go]');
       const bill = event.target.closest('[data-bill]');
-      if (bill) { billing = Number(bill.dataset.bill) === 12 ? 12 : 1; paintVip(); }
+      if (bill) { billing[bill.closest('[data-plan]').dataset.plan] = Number(bill.dataset.bill) === 12 ? 12 : 1; renderCurrent(); }
       else if (button) choose(planById(button.dataset.planGo), button);
       else if (event.target.closest('[data-plans-cancel]')) goCancel();
       // the X, or the empty space around the plans
@@ -681,7 +714,7 @@
       const [checkout] = await Promise.all([loadCheckout(), wait(BUSY_MS / 3)]);
       setBusy(button, false);
       dialog.close();
-      checkout.open(plan.id, plan.billing ? { months: billing } : {});
+      checkout.open(plan.id, plan.billing ? { months: billing[plan.id] } : {});
     } catch (e) {
       setBusy(button, false);
       button.querySelector('[data-plan-label]').textContent = 'Try again';
