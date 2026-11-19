@@ -20,8 +20,8 @@
   const PROFILE_KEY = 'rzgs_profile'; // name, picture and plan, so the header is right at once
   const BUSY_MS = 900; // how long "Processing..." stays at least
   const COMMUNITY_URL = 'https://t.me/+NvCIdtTmMIViMjg9';
-  const SALES_URL = `https://t.me/sarannsadboi?text=${encodeURIComponent('Hi, I want the Diamond plan.')}`; // Diamond is sold in person
   const JUST_IN_KEY = 'rzgs_just_in'; // auth.js leaves this for the next page, right after logging in
+  const PRICES_KEY = 'rzgs_prices'; // the VIP price, as web_prices() said it last (for this visit)
 
   // This file sits in the site's top folder, so other pages are found from here on any page.
   const SITE = new URL('./', document.currentScript.src);
@@ -63,6 +63,8 @@
 
   /* ---------------------------------------------------------------- the plans */
   // Only what the License Rules really give. `id` is the plan's name on the website (web_users.plan).
+  // VIP took the place of Diamond (the owner, 19 Nov 2026): any broker, VIP mode in the app, a month or a year,
+  // sold right here like Elite. Its price is the owner's to set (admin page), so it is read from web_prices().
   const NEEDS_PARTNER = 'An MT5 hedging account opened with a partner broker: Exness, Investizo or Lirunex';
   const NEEDS_PC = 'A computer or VPS that keeps MT5 open';
   const PLANS = [
@@ -73,7 +75,7 @@
       amount: '$0', per: '/ 7 days', button: 'Claim Free Trial', under: 'No payment needed',
       get: ['The same RZGS-PRO gold bot as Elite', 'Bot file and Bot Password on your dashboard', 'Phone control app', 'P/L Report in your account'],
       needs: [NEEDS_PARTNER, NEEDS_PC],
-      not: ['Any broker of your choice', 'Basic VPS'],
+      not: ['VIP mode', 'Any broker of your choice'],
     },
     {
       id: 'elite', name: 'Elite', tone: 'elite', icon: 'hexagon', chip: 'Most popular',
@@ -82,19 +84,81 @@
       amount: '$5', per: '/ month', button: 'Upgrade Plan', under: 'You pay by KHQR on this website',
       get: ['The RZGS-PRO gold bot for 30 days', 'Bot file and Bot Password on your dashboard', 'Phone control app', 'P/L Report in your account'],
       needs: [NEEDS_PARTNER, NEEDS_PC],
-      not: ['Any broker of your choice', 'Basic VPS'],
+      not: ['VIP mode', 'Any broker of your choice'],
     },
     {
-      id: 'diamond', name: 'Diamond', tone: 'diamond', icon: 'gem', chip: 'Any broker',
-      lead: 'Keep your own broker. Hosting included.',
-      box: ['Monthly on 1 MT5 account', 'Works at any broker', '1 basic VPS included while paid'],
-      amount: '$49', per: '/ month', button: 'Contact Sales', under: 'We continue with you on Telegram',
-      get: ['Everything in Elite', 'No partner broker needed: keep your own', '1 basic VPS, so the bot can run 24/7', 'The bot file made for every broker'],
-      needs: ['An MT5 hedging account at any broker, one that can trade gold'],
-      note: ['When the plan ends the VPS is removed, so keep a copy of anything you need from it.'],
+      id: 'vip', name: 'VIP', tone: 'vip', icon: 'crown', chip: 'Any broker', billing: true,
+      lead: 'VIP mode, at any broker you like.',
+      box: ['30 days on 1 MT5 account', 'Works at any broker', 'VIP mode unlocked in your app'],
+      amount: '$29', per: '/ month', button: 'Go VIP', under: 'You pay by KHQR on this website',
+      get: ['Everything in Elite', 'VIP mode: a first trade in profit closes after a short countdown', 'Your own VIP grid distance, set in the app', 'Keep your own broker: no partner account needed'],
+      needs: ['An MT5 hedging account at any broker, one that can trade gold', NEEDS_PC],
     },
   ];
   const planById = (id) => PLANS.find((plan) => plan.id === id);
+
+  /* ---------------------------------------------------------------- the VIP price */
+  // The owner sets a month in $ and the yearly saving in % on the admin page; web_prices() in the database gives the
+  // year price from them, so the checkout and every page say the same. Until it answers, the first price is shown.
+  const money = (value) => {
+    const cents = Math.round(Number(value) * 100) / 100;
+    return `$${Number.isInteger(cents) ? cents : cents.toFixed(2)}`;
+  };
+  let prices = (() => {
+    try { return JSON.parse(sessionStorage.getItem(PRICES_KEY)) || null; } catch (e) { return null; }
+  })() || { month: 29, year_off: 17, year: 289, year_save: 59 };
+  let pricesAsked = null;
+  let billing = 1; // the VIP card: 1 = a month, 12 = a year
+  function usePrices(vip) {
+    prices = { month: Number(vip.month), year_off: Number(vip.year_off), year: Number(vip.year), year_save: Number(vip.year_save) };
+    planById('vip').amount = money(prices.month);
+  }
+  usePrices(prices);
+  function loadPrices() {
+    if (pricesAsked) return pricesAsked;
+    pricesAsked = fetch(`${SUPABASE_URL}/rest/v1/rpc/web_prices`, {
+      method: 'POST',
+      headers: { apikey: SUPABASE_KEY, 'Content-Type': 'application/json' },
+      body: '{}',
+    }).then((response) => (response.ok ? response.json() : null)).then((data) => {
+      const vip = data && data.vip;
+      if (vip && Number(vip.month) > 0 && Number(vip.year) > 0) {
+        usePrices(vip);
+        try { sessionStorage.setItem(PRICES_KEY, JSON.stringify(prices)); } catch (e) { /* private window */ }
+      }
+      paintPrices();
+      document.dispatchEvent(new CustomEvent('rzgs:prices'));
+      return prices;
+    }).catch(() => prices);
+    return pricesAsked;
+  }
+  // Words with the VIP price in them, on any page: <span data-vip-price="month | year | save | off | permonth">
+  function paintPrices() {
+    const said = { month: money(prices.month), year: money(prices.year), save: money(prices.year_save),
+      off: `${prices.year_off}%`, permonth: money(prices.year / 12) };
+    document.querySelectorAll('[data-vip-price]').forEach((el) => {
+      if (said[el.dataset.vipPrice]) el.textContent = said[el.dataset.vipPrice];
+    });
+    paintVip();
+  }
+
+  // The VIP card of the plans: a month or a year, at the price of the moment.
+  function paintVip() {
+    const card = dialog && dialog.querySelector('[data-plan="vip"]');
+    if (!card) return;
+    const year = billing === 12;
+    const saves = prices.year_off > 0 && prices.year_save > 0;
+    card.querySelectorAll('[data-bill]').forEach((choice) => choice.setAttribute('aria-pressed', String(Number(choice.dataset.bill) === billing)));
+    const off = card.querySelector('[data-bill-off]');
+    off.textContent = `Save ${prices.year_off}%`;
+    off.hidden = !saves;
+    card.querySelector('[data-plan-amount]').textContent = money(year ? prices.year : prices.month);
+    card.querySelector('[data-plan-per]').textContent = year ? '/ year' : '/ month';
+    card.querySelector('[data-plan-box]').textContent = `${year ? 365 : 30} days on 1 MT5 account`;
+    const save = card.querySelector('[data-plan-save]');
+    save.textContent = year ? `Only ${money(prices.year / 12)} a month. You save ${money(prices.year_save)}.` : `Pay for a year and save ${money(prices.year_save)}.`;
+    save.hidden = !saves;
+  }
 
   const EVERY_PLAN = [
     ['gold', 'Trades gold by fixed rules', 'A buy and a sell open together on XAUUSD. The bot does not try to predict the price.'],
@@ -111,6 +175,11 @@
   }
 
   function cardHtml(plan) {
+    // VIP: a month or a year (the yearly saving is the owner's to set)
+    const bill = plan.billing ? `<div class="pc-bill" role="group" aria-label="Pay for">
+        <button type="button" data-bill="1" aria-pressed="true">Monthly</button>
+        <button type="button" data-bill="12" aria-pressed="false">Yearly <i data-bill-off>Save ${prices.year_off}%</i></button>
+      </div>` : '';
     return `<article class="pc pc--${plan.tone}" data-plan="${plan.id}"><div class="pc-in">
       <div class="pc-top">
         <span class="pc-icon">${ICONS[plan.icon]}</span>
@@ -119,7 +188,9 @@
       </div>
       <p class="pc-lead">${plan.lead}</p>
       <div class="pc-box"><strong data-plan-box>${plan.box[0]}</strong>${plan.box.slice(1).map((line) => `<span>${line}</span>`).join('')}</div>
+      ${bill}
       <p class="pc-price"><b data-plan-amount>${plan.amount}</b><span data-plan-per>${plan.per}</span></p>
+      ${plan.billing ? '<p class="pc-save" data-plan-save></p>' : ''}
       <span class="plan-btn-glow"><button class="plan-btn" type="button" data-plan-go="${plan.id}"><span data-plan-label>${plan.button}</span></button></span>
       <p class="pc-under">${plan.under}</p>
       ${listHtml('What you get', plan.get, ICONS.check, 'pc-list--hot')}
@@ -174,7 +245,7 @@
       const theme = document.querySelector('link[href*="theme.css"]');
       if (theme) theme.before(style); else document.head.append(style);
       const script = document.createElement('script');
-      script.src = pageUrl('checkout.js?v=6');
+      script.src = pageUrl('checkout.js?v=7');
       script.onload = () => resolve(window.rzgsCheckout);
       script.onerror = () => reject(new Error('The checkout did not load'));
       document.head.append(script);
@@ -183,11 +254,12 @@
     return checkoutPromise;
   }
 
-  // Back to this page after signing up or logging in, where the plans then open.
-  function toSignUp() {
+  // Back to this page after signing up or logging in, where the plans then open. to: somewhere else to come back to
+  // (a path on this site), page: the log in page instead of sign-up.
+  function toSignUp(to = '', page = 'signup') {
     const here = location.pathname;
-    write(AFTER_KEY, JSON.stringify({ to: /(login|signup|reset-password)(\.html)?$/.test(here) ? SITE.pathname : here, at: Date.now() }));
-    location.href = pageUrl('signup');
+    write(AFTER_KEY, JSON.stringify({ to: to || (/(login|signup|reset-password)(\.html)?$/.test(here) ? SITE.pathname : here), at: Date.now() }));
+    location.href = pageUrl(page);
   }
 
   /* ---------------------------------------------------------------- the profile in the header */
@@ -217,7 +289,7 @@
   /* ---------------------------------------------------------------- the account card */
   // One card in three places: under the profile button of the header (computers, on hover), at the bottom of the phone
   // menu, and at the bottom of the dashboard's own menu (the owner's sketch, 2 Nov 2026). The last two open with a tap.
-  const PLAN_DAYS = { trial: 7, elite: 30, diamond: 30 };
+  const PLAN_DAYS = { trial: 7, elite: 30, vip: 30, diamond: 30 };
   let menu = null;
   const cards = [];
 
@@ -311,11 +383,13 @@
   }
 
   // One bar a day of the plan (the owner, 2026-11-03): lit for each day left, dark for the days used. No plan: 30 dark
-  // bars. A plan given more days than its length gets a bar for each of them.
+  // bars. A plan given more days than its length gets a bar for each of them; a year (VIP) gets one bar a month.
   function paintMeter(meter, planId, ends, left, running) {
-    const total = !planId ? PLAN_DAYS.elite : Math.max(PLAN_DAYS[planId], running && ends ? left : 0);
+    const days = !planId ? PLAN_DAYS.elite : Math.max(PLAN_DAYS[planId] || 30, running && ends ? left : 0);
+    const byMonth = days > 62;
+    const total = byMonth ? 12 : days;
     if (meter.children.length !== total) meter.innerHTML = '<i></i>'.repeat(total);
-    const lit = !running ? 0 : !ends ? total : Math.min(total, left);
+    const lit = !running ? 0 : !ends ? total : byMonth ? Math.min(12, Math.ceil(left / 30.42)) : Math.min(total, left);
     [...meter.children].forEach((part, index) => part.classList.toggle('on', index < lit));
   }
 
@@ -334,7 +408,7 @@
     const [go, cta] = !plan ? ['Start free', 'Get your bot']
       : !running ? [plan.id === 'trial' ? 'Choose a plan' : 'Renew your plan', 'See plans']
         : plan.id === 'trial' ? ['Go Elite', 'Upgrade']
-          : plan.id === 'elite' ? ['Go Diamond', 'Upgrade']
+          : plan.id === 'elite' ? ['Unlock VIP mode', 'Go VIP']
             : ['Your plan is the top one', 'See plans'];
     say('[data-pm-go]', go);
     say('[data-pm-cta]', cta);
@@ -419,7 +493,8 @@
 
   const dateText = (date) => date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
-  // On a running Elite plan, Diamond can start now: the plan is cancelled first, after asking.
+  // On a running Elite plan, VIP can start now: it takes the place of Elite once paid (the checkout function allows
+  // this one move while a paid plan runs; nothing is cancelled first).
   const movingUp = (now) => now.plan === 'elite' && !now.ended;
 
   // What the person has now, for the pop-up and the Elite confirmation.
@@ -483,8 +558,8 @@
         // a plan can be renewed once it has ended, not before
         label.textContent = 'Plan running';
         button.disabled = true;
-      } else if (plan.id === 'diamond' && movingUp(current)) {
-        label.textContent = 'Upgrade to Diamond';
+      } else if (plan.id === 'vip' && movingUp(current)) {
+        label.textContent = 'Upgrade to VIP';
         button.disabled = false;
       } else if (paidRunning) {
         label.textContent = 'After your plan ends';
@@ -493,10 +568,11 @@
         label.textContent = mine ? 'Renew Plan' : plan.button;
         button.disabled = false;
       }
-      const upgrade = plan.id === 'diamond' && movingUp(current);
-      card.querySelector('.pc-under').textContent = upgrade ? `Your ${current.name} plan is cancelled first. Days left are not refunded.`
+      const upgrade = plan.id === 'vip' && movingUp(current);
+      card.querySelector('.pc-under').textContent = upgrade ? `Upgrade now. VIP starts when you pay and takes the place of your ${current.name} plan.`
         : paidRunning && current.endsText ? `You can ${running ? 'renew' : 'start this'} after ${current.endsText}` : plan.under;
     });
+    paintVip();
     // the promotions: 10 free days for an account made during the welcome offer, and a free month of Elite from the
     // Affiliate program (the checkout function then skips the payment)
     const days = (promo && promo.trial_days) || 7;
@@ -559,7 +635,9 @@
     document.body.append(dialog);
     dialog.addEventListener('click', (event) => {
       const button = event.target.closest('[data-plan-go]');
-      if (button) choose(planById(button.dataset.planGo), button);
+      const bill = event.target.closest('[data-bill]');
+      if (bill) { billing = Number(bill.dataset.bill) === 12 ? 12 : 1; paintVip(); }
+      else if (button) choose(planById(button.dataset.planGo), button);
       else if (event.target.closest('[data-plans-cancel]')) goCancel();
       // the X, or the empty space around the plans
       else if (event.target.closest('[data-plans-close]') || event.target === dialog || event.target.classList.contains('plans-wrap')) dialog.close();
@@ -567,8 +645,10 @@
     dialog.addEventListener('close', () => lockPage(false));
   }
 
-  function openPlans() {
+  // pick: a plan to bring into view and mark (the control app's "Go VIP" comes here as rzgspro.com/#vip)
+  function openPlans(pick) {
     if (!dialog) buildDialog();
+    loadPrices();
     if (dialog.open) return;
     current = describeCurrent(storedProfile());
     renderCurrent();
@@ -576,33 +656,24 @@
     if (window.rzgsMotion) window.rzgsMotion.fromTap(dialog);
     dialog.showModal();
     dialog.scrollTop = 0;
+    const card = pick && dialog.querySelector(`[data-plan="${pick}"]`);
+    if (card) {
+      card.scrollIntoView({ block: 'center' });
+      card.classList.add('is-picked');
+      setTimeout(() => card.classList.remove('is-picked'), 2600);
+    }
     freshCurrent();
   }
 
-  async function goCancel(next) {
+  async function goCancel() {
     const checkout = await loadCheckout();
     if (dialog && dialog.open) dialog.close();
-    checkout.askCancel(current.plan, current.endsAt, next);
+    checkout.askCancel(current.plan, current.endsAt);
   }
 
-  // A chat with our sales team, in a new tab: this page stays where it is.
-  function toSales() {
-    const link = document.createElement('a');
-    link.href = SALES_URL;
-    link.target = '_blank';
-    link.rel = 'noopener';
-    link.click();
-  }
-
-  // Diamond goes to our sales team. Free and Elite go on in the checkout box, on this same page; with no account,
-  // signing up comes first.
+  // Every plan goes on in the checkout box, on this same page; with no account, signing up comes first.
   async function choose(plan, button) {
     if (button.disabled) return;
-    if (plan.id === 'diamond') {
-      if (current.plan === 'elite') goCancel('diamond'); // days left: asked twice; ended: asked once
-      else toSales();
-      return;
-    }
     setBusy(button, true);
     const session = await activeSession();
     if (session === null) { toSignUp(); return; }
@@ -610,7 +681,7 @@
       const [checkout] = await Promise.all([loadCheckout(), wait(BUSY_MS / 3)]);
       setBusy(button, false);
       dialog.close();
-      checkout.open(plan.id);
+      checkout.open(plan.id, plan.billing ? { months: billing } : {});
     } catch (e) {
       setBusy(button, false);
       button.querySelector('[data-plan-label]').textContent = 'Try again';
@@ -956,14 +1027,9 @@
     const go = event.target.closest('[data-checkout]');
     if (!go || go.disabled || event.metaKey || event.ctrlKey || event.shiftKey) return;
     event.preventDefault();
-    if (go.dataset.checkout === 'diamond') {
-      current = describeCurrent(storedProfile());
-      if (current.plan === 'elite') goCancel('diamond'); // days left: asked twice; ended: asked once
-      else toSales();
-      return;
-    }
     if (!signedIn()) { toSignUp(); return; }
-    (await loadCheckout()).open(go.dataset.checkout);
+    // VIP: a month unless the button says a year (data-months="12"); the checkout box lets them change it
+    (await loadCheckout()).open(go.dataset.checkout, { months: Number(go.dataset.months) === 12 ? 12 : 1 });
   });
 
   keepInvite();
@@ -990,7 +1056,7 @@
   } catch (e) { /* private window */ }
   if (justIn) {
     profileLoaded.then((profile) => {
-      if (profile && needsPlan(profile)) whenPageIsReady(openPlans);
+      if (profile && needsPlan(profile)) whenPageIsReady(() => openPlans());
     });
   }
   whenPageIsReady(paintTrialDays);
@@ -1007,10 +1073,13 @@
     // the dashboard: the plans for its Subscription tab, the account card in its menu, and Cancel plan
     plans: PLANS,
     mountCard,
-    cancel(next) {
+    cancel() {
       current = describeCurrent(storedProfile());
-      goCancel(next);
+      goCancel();
     },
+    // the VIP price of the moment ({ month, year_off, year, year_save }); 'rzgs:prices' tells when it is known
+    prices: loadPrices,
+    money,
     // the Edit profile box saved something: the header follows at once
     repaint(fields) {
       const profile = { ...storedProfile(), ...fields };
@@ -1020,12 +1089,19 @@
   };
 
   // Sent here to see the plans: they asked, by a link from another page or from before the plans became a pop-up.
-  if (/^#(plans|pricing)$/.test(location.hash)) {
+  // #vip: the control app's "Go VIP" (someone who has a bot, so logging in comes first, then the plans, VIP in view).
+  if (/^#(plans|pricing|vip)$/.test(location.hash)) {
+    const vip = location.hash === '#vip';
     history.replaceState(null, '', location.pathname + location.search);
-    if (signedIn()) openPlans();
+    if (signedIn()) whenPageIsReady(() => openPlans(vip ? 'vip' : null));
+    else if (vip) toSignUp(`${SITE.pathname}#vip`, 'login');
     else {
       const partners = document.getElementById('partners');
       if (partners) partners.scrollIntoView();
     }
   }
+  // a page that shows the VIP price in its words, and the account pages (their plan cards): the price of the moment
+  whenPageIsReady(() => {
+    if (document.querySelector('[data-vip-price]') || ['dashboard', 'manage'].includes(document.body.dataset.authPage)) loadPrices();
+  });
 })();

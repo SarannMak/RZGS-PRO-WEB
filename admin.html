@@ -11,12 +11,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-  <link rel="stylesheet" href="style.css?v=38">
-  <link rel="stylesheet" href="auth.css?v=25">
-  <link rel="stylesheet" href="admin.css?v=1">
-  <link rel="stylesheet" href="theme.css?v=88">
+  <link rel="stylesheet" href="style.css?v=40">
+  <link rel="stylesheet" href="auth.css?v=30">
+  <link rel="stylesheet" href="admin.css?v=3">
+  <link rel="stylesheet" href="theme.css?v=90">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0" defer></script>
-  <script src="admin.js?v=4" defer></script>
+  <script src="admin.js?v=5" defer></script>
 </head>
 <body class="adm-page">
   <!-- The owner's page (rzgspro.com/admin, the owner, 6 Nov 2026): every part of the site in one place. Only the
@@ -88,13 +88,29 @@
             <div data-adm-waiting><p class="adm-empty">Loading...</p></div>
           </section>
           <section class="dash-panel">
-            <h2>Give a Diamond plan</h2>
-            <p class="dash-hint">Diamond is sold on Telegram. When the client has paid you, type their website email and their MT5 number. Their bot, passwords and file appear on their dashboard, for 30 days from now.</p>
+            <h2>VIP price</h2>
+            <p class="dash-hint">What VIP costs on the website. A year is 12 months less the yearly saving, rounded to whole dollars. Orders already started keep the price they started with.</p>
+            <form class="adm-give" data-adm-price novalidate>
+              <div class="adm-price-row">
+                <label><span>A month, in $</span><input class="adm-input" name="month" type="text" inputmode="decimal" autocomplete="off" spellcheck="false"></label>
+                <label><span>Yearly saving, in %</span><input class="adm-input" name="off" type="text" inputmode="numeric" autocomplete="off" spellcheck="false"></label>
+              </div>
+              <p class="adm-why" data-adm-price-say role="status">Loading the price...</p>
+              <button class="btn btn-primary btn-sm" type="submit" data-adm-price-go>Save the price</button>
+            </form>
+          </section>
+          <section class="dash-panel">
+            <h2>Give a VIP plan</h2>
+            <p class="dash-hint">VIP sells by itself on the website. Use this when a client paid you another way: type their website email and their MT5 number, and choose a month or a year. Their bot, passwords and file appear on their dashboard from now. A client on Free or Elite can be given VIP.</p>
             <form class="adm-give" data-adm-give novalidate>
               <input class="adm-input" name="email" type="email" inputmode="email" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="The client's website email" aria-label="The client's website email">
               <input class="adm-input" name="account" type="text" inputmode="numeric" autocomplete="off" placeholder="Their MT5 number" aria-label="Their MT5 number">
+              <select class="adm-input" name="months" aria-label="How long">
+                <option value="1">1 month</option>
+                <option value="12">1 year</option>
+              </select>
               <p class="adm-why" data-adm-give-msg role="status" hidden></p>
-              <button class="btn btn-primary btn-sm" type="submit" data-adm-give-go>Give Diamond</button>
+              <button class="btn btn-primary btn-sm" type="submit" data-adm-give-go>Give VIP</button>
             </form>
           </section>
           <section class="dash-panel">
@@ -116,7 +132,7 @@
               <button type="button" data-filter="running" aria-pressed="false">Plan running</button>
               <button type="button" data-filter="trial" aria-pressed="false">Free</button>
               <button type="button" data-filter="elite" aria-pressed="false">Elite</button>
-              <button type="button" data-filter="diamond" aria-pressed="false">Diamond</button>
+              <button type="button" data-filter="vip" aria-pressed="false">VIP</button>
               <button type="button" data-filter="ended" aria-pressed="false">Plan ended</button>
               <button type="button" data-filter="none" aria-pressed="false">No plan</button>
               <button type="button" data-filter="unconfirmed" aria-pressed="false">Email not confirmed</button>

@@ -29,7 +29,7 @@
   --text-subtle: #667085;
 
   /* accent: the brand blue. --cyan keeps its old name, so every place that was cyan is now this blue */
-  --blue: #0b74de;
+  --blue: #0a6dd6;            /* text-safe shade: 4.6:1 on the light-blue chips (review D1, 19 Nov 2026) */
   --blue-strong: #0862c9;
   --blue-deep: #0753c8;
   --blue-soft: #eef5ff;
@@ -40,15 +40,18 @@
   --neon: #4a820a;
   --lime-fill: #84cc16;
   --lime-soft: #f1fadf;
-  --good: #08834a;
+  --good: #077a44;            /* D2: 4.9:1+ on the light cards */
   --good-soft: #e7f7ee;
-  --bad: #d92d3a;
+  --bad: #c42633;             /* D2 */
   --bad-soft: #fdecee;
   --warn: #b95e04;
   --warn-soft: #fff4e5;
   --buy: #0b6bd3;
-  --sell: #c2540f;
+  --sell: #ad4a0c;            /* D2 */
   --on-accent: #ffffff;
+  --vip: #8f5400;             /* the VIP plan's gold, text-safe: 6.1:1 on white, 5.2:1 on its own tint (19 Nov 2026) */
+  --vip-rgb: 143, 84, 0;
+  --vip-soft: #fbf1e2;
   --grad: linear-gradient(90deg, var(--blue-deep) 0%, var(--blue) 55%, #0b8be6 100%);
   --grad-btn: linear-gradient(180deg, #0f7de6 0%, #0866cf 100%);
 
@@ -200,8 +203,8 @@ pre {
   box-shadow: var(--shadow-xs);
   color: var(--text);
   font: 600 12px/1.2 var(--font-body);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  text-transform: none;
 }
 .kicker::before {
   content: "";
@@ -517,8 +520,8 @@ pre {
   border-radius: var(--radius-pill);
   background: rgba(255, 255, 255, 0.16);
   color: #fff;
-  font: 600 11.5px/1 var(--font-body);
-  letter-spacing: 0.04em;
+  font: 600 12px/1 var(--font-body);
+  letter-spacing: 0.01em;
   clip-path: none;
 }
 .trial-bar-chip .icon {
@@ -807,8 +810,8 @@ pre {
 }
 .gp-plan b {
   color: var(--text-subtle);
-  font: 600 10.5px/1 var(--font-body);
-  letter-spacing: 0.06em;
+  font: 600 12px/1 var(--font-body);
+  letter-spacing: 0.01em;
 }
 .gp-plan.is-hot {
   border-color: var(--blue);
@@ -850,7 +853,7 @@ pre {
   border-radius: 10px;
   background-color: var(--surface);
   color: var(--text);
-  font: 600 11.5px/1.2 var(--font-body);
+  font: 600 12px/1.2 var(--font-body);
   letter-spacing: 0;
   text-transform: none;
   clip-path: none;
@@ -882,7 +885,7 @@ pre {
   border: 1px solid var(--border);
   border-radius: 10px;
   background: var(--surface);
-  font: 500 10.5px/1.2 var(--font-body);
+  font: 500 12px/1.2 var(--font-body);
 }
 .gp-key code {
   color: var(--text);
@@ -903,11 +906,11 @@ pre {
   border-radius: 6px;
   background: var(--surface-2);
   color: var(--text-subtle);
-  font: 500 9.5px/1.2 var(--font-body);
+  font: 500 12px/1.2 var(--font-body);
 }
 .gp-ea {
   color: var(--good);
-  font: 600 9.5px/1.2 var(--font-body);
+  font: 600 12px/1.2 var(--font-body);
 }
 .gp-ea i {
   box-shadow: 0 0 0 3px rgba(8, 131, 74, 0.15);
@@ -929,8 +932,8 @@ pre {
   border-radius: 6px;
   background: var(--good);
   color: #fff;
-  font: 600 9.5px/1 var(--font-body);
-  letter-spacing: 0.04em;
+  font: 600 12px/1 var(--font-body);
+  letter-spacing: 0.01em;
   clip-path: none;
 }
 
@@ -1094,7 +1097,7 @@ pre {
   margin-bottom: 12px;
   color: var(--text-subtle);
   font: 500 12.5px/1 var(--font-body);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.01em;
 }
 .footer-links a {
   color: var(--text);
@@ -1167,7 +1170,7 @@ dialog.plan-confirm::backdrop {
   --btn-fg: #0b1426;
 }
 .pc--elite {
-  --a: #0b74de;
+  --a: #0a6dd6;
   --a-rgb: 11, 116, 222;
   --btn-bg: var(--grad-btn);
   --btn-fg: #fff;
@@ -1177,6 +1180,126 @@ dialog.plan-confirm::backdrop {
   --a-rgb: 124, 77, 255;
   --btn-bg: linear-gradient(180deg, #8b62ff 0%, #6d3ff0 100%);
   --btn-fg: #fff;
+}
+/* VIP (took Diamond's place, 19 Nov 2026): gold, with dark letters on its button (6.9:1) */
+.pc--vip {
+  --a: var(--vip);
+  --a-rgb: var(--vip-rgb);
+  --btn-bg: linear-gradient(180deg, #f6b73e 0%, #e2930f 100%);
+  --btn-fg: #2a1600;
+}
+/* VIP: a month or a year */
+.pc-bill {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+}
+.pc-bill button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-muted);
+  font: 600 14px/1 var(--font-body);
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+.pc-bill button:hover {
+  color: var(--text);
+}
+.pc-bill button[aria-pressed="true"] {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+}
+.pc-bill button:focus-visible {
+  outline: 2px solid rgba(var(--a-rgb), 0.7);
+  outline-offset: 1px;
+}
+.pc-bill i {
+  padding: 4px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--vip-soft);
+  color: var(--vip);
+  font: 600 12px/1 var(--font-body);
+  font-style: normal;
+}
+.pc-save {
+  margin: -6px 0 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+/* the plan someone was sent to see (rzgspro.com/#vip from the control app): a ring for a moment */
+.pc {
+  transition: box-shadow 0.4s ease;
+}
+.pc.is-picked {
+  box-shadow: 0 0 0 3px rgba(var(--a-rgb), 0.45), var(--shadow-md);
+}
+/* the checkout box: VIP for a month or a year */
+.co-bill {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin: 2px 0 6px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface-2);
+}
+.co-bill button {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px 6px;
+  min-height: 44px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-muted);
+  font: 500 14px/1.2 var(--font-body);
+  cursor: pointer;
+}
+.co-bill button b {
+  color: inherit;
+  font-weight: 700;
+}
+.co-bill button[aria-pressed="true"] {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+}
+.co-bill button:disabled {
+  cursor: progress;
+}
+.co-bill button[aria-busy="true"] {
+  opacity: 0.6;
+}
+.co-bill i {
+  padding: 3px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--vip-soft);
+  color: var(--vip);
+  font: 600 12px/1 var(--font-body);
+  font-style: normal;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pc-bill button,
+  .pc {
+    transition: none;
+  }
 }
 .pc {
   padding: 0;
@@ -1208,7 +1331,7 @@ dialog.plan-confirm::backdrop {
   border-radius: var(--radius-pill);
   background: rgba(var(--a-rgb), 0.12);
   color: rgb(var(--a-rgb));
-  font: 600 11.5px/1 var(--font-body);
+  font: 600 12px/1 var(--font-body);
   letter-spacing: 0.02em;
   clip-path: none;
 }
@@ -1228,7 +1351,7 @@ dialog.plan-confirm::backdrop {
 .pc-list h4 {
   color: rgb(var(--a-rgb));
   font: 600 12px/1 var(--font-body);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.01em;
 }
 .pc-price b {
   font: 700 46px/1 var(--font-display);
@@ -1289,7 +1412,7 @@ dialog.plan-confirm::backdrop {
 
 /* the confirmation and the offers: a white card */
 dialog.plan-confirm {
-  --a: #0b74de;
+  --a: #0a6dd6;
   --a-rgb: 11, 116, 222;
   padding: 0;
   border: 1px solid rgba(15, 35, 70, 0.08);
@@ -1350,7 +1473,7 @@ dialog.promo {
 }
 .promo-timer-word {
   color: #567a22;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.01em;
 }
 .promo-left b {
   color: var(--text);
@@ -1712,7 +1835,7 @@ dialog.promo {
 .toc-title {
   color: var(--text-subtle);
   font: 500 12px/1.2 var(--font-body);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.01em;
 }
 .breadcrumb a:hover {
   color: var(--blue);
@@ -1739,7 +1862,7 @@ dialog.promo {
 .stat-label {
   color: var(--text-subtle);
   font: 500 12px/1.5 var(--font-body);
-  letter-spacing: 0.05em;
+  letter-spacing: 0.01em;
 }
 .spec-table td,
 .license-card dd,
@@ -1876,8 +1999,8 @@ dialog.promo {
   border-radius: var(--radius-pill);
   background: var(--surface);
   color: var(--blue);
-  font: 600 11.5px/1 var(--font-body);
-  letter-spacing: 0.06em;
+  font: 600 12px/1 var(--font-body);
+  letter-spacing: 0.01em;
   box-shadow: var(--shadow-xs);
   clip-path: none;
 }
@@ -1931,7 +2054,7 @@ dialog.promo {
 .acc-sum-plan small,
 .acc-invite-tag,
 .acc-invite-sub {
-  letter-spacing: 0.05em;
+  letter-spacing: 0.01em;
 }
 .cap,
 .dash-panel > h2,
@@ -2520,7 +2643,7 @@ dialog.dash-edit::backdrop {
   box-shadow: 0 0 0 3px rgba(11, 116, 222, 0.1), var(--shadow-sm);
 }
 .path3d-step .lane {
-  font: 600 11.5px/1 var(--font-body);
+  font: 600 12px/1 var(--font-body);
   letter-spacing: 0.06em;
 }
 .path3d-go:focus-visible {
@@ -2892,8 +3015,8 @@ body {
   margin: 0;
   color: var(--text-muted);
   font: 600 12.5px/1.2 var(--font-body);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  text-transform: none;
 }
 .founder-trophy {
   width: 18px;
@@ -3900,9 +4023,9 @@ body {
   height: 26px;
   padding-top: 8px;
   color: var(--text-subtle);
-  font: 600 11.5px/1 var(--font-body);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font: 600 12px/1 var(--font-body);
+  letter-spacing: 0.01em;
+  text-transform: none;
 }
 .r2-bars .is-best b {
   color: var(--blue);
@@ -3933,8 +4056,8 @@ body {
     font-size: 10.5px;
   }
   .r2-bars span {
-    font-size: 10px;
-    letter-spacing: 0.04em;
+    font-size: 12px;
+    letter-spacing: 0.01em;
   }
 }
 
@@ -3981,6 +4104,10 @@ body {
 .acc-plan-card[data-tone="diamond"] .acc-plan-card-top span {
   background: #f3efff;
   color: #6d3ff0;
+}
+.acc-plan-card[data-tone="vip"] .acc-plan-card-top span {
+  background: var(--vip-soft);
+  color: var(--vip);
 }
 .de-pic-add {
   background: var(--surface);
@@ -4048,7 +4175,7 @@ body {
     font-size: 11px;
   }
   .r2-bars span {
-    font-size: 10.5px;
+    font-size: 12px;
   }
 }
 
@@ -4843,7 +4970,7 @@ body {
     align-self: flex-start;
     margin-left: auto;
     padding: 5px 9px;
-    font-size: 11.5px;
+    font-size: 12px;
   }
 }
 @media (max-width: 370px) {
@@ -5132,8 +5259,8 @@ body {
   margin: 0 0 8px;
   color: #7cb6ff;
   font: 600 12.5px/1.2 var(--font-body);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  text-transform: none;
 }
 .fd-title {
   margin: 0;
@@ -6548,7 +6675,7 @@ body {
 }
 .fb-value span {
   color: #8cc2ff;
-  font: 500 11.5px/1.2 var(--font-body);
+  font: 500 12px/1.2 var(--font-body);
   white-space: nowrap;
 }
 
@@ -8763,7 +8890,7 @@ body {
     font-size: 14.5px;
   }
   .pz .partner-text small {
-    font-size: 11.5px;
+    font-size: 12px;
   }
 }
 @media (min-width: 600px) and (max-width: 999.98px) {
@@ -8920,6 +9047,7 @@ body {
   position: relative;
   isolation: isolate;
   background: #060a18;
+  overflow: clip;            /* the sticky sky ends where the dark ends: it slid over the FAQ (the owner, 19 Nov 2026) */
 }
 .fd,
 .pz {
@@ -9001,4 +9129,74 @@ body {
   .fd.is-pinned .fd-word {
     margin-top: -0.22em;
   }
+}
+
+/* ---------------------------------------------------------------- tap targets on phones (review D4, 19 Nov 2026) */
+/* About 44 px for a finger: fields 48 px, the eye button 44 px, and small text links get a 44 px touch area without
+   moving anything (an invisible box around them). The trial bar and plans buttons are styled in plans.css, which
+   loads after this file: `:root` keeps these rules ahead. */
+@media (max-width: 768px) {
+  .input,
+  .auth-section .input {
+    min-height: 48px;
+  }
+  .toggle-pw {
+    top: 2px;
+    right: 2px;
+    bottom: 2px;
+  }
+  .auth-link,
+  .acc-sum-all,
+  .acc-id-mail,
+  .contact-email,
+  .auth-section a[href*="reset-password"] {
+    position: relative;
+  }
+  .auth-link::after,
+  .acc-sum-all::after,
+  .acc-id-mail::after,
+  .contact-email::after,
+  .auth-section a[href*="reset-password"]::after {
+    content: "";
+    position: absolute;
+    inset: -12px -6px;
+  }
+  :root .trial-bar-x,
+  :root .plans-x {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  :root .trial-bar-go,
+  :root .promo-later {
+    min-height: 44px;
+  }
+}
+
+/* ---------------------------------------------------------------- feature cards: the icon beside the title (review D9, 19 Nov 2026) */
+/* The Bot, Tutorial, License and Contact: a smaller icon in the title's row in place of a 44 px tile stacked above it. */
+.mini-feature {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 14px;
+  row-gap: 10px;
+  align-content: start;
+}
+.mini-feature > .feature-icon {
+  grid-row: 1;
+  align-self: center;
+  width: 36px;
+  height: 36px;
+  margin: 0;
+}
+.mini-feature > .feature-icon .icon {
+  width: 18px;
+  height: 18px;
+}
+.mini-feature > h3 {
+  grid-row: 1;
+  align-self: center;
+  margin: 0;
+}
+.mini-feature > :not(.feature-icon):not(h3) {
+  grid-column: 1 / -1;
 }

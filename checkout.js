@@ -5,7 +5,7 @@
    One box walks the client through the steps of their plan:
      Free     broker account, MT5 number, bot
      Elite    broker account, MT5 number, KHQR payment, bot
-     Diamond  MT5 number, KHQR payment, bot
+     VIP      MT5 number (typed twice: no broker can confirm it), KHQR payment, bot; a month or a year
    Every check and every decision is made by the server function "checkout"
    (1 Website/checkout-function/index.ts). This file only asks and shows.
    ========================================================================== */
@@ -23,7 +23,12 @@
   const PLANS = {
     trial: { name: 'Free', amount: '$0', days: 7, steps: ['broker', 'mt5', 'bot'] },
     elite: { name: 'Elite', amount: '$5', days: 30, steps: ['broker', 'mt5', 'pay', 'bot'] },
-    diamond: { name: 'Diamond', amount: '$49', days: 30, steps: ['mt5', 'pay', 'bot'] },
+    // VIP: its price is set by the owner; the order says what it costs (a month or a year)
+    vip: { name: 'VIP', amount: '$29', days: 30, steps: ['mt5', 'pay', 'bot'] },
+  };
+  const money = (value) => {
+    const cents = Math.round(Number(value) * 100) / 100;
+    return `$${Number.isInteger(cents) ? cents : cents.toFixed(2)}`;
   };
   const STEP_WORDS = { broker: 'Broker', mt5: 'MT5', pay: 'Pay', bot: 'Your bot' };
   // in the order and with the links the partner brokers have everywhere else
@@ -49,8 +54,9 @@
   let autoLooks = 0;
   let shownQr = null;
   let qrWatch = null;
-  let movingTo = null;   // asked to cancel in order to move up to this plan
   let pickedBroker = ''; // chosen on the first screen of the broker step, not yet sent to the server
+  let typedMt5 = null;   // the MT5 numbers typed before a VIP month became a year: typed in again for them
+  let vipPrices = null;  // the VIP price of the moment (plans.js, web_prices())
   // The robot beside the steps, on a computer only (the owner's drawing, 2026-11-02). It is loaded the first time it is needed.
   const WIDE = '(min-width: 860px)';
   let robot = null;
@@ -188,7 +194,20 @@
 
   // the free trial is 10 days for an account made during the welcome offer (plans.js knows, from web_my_invites)
   const trialDays = () => (window.rzgsPlans && window.rzgsPlans.promo && window.rzgsPlans.promo.trial_days) || PLANS.trial.days;
-  const planLine = (plan) => `<p class="co-plan"><b>${PLANS[plan].name}</b> ${freeMonth() ? '$0 · free month' : PLANS[plan].amount} · ${plan === 'trial' ? trialDays() : PLANS[plan].days} days · 1 MT5 account</p>`;
+  const yearly = () => Boolean(order && order.plan === 'vip' && Number(order.months) === 12);
+  const planLine = (plan) => (plan === 'vip' && order
+    ? `<p class="co-plan"><b>VIP</b> ${money(order.amount)} · ${yearly() ? '1 year' : '1 month'} · 1 MT5 account · any broker</p>`
+    : `<p class="co-plan"><b>${PLANS[plan].name}</b> ${freeMonth() ? '$0 · free month' : PLANS[plan].amount} · ${plan === 'trial' ? trialDays() : PLANS[plan].days} days · 1 MT5 account</p>`);
+  // VIP: a month or a year, changed on the MT5 and payment steps (the order's price changes with it, on the server)
+  function billSwitch() {
+    if (!order || order.plan !== 'vip') return '';
+    const p = vipPrices || { month: 29, year: 289, year_off: 17 };
+    const [month, year] = yearly() ? [p.month, order.amount] : [order.amount, p.year];
+    return `<div class="co-bill" role="group" aria-label="Pay for">
+        <button type="button" data-co-bill="1" aria-pressed="${!yearly()}">1 month <b>${money(month)}</b></button>
+        <button type="button" data-co-bill="12" aria-pressed="${yearly()}">1 year <b>${money(year)}</b>${p.year_off > 0 ? `<i>Save ${p.year_off}%</i>` : ''}</button>
+      </div>`;
+  }
   const message = (note) => `<p class="co-msg" data-co-msg role="alert"${note ? ' data-tone="error"' : ' hidden'}>${esc(note || '')}</p>`;
   const mainButton = (label, attributes = '') => `<span class="plan-btn-glow"><button class="plan-btn" ${attributes}><span data-plan-label>${label}</span></button></span>`;
   // Stuck on any step: the words go to our team on Telegram, with the order number already typed.
@@ -199,14 +218,15 @@
   const agree = `<p class="plan-confirm-note">By continuing you agree to our <a href="${pageUrl('license')}">License Rules</a> and <a href="${pageUrl('terms')}">Terms &amp; Conditions</a>. Your plan does not renew by itself.</p>`;
 
   // A check that did not pass says "no" like a wrong password: the box turns red and shakes, the cursor goes back to it.
-  function say(text, html) {
+  // which: the field it is about, when it is not the first one.
+  function say(text, html, which = null) {
     const line = inner.querySelector('[data-co-msg]');
     if (!line) return;
     line.dataset.tone = 'error';
     line.hidden = false;
     if (html) line.innerHTML = text;
     else line.textContent = text;
-    const field = inner.querySelector('.co-input');
+    const field = which || inner.querySelector('.co-input');
     if (field) {
       field.classList.add('is-wrong');
       field.focus({ preventScroll: true });
@@ -311,16 +331,28 @@
 
   function paintMt5() {
     const back = PLANS[order.plan].steps[0] !== 'mt5';
-    const typed = order.mt5 || (last && last.mt5) || '';
+    // any broker (VIP): no broker can say whose number it is, so it is typed twice (the owner, 2026-11-19)
+    const twice = order.plan === 'vip';
+    const kept = typedMt5 || {};
+    typedMt5 = null;
+    const typed = kept.account ?? (order.mt5 || (last && last.mt5) || '');
     const paid = order.amount > 0;
     paint(`${rail(order.plan, 'mt5')}${planLine(order.plan)}
+      ${billSwitch()}
       <h2 id="co-title">Connect Your MT5</h2>
-      <p class="plan-confirm-lead">The login number of the account the bot will run on. It has to be a hedging account${order.plan === 'diamond' ? ' that can trade gold' : ''}.</p>
+      <p class="plan-confirm-lead">${twice
+        ? 'The login number of the account the bot will run on, at any broker. It has to be a hedging account that can trade gold.'
+        : 'The login number of the account the bot will run on. It has to be a hedging account.'}</p>
       <form data-co-form="mt5" novalidate>
         <div class="co-field">
           <label for="co-mt5">MT5 login number</label>
           <input class="co-input" id="co-mt5" name="account" type="text" inputmode="numeric" autocomplete="off" value="${esc(typed)}" required>
         </div>
+        ${twice ? `<div class="co-field">
+          <label for="co-mt5-again">Type it again</label>
+          <input class="co-input" id="co-mt5-again" name="confirm" type="text" inputmode="numeric" autocomplete="off" value="${esc(kept.confirm || '')}" required aria-describedby="co-mt5-why">
+          <p class="co-small" id="co-mt5-why">Your Bot Password will work only on this number, so we ask for it twice.</p>
+        </div>` : ''}
         ${message(order.note)}
         <button class="btn btn-ghost btn-block co-ask" type="button" data-co-ask hidden>Ask our team to check</button>
         ${mainButton(paid ? 'Continue to payment' : 'Get my bot', 'type="submit"')}
@@ -332,10 +364,11 @@
 
   // The owner's Scan to Pay poster, with this order's own QR, name and amount where the bot's poster has them.
   function paintPay(qr) {
-    const money = `$${Number(qr.amount).toFixed(2)}`;
+    const amount = `$${Number(qr.amount).toFixed(2)}`;
     paint(`${rail(order.plan, 'pay')}${planLine(order.plan)}
+      ${billSwitch()}
       <h2 id="co-title">Complete Your Payment</h2>
-      <p class="plan-confirm-lead">Pay ${money} by KHQR.</p>
+      <p class="plan-confirm-lead">Pay ${amount} by KHQR.</p>
       ${message(order.note)}
       <button class="btn btn-ghost btn-block co-ask" type="button" data-co-ask hidden>Ask our team to check my payment</button>
       <div class="co-stack">
@@ -351,9 +384,9 @@
       ${helpLine('Problem with your payment?')}`, {});
     box.classList.add('co--pay');
     box.querySelector('[data-co-side-pay]').innerHTML = `<div class="co-poster">
-        <img src="${pageUrl(`assets/pay-${order.plan}.webp`)}" width="1254" height="1254" alt="Scan to pay ${money}" data-co-art>
+        <img src="${pageUrl(`assets/pay-${order.plan}.webp`)}" width="1254" height="1254" alt="Scan to pay ${amount}" data-co-art>
         <div class="co-poster-card"><p>${esc(qr.name)}</p><b>$ ${Number(qr.amount).toFixed(2)}</b></div>
-        <div class="co-poster-qr" data-co-qr><svg viewBox="0 0 ${qr.size} ${qr.size}" role="img" aria-label="KHQR code for ${money}" shape-rendering="crispEdges"><path d="${qr.path}"/></svg></div>
+        <div class="co-poster-qr" data-co-qr><svg viewBox="0 0 ${qr.size} ${qr.size}" role="img" aria-label="KHQR code for ${amount}" shape-rendering="crispEdges"><path d="${qr.path}"/></svg></div>
       </div>`;
     shownQr = qr;
     autoLooks = 0;
@@ -572,7 +605,9 @@
     email_bad: 'Please type the email you used at the broker.',
     broker_bad: 'Please choose your broker.',
     mt5_bad: 'That is not an MT5 number. It has 5 to 12 digits and no letters.',
+    mt5_mismatch: 'The two numbers are not the same. Please type your MT5 login number again.',
     mt5_taken: 'This MT5 account is already used on another RZGS-PRO account. If it is yours, please contact us.',
+    plan_bad: 'This plan is not sold any more. Please choose another plan.',
     too_many: 'That is a lot of tries for one day. Please try again tomorrow, or contact us.',
     net: "We couldn't reach our server. Check your connection and try again.",
     server: 'Something went wrong on our side. Please try again in a minute.',
@@ -596,14 +631,15 @@
       say(`${name} did not answer just now. Please try again.${result.can_ask ? ' Or ask our team to check it for you.' : ''}`);
       if (ask) ask.hidden = !result.can_ask;
     } else if (result.code === 'trial_used') {
-      paintNotice('You have used your free days', 'The free trial is once per person. Elite and Diamond are open to you any time.',
+      paintNotice('You have used your free days', 'The free trial is once per person. Elite and VIP are open to you any time.',
         `<a class="btn btn-primary" href="${pageUrl('./#plans')}" data-plans>See plans</a>`);
     } else if (result.code === 'paid_running') {
       paintNotice('Your plan is still running', 'A new plan can start when this one ends. To change now, cancel your plan first: you find it under See plans.',
         `<a class="btn btn-primary" href="${pageUrl('./#plans')}" data-plans>See plans</a>`);
-    } else if (result.code === 'sold_in_person') {
-      paintNotice('Diamond is sold by our team', 'Our sales team helps you with Diamond on Telegram.',
-        '<a class="btn btn-primary" href="https://t.me/sarannsadboi" target="_blank" rel="noopener">Contact Sales</a>');
+    } else if (result.code === 'mt5_mismatch') {
+      say(WORDS.mt5_mismatch, false, inner.querySelector('#co-mt5-again'));
+    } else if (result.code === 'plan_bad') {
+      paintNotice('Choose another plan', WORDS.plan_bad, `<a class="btn btn-primary" href="${pageUrl('./#plans')}" data-plans>See plans</a>`);
     } else if (result.code === 'in_review') {
       show(result);
     } else if (result.code === 'pay_off') {
@@ -632,14 +668,17 @@
     } else {
       const account = form.elements.account.value.replace(/\s+/g, '');
       if (!/^\d{5,12}$/.test(account)) { say(WORDS.mt5_bad); return; }
-      [action, fields] = ['mt5', { account }];
+      const again = form.elements.confirm; // VIP: typed twice
+      if (again && again.value.replace(/\s+/g, '') !== account) { say(WORDS.mt5_mismatch, false, again); return; }
+      [action, fields] = ['mt5', again ? { account, confirm: again.value.replace(/\s+/g, '') } : { account }];
     }
     setBusy(button, true);
     const result = await call(action, fields);
     if (!result.ok && button.isConnected) setBusy(button, false);
     // the bot straight away (Free): the celebration says it. Sent to a person: nothing to tick yet.
-    if (result.ok && result.licence) justDone = 'MT5 account confirmed.';
-    else if (result.ok && !(result.order && result.order.stage === 'review')) await tick(action === 'broker' ? 'Account found' : 'MT5 account confirmed');
+    const saved = order && order.plan === 'vip' ? 'MT5 number saved' : 'MT5 account confirmed';
+    if (result.ok && result.licence) justDone = `${saved}.`;
+    else if (result.ok && !(result.order && result.order.stage === 'review')) await tick(action === 'broker' ? 'Account found' : saved);
     afterAction(result);
   }
 
@@ -715,6 +754,24 @@
     if (event.target.closest('a[data-plans]')) { box.close(); return; }
     if (event.target.closest('[data-co-registered]')) { paintEmail(); return; }
     if (event.target.closest('[data-co-change-broker]')) { paintBrokerChoice(); return; }
+    // VIP: a month became a year, or back. The server gives the order its new price (and a new QR on the payment step).
+    const bill = event.target.closest('[data-co-bill]');
+    if (bill) {
+      const months = Number(bill.dataset.coBill) === 12 ? 12 : 1;
+      if (!order || bill.disabled || months === (yearly() ? 12 : 1)) return;
+      const form = inner.querySelector('[data-co-form="mt5"]');
+      if (form) typedMt5 = { account: form.elements.account.value, confirm: form.elements.confirm ? form.elements.confirm.value : '' };
+      inner.querySelectorAll('[data-co-bill]').forEach((one) => { one.disabled = true; });
+      bill.setAttribute('aria-busy', 'true');
+      const result = await call('start', { plan: order.plan, months });
+      if (!result.ok) {
+        typedMt5 = null;
+        inner.querySelectorAll('[data-co-bill]').forEach((one) => { one.disabled = false; });
+        bill.removeAttribute('aria-busy');
+      }
+      afterAction(result);
+      return;
+    }
     const paid = event.target.closest('[data-co-paid]');
     if (paid) { lookForPayment(paid, false); return; }
     if (event.target.closest('[data-co-save]')) { savePoster(); return; }
@@ -734,9 +791,7 @@
       }
       announce(result);
       const stillRuns = 'A bot that is running in MT5 does not stop by itself: pause it in the control app or take it off the chart.';
-      if (movingTo === 'diamond') paintNotice('Your plan is cancelled', `Now our sales team helps you with Diamond on Telegram. ${stillRuns}`,
-        '<a class="btn btn-primary" href="https://t.me/sarannsadboi" target="_blank" rel="noopener">Contact Sales</a>');
-      else paintNotice('Your plan is cancelled', `You can choose a new plan now. ${stillRuns}`,
+      paintNotice('Your plan is cancelled', `You can choose a new plan now. ${stillRuns}`,
         `<a class="btn btn-primary" href="${pageUrl('./#plans')}" data-plans>See plans</a>`);
     }
   }
@@ -798,44 +853,51 @@
     } catch (e) { /* they type it */ }
   }
 
+  // The VIP price of the moment, for the other choice of the month / year switch (the order has its own price).
+  async function loadPrices() {
+    try {
+      if (window.rzgsPlans && window.rzgsPlans.prices) vipPrices = await window.rzgsPlans.prices();
+    } catch (e) { /* the first price is shown */ }
+  }
+
   window.rzgsCheckout = {
-    // A plan button: starts the order, or takes it up again where it was.
-    async open(plan) {
+    // A plan button: starts the order, or takes it up again where it was. options.months: VIP for 1 or 12 months.
+    async open(plan, options = {}) {
       openBox();
       paintLoading();
-      const [result] = await Promise.all([call('start', { plan }), loadLast()]);
+      typedMt5 = null;
+      const months = plan === 'vip' && Number(options.months) === 12 ? 12 : 1;
+      const [result] = await Promise.all([call('start', plan === 'vip' ? { plan, months } : { plan }), loadLast(), loadPrices()]);
       afterAction(result);
     },
     // "Continue" on the dashboard.
     async resume() {
       openBox();
       paintLoading();
-      const [result] = await Promise.all([call('state'), loadLast()]);
+      typedMt5 = null;
+      const [result] = await Promise.all([call('state'), loadLast(), loadPrices()]);
       afterAction(result);
     },
-    // Asked before anything changes. The days left are gone (the owner, 2026-10-31). next: the plan they are moving up to.
+    // Asked before anything changes. The days left are gone (the owner, 2026-10-31).
     // Days left: asked twice. A plan that has ended: asked once, with nothing to lose (the owner, 2026-11-02).
-    askCancel(plan, expiresAt, next) {
+    // (Moving up from Elite to VIP needs no cancel: the checkout lets VIP start while Elite runs, 2026-11-19.)
+    askCancel(plan, expiresAt) {
       openBox();
-      movingTo = next || null;
       const name = (PLANS[plan] || {}).name || 'paid';
       const ends = expiresAt ? new Date(expiresAt) : null;
       const left = ends ? Math.max(0, Math.ceil((ends - Date.now()) / 86400000)) : 0;
       cancelling = { name, left };
       if (ends && ends <= Date.now()) {
-        paint(`<h2 id="co-title">${next ? `Move from ${esc(name)} to Diamond?` : `Your ${esc(name)} plan has ended`}</h2>
-          <p class="plan-confirm-lead">It ended on ${dateText(ends)}, so you lose nothing. ${next ? 'Our sales team helps you with Diamond on Telegram.' : 'You can choose a new plan now.'}</p>
+        paint(`<h2 id="co-title">Your ${esc(name)} plan has ended</h2>
+          <p class="plan-confirm-lead">It ended on ${dateText(ends)}, so you lose nothing. You can choose a new plan now.</p>
           <div class="co-row">
-            <button class="btn btn-ghost" type="button" data-co-close data-co-first>${next ? 'No, not now' : 'Close'}</button>
-            ${next
-              ? '<a class="btn btn-primary" href="https://t.me/sarannsadboi" target="_blank" rel="noopener" data-co-close>Yes, Contact Sales</a>'
-              : `<a class="btn btn-primary" href="${pageUrl('./#plans')}" data-plans>See plans</a>`}
+            <button class="btn btn-ghost" type="button" data-co-close data-co-first>Close</button>
+            <a class="btn btn-primary" href="${pageUrl('./#plans')}" data-plans>See plans</a>
           </div>`);
         return;
       }
       paint(`<p class="co-plan">Confirm 1 of 2</p>
-        <h2 id="co-title">${next ? `Move from ${esc(name)} to Diamond?` : `Cancel your ${esc(name)} plan?`}</h2>
-        ${next ? `<p class="plan-confirm-lead">To move up, your ${esc(name)} plan is cancelled first. Then our sales team helps you with Diamond on Telegram.</p>` : ''}
+        <h2 id="co-title">Cancel your ${esc(name)} plan?</h2>
         <p class="plan-confirm-lead">${ends ? `It runs until ${dateText(ends)}, ${left} ${left === 1 ? 'day' : 'days'} left. ` : ''}If you cancel, those days are gone: they are not refunded and they do not move to a new plan.</p>
         <p class="plan-confirm-lead">Cancelling does not stop a bot that is running in MT5. To stop it, pause it in the control app or take it off the chart.</p>
         ${message('')}

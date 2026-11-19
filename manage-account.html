@@ -24,18 +24,18 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-  <link rel="stylesheet" href="style.css?v=38">
-  <link rel="stylesheet" href="plans.css?v=7">
-  <link rel="stylesheet" href="auth.css?v=27">
+  <link rel="stylesheet" href="style.css?v=40">
+  <link rel="stylesheet" href="plans.css?v=9">
+  <link rel="stylesheet" href="auth.css?v=30">
   <link rel="stylesheet" href="motion.css?v=7">
-  <link rel="stylesheet" href="theme.css?v=88">
+  <link rel="stylesheet" href="theme.css?v=90">
 
   <script>document.documentElement.classList.add('js');try{if(localStorage.getItem('sb-zaziizzsbytkdlatoutv-auth-token'))document.documentElement.classList.add('signed-in')}catch(e){}</script>
   <script src="script.js?v=22" defer></script>
   <script src="motion.js?v=9" defer></script>
-  <script src="plans.js?v=17" defer></script>
+  <script src="plans.js?v=18" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0" defer></script>
-  <script src="auth.js?v=36" defer></script>
+  <script src="auth.js?v=37" defer></script>
 </head>
 <body data-auth-page="manage" class="acc-page" data-motion="video">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -56,6 +56,7 @@
     <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.94 15.5a2 2 0 0 0-1.44-1.44l-6.13-1.58a.5.5 0 0 1 0-.96L8.5 9.94A2 2 0 0 0 9.94 8.5l1.58-6.14a.5.5 0 0 1 .96 0l1.58 6.14a2 2 0 0 0 1.44 1.44l6.14 1.58a.5.5 0 0 1 0 .96l-6.14 1.58a2 2 0 0 0-1.44 1.44l-1.58 6.14a.5.5 0 0 1-.96 0z"/><path d="M20 3v4M22 5h-4M4 17v2M5 18H3"/></symbol>
     <symbol id="i-zap" viewBox="0 0 24 24"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></symbol>
     <symbol id="i-gem" viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6M2 9h20"/></symbol>
+    <symbol id="i-crown" viewBox="0 0 24 24"><path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294zM5 21h14"/></symbol>
     <symbol id="i-hexagon" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></symbol>
     <symbol id="i-trending-up" viewBox="0 0 24 24"><path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/></symbol>
     <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
@@ -149,7 +150,7 @@
               <div class="mega-col">
                 <p class="mega-head"><span class="mega-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg></span>Your plan</p>
                 <ul class="mega-links">
-                  <li><a href="how-to-buy#compare">Elite or Diamond?</a></li>
+                  <li><a href="how-to-buy#compare">Elite or VIP?</a></li>
                   <li><a href="how-to-buy#know-title">After you buy</a></li>
                 </ul>
               </div>
@@ -232,7 +233,7 @@
 
         <!-- The menu (the owner's sketch, 2 Nov 2026): a column on the left of a computer screen that folds to its icons,
              a drawer on a phone. The profile button at its bottom opens the account card (plans.js). -->
-        <aside class="acc-side" id="acc-side" data-acc-side aria-label="Account menu">
+        <nav class="acc-side" id="acc-side" data-acc-side aria-label="Account menu">
           <div class="acc-side-top">
             <a class="acc-brand" href="./" aria-label="RZGS-PRO home">
               <img src="assets/logo-192.webp" alt="" width="30" height="30">
@@ -267,7 +268,7 @@
               <svg class="icon" aria-hidden="true"><use href="#i-chevrons-up-down"/></svg>
             </button>
           </div>
-        </aside>
+        </nav>
         <div class="acc-shade" data-acc-shade hidden></div>
 
         <div class="acc-main">
@@ -440,7 +441,7 @@
                 </div>
                 <a class="btn btn-primary btn-block" href="./#plans" data-sub-action>See plans</a>
                 <ul class="acc-plan-get" data-sub-get></ul>
-                <p class="dash-hint" data-plan-choice-note>Trial and Elite start right here. Diamond opens a chat with our sales team on Telegram.</p>
+                <p class="dash-hint" data-plan-choice-note>Free, Elite and VIP all start right here, in a few short steps.</p>
                 <button class="acc-text-btn" type="button" data-sub-cancel hidden>Cancel plan</button>
               </section>
               <section class="dash-panel">

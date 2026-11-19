@@ -118,9 +118,9 @@ html.signed-in .guest-only {
   padding: 6px 10px;
   background: #02131a;
   color: var(--neon);
-  font: 600 11px/1 var(--font-mono);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font: 600 12px/1 var(--font-mono);
+  letter-spacing: 0.01em;
+  text-transform: none;
   clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
 }
 .trial-bar-chip .icon {
@@ -305,6 +305,12 @@ dialog.plans::backdrop {
   --a3: #8f8bff;
   --a-rgb: 197, 139, 255;
 }
+.pc--vip {
+  --a: #ffc24d;
+  --a2: #ffd98a;
+  --a3: #f5a623;
+  --a-rgb: 255, 194, 77;
+}
 /* a frame with two cut corners: the outer box is the line, the inner box the panel */
 .pc {
   padding: 1px;
@@ -348,7 +354,7 @@ dialog.plans::backdrop {
   color: #02131a;
   font: 600 11px/1 var(--font-mono);
   letter-spacing: 0.04em;
-  text-transform: uppercase;
+  text-transform: none;
   white-space: nowrap;
   clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
 }
@@ -410,7 +416,7 @@ dialog.plans::backdrop {
   color: rgb(var(--a-rgb));
   font: 600 11px/1 var(--font-mono);
   letter-spacing: 0.09em;
-  text-transform: uppercase;
+  text-transform: none;
 }
 .pc-list ul {
   display: grid;
@@ -1086,14 +1092,14 @@ dialog.promo {
 }
 .promo-timer-word {
   color: var(--text-subtle);
-  font-size: 11px;
-  text-transform: uppercase;
+  font-size: 12px;
+  text-transform: none;
 }
 .promo-chip {
   color: var(--neon);
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.01em;
+  text-transform: none;
 }
 .promo-left {
   color: var(--text-subtle);

@@ -477,7 +477,7 @@ function build(THREE, root) {
     });
   }
   const freeBoard = board('FREE', INK.lime, ['7-day trial  ·  $0', 'Open a broker account'], 'WITH OUR LINK');
-  const paidBoard = board('PAID', INK.gold, ['Elite or Diamond', '$5 or $49 a month'], 'PAY BY KHQR');
+  const paidBoard = board('PAID', INK.gold, ['Elite or VIP', 'from $5 a month'], 'PAY BY KHQR');
   const brokerScreen = painted(512, 240, (ctx, w, h, ok) => {
     fillFrame(ctx, 2, 2, w - 4, h - 4, INK.panel, INK.lime, 20);
     write(ctx, 'OPEN YOUR ACCOUNT', 26, 56, 40, INK.text, 800);
@@ -720,7 +720,7 @@ function build(THREE, root) {
     visitor: ['VISITOR', 'Sign up or log in', INK.cyan],
     account: ['ACCOUNT', 'Logged in', INK.cyan],
     free: ['FREE', '7-day trial', INK.lime],
-    paid: ['PAID', 'Elite or Diamond', INK.gold],
+    paid: ['PAID', 'Elite or VIP', INK.gold],
     opened: ['BROKER', 'Opened with our link', INK.lime],
     paidok: ['PAID', 'Receipt sent', INK.gold],
   };

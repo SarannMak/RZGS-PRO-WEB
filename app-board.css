@@ -19,7 +19,7 @@
   --tab-on: #ffffff;
   --tab-on-text: #0b1426;
   --value: #0b6bd3;
-  --big: #0b74de;
+  --big: #0a6dd6;             /* review D1 */
   --key: linear-gradient(180deg, #2f8cf0 0%, #0866cf 100%);
   --key-shadow: 0 8px 18px -10px rgba(8, 102, 207, 0.85);
   --hold-key: linear-gradient(180deg, #fbb43c 0%, #f08c0b 100%);
@@ -27,13 +27,13 @@
   --glide-go: #1b79df;
   --glide-hold: #f49b22;
   --danger-line: #f3b7bd;
-  --danger-text: #d92d3a;
+  --danger-text: #c42633;     /* review D2 */
   --danger-hover: #fdecee;
   --danger-key: linear-gradient(180deg, #e5484d 0%, #c92a36 100%);
   --buy-bg: #e8f2ff;
   --buy-text: #0b6bd3;
   --sell-bg: #fff1e3;
-  --sell-text: #c2540f;
+  --sell-text: #ad4a0c;       /* review D2 */
   --input-bg: #ffffff;
   --input-line: #cdd7e5;
   --ring-focus: rgba(11, 116, 222, 0.16);
@@ -442,7 +442,7 @@ header h1 {
   min-height: 28px;
   padding: 0 9px;
   color: var(--muted);
-  font: 600 11px var(--f-body);
+  font: 600 12px var(--f-body);
   letter-spacing: 0;
   text-transform: none;
 }
@@ -650,7 +650,7 @@ nav button {
   border-top: 0;
   border-radius: 16px;
   color: var(--muted);
-  font: 500 10.5px var(--f-body);
+  font: 500 12px var(--f-body);
   letter-spacing: 0;
   text-transform: none;
 }
@@ -799,7 +799,7 @@ nav svg {
   padding: 5px 8px;
   border: 0;
   border-radius: 7px;
-  font: 600 11.5px/1 var(--f-body);
+  font: 600 12px/1 var(--f-body);
 }
 .tag.buy {
   background: var(--buy-bg);
@@ -829,7 +829,7 @@ nav svg {
   font-size: 13.5px;
 }
 .ev .k {
-  font: 600 11px var(--f-body);
+  font: 600 12px var(--f-body);
   letter-spacing: 0.02em;
   text-transform: none;
 }
@@ -837,7 +837,7 @@ nav svg {
 /* ---------------------------------------------------------------- Report and the risk table */
 .tbl th {
   color: var(--muted);
-  font: 600 11px var(--f-body);
+  font: 600 12px var(--f-body);
   letter-spacing: 0;
   text-transform: none;
 }
@@ -893,7 +893,7 @@ nav svg {
 .set label small,
 .sg-head label small {
   color: var(--muted);
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 400;
 }
 .set-ok,
@@ -978,7 +978,7 @@ nav svg {
   border-radius: 999px;
   background: var(--tile);
   color: var(--muted);
-  font: 500 11.5px var(--f-body);
+  font: 500 12px var(--f-body);
   letter-spacing: 0;
 }
 .chipx.on {
@@ -997,7 +997,8 @@ nav svg {
 :root[data-theme="dark"] #sheet,
 :root[data-theme="dark"] #quit,
 :root[data-theme="dark"] #setWarn,
-:root[data-theme="dark"] #pwConfirm {
+:root[data-theme="dark"] #pwConfirm,
+:root[data-theme="dark"] #vipLock {
   background: var(--overlay) !important;
 }
 
@@ -1077,4 +1078,81 @@ main {
 .mini-seg button:focus-visible,
 nav button:focus-visible {
   outline-offset: -2px;
+}
+
+/* ---------------------------------------------------------------- tap targets (review D4, 19 Nov 2026) */
+/* The control app is a phone app at every width: buttons, fields and choices are 44 px to a finger. */
+.icon-btn {
+  width: 44px;
+  height: 44px;
+}
+#t-settings .set input[type="number"],
+#t-settings .set input[type="text"],
+.sg-val,
+.chip,
+#main .seg > button,
+#main .btn {
+  min-height: 44px;
+}
+
+/* light mode: the choice that is off on the chart's small switches (Line, History) was 4.4:1 on its grey track;
+   one shade darker reads at 5.2:1 (review, 19 Nov 2026) */
+:root:not([data-theme="dark"]) .mini-seg button:not([aria-pressed="true"]),
+:root:not([data-theme="dark"]) .hist-btn:not([aria-pressed="true"]) {
+  color: #5b6474;
+}
+
+/* ---------------------------------------------------------------- VIP (19 Nov 2026) */
+/* The VIP plan's gold: dark enough to read as text in light mode (6.1:1 on white), light in dark mode. */
+:root {
+  --vip-ink: #8f5400;
+}
+:root[data-theme="dark"] {
+  --vip-ink: #ffc24d;
+}
+/* Lot mode on a Free or Elite bot: the third key is VIP with a lock; a tap shows the VIP card */
+.seg-mode button[data-locked] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+.seg-mode button[data-locked] svg {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.vip-cap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--vip-ink);
+}
+.vip-cap svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.quit-card .vip-price {
+  color: var(--title);
+}
+.quit-card .vip-price b {
+  font-weight: 700;
+}
+#vipLockGo {
+  border: 1px solid #d48a0c;
+  border-image: none;
+  background: linear-gradient(180deg, #f6b73e 0%, #e2930f 100%);
+  color: #2a1600;
+}
+#vipLockGo:hover {
+  filter: brightness(1.05);
 }

@@ -14,18 +14,18 @@
   --grid: rgba(11, 116, 222, 0);
   --frame: #b9d3f5;
   --glow: rgba(16, 24, 40, 0.08);
-  --cyan: #0b74de;
+  --cyan: #0a6dd6;            /* review D1, 19 Nov 2026 */
   --neon: #4a820a;
   --chip: #eef5ff;
   --bracket: #84cc16;
   --title: #0b1426;
   --body: #3e4a5c;
   --muted: #667085;
-  --good: #08834a;
-  --bad: #d92d3a;
+  --good: #077a44;            /* D2 */
+  --bad: #c42633;             /* D2 */
   --warn: #b95e04;
   --buy: #0b6bd3;
-  --sell: #c2540f;
+  --sell: #ad4a0c;            /* D2 */
   --on: #ffffff;
   --grad: linear-gradient(90deg, #0753c8 0%, #0b74de 55%, #0b8be6 100%);
   --grad-btn: linear-gradient(180deg, #0f7de6 0%, #0866cf 100%);
@@ -162,7 +162,8 @@ header h1 {
 #sheet,
 #quit,
 #setWarn,
-#pwConfirm {
+#pwConfirm,
+#vipLock {
   background: rgba(15, 23, 42, 0.42) !important;
   -webkit-backdrop-filter: blur(3px);
   backdrop-filter: blur(3px);
@@ -507,7 +508,7 @@ nav button[aria-selected="true"] {
   overflow: hidden;
 }
 .ring .sub {
-  font: 600 7.5px var(--f-body);
+  font: 600 10px var(--f-body);
   letter-spacing: 0.08em;
 }
 .actbar {

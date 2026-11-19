@@ -24,15 +24,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Oxanium:wght@800&display=swap">
-  <link rel="stylesheet" href="style.css?v=38">
-  <link rel="stylesheet" href="plans.css?v=7">
+  <link rel="stylesheet" href="style.css?v=40">
+  <link rel="stylesheet" href="plans.css?v=9">
   <link rel="stylesheet" href="motion.css?v=7">
-  <link rel="stylesheet" href="theme.css?v=88">
+  <link rel="stylesheet" href="theme.css?v=90">
 
   <script>document.documentElement.classList.add('js');try{if(localStorage.getItem('sb-zaziizzsbytkdlatoutv-auth-token'))document.documentElement.classList.add('signed-in')}catch(e){}</script>
   <script src="script.js?v=22" defer></script>
   <script src="motion.js?v=9" defer></script>
-  <script src="plans.js?v=17" defer></script>
+  <script src="plans.js?v=18" defer></script>
   <!-- the 3D library the robot needs: asked for at once, so the robot can come up sooner -->
   <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js">
   <script src="robot-3d.js?v=13" defer></script>
@@ -147,7 +147,7 @@
               <div class="mega-col">
                 <p class="mega-head"><span class="mega-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg></span>Your plan</p>
                 <ul class="mega-links">
-                  <li><a href="how-to-buy#compare">Elite or Diamond?</a></li>
+                  <li><a href="how-to-buy#compare">Elite or VIP?</a></li>
                   <li><a href="how-to-buy#know-title">After you buy</a></li>
                 </ul>
               </div>
@@ -262,8 +262,9 @@
               <li>One tap starts me. One more tap pauses me.</li>
               <li>You can watch my trades on your phone.</li>
               <li>Try me free for 7 days.</li>
-              <li>Elite is $5 a month. Diamond is $49 a month.</li>
-              <li>With Diamond you keep your own broker.</li>
+              <li>Elite is $5 a month. VIP is <span data-vip-price="month">$29</span> a month.</li>
+              <li>With VIP you keep your own broker.</li>
+              <li>In VIP mode a first trade in profit closes after a short countdown.</li>
               <li>One plan covers one MT5 account.</li>
               <li>I need an MT5 hedging account that can trade gold.</li>
               <li>Your dashboard sets me up with you, step by step.</li>
@@ -361,12 +362,12 @@
           <article class="card mini-feature reveal" style="--d: 120ms">
             <span class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-app-control"/></svg></span>
             <h3>Control: run the bot</h3>
-            <p>Activate or pause with one tap, or let the running cycle finish. Choose Basic, Smart or High risk lots, add a cooldown, or close buys, sells or everything. Every close asks you to confirm.</p>
+            <p>Activate or pause with one tap, or let the running cycle finish. Choose Basic or Smart mode (VIP mode on the VIP plan), add a cooldown, or close buys, sells or everything. Every close asks you to confirm.</p>
           </article>
           <article class="card mini-feature reveal">
             <span class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-app-tools"/></svg></span>
             <h3>Tools: settings, risk and report</h3>
-            <p>See the settings your bot runs with and change them: take profit, basket profit, the Smart mode grid distance, max grid levels, cooldown and more. The risk calculator shows the most each grid level can lose before the next one opens. The report shows your closed profit this week, last week, by month or for all time.</p>
+            <p>See the settings your bot runs with and change them: take profit, basket profit, the Smart mode grid distance, max grid levels, cooldown and more. VIP adds the VIP countdown and its own grid distance. The risk calculator shows the most each grid level can lose before the next one opens. The report shows your closed profit this week, last week, by month or for all time.</p>
           </article>
           <article class="card mini-feature reveal" style="--d: 60ms">
             <span class="feature-icon"><svg class="icon" aria-hidden="true"><use href="#i-app-log"/></svg></span>
@@ -395,7 +396,7 @@
             <svg class="icon" aria-hidden="true"><use href="#i-server"/></svg>
             <div>
               <h3>Keep it running 24/7</h3>
-              <p>The EA only works while MetaTrader 5 is open and online. To keep the bot running around the clock, run MT5 on a VPS, a computer in the cloud that never sleeps. Diamond includes a basic VPS while your plan is paid.</p>
+              <p>The EA only works while MetaTrader 5 is open and online. To keep the bot running around the clock, run MT5 on a VPS, a computer in the cloud that never sleeps.</p>
             </div>
           </div>
         </div>
@@ -409,10 +410,10 @@
               <tr><th scope="row">Account type</th><td>Hedging account (buy and sell open at the same time)</td></tr>
               <tr><th scope="row">Product type</th><td>Expert Advisor (EA), rule-based hedge grid</td></tr>
               <tr><th scope="row">Trading control</th><td>Phone control app: Activate, Pause, Finish, Close</td></tr>
-              <tr><th scope="row">How trades close</th><td>Take profit per trade, basket close per side</td></tr>
+              <tr><th scope="row">How trades close</th><td>Take profit per trade (a short countdown in VIP mode), basket close per side</td></tr>
               <tr><th scope="row">Accounts per license</th><td>1 MT5 trading account</td></tr>
               <tr><th scope="row">Runs on</th><td>A computer or VPS with MT5 open</td></tr>
-              <tr><th scope="row">Licenses</th><td>7-day free trial, Elite, Diamond. <a href="license">License rules</a></td></tr>
+              <tr><th scope="row">Licenses</th><td>7-day free trial, Elite, VIP. <a href="license">License rules</a></td></tr>
               <tr><th scope="row">Reports</th><td>P/L Report in your account</td></tr>
             </tbody>
           </table>

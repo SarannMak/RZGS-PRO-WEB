@@ -34,6 +34,9 @@
   --mint: var(--good);
   --violet: var(--buy);
   --gold: var(--warn);
+  --vip: #ffc24d;              /* the VIP plan (19 Nov 2026); theme.css has the light shade */
+  --vip-rgb: 255, 194, 77;
+  --vip-soft: rgba(255, 194, 77, 0.14);
   --down: var(--bad);
   --on-accent: #02131a;
   --grad: linear-gradient(90deg, var(--cyan) 0%, #37efb8 52%, var(--neon) 100%);
@@ -1874,7 +1877,7 @@ a {
   color: var(--text);
   font: 600 13px/1 var(--font-mono);
   letter-spacing: 0.12em;
-  text-transform: uppercase;
+  text-transform: none;
 }
 .footer-links {
   margin: 0;
@@ -2004,7 +2007,7 @@ a {
   color: var(--text-subtle);
   font: 500 12px/1 var(--font-mono);
   letter-spacing: 0.1em;
-  text-transform: uppercase;
+  text-transform: none;
 }
 .page-actions {
   display: flex;
@@ -2483,7 +2486,7 @@ a {
   color: var(--text-subtle);
   font: 500 11px/1 var(--font-mono);
   letter-spacing: 0.12em;
-  text-transform: uppercase;
+  text-transform: none;
 }
 .toc ol {
   display: grid;
@@ -3547,7 +3550,7 @@ a {
   color: var(--text-subtle);
   font: 500 11px/1.5 var(--font-mono);
   letter-spacing: 0.1em;
-  text-transform: uppercase;
+  text-transform: none;
 }
 .spec-table td,
 .license-card dd,
@@ -4439,7 +4442,7 @@ body:has(.tg-float) .site-footer {
   color: var(--text-subtle);
   font: 600 10px/1 var(--font-mono);
   letter-spacing: 0.14em;
-  text-transform: uppercase;
+  text-transform: none;
 }
 .gp-plan.is-hot {
   --edge: var(--neon);
@@ -4549,7 +4552,7 @@ body:has(.tg-float) .site-footer {
 .gp-word {
   margin-top: -3px;
   color: var(--good);
-  font: 600 11px/1.3 var(--font-body);
+  font: 600 12px/1.3 var(--font-body);
 }
 .gp-word + .gp-field {
   margin-top: 5px;
@@ -4584,7 +4587,7 @@ body:has(.tg-float) .site-footer {
   padding: 5px;
   background: #e21d1d;
   color: #fff;
-  font: 700 11px/1 var(--font-display);
+  font: 700 12px/1 var(--font-display);
   letter-spacing: 0.14em;
   text-align: center;
 }
@@ -4628,7 +4631,7 @@ body:has(.tg-float) .site-footer {
   border: 1px solid var(--frame);
   background: var(--chip);
   color: var(--text);
-  font: 500 9.5px/1 var(--font-body);
+  font: 500 12px/1 var(--font-body);
   font-style: normal;
 }
 .gp-run {
@@ -4712,7 +4715,7 @@ body:has(.tg-float) .site-footer {
   color: #04130c;
   font: 700 9px/1 var(--font-display);
   letter-spacing: 0.12em;
-  text-transform: uppercase;
+  text-transform: none;
   clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px);
 }
 /* each tick draws itself when its step comes into view */
@@ -4843,7 +4846,7 @@ body:has(.tg-float) .site-footer {
   color: var(--on-accent);
   font: 700 11px/1 var(--font-mono);
   letter-spacing: 0.2em;
-  text-transform: uppercase;
+  text-transform: none;
   clip-path: polygon(7px 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%, 0 7px);
 }
 .buy-icon {

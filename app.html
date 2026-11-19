@@ -141,7 +141,7 @@ button{cursor:pointer}
 .seg-range{margin-bottom:12px}
 .seg-range button,.seg-log button{letter-spacing:.06em;padding-inline:2px}
 .rp-sum{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
-.bars text{font:500 9px var(--f-mono);fill:var(--muted);text-anchor:middle}
+.bars text{font:500 10px var(--f-mono);fill:var(--muted);text-anchor:middle}
 .row{display:flex;gap:10px;flex-wrap:wrap}
 .row>.btn{flex:1 1 0;min-width:0}
 
@@ -228,12 +228,12 @@ nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;st
 .legend b{color:var(--title);font-size:13px;letter-spacing:0;margin-left:3px}
 /* Activate / Pause bar: its own row between the scrolling deck and the dock, so it never covers content */
 .actbar{padding-block:10px;border-top:1px solid var(--line);background:var(--bg)}
-#quit,#pwConfirm{position:fixed;inset:0;background:rgba(5,6,14,.78);display:flex;align-items:center;justify-content:center;z-index:45;padding:16px}
+#quit,#pwConfirm,#vipLock{position:fixed;inset:0;background:rgba(5,6,14,.78);display:flex;align-items:center;justify-content:center;z-index:45;padding:16px}
 .quit-card{width:100%;max-width:340px;padding:26px 22px 20px;display:flex;flex-direction:column;gap:14px}
 .quit-card h3{font:700 19px var(--f-display);color:var(--title);margin:0;letter-spacing:.03em}
 .quit-card p{margin:0;font-size:13.5px;color:var(--muted)}
 .ld-line{position:absolute;left:0;right:0;border-top:1px dashed var(--cyan)}
-.ld-line span{position:absolute;right:0;top:-9px;background:var(--panel);font:500 10.5px/1 var(--f-mono);padding:3px 0 3px 6px;color:var(--cyan)}
+.ld-line span{position:absolute;right:0;top:-9px;background:var(--panel);font:500 12px/1 var(--f-mono);padding:3px 0 3px 6px;color:var(--cyan)}
 .ld-line.next{border-top:1px dashed var(--muted)} .ld-line.next span{left:0;right:auto;padding:3px 6px 3px 0;color:var(--muted)}
 /* TP of a single trade / close price of a basket: dashed in the side colour, word at that side's edge */
 .ld-line.exit{border-top:1px dashed currentColor}
@@ -265,14 +265,14 @@ nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;st
 .pos:first-child{border-top:0;padding-top:0}
 .tag{font:600 11px var(--f-mono);padding:3px 6px;border:1px solid;min-width:74px;text-align:center}
 .tag.buy{color:var(--buy)} .tag.sell{color:var(--sell)}
-.pos small{color:var(--muted);font:400 11.5px var(--f-mono)}
+.pos small{color:var(--muted);font:400 12px var(--f-mono)}
 .pos .num{font-size:15px;font-weight:600;text-align:right}
 .empty{color:var(--muted);font-size:13px;margin:0}
 
 /* ---------- log ---------- */
 .ev{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;padding-block:9px;border-top:1px solid var(--line)}
 .ev:first-child{border-top:0;padding-top:0}
-.ev time{font:400 11px var(--f-mono);color:var(--muted);padding-top:2px}
+.ev time{font:400 12px var(--f-mono);color:var(--muted);padding-top:2px}
 .ev p{margin:0;color:var(--title);font-size:14px}
 .ev p b{font-weight:600;font-variant-numeric:tabular-nums}
 .ev .k{grid-column:2;font:500 9.5px var(--f-mono);letter-spacing:.14em;text-transform:uppercase}
@@ -318,7 +318,7 @@ body{
 .sheet-card{border-image-source:var(--hud-frame-danger);box-shadow:none;filter:drop-shadow(0 0 12px rgba(255,90,106,.28))}
 .panel{border:1px solid transparent;border-image:var(--hud-panel) 16 fill / 16px;background:none}
 #toast{border:1px solid transparent;border-image:var(--hud-callout) 16 fill / 16px;background:none}
-#sheet,#quit{background:rgba(1,6,10,.84)}
+#sheet,#quit,#vipLock{background:rgba(1,6,10,.84)}
 
 /* buttons: cut corners; the picture supplies the fill, so the plain background is off */
 .btn,.btn.primary,.btn.go,.btn.hold,.btn.danger,.btn.on,.btn.go.on,.btn.hold.on,.btn.danger.on{
@@ -634,9 +634,9 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
 }
 </style>
 <!-- the light look (14 Nov 2026): after the styles above, so it wins -->
-<link rel="stylesheet" href="app-theme.css?v=23">
+<link rel="stylesheet" href="app-theme.css?v=25">
 <!-- the board look, dark or light (16 Nov 2026): last, so it wins -->
-<link rel="stylesheet" href="app-board.css?v=6">
+<link rel="stylesheet" href="app-board.css?v=9">
 </head>
 <body>
 <div class="app">
@@ -701,7 +701,7 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
     </a>
   </header>
 
-  <main id="main" hidden>
+  <main id="main" tabindex="0" hidden>
 
     <!-- HOME -->
     <div class="view" id="v-home">
@@ -885,10 +885,10 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
         </section>
         <!-- Vip mode: only with the Vip bot, which sends cfg.vip (the owner, 18 Nov 2026) -->
         <section class="panel" id="vipBox" hidden>
-          <h2>Vip mode</h2>
-          <div class="set" id="rowVipGrid"><label for="setVipGrid">Vip grid distance<small>points after a Vip TP</small></label><input id="setVipGrid" type="number" inputmode="numeric" min="50" step="50"></div>
-          <div class="set"><label for="setVipSec">Vip countdown<small>seconds in profit, then the trade closes</small></label><input id="setVipSec" type="number" inputmode="numeric" min="1" max="60" step="1"></div>
-          <div class="set col"><label for="setVipLots">Vip lot list<small>one lot per grid level, set in MT5</small></label><input id="setVipLots" class="wide" type="text" inputmode="decimal"></div>
+          <h2>VIP mode</h2>
+          <div class="set" id="rowVipGrid"><label for="setVipGrid">VIP grid distance<small>points after a VIP TP</small></label><input id="setVipGrid" type="number" inputmode="numeric" min="50" step="50"></div>
+          <div class="set"><label for="setVipSec">VIP countdown<small>seconds in profit, then the trade closes</small></label><input id="setVipSec" type="number" inputmode="numeric" min="1" max="60" step="1"></div>
+          <div class="set col"><label for="setVipLots">VIP lot list<small>one lot per grid level, set in MT5</small></label><input id="setVipLots" class="wide" type="text" inputmode="decimal"></div>
           <p class="hint" id="vipHint"></p>
         </section>
         <section class="panel">
@@ -1050,6 +1050,18 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
     </div>
   </div>
 </div>
+<div id="vipLock" hidden>
+  <div class="frame quit-card vip-card" role="dialog" aria-modal="true" aria-labelledby="vipLockTitle"><i class="br"></i>
+    <span class="cap vip-cap"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294zM5 21h14"/></svg>VIP plan</span>
+    <h3 id="vipLockTitle">VIP mode is in the VIP plan</h3>
+    <p>In VIP mode a first trade that reaches a small profit closes after a short countdown, and you set your own VIP grid. VIP also works at any broker.</p>
+    <p class="vip-price" id="vipLockPrice">From <b>$29</b> a month, or <b>$289</b> for a year (save 17%).</p>
+    <div class="row">
+      <button class="btn" id="vipLockNo">Not now</button>
+      <button class="btn vip-go" id="vipLockGo">Go VIP</button>
+    </div>
+  </div>
+</div>
 <div id="setWarn" hidden style="position:fixed;inset:0;background:rgba(1,6,10,.84);display:flex;align-items:center;justify-content:center;z-index:45;padding:16px">
   <div class="frame quit-card" role="dialog" aria-modal="true" aria-labelledby="setWarnTitle"><i class="br"></i>
     <span class="cap bad">Higher risk</span>
@@ -1161,8 +1173,8 @@ function lotAt(l) {
 // yet, N = seconds left, null = not a Vip trade: a bigger lot, it closes with the basket).
 function posNote(p, c) {
   if (typeof p.vip === 'number') {
-    if (p.vip < 0) return '<small>Vip TP: ' + money(c.vipProfit || 0.1) + ' for ' + (c.vipSec || 5) + ' s</small>';
-    return '<small class="good">' + (p.vip > 0 ? 'Vip TP in ' + p.vip + ' s' : 'Vip TP now') + '</small>';
+    if (p.vip < 0) return '<small>VIP TP: ' + money(c.vipProfit || 0.1) + ' for ' + (c.vipSec || 5) + ' s</small>';
+    return '<small class="good">' + (p.vip > 0 ? 'VIP TP in ' + p.vip + ' s' : 'VIP TP now') + '</small>';
   }
   return '<small>' + (p.tp ? 'TP ' + px(p.tp) : 'waits for basket') + '</small>';
 }
@@ -1309,7 +1321,7 @@ function syncSettings(c) {
   const gridSub = $('rowGrid').querySelector('label small'), gridWhat = c.vipGrid != null ? 'points after a TP hit, Basic mode' : 'points after a TP hit';
   if (gridSub.textContent !== gridWhat) gridSub.textContent = gridWhat;
   if (c.vip === true) {
-    const t = 'In Vip mode trades have no take profit. A base-lot trade closes when its countdown ends and it is still at ' +
+    const t = 'In VIP mode trades have no take profit. A base-lot trade closes when its countdown ends and it is still at ' +
       money(c.vipProfit || 0.1) + ' or more. The bigger lots close with the basket.';
     if ($('vipHint').textContent !== t) $('vipHint').textContent = t;
   }
@@ -1772,13 +1784,22 @@ function renderTp(s) {
 }
 // Lot mode bar. A tap moves the lit box at once; the bot's answer confirms it, or the box goes back.
 const MODES = ['basic', 'smart', 'high'];
+const LOCK_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
 const modeSlot = (m) => (m === 'vip' ? 'high' : m);  // the Vip bot's mode is on the third button (it still sends "high")
 let modePick = null;
 function renderModeBar(s) {
   if (modePick && (modePick.arg === modeSlot(s.mode) || Date.now() - modePick.t > 6000)) modePick = null;
   const row = $('modeRow'), arg = !S ? '' : modePick ? modePick.arg : modeSlot(s.mode), i = MODES.indexOf(arg);
-  const third = row.querySelector('[data-arg="high"]'), name = s.cfg && s.cfg.vip === true ? 'Vip' : 'Risk';
-  if (third.textContent !== name) third.textContent = name;
+  // The third key (the owner, 19 Nov 2026): VIP on a VIP bot; on Free and Elite bots a locked VIP, whose tap tells what
+  // VIP is and where to get it. A bot from before then that still runs High risk keeps a "Risk" key until it leaves it.
+  const third = row.querySelector('[data-arg="high"]'), vipBot = Boolean(s.cfg && s.cfg.vip === true);
+  const look = !S || vipBot ? 'vip' : s.mode === 'high' ? 'risk' : 'lock';
+  if (third.dataset.look !== look) {
+    third.dataset.look = look;
+    third.innerHTML = look === 'risk' ? 'Risk' : look === 'lock' ? LOCK_ICON + 'VIP' : 'VIP';
+    third.toggleAttribute('data-locked', look === 'lock');
+    if (look === 'lock') third.setAttribute('aria-label', 'VIP mode, in the VIP plan'); else third.removeAttribute('aria-label');
+  }
   row.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.arg === arg));
   if (i < 0) { delete row.dataset.pos; return; }
   if (row.dataset.pos == null) {                    // the first time the box appears in place, it does not slide in
@@ -1847,7 +1868,7 @@ function renderCalc(s) {
   $('calcSum').innerHTML = facts.map(f => '<p>' + f + '</p>').join('');
   $('calcNote').textContent = 'Move is the price distance from the first pair, in $. Take profits collected on the way are not counted, so the real drop is a little smaller.' +
     (smart ? ' Smart mode: this table uses the grid distance of the session now (' + grid + ' points).' : '') +
-    (vip ? ' Vip mode: the pairs are ' + step.toFixed(2) + '$ apart (the Vip TP move ' + tpMove.toFixed(2) + '$ + the grid distance of ' + grid + ' points).' : '');
+    (vip ? ' VIP mode: the pairs are ' + step.toFixed(2) + '$ apart (the VIP TP move ' + tpMove.toFixed(2) + '$ + the grid distance of ' + grid + ' points).' : '');
 }
 // Report: closed profit by range. This week and Last week: a bar a day, Monday to Sunday; Month: a bar a week for the
 // last 5 weeks; All time: a bar a week since the first trade, a bar a month after half a year. From the bot's "rep"
@@ -2226,7 +2247,35 @@ $('acLogoutOthers').addEventListener('click', async () => {
 $('quitNo').addEventListener('click', closeQuit);
 $('quitYes').addEventListener('click', logout);
 $('quit').addEventListener('click', e => { if (e.target === $('quit')) closeQuit(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeQuit(); closePwConfirm(); if (pending) { closeSheet(); toast('Canceled.'); } } });
+// VIP (the owner, 19 Nov 2026): what VIP mode is, its price of the moment (web_prices(), set on the admin page) and a
+// way to it. "Go VIP" opens rzgspro.com/#vip: the plans, VIP in view, after logging in. Inside Telegram the browser
+// opens it; elsewhere a new tab, so the app stays where it is.
+const VIP_URL = new URL('./#vip', location.href).href;
+let vipPriceAsked = false;
+function openVipLock() {
+  $('vipLock').hidden = false;
+  $('vipLockGo').focus();
+  if (vipPriceAsked) return;
+  vipPriceAsked = true;
+  fetch(SERVER + 'web_prices', { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: APIKEY }, body: '{}' })
+    .then(r => (r.ok ? r.json() : null)).then(d => {
+      const v = d && d.vip, cash = n => '$' + (Number.isInteger(Number(n)) ? Number(n) : Number(n).toFixed(2));
+      if (!v || !(Number(v.month) > 0)) return;
+      $('vipLockPrice').innerHTML = 'From <b>' + cash(v.month) + '</b> a month, or <b>' + cash(v.year) + '</b> for a year' +
+        (Number(v.year_off) > 0 && Number(v.year_save) > 0 ? ' (save ' + Number(v.year_off) + '%)' : '') + '.';
+    }).catch(() => { vipPriceAsked = false; });
+}
+function closeVipLock() { $('vipLock').hidden = true; }
+$('vipLockNo').addEventListener('click', closeVipLock);
+$('vipLock').addEventListener('click', e => { if (e.target === $('vipLock')) closeVipLock(); });
+$('vipLockGo').addEventListener('click', () => {
+  closeVipLock();
+  const tg = window.Telegram && Telegram.WebApp;
+  if (tg && tg.initData && tg.openLink) { tg.openLink(VIP_URL); return; }
+  const w = window.open(VIP_URL, '_blank');
+  if (w) w.opener = null; else location.href = VIP_URL;
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeQuit(); closePwConfirm(); closeVipLock(); if (pending) { closeSheet(); toast('Canceled.'); } } });
 
 /* ---------- events ---------- */
 $('dock').addEventListener('click', e => { const b = e.target.closest('button[data-tab]'); if (b) openTab(b.dataset.tab); });
@@ -2246,6 +2295,7 @@ syncSeg('logSeg', 'log', logTab);
 syncSeg('rpSeg', 'range', rpRange);
 function onAction(e) {
   const b = e.target.closest('button'); if (!b) return;
+  if (b.hasAttribute('data-locked')) { openVipLock(); return; }      // VIP mode on a Free or Elite bot
   if (b.classList.contains('btn')) flash(b);
   if (b.dataset.cmd) send(b.dataset.cmd, b.dataset.arg);
   if (b.dataset.cmd === 'mode' && online) { modePick = { arg: b.dataset.arg, t: Date.now() }; render(); }

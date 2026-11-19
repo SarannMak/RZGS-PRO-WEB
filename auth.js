@@ -839,11 +839,13 @@
   }
 
   /* ------------------------------------------------------------ dashboard page */
-  const PLAN_NAMES = { trial: 'Free trial', elite: 'Elite', diamond: 'Diamond' };
-  const PLAN_DAYS = { trial: 7, elite: 30, diamond: 30 }; // length of one period, used to fill the ring
-  // A plan's picture (the owner, 2026-11-03): the free trial a bolt, Elite a hexagon, Diamond a gem, each in its own
+  // VIP took the place of Diamond on 19 Nov 2026 (Diamond stays here only so an old record still reads).
+  const PLAN_NAMES = { trial: 'Free trial', elite: 'Elite', vip: 'VIP', diamond: 'Diamond' };
+  const PLAN_DAYS = { trial: 7, elite: 30, vip: 30, diamond: 30 }; // length of one period, used to fill the ring
+  // A plan's picture (the owner, 2026-11-03): the free trial a bolt, Elite a hexagon, VIP a crown, each in its own
   // colour (auth.css .plan-logo). No plan: the layers of the plans to choose from. A plan that ended is shown faded.
-  const PLAN_ICONS = { trial: 'zap', elite: 'hexagon', diamond: 'gem' };
+  const PLAN_ICONS = { trial: 'zap', elite: 'hexagon', vip: 'crown', diamond: 'gem' };
+  const PAID = ['elite', 'vip', 'diamond'];
   function paintPlanLogo(logo, plan, ended) {
     logo.dataset.tone = PLAN_ICONS[plan] ? plan : 'off';
     logo.classList.toggle('is-ended', Boolean(ended));
@@ -919,7 +921,7 @@
       tone: soon ? 'warn' : 'good',
       big: String(daysLeft),
       sub: daysLeft === 1 ? 'DAY LEFT' : 'DAYS LEFT',
-      arc: Math.max(4, Math.min(100, (daysLeft / PLAN_DAYS[plan]) * 100)),
+      arc: Math.max(4, Math.min(100, (daysLeft / (plan === 'vip' && daysLeft > 31 ? 365 : PLAN_DAYS[plan])) * 100)), // VIP: a year
       note: soon
         ? `Your ${what} ends on ${longDate(ends)}. ${plan === 'trial' ? 'Choose a plan now to avoid a break.' : 'You can renew it once it has ended.'}`
         : `Your ${what} is valid until ${longDate(ends)}.`,
@@ -1128,7 +1130,7 @@
     let journeySeen = '';
     function renderAwards() {
       const plan = PLAN_NAMES[profile.plan] ? profile.plan : null;
-      const paid = plan === 'elite' || plan === 'diamond';
+      const paid = PAID.includes(plan);
       const delivered = Boolean(plan || checkout.licence);
       const confirmed = Boolean(profile.email_confirmed_at || user.email_confirmed_at);
       const missing = [!avatarAddress() && 'your photo', !stored('about') && 'a few words about you', !stored('country') && 'your location'].filter(Boolean);
@@ -1150,7 +1152,7 @@
           todo: delivered ? 'Put the bot on a chart in MT5. It shows here as soon as it runs.' : 'Comes after your bot file is ready.' },
         { key: 'trade', title: 'First closed trade', done: Boolean(bot.traded), did: 'Your bot has closed a trade.',
           todo: connected ? 'Comes when your bot closes its first trade. Keep MT5 open and online.' : 'Comes after your bot is connected.' },
-        { key: 'paid', title: 'Elite or Diamond', done: paid, did: 'You are on a paid plan.', todo: 'Move up to Elite or Diamond when you are ready.' },
+        { key: 'paid', title: 'Elite or VIP', done: paid, did: 'You are on a paid plan.', todo: 'Move up to Elite or VIP when you are ready.' },
       ];
       const next = steps.find((step) => !step.done);
       const count = `${steps.filter((step) => step.done).length} of ${steps.length}`;
@@ -1346,15 +1348,15 @@
       renew.classList.toggle('btn-ghost', healthy);
       // a paid plan that is running: nothing else starts until it ends or is cancelled
       const paidRunning = Boolean(state.plan) && state.plan !== 'trial' && state.status !== 'Expired';
-      // moving up from Elite to Diamond is the one change that can start now: it asks to cancel first (plans.js)
+      // moving up from Elite to VIP is the one change that can start now, with no cancel first (plans.js, checkout)
       const canMoveUp = paidRunning && state.plan === 'elite';
       setAll('[data-plan-choice-note]', paidRunning
-        ? `Your ${state.name} plan runs until ${state.until}. You can renew it or start another plan when it ends.${canMoveUp ? ' To move up now, choose Diamond.' : ''}`
-        : 'Trial and Elite start right here. Diamond opens a chat with our sales team on Telegram.');
+        ? `Your ${state.name} plan runs until ${state.until}. You can renew it or start another plan when it ends.${canMoveUp ? ' To move up now, choose VIP: it takes the place of Elite as soon as you pay.' : ''}`
+        : 'Free, Elite and VIP all start right here, in a few short steps.');
     }
 
     /* ----- order: the buying steps of an order that is under way ----- */
-    const ORDER_STEPS = { trial: ['broker', 'mt5', 'bot'], elite: ['broker', 'mt5', 'pay', 'bot'], diamond: ['mt5', 'pay', 'bot'] };
+    const ORDER_STEPS = { trial: ['broker', 'mt5', 'bot'], elite: ['broker', 'mt5', 'pay', 'bot'], vip: ['mt5', 'pay', 'bot'], diamond: ['mt5', 'pay', 'bot'] };
     const ORDER_LABEL = { broker: 'Broker account', mt5: 'MT5 account', pay: 'Payment', bot: 'Bot delivered' };
     const ORDER_NOTE = {
       broker: 'Tell us your broker and the email you used there.',
@@ -1462,6 +1464,7 @@
     setInterval(refreshAll, 20000);
     document.addEventListener('visibilitychange', refreshAll);
     document.addEventListener('rzgs:checkout', refreshAll);
+    document.addEventListener('rzgs:prices', () => renderPlan()); // the VIP price of the moment (plans.js)
 
     root.addEventListener('click', (event) => {
       if (event.target.closest('[data-order-go]')) withCheckout((checkoutBox) => checkoutBox.resume());
@@ -1938,7 +1941,7 @@
           : `${ended ? 'It ended on' : 'Your plan runs until'} ${state.until}.`;
       $('[data-sub-price]', sub).textContent = mine && !ended ? `${mine.amount} ${mine.per}` : '';
       // its one next step: the free days, renewing or upgrading the trial; none while a paid plan runs (the owner,
-      // 2026-11-03: no "Move up to Diamond" here; Diamond is in Other plans below)
+      // 2026-11-03: no "Move up" here; VIP is in Other plans below)
       const [label, checkoutId, main] = !state.plan ? (checkout.trial_used ? ['Choose a plan', '', true] : ['Claim your free trial', 'trial', true])
         : ended ? [`Renew ${mine ? mine.name : state.name}`, state.plan, true]
           : ['Upgrade your plan', '', true];
@@ -1986,18 +1989,18 @@
 
     function renderPlan() {
       const state = planState(profile);
-      // a paid plan that is running: nothing else starts until it ends or is cancelled; from Elite, Diamond can (plans.js)
+      // a paid plan that is running: nothing else starts until it ends or is cancelled; from Elite, VIP can (plans.js)
       const paidRunning = Boolean(state.plan) && state.plan !== 'trial' && state.status !== 'Expired';
       const canMoveUp = paidRunning && state.plan === 'elite';
       setAll('[data-plan-choice-note]', paidRunning
-        ? `Your ${state.name} plan runs until ${state.until}. You can renew it or start another plan when it ends.${canMoveUp ? ' To move up now, choose Diamond.' : ''}`
-        : 'Trial and Elite start right here. Diamond opens a chat with our sales team on Telegram.');
+        ? `Your ${state.name} plan runs until ${state.until}. You can renew it or start another plan when it ends.${canMoveUp ? ' To move up now, choose VIP: it takes the place of Elite as soon as you pay.' : ''}`
+        : 'Free, Elite and VIP all start right here, in a few short steps.');
       renderSubscription(state, paidRunning, canMoveUp);
       renderSummary(state);
       $$('[data-plan-link]', root).forEach((button) => {
         const on = button.dataset.planLink === state.plan;
         const freeUsed = button.dataset.planLink === 'trial' && checkout.trial_used;
-        const moveUp = canMoveUp && button.dataset.planLink === 'diamond';
+        const moveUp = canMoveUp && button.dataset.planLink === 'vip';
         const locked = !moveUp && (paidRunning || freeUsed || (on && (state.plan === 'trial' || state.status !== 'Expired'))); // the free days only once
         button.disabled = locked;
         button.classList.toggle('is-locked', locked && !on);
@@ -2009,10 +2012,13 @@
 
     /* ----- Personal profile: the plan and the profit at a glance (Higgsfield's account page, 2026-11-03) ----- */
     // the meter: one bar a day of the plan, lit for each day left (as in the account card, plans.js)
+    // a year (VIP) gets one bar a month
     function paintDays(meter, planId, ends, left, running) {
-      const total = !planId ? PLAN_DAYS.elite : Math.max(PLAN_DAYS[planId], running && ends ? left : 0);
+      const days = !planId ? PLAN_DAYS.elite : Math.max(PLAN_DAYS[planId] || 30, running && ends ? left : 0);
+      const byMonth = days > 62;
+      const total = byMonth ? 12 : days;
       if (meter.children.length !== total) meter.innerHTML = '<i></i>'.repeat(total);
-      const lit = !running ? 0 : !ends ? total : Math.min(total, left);
+      const lit = !running ? 0 : !ends ? total : byMonth ? Math.min(12, Math.ceil(left / 30.42)) : Math.min(total, left);
       [...meter.children].forEach((part, index) => part.classList.toggle('on', index < lit));
     }
     function renderSummary(state) {
@@ -2025,7 +2031,7 @@
       setAll('[data-sum-left]', !state.plan ? 'No plan yet' : !running ? `${state.name} ended` : ends ? `${left} ${left === 1 ? 'day' : 'days'} left` : `${state.name} plan`);
       setAll('[data-sum-until]', !state.plan ? 'No payment needed to start.' : !ends ? 'No end date' : `${running ? 'Until' : 'Ended'} ${state.until}`);
       paintDays($('[data-sum-meter]', root), state.plan, ends, left, running);
-      $('[data-sum-go]', root).textContent = !running ? 'Choose a plan' : state.plan === 'diamond' ? 'See your plan' : 'Upgrade';
+      $('[data-sum-go]', root).textContent = !running ? 'Choose a plan' : ['vip', 'diamond'].includes(state.plan) ? 'See your plan' : 'Upgrade';
     }
 
     /* ----- Usage: the client's own bot, in money (web_my_usage; the owner chose to show it, 2 Nov 2026) ----- */
@@ -2407,7 +2413,7 @@
       const readyBox = $('[data-invite-ready]', inviteBox);
       readyBox.hidden = !ready;
       if (ready) {
-        const running = ['elite', 'diamond'].includes(profile.plan) && profile.plan_expires_at && new Date(profile.plan_expires_at) > new Date();
+        const running = PAID.includes(profile.plan) && profile.plan_expires_at && new Date(profile.plan_expires_at) > new Date();
         $('[data-invite-ready-text]', readyBox).textContent = `You have ${answer.left} free month${answer.left === 1 ? '' : 's'} of Elite ready.`
           + (running ? ' It can start when your current plan ends.' : ' Choose Elite and the payment is skipped.');
       }
@@ -2596,6 +2602,7 @@
       await refreshCheckout();
       renderPlan();
     });
+    document.addEventListener('rzgs:prices', () => renderPlan()); // the VIP price of the moment (plans.js)
     // signed out in another tab
     db.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_OUT') location.replace('./');

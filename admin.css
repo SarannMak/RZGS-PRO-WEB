@@ -128,7 +128,7 @@
   border-radius: 2px;
   background: var(--warn);
   color: var(--on-accent);
-  font: 700 11px/1.2 var(--font-mono);
+  font: 700 12px/1.2 var(--font-mono);
   text-align: center;
 }
 .adm-badge--quiet {
@@ -312,7 +312,7 @@
 .adm-chips button span {
   margin-left: 6px;
   color: var(--text-subtle);
-  font: 500 11px/1 var(--font-mono);
+  font: 500 12px/1 var(--font-mono);
 }
 
 /* ----- figures ----- */
@@ -340,9 +340,9 @@
 }
 .adm-tile-label {
   color: var(--text-subtle);
-  font: 500 11px/1.3 var(--font-mono);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font: 500 12px/1.3 var(--font-mono);
+  letter-spacing: 0.01em;
+  text-transform: none;
 }
 .adm-tile .adm-num {
   color: var(--text);
@@ -391,9 +391,9 @@ a.adm-tile:hover .adm-sub {
 .adm-panel-head > h2 {
   margin: 0;
   color: var(--text-subtle);
-  font: 500 11px/1.2 var(--font-mono);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  font: 500 12px/1.2 var(--font-mono);
+  letter-spacing: 0.01em;
+  text-transform: none;
 }
 .adm-row-left {
   margin-top: 14px;
@@ -515,9 +515,9 @@ a.adm-tile:hover .adm-sub {
   top: 0;
   background: var(--surface);
   color: var(--text-subtle);
-  font: 500 11px/1.3 var(--font-mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font: 500 12px/1.3 var(--font-mono);
+  letter-spacing: 0.01em;
+  text-transform: none;
 }
 .adm-table td.num,
 .adm-table th.num {
@@ -549,9 +549,9 @@ a.adm-tile:hover .adm-sub {
 .adm-flush-title {
   margin: 14px 0 6px;
   color: var(--text-subtle);
-  font: 500 11px/1.2 var(--font-mono);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  font: 500 12px/1.2 var(--font-mono);
+  letter-spacing: 0.01em;
+  text-transform: none;
 }
 .adm-up { color: var(--good); }
 .adm-down { color: var(--bad); }
@@ -597,6 +597,7 @@ a.adm-tile:hover .adm-sub {
 }
 .adm-plan--elite { border-color: var(--frame); color: var(--cyan); }
 .adm-plan--diamond { border-color: var(--neon); color: var(--neon); }
+.adm-plan--vip { border-color: var(--vip); color: var(--vip); }
 .adm-plan--ended { border-style: dashed; color: var(--text-subtle); }
 
 /* ----- bot groups ----- */
@@ -661,10 +662,10 @@ a.adm-tile:hover .adm-sub {
   padding: 0 0 6px;
   border-bottom: 1px solid var(--border-strong);
   color: var(--text-subtle);
-  font: 500 11px/1.3 var(--font-mono);
-  letter-spacing: 0.08em;
+  font: 500 12px/1.3 var(--font-mono);
+  letter-spacing: 0.01em;
   text-align: right;
-  text-transform: uppercase;
+  text-transform: none;
 }
 .adm-st td {
   padding: 8px 0;
@@ -743,6 +744,23 @@ a.adm-tile:hover .adm-sub {
 .adm-give .adm-why {
   margin: 0;
 }
+/* the VIP price: a month and the yearly saving, side by side (19 Nov 2026) */
+.adm-price-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.adm-price-row label {
+  display: grid;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+@media (max-width: 480px) {
+  .adm-price-row {
+    grid-template-columns: 1fr;
+  }
+}
 
 /* sending to Telegram: asked once more on the button itself */
 .btn[data-sure] {
@@ -753,4 +771,13 @@ a.adm-tile:hover .adm-sub {
 }
 .form-msg.is-bad {
   color: var(--bad);
+}
+
+/* tap targets (review D4, 19 Nov 2026): the folding rows were 19 px tall. 44 px to tap, the same place on the card */
+.adm-chart details summary {
+  padding-block: 12px;
+  margin-block: -12px;
+}
+.adm-group > summary {
+  min-height: 44px;
 }

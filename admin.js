@@ -1,7 +1,7 @@
 /* ==========================================================================
    RZGS-PRO: the owner's page (rzgspro.com/admin), 6 Nov 2026. A menu of every part of the site: Overview,
    Orders, Clients, Bots, Sign-ups, Statement, Reports, Affiliate, Traffic and Admins.
-   The figures come from web_admin() in Supabase (web_admin.sql); orders, Give Diamond and sending to Telegram go
+   The figures come from web_admin() in Supabase (web_admin.sql); orders, Give VIP, the VIP price and sending to Telegram go
    through the checkout function. Both answer only the website accounts in rz_config checkout_admins.
    ========================================================================== */
 (() => {
@@ -15,7 +15,9 @@
     auth: { flowType: 'implicit', persistSession: true, autoRefreshToken: true, detectSessionInUrl: false },
   });
 
-  const PLAN_NAMES = { trial: 'Free', elite: 'Elite', diamond: 'Diamond' };
+  const PLAN_NAMES = { trial: 'Free', elite: 'Elite', vip: 'VIP', diamond: 'Diamond' };
+  // a VIP order is for a month or a year
+  const planOf = (order) => `${PLAN_NAMES[order.plan] || esc(order.plan)}${order.plan === 'vip' ? (Number(order.months) === 12 ? ', 1 year' : ', 1 month') : ''}`;
   const BROKER_NAMES = { exness: 'Exness', investizo: 'Investizo', lirunex: 'Lirunex' };
   const STEP_NAMES = { broker: 'Broker account', mt5: 'MT5 account', pay: 'Payment' };
   const STAGE_NAMES = { broker: 'At broker step', mt5: 'At MT5 step', pay: 'Waiting for payment', review: 'Needs you', done: 'Delivered' };
@@ -90,7 +92,7 @@
     state.me = data.session.user.email || '';
     return data.session;
   }
-  // the checkout function: orders, Give Diamond, statements
+  // the checkout function: orders, Give VIP, the VIP price, statements
   async function call(action, fields = {}) {
     const current = await session();
     try {
@@ -310,13 +312,13 @@
     const { period: p, now: n } = data;
     const word = PERIOD_WORDS[kind];
     const plans = n.plans || {};
-    const running = (plans.trial || 0) + (plans.elite || 0) + (plans.diamond || 0);
+    const running = (plans.trial || 0) + (plans.elite || 0) + (plans.vip || 0) + (plans.diamond || 0);
     $('[data-adm-tiles="overview"]').innerHTML = [
       { label: 'Waiting for you', value: count(n.review), sub: n.review ? 'Open Orders to decide' : 'Nothing to decide', hot: n.review > 0, href: '#orders' },
       { label: `Income ${word}`, value: money(p.plan_income), sub: `${money(n.income_total)} in all, plans only` },
       { label: `Sign-ups ${word}`, value: count(p.signup), sub: `${count(p.signup_prev)} the ${PREV_WORDS[kind]} before`, href: '#signups' },
       { label: 'Accounts', value: count(n.accounts), sub: `${count(n.unconfirmed)} email not confirmed`, href: '#clients' },
-      { label: 'Plans running', value: count(running), sub: `Free ${count(plans.trial)} · Elite ${count(plans.elite)} · Diamond ${count(plans.diamond)}` },
+      { label: 'Plans running', value: count(running), sub: `Free ${count(plans.trial)} · Elite ${count(plans.elite)} · VIP ${count(plans.vip)}` },
       { label: 'Bots online now', value: count(n.bots_online), sub: `${count(n.bots_today)} reported today · ${count(n.bots_total)} in all`, href: '#bots' },
       { label: 'Orders in progress', value: count(n.open_orders), sub: 'At the broker, MT5 or payment step', href: '#orders' },
       { label: `Visitors ${word}`, value: count(p.traffic && p.traffic.visitors), sub: `${count(p.traffic && p.traffic.views)} page views`, href: '#traffic' },
@@ -330,7 +332,7 @@
   function card(order) {
     const email = order.web_users ? order.web_users.email : '';
     return `<article class="adm-card" data-order="${order.id}">
-      <h3>${STEP_NAMES[order.review_from] || 'Order'}: ${PLAN_NAMES[order.plan] || esc(order.plan)}${Number(order.amount) > 0 ? ` $${Number(order.amount)}` : ''}</h3>
+      <h3>${STEP_NAMES[order.review_from] || 'Order'}: ${planOf(order)}${Number(order.amount) > 0 ? ` $${Number(order.amount)}` : ''}</h3>
       <dl>
         <dt>Client</dt><dd>${esc(email)}</dd>
         ${order.broker ? `<dt>Broker</dt><dd>${esc(BROKER_NAMES[order.broker] || order.broker)}${order.broker_email ? ` · ${esc(order.broker_email)}` : ''}</dd>` : ''}
@@ -354,10 +356,13 @@
       return;
     }
     const s = data.status || {};
-    const files = (data.files || []).length;
+    // the seven files the website hands out (Free and Elite for each partner broker, and VIP for every broker)
+    const kinds = new Set((data.files || []).map((file) => file.kind));
+    const files = BOT_FILES.filter((kind) => kinds.has(kind)).length;
+    showPrices(data.prices);
     status([
       s.bakong_on ? `Bakong on: ${s.bakong_used} of ${s.bakong_day} checks used today` : 'Bakong is OFF on the website server',
-      `${files} of 7 bot files`,
+      `${files} of 7 bot files${kinds.has('vip') ? '' : ' (the VIP file is missing)'}`,
       s.secret ? 'Bot Passwords can be made' : 'The licence secret is MISSING',
     ].join(' · '), !s.secret || files < 7);
     const waiting = data.waiting || [];
@@ -369,7 +374,7 @@
     $('[data-adm-recent]').innerHTML = (data.recent || []).map((order) => `<tr>
       <td>${when(order.created_at)}</td>
       <td>${esc(order.web_users ? order.web_users.email : '')}</td>
-      <td>${PLAN_NAMES[order.plan] || esc(order.plan)}</td>
+      <td>${planOf(order)}</td>
       <td>${esc(BROKER_NAMES[order.broker] || order.broker || '-')}</td>
       <td>${esc(order.mt5 || '-')}</td>
       <td>${order.tx ? `$${Number(order.amount)}` : '-'}</td>
@@ -383,7 +388,7 @@
     running: (r) => isLive(r.plan, r.expires),
     trial: (r) => r.plan === 'trial' && isLive(r.plan, r.expires),
     elite: (r) => r.plan === 'elite' && isLive(r.plan, r.expires),
-    diamond: (r) => r.plan === 'diamond' && isLive(r.plan, r.expires),
+    vip: (r) => r.plan === 'vip' && isLive(r.plan, r.expires),
     ended: (r) => Boolean(r.plan) && !isLive(r.plan, r.expires),
     none: (r) => !r.plan,
     unconfirmed: (r) => !r.confirmed,
@@ -532,7 +537,7 @@
         { t: 'Incomplete (not finished)', v: count(p.open) },
         { t: 'Free (trial plan)', v: count(plans.trial) },
         { t: 'Elite ($5 plan)', v: count(plans.elite) },
-        { t: 'Diamond ($49 plan)', v: count(plans.diamond) },
+        { t: 'VIP (a month or a year)', v: count(plans.vip) },
         { t: 'Plan income', v: money(p.plan_income), total: true },
       ]),
       stPanel('User registration', ['This period', 'Total'], [
@@ -806,7 +811,54 @@
     setTimeout(loadOrders, result.ok ? 0 : 1800);
   });
 
-  /* ---------------------------------------------------------------- a Diamond plan sold on Telegram */
+  /* ---------------------------------------------------------------- the VIP price (the owner, 19 Nov 2026) */
+  // A month in $ and the yearly saving in %. The year is worked out the way web_prices() does it in the database,
+  // so the line under the boxes is what clients will be asked.
+  const BOT_FILES = ['free_exness', 'free_investizo', 'free_lirunex', 'elite_exness', 'elite_investizo', 'elite_lirunex', 'vip'];
+  const priceForm = $('[data-adm-price]');
+  const priceSay = $('[data-adm-price-say]');
+  const priceGo = $('[data-adm-price-go]');
+  const PRICE_WORDS = {
+    price_bad: 'Type a monthly price from $1 to $9999 (cents are fine).',
+    off_bad: 'Type a yearly saving from 0 to 90, a whole number.',
+    not_admin: 'This page is for the owner of the site.',
+  };
+  function pricePreview() {
+    const month = Math.round(Number(priceForm.elements.month.value.trim().replace(',', '.')) * 100) / 100;
+    const off = Number(priceForm.elements.off.value.trim());
+    if (!(month >= 1 && month <= 9999)) { priceSay.textContent = PRICE_WORDS.price_bad; return null; }
+    if (!(Number.isInteger(off) && off >= 0 && off <= 90)) { priceSay.textContent = PRICE_WORDS.off_bad; return null; }
+    const year = Math.round((month * 12 * (100 - off)) / 100);
+    priceSay.innerHTML = `Clients see <b>${money(month)}</b> a month, or <b>${money(year)}</b> a year${off > 0 && month * 12 > year ? ` (save ${off}%, ${money(month * 12 - year)})` : ''}.`;
+    return { month, off };
+  }
+  // the price the server has now (admin_list), unless the owner is typing a new one
+  function showPrices(prices) {
+    if (!prices) {
+      if (!priceForm.elements.month.value) priceSay.textContent = OLD_FUNCTION;
+      return;
+    }
+    if (priceForm.querySelector('input:focus') || priceForm.dataset.typed) return;
+    priceForm.elements.month.value = String(prices.month);
+    priceForm.elements.off.value = String(prices.year_off);
+    pricePreview();
+  }
+  priceForm.addEventListener('input', () => { priceForm.dataset.typed = '1'; pricePreview(); });
+  priceForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const wanted = pricePreview();
+    if (!wanted) return;
+    priceGo.disabled = true;
+    const result = await call('admin_prices', { month: wanted.month, year_off: wanted.off });
+    priceGo.disabled = false;
+    if (!result.ok) { priceSay.textContent = PRICE_WORDS[result.code] || OLD_FUNCTION; return; }
+    delete priceForm.dataset.typed;
+    if (document.activeElement && priceForm.contains(document.activeElement)) document.activeElement.blur();
+    showPrices(result.prices);
+    priceSay.innerHTML = `Saved. ${priceSay.innerHTML}`;
+  });
+
+  /* ---------------------------------------------------------------- a VIP plan the owner gives (paid another way) */
   const GIVE_WORDS = {
     email_bad: 'Please type the email of the client\'s website account.',
     mt5_bad: 'That is not an MT5 number. It has 5 to 12 digits and no letters.',
@@ -818,21 +870,22 @@
   const giveLine = $('[data-adm-give-msg]');
   const giveGo = $('[data-adm-give-go]');
   const giveSay = (html) => { giveLine.innerHTML = html; giveLine.hidden = false; };
-  const giveReset = () => { delete giveForm.dataset.sure; giveGo.textContent = 'Give Diamond'; };
+  const giveReset = () => { delete giveForm.dataset.sure; giveGo.textContent = 'Give VIP'; };
   giveForm.addEventListener('input', () => { giveReset(); giveLine.hidden = true; });
   giveForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     const email = giveForm.elements.email.value.trim();
     const account = giveForm.elements.account.value.replace(/\s+/g, '');
+    const months = Number(giveForm.elements.months.value) === 12 ? 12 : 1;
     // asked once more: this starts a plan for a real client
     if (!giveForm.dataset.sure) {
       giveForm.dataset.sure = '1';
       giveGo.textContent = 'Yes, give it';
-      giveSay(`Give Diamond for 30 days to <b>${esc(email)}</b>, MT5 <b>${esc(account)}</b>?`);
+      giveSay(`Give VIP for ${months === 12 ? '1 year' : '1 month'} to <b>${esc(email)}</b>, MT5 <b>${esc(account)}</b>?`);
       return;
     }
     giveGo.disabled = true;
-    const result = await call('admin_give', { email, account });
+    const result = await call('admin_give', { email, account, months });
     giveGo.disabled = false;
     giveReset();
     if (result.ok && result.licence) {
@@ -841,7 +894,7 @@
     } else if (result.ok) {
       giveSay('It could not be finished by itself. Look under Waiting for you.');
     } else if (result.code === 'paid_running') {
-      giveSay(`This client has a paid plan running${result.until ? ` until ${when(result.until)}` : ''}. It has to end first, or they can cancel it under See plans.`);
+      giveSay(`This client's VIP plan is still running${result.until ? ` until ${when(result.until)}` : ''}. It can be given again when it ends.`);
     } else {
       giveSay(esc(GIVE_WORDS[result.code] || OLD_FUNCTION));
     }

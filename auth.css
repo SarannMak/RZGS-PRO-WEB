@@ -225,7 +225,7 @@ select.input option {
 }
 .field-error {
   margin: 0;
-  color: #ff8a8a;
+  color: var(--bad);
   font-size: 13px;
 }
 .check-field {
@@ -302,7 +302,7 @@ select.input option {
   color: var(--text-subtle);
   font: 500 11px/1.3 var(--font-mono);
   letter-spacing: 0.08em;
-  text-transform: uppercase;
+  text-transform: none;
   transition: color var(--dur) var(--ease-out);
 }
 .steps-bar li::before {
@@ -494,9 +494,9 @@ body[data-auth-page="dashboard"] {
 /* small capital label, like the app's .cap */
 .cap {
   color: var(--text-subtle);
-  font: 500 11px/1.3 var(--font-mono);
+  font: 500 12px/1.3 var(--font-mono);
   letter-spacing: 0.12em;
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 /* ----- header strip ----- */
@@ -707,9 +707,9 @@ body[data-auth-page="dashboard"] {
 .dash-panel > h2 {
   margin: 0 0 12px;
   color: var(--text-subtle);
-  font: 500 11px/1.2 var(--font-mono);
+  font: 500 12px/1.2 var(--font-mono);
   letter-spacing: 0.14em;
-  text-transform: uppercase;
+  text-transform: none;
 }
 .dash-hint {
   margin: 10px 0 0;
@@ -906,7 +906,7 @@ body[data-auth-page="dashboard"] {
 }
 .dash-ring .sub {
   fill: var(--text-subtle);
-  font: 500 7.5px var(--font-mono);
+  font: 500 10px var(--font-mono);
   letter-spacing: 0.14em;
 }
 .dash-core-info {
@@ -929,7 +929,7 @@ body[data-auth-page="dashboard"] {
   color: var(--warn);
 }
 .dash-pill[data-tone="bad"] {
-  color: #ff8a8a;
+  color: var(--bad);
 }
 .dash-pill[data-tone="off"] {
   color: var(--text-subtle);
@@ -1020,7 +1020,7 @@ body[data-auth-page="dashboard"] {
   color: var(--good);
 }
 .form-msg[data-tone="error"] {
-  color: #ff8a8a;
+  color: var(--bad);
 }
 
 /* ----- log ----- */
@@ -1576,9 +1576,9 @@ a.trial-banner:hover {
   padding: 4px 9px;
   background: var(--chip);
   color: var(--cyan);
-  font: 600 10px/1.3 var(--font-mono);
+  font: 600 12px/1.3 var(--font-mono);
   letter-spacing: 0.1em;
-  text-transform: uppercase;
+  text-transform: none;
   clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px);
 }
 .dp-plan[data-tone="off"] {
@@ -1589,6 +1589,9 @@ a.trial-banner:hover {
 }
 .dp-plan[data-tone="diamond"] {
   color: #c58bff;
+}
+.dp-plan[data-tone="vip"] {
+  color: var(--vip);
 }
 .dp-stats {
   display: grid;
@@ -1976,8 +1979,8 @@ textarea.input {
   margin: 0;
 }
 .dp-stats .cap {
-  font-size: 10.5px;
-  letter-spacing: 0.06em;
+  font-size: 12px;
+  letter-spacing: 0.01em;
   white-space: nowrap;
 }
 .dp-today {
@@ -2270,7 +2273,7 @@ dialog.dash-edit::backdrop {
   padding: 8px 0;
   border: 0;
   background: none;
-  color: #ff8a8a;
+  color: var(--bad);
   font: 500 14px/1 var(--font-body);
   cursor: pointer;
 }
@@ -2359,7 +2362,7 @@ dialog.dash-edit::backdrop {
 }
 .auth-section .steps-bar li {
   gap: 5px;
-  font-size: 10px;
+  font-size: 12px;
 }
 .auth-section .auth-step {
   margin-top: 10px;
@@ -2521,7 +2524,7 @@ dialog.dash-edit::backdrop {
 .auth-verify .field .field-error {
   max-width: none;
   margin: 2px 0 0;
-  color: #ff8a8a;
+  color: var(--bad);
   font-size: 13px;
   text-align: left;
 }
@@ -2752,9 +2755,9 @@ html:has(body.acc-page) {
 .acc-nav-cap {
   margin: 6px 12px 0;
   color: var(--text-subtle);
-  font: 500 10.5px/1 var(--font-mono);
+  font: 500 12px/1 var(--font-mono);
   letter-spacing: 0.14em;
-  text-transform: uppercase;
+  text-transform: none;
 }
 .acc-nav--site a {
   min-height: 38px;
@@ -3239,6 +3242,9 @@ html:has(body.acc-page) {
 .acc-plan-card[data-tone="diamond"] .acc-plan-card-top span {
   color: #c58bff;
 }
+.acc-plan-card[data-tone="vip"] .acc-plan-card-top span {
+  color: var(--vip);
+}
 .acc-plan-card-price {
   margin: 0;
   color: var(--text-muted);
@@ -3411,7 +3417,7 @@ html:has(body.acc-page) {
 }
 .acc-bars text {
   fill: var(--text-subtle);
-  font: 500 9.5px var(--font-mono);
+  font: 500 10px var(--font-mono);
   text-anchor: middle;
 }
 .acc-bars text.amt {
@@ -3892,6 +3898,9 @@ html:has(body.acc-page) {
 .plan-logo[data-tone="diamond"] {
   --tone: #c58bff;
 }
+.plan-logo[data-tone="vip"] {
+  --tone: var(--vip);
+}
 .plan-logo.is-ended {
   opacity: 0.55;
   filter: grayscale(0.6);
@@ -3930,6 +3939,9 @@ html:has(body.acc-page) {
 }
 .plan-hero[data-tone="diamond"] .plan-hero-chip {
   color: #c58bff;
+}
+.plan-hero[data-tone="vip"] .plan-hero-chip {
+  color: var(--vip);
 }
 .plan-hero-name {
   margin: 4px 0 0;
@@ -3971,9 +3983,9 @@ html:has(body.acc-page) {
   display: block;
   margin-top: 4px;
   color: var(--text-subtle);
-  font: 500 11px/1.2 var(--font-mono);
+  font: 500 12px/1.2 var(--font-mono);
   letter-spacing: 0.1em;
-  text-transform: uppercase;
+  text-transform: none;
 }
 .acc-plan-top .plan-logo {
   width: 64px;
