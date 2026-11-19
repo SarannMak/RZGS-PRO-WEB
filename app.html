@@ -636,7 +636,7 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
 <!-- the light look (14 Nov 2026): after the styles above, so it wins -->
 <link rel="stylesheet" href="app-theme.css?v=23">
 <!-- the board look, dark or light (16 Nov 2026): last, so it wins -->
-<link rel="stylesheet" href="app-board.css?v=4">
+<link rel="stylesheet" href="app-board.css?v=6">
 </head>
 <body>
 <div class="app">
@@ -2472,6 +2472,29 @@ paintMode();
 document.querySelectorAll('#t-settings .panel:not(:last-of-type) input:not([type=range])').forEach(i => { i.disabled = true; });
 $('acc').value = account;
 linkFollow();
+// The phone keyboard (the owner, 19 Nov 2026: "keyboard come up ... not blindly typing"). Where the browser does not
+// shrink the page for the keyboard (iPhone, Telegram, most Android browsers), --kb is the part of the page it covers:
+// the scroll boxes get that much room at their end (app-board.css) and the field being typed in moves just above it.
+(() => {
+  const vv = window.visualViewport;
+  if (!vv) return;
+  const root = document.documentElement;
+  let kb = 0, later = 0;
+  const typing = () => { const a = document.activeElement; return a && a.matches && a.matches('input:not([type=checkbox]):not([type=radio]):not([type=range]), textarea') ? a : null; };
+  const measure = () => {
+    const covered = Math.abs(vv.scale - 1) > 0.01 ? 0 : Math.round(window.innerHeight - vv.height - vv.offsetTop);
+    const next = typing() && covered > 80 ? covered : 0;          // less than that is the browser's own bar, not a keyboard
+    if (next === kb) return;
+    kb = next;
+    root.style.setProperty('--kb', kb + 'px');
+    root.classList.toggle('kb-open', kb > 0);
+  };
+  const reveal = () => { const f = typing(); if (f) f.scrollIntoView({ block: 'nearest', inline: 'nearest' }); };
+  const settle = (ms) => { clearTimeout(later); later = setTimeout(() => { measure(); reveal(); }, ms); };
+  vv.addEventListener('resize', () => settle(80));
+  document.addEventListener('focusin', () => { if (typing()) settle(350); });   // after the keyboard has slid up
+  document.addEventListener('focusout', () => setTimeout(measure, 150));
+})();
 if (window.Telegram && Telegram.WebApp) { try { Telegram.WebApp.ready(); Telegram.WebApp.expand(); } catch (e) {} }
 if (token) enter();
 })();

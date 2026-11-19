@@ -422,7 +422,11 @@ header h1 {
     box-shadow: none;
   }
 }
-/* the small switches on the chart: Candles / Line, History */
+/* the small switches on the chart: Candles / Line, History. On a phone under ~385 px they drop under the title;
+   they stay at the right there, as on wider screens (the owner, 19 Nov 2026) */
+.ld-tools {
+  margin-left: auto;
+}
 .mini-seg,
 .hist-btn {
   border: 1px solid var(--card-line);
@@ -998,22 +1002,50 @@ nav svg {
 }
 
 /* ---------------------------------------------------------------- the link screen */
+/* border-image none wins over every state rule of the old look (a focused or wrong field, the busy / ok / bad link
+   tiles): those drew the old square frame with corner dots inside the round box in dark mode (the owner, 19 Nov 2026) */
 .ln-tile {
   border: 1px solid var(--card-line);
-  border-image: none;
+  border-image: none !important;
   border-radius: 22px;
   background: var(--card);
   box-shadow: var(--card-shadow);
 }
 .ln-slot {
   border: 1px solid var(--input-line);
-  border-image: none;
+  border-image: none !important;
   border-radius: 14px;
   background: var(--input-bg);
 }
 .ln-slot:focus-within {
   border-color: var(--cyan);
   box-shadow: 0 0 0 4px var(--ring-focus);
+}
+/* #login scrolls, so it cuts whatever reaches past its sides: the focus ring of a field (and the ring of a link
+   tile) was cut flat on the left and right (the owner, 19 Nov 2026). 6 px of room at each side; the negative
+   margin keeps every field and tile exactly where it was. */
+#login {
+  padding-inline: 6px;
+  margin-inline: -6px;
+}
+@media (min-width: 1024px) {
+  #login {
+    max-width: 492px;
+    margin-inline: auto;
+  }
+}
+/* the phone keyboard (the owner, 19 Nov 2026: no more typing blind). --kb is the height of the page the keyboard
+   covers, set by the keyboard script at the end of app.html. A scroll box gets that much room at its end, and a
+   field scrolled into view stops 24 px above the keyboard. */
+#login,
+main {
+  scroll-padding-bottom: calc(var(--kb, 0px) + 24px);
+}
+.kb-open #login::after,
+.kb-open main::after {
+  content: "";
+  flex: none;
+  height: var(--kb);
 }
 .ln-slot input {
   color: var(--title);
