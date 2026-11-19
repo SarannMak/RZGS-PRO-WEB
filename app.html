@@ -636,7 +636,7 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
 <!-- the light look (14 Nov 2026): after the styles above, so it wins -->
 <link rel="stylesheet" href="app-theme.css?v=23">
 <!-- the board look, dark or light (16 Nov 2026): last, so it wins -->
-<link rel="stylesheet" href="app-board.css?v=3">
+<link rel="stylesheet" href="app-board.css?v=4">
 </head>
 <body>
 <div class="app">
@@ -882,6 +882,14 @@ nav button[aria-selected="true"]{border-top-color:var(--neon)}
           <div class="set col"><label for="setLots">Basic lot list<small>one lot per grid level, separated by commas</small></label><input id="setLots" class="wide" type="text" inputmode="decimal"></div>
           <div class="set"><label for="setAsym">Only the holding side grows<small>the TP side stays at base lot</small></label><input id="setAsym" class="sw-in" type="checkbox"></div>
           <div class="set"><label for="setReset">Restart at L1 after a basket<small>when trades are still open</small></label><input id="setReset" class="sw-in" type="checkbox"></div>
+        </section>
+        <!-- Vip mode: only with the Vip bot, which sends cfg.vip (the owner, 18 Nov 2026) -->
+        <section class="panel" id="vipBox" hidden>
+          <h2>Vip mode</h2>
+          <div class="set" id="rowVipGrid"><label for="setVipGrid">Vip grid distance<small>points after a Vip TP</small></label><input id="setVipGrid" type="number" inputmode="numeric" min="50" step="50"></div>
+          <div class="set"><label for="setVipSec">Vip countdown<small>seconds in profit, then the trade closes</small></label><input id="setVipSec" type="number" inputmode="numeric" min="1" max="60" step="1"></div>
+          <div class="set col"><label for="setVipLots">Vip lot list<small>one lot per grid level, set in MT5</small></label><input id="setVipLots" class="wide" type="text" inputmode="decimal"></div>
+          <p class="hint" id="vipHint"></p>
         </section>
         <section class="panel">
           <h2>Protection</h2>
@@ -1146,7 +1154,17 @@ const view = () => S || EMPTY;
 function lotAt(l) {
   const s = view(), c = s.cfg;
   if (s.mode === 'high') return Math.max(0.01, Math.round(c.highStart * Math.pow(c.highMult, l) * 100 + 1e-9) / 100);
+  if (s.mode === 'vip' && c.vipLots && c.vipLots.length) return c.vipLots[Math.min(l, c.vipLots.length - 1)] || 0.01;
   return c.lots[Math.min(l, c.lots.length - 1)] || 0.01;
+}
+// Under each open trade: its take profit, or with the Vip bot its Vip countdown (p.vip: -1 = not at the Vip profit
+// yet, N = seconds left, null = not a Vip trade: a bigger lot, it closes with the basket).
+function posNote(p, c) {
+  if (typeof p.vip === 'number') {
+    if (p.vip < 0) return '<small>Vip TP: ' + money(c.vipProfit || 0.1) + ' for ' + (c.vipSec || 5) + ' s</small>';
+    return '<small class="good">' + (p.vip > 0 ? 'Vip TP in ' + p.vip + ' s' : 'Vip TP now') + '</small>';
+  }
+  return '<small>' + (p.tp ? 'TP ' + px(p.tp) : 'waits for basket') + '</small>';
 }
 // The light answer (app_state_lite, the owner, 8 Nov 2026): the app says what it already has, the server sends only
 // what is new. evTop: the newest history line it has (the 50 lines come only when there is a newer one). barKey: the
@@ -1261,6 +1279,8 @@ const SETS = {
   setMaxLots: { key: 'maxlots', cfg: 'maxLots', fmt: (v) => (v > 0 ? v.toFixed(2) : 'off'), ok: (v) => v >= 0 && v <= 1000, err: () => 'use 0 to 1000 (0 = off)' },
   setEqStop: { key: 'eqstop', cfg: 'eqStop', fmt: pctOff, ok: (v) => v >= 0 && v <= 100, err: () => 'use 0 to 100 (0 = off)' },
   setTarget: { key: 'target', cfg: 'target', fmt: (v) => (v > 0 ? v.toFixed(2) + '$' : 'off'), ok: (v) => v >= 0, err: () => 'use 0 or more (0 = off)' },
+  setVipSec: { key: 'vipsec', cfg: 'vipSec', fmt: (v) => v + ' s', ok: (v) => Number.isInteger(v) && v >= 1 && v <= 60, err: () => 'use 1 to 60' },
+  setVipGrid: { key: 'vipgrid', cfg: 'vipGrid', fmt: (v) => v + ' points', ok: (v, c) => SETS.setGrid.ok(v, c), err: (c) => SETS.setGrid.err(c) },
 };
 const setSent = {};                                 // when each field was last confirmed: the bot's answer is awaited
 function setValue(id) { const el = $(id); return SETS[id].check ? el.checked : (el.value.trim() === '' ? NaN : Number(el.value)); }
@@ -1281,8 +1301,17 @@ function syncSettings(c) {
   for (const id of Object.keys(SETS)) {
     const el = $(id), busy = !$(id + 'Ok').hidden || document.activeElement === el || Date.now() - (setSent[id] || 0) < 6000;
     el.disabled = !on || !online;
-    if (!busy) setShow(id, c[SETS[id].cfg]);
+    if (!busy && c[SETS[id].cfg] != null) setShow(id, c[SETS[id].cfg]);
     if (PICKS[id]) { $(id + 'Pick').disabled = el.disabled; pickPaint(id); }
+  }
+  $('vipBox').hidden = c.vip !== true;
+  $('rowVipGrid').hidden = c.vipGrid == null;                    // the Vip bot sends its own grid since 19 Nov 2026
+  const gridSub = $('rowGrid').querySelector('label small'), gridWhat = c.vipGrid != null ? 'points after a TP hit, Basic mode' : 'points after a TP hit';
+  if (gridSub.textContent !== gridWhat) gridSub.textContent = gridWhat;
+  if (c.vip === true) {
+    const t = 'In Vip mode trades have no take profit. A base-lot trade closes when its countdown ends and it is still at ' +
+      money(c.vipProfit || 0.1) + ' or more. The bigger lots close with the basket.';
+    if ($('vipHint').textContent !== t) $('vipHint').textContent = t;
   }
   $('setHint').textContent = on
     ? 'These are the settings the bot is running with. Tap a value to change it, then confirm. The lot list is set in the bot inputs in MT5.'
@@ -1351,6 +1380,8 @@ const PICKS = {
   setLevels: { opts: [5, 7, 12, 15, 17, 22, 35], fmt: String },
   setCooldown: { opts: [1, 5, 10, 20, 30, 60, 120], fmt: (v) => v + ' s' },
   setMaxLots: { opts: [0.5, 1.2, 2, 3, 5], fmt: (v) => (v > 0 ? Number(v).toFixed(2) : 'off'), reach: true },
+  setVipSec: { opts: [3, 5, 10, 15, 30, 60], fmt: (v) => v + ' s' },
+  setVipGrid: { opts: [500, 1000, 1500, 2000, 2500, 3000], fmt: String, usd: true },   // usd: each choice shows its $ of price
 };
 const pickCustom = {};
 // the deepest level that opens with this max total lots (the rule of the bot and of the risk calculator)
@@ -1373,6 +1404,7 @@ function pickPaint(id) {
     if (on) hit = true;
     b.setAttribute('aria-pressed', String(on));
     if (d.reach && c.maxLevels) { const r = lotsReach(o, c); b.querySelector('small').textContent = r >= c.maxLevels ? 'all L' + r : 'to L' + r; }
+    if (d.usd && c.pt) b.querySelector('small').textContent = (o * c.pt).toFixed(2) + '$';
   });
   list.querySelector('[data-v="custom"]').setAttribute('aria-pressed', String(!!pickCustom[id] || !hit));
 }
@@ -1391,7 +1423,7 @@ for (const [id, d] of Object.entries(PICKS)) {
   list.className = 'pick-list'; list.id = id + 'List'; list.hidden = true;
   list.innerHTML = '<div class="chips">' +
     d.opts.map((o) => '<button class="chip' + (w && w(o) ? ' risky' : '') + '" type="button" data-pick="' + id + '" data-v="' + o + '" aria-pressed="false">' + d.fmt(o) +
-      (d.reach ? '<small></small>' : w && w(o) ? '<small>risk</small>' : '') + '</button>').join('') +
+      (d.reach || d.usd ? '<small></small>' : w && w(o) ? '<small>risk</small>' : '') + '</button>').join('') +
     '<button class="chip" type="button" data-pick="' + id + '" data-v="custom" aria-pressed="false">Custom</button></div>';
   row.after(list);
   row.appendChild(el);                                         // Custom: the field takes the place of the value box
@@ -1427,6 +1459,7 @@ function fillSettings(c) {
   $('setLots').value = c.lots.map(l => Number(l).toFixed(2)).join(', ');
   $('setAsym').checked = c.asym; $('setReset').checked = c.reset;
   $('setMaxLots').value = c.maxLots; $('setEqStop').value = c.eqStop; $('setTarget').value = c.target;
+  if (c.vip === true) { $('setVipSec').value = c.vipSec; if (c.vipGrid != null) $('setVipGrid').value = c.vipGrid; $('setVipLots').value = (c.vipLots || []).map(l => Number(l).toFixed(2)).join(', '); }
 }
 // The line in the equity card: the equity while this app is open, in the brand colours, no scale.
 // A calm summary, not every tick: the readings (one a second) are averaged into at most 36 points, softened once
@@ -1739,10 +1772,13 @@ function renderTp(s) {
 }
 // Lot mode bar. A tap moves the lit box at once; the bot's answer confirms it, or the box goes back.
 const MODES = ['basic', 'smart', 'high'];
+const modeSlot = (m) => (m === 'vip' ? 'high' : m);  // the Vip bot's mode is on the third button (it still sends "high")
 let modePick = null;
 function renderModeBar(s) {
-  if (modePick && (modePick.arg === s.mode || Date.now() - modePick.t > 6000)) modePick = null;
-  const row = $('modeRow'), arg = !S ? '' : modePick ? modePick.arg : s.mode, i = MODES.indexOf(arg);
+  if (modePick && (modePick.arg === modeSlot(s.mode) || Date.now() - modePick.t > 6000)) modePick = null;
+  const row = $('modeRow'), arg = !S ? '' : modePick ? modePick.arg : modeSlot(s.mode), i = MODES.indexOf(arg);
+  const third = row.querySelector('[data-arg="high"]'), name = s.cfg && s.cfg.vip === true ? 'Vip' : 'Risk';
+  if (third.textContent !== name) third.textContent = name;
   row.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.arg === arg));
   if (i < 0) { delete row.dataset.pos; return; }
   if (row.dataset.pos == null) {                    // the first time the box appears in place, it does not slide in
@@ -1756,8 +1792,13 @@ function renderModeBar(s) {
 // max total lots) has no next one: from there the loss grows by its hold lots for every 1.00$ the price moves on.
 // Take profits collected on the way are not counted, so the real drop is a little smaller.
 function renderCalc(s) {
-  const c = s.cfg, smart = s.mode === 'smart' && !!s.sgrid, grid = smart ? s.sgrid.now : c.gridPts;
-  const step = (c.tpPts + grid) * c.pt, pv = c.pv || 100, bal = s.balance > 0 ? s.balance : 0;
+  const c = s.cfg, smart = s.mode === 'smart' && !!s.sgrid;
+  const grid = smart ? s.sgrid.now : s.mode === 'vip' && c.vipGrid > 0 ? c.vipGrid : c.gridPts;    // Vip has its own grid
+  const pv = c.pv || 100, bal = s.balance > 0 ? s.balance : 0;
+  // Vip: the TP side closes at the Vip profit of its base lot (0.10$ on 0.01 lot = 0.10$ of price), not at the take
+  // profit, so the next pair comes sooner: the levels are that move + the grid distance apart.
+  const vip = s.mode === 'vip' && c.vipProfit > 0, tpMove = vip ? c.vipProfit / (lotAt(0) * pv) : c.tpPts * c.pt;
+  const step = tpMove + grid * c.pt;
   const lv = [];                                    // every level: its lot, the lots held, where it opens, and if it can open
   let hold = 0;
   for (let n = 1; n <= c.maxLevels; n++) {
@@ -1805,7 +1846,8 @@ function renderCalc(s) {
   }
   $('calcSum').innerHTML = facts.map(f => '<p>' + f + '</p>').join('');
   $('calcNote').textContent = 'Move is the price distance from the first pair, in $. Take profits collected on the way are not counted, so the real drop is a little smaller.' +
-    (smart ? ' Smart mode: this table uses the grid distance of the session now (' + grid + ' points).' : '');
+    (smart ? ' Smart mode: this table uses the grid distance of the session now (' + grid + ' points).' : '') +
+    (vip ? ' Vip mode: the pairs are ' + step.toFixed(2) + '$ apart (the Vip TP move ' + tpMove.toFixed(2) + '$ + the grid distance of ' + grid + ' points).' : '');
 }
 // Report: closed profit by range. This week and Last week: a bar a day, Monday to Sunday; Month: a bar a week for the
 // last 5 weeks; All time: a bar a week since the first trade, a bar a month after half a year. From the bot's "rep"
@@ -2003,8 +2045,8 @@ function render() {
     $('posTitle').textContent = 'Open positions (' + s.positions.length + ')';
     $('posList').innerHTML = s.positions.length ? s.positions.map(p =>
       '<div class="pos"><span class="tag ' + p.side + '">' + p.side.toUpperCase() + ' ' + esc(p.tag) + '</span>' +
-      '<span><b class="num" style="color:var(--title)">' + Number(p.lot).toFixed(2) + '</b> <small>@ ' + px(p.open) + '</small><br><small>' +
-      (p.tp ? 'TP ' + px(p.tp) : 'waits for basket') + '</small></span>' +
+      '<span><b class="num" style="color:var(--title)">' + Number(p.lot).toFixed(2) + '</b> <small>@ ' + px(p.open) + '</small><br>' +
+      posNote(p, s.cfg) + '</span>' +
       '<span class="num ' + (p.profit >= -0.004 ? 'good' : 'bad') + '">' + money(p.profit) + '</span></div>').join('')
       : '<p class="empty">No open positions.</p>';
   }
